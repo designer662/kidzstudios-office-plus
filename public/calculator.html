@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KidzStudios internal operations tool.">
+
+  <title>Quotation Calculator | KidzStudios</title>
+  
+  <meta name="theme-color" content="#F2F2F7">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* --- CSS VARIABLES --- */
+    :root {
+      --bg-body: #F2F2F7;
+      --bg-container: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-input: #F2F2F7;
+      --bg-input-hover: #E5E5EA;
+      --border-main: #E5E5EA;
+      --border-input: #E5E5EA;
+      --text-primary: #1C1C1E;
+      --text-secondary: #8E8E93;
+      --accent-color: #0A84FF;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      background: var(--bg-body); 
+      color: var(--text-primary); 
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* --- NEW GLASS HEADER (replaces old .plain-header) --- */
+    .glass-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      padding: 0 32px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      width: 100%;
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #334155;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .back-link:hover {
+      color: #3b82f6;
+      transform: translateX(-4px);
+    }
+    @media (max-width: 768px) {
+      .glass-header { padding: 0 20px; }
+      .brand-title { font-size: 13px; }
+      .back-link { font-size: 13px; }
+    }
+
+    /* --- THE REST OF YOUR ORIGINAL STYLES (unchanged) --- */
+    .main-content { padding: 32px 24px; flex: 1; }
+    .layout-wrapper { display: grid; grid-template-columns: 1fr 380px; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; align-items: start; }
+    
+    .left-panel { background: var(--bg-container); border-radius: 32px; padding: 32px; border: 1px solid var(--border-main); }
+    .right-panel { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+    .right-box { background: var(--bg-container); border-radius: 32px; padding: 24px; border: 1px solid var(--border-main); }
+
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .brand-subtitle { color: var(--text-secondary); font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
+
+    .reset-btn { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .reset-btn:hover { background: #fecaca; }
+    
+    /* --- Category Grid --- */
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .category-card { background: var(--bg-card); border: 2px solid var(--border-input); border-radius: 24px; padding: 16px 8px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .category-card:hover { background: var(--bg-input); }
+    .category-card.active { border-color: var(--accent-color); background: rgba(10, 132, 255, 0.1); }
+    .cat-icon { margin-bottom: 8px; display: flex; color: var(--text-secondary); transition: color 0.2s ease; }
+    .category-card.active .cat-icon, .category-card.active .cat-name { color: var(--accent-color); }
+    .cat-name { font-size: 12px; font-weight: 600; color: var(--text-secondary); line-height: 1.3; transition: color 0.2s ease; }
+    
+    /* --- Form Elements --- */
+    .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .form-group { background: var(--bg-card); padding: 24px; border-radius: 28px; margin-bottom: 16px; border: 1px solid var(--border-input);}
+    .section-title { display: block; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); font-size: 18px; letter-spacing: -0.3px; }
+    label.field-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: block; margin-top: 16px; font-weight: 500; }
+
+    .input-field, .select-field { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text-primary); font-size: 15px; outline: none; margin-bottom: 4px; appearance: none; -webkit-appearance: none; transition: box-shadow 0.2s ease, background 0.3s ease; }
+    .select-field { background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+    .input-field:focus, .select-field:focus { box-shadow: 0 0 0 2px var(--accent-color); background: var(--bg-container);}
+    
+    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    
+    .checkbox-label { font-size: 15px; color: var(--text-primary); display: flex; align-items: center; cursor: pointer; font-weight: 500; }
+    .checkbox-label input { margin-right: 12px; accent-color: var(--accent-color); width: 18px; height: 18px; border-radius: 4px; }
+    
+    /* Permanent Custom Size Box */
+    .custom-size-box { display: block; background: rgba(10, 132, 255, 0.05); border: 1px dashed var(--accent-color); padding: 16px; border-radius: 16px; margin-top: 16px; }
+
+    /* --- Steppers --- */
+    .size-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; margin-bottom: 8px; }
+    .size-item { display: flex; flex-direction: column; align-items: center; background: var(--bg-input); padding: 10px 6px; border-radius: 16px; border: 1px solid var(--border-input);}
+    .size-item label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .surcharge-badge { font-size: 10px; color: var(--accent-color); margin-bottom: 8px; height: 12px; font-weight: 600; }
+    
+    .stepper-wrapper, .general-stepper { display: flex; align-items: center; background: var(--bg-card); border-radius: 12px; overflow: hidden; width: 100%; border: 1px solid var(--border-input);}
+    .general-stepper { background: var(--bg-input); border-radius: 16px; margin-bottom: 4px; }
+    .stepper-btn, .general-stepper button { display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--accent-color); font-size: 18px; width: 26px; height: 32px; cursor: pointer; font-weight: bold; flex-shrink: 0;}
+    .general-stepper button { width: 36px; height: 36px; font-size: 20px;}
+    .size-input, .general-stepper input { width: 100%; text-align: center; padding: 8px 0; border: none; background: transparent; color: var(--text-primary); font-weight: 600; font-size: 15px; outline: none; min-width: 0;}
+    .general-stepper input { font-size: 16px; }
+
+    .addon-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-main); }
+    .addon-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .addon-label { font-size: 14px; font-weight: 600; color: var(--text-primary); display: block;}
+    .addon-price { color: var(--accent-color); font-size: 12px; font-weight: 500; }
+
+    /* --- Visual Banner --- */
+    .panel-banner { width: 100%; height: 100px; border-radius: 24px; margin-bottom: 24px; display: flex; align-items: center; padding: 0 24px; gap: 16px; background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(0, 86, 179, 0.1)); border: 1px solid rgba(10, 132, 255, 0.3); color: var(--accent-color); }
+    .panel-banner svg { width: 48px; height: 48px; opacity: 0.8; }
+    .panel-banner h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px;}
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- Right Panel Displays --- */
+    .price-breakdown { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; text-align: center; gap: 8px;}
+    .price-breakdown div { flex: 1; }
+    .price-breakdown strong { color: var(--text-primary); font-size: 16px; display: block; margin-top: 4px; font-weight: 600; }
+    
+    .total-price { text-align: center; font-size: 16px; font-weight: 500; color: var(--text-secondary); padding-top: 16px; border-top: 1px solid var(--border-main); }
+    .total-price span { color: var(--text-primary); font-size: 40px; display: block; margin-top: 8px; font-weight: 700; letter-spacing: -1px; }
+
+    .deposit-terms { display: flex; justify-content: space-between; align-items: center; background: rgba(10, 132, 255, 0.05); padding: 16px; border-radius: 16px; margin-top: 16px; border: 1px solid rgba(10, 132, 255, 0.2); }
+    .deposit-terms div { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-align: left;}
+    .deposit-terms span { display: block; font-size: 18px; color: var(--accent-color); font-weight: 700; margin-top: 4px; }
+    .deposit-terms .balance span { color: var(--text-primary); }
+    
+    .breakdown-list { text-align: left; background: var(--bg-body); padding: 16px; border-radius: 16px; margin-top: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; max-height: 250px; overflow-y: auto;}
+    .breakdown-list ul { padding-left: 16px; margin: 0;}
+
+    /* Cart Items */
+    .cart-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border-main); }
+    .cart-item-title { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+    .cart-item-details { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .cart-item-price { font-weight: 700; color: var(--accent-color); font-size: 14px; }
+    .btn-remove-cart { background: none; border: none; color: #FF3B30; font-size: 16px; cursor: pointer; padding: 4px; line-height: 1; margin-left: 8px;}
+
+    /* Buttons */
+    .wa-btn { background: #34C759; color: #fff; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s ease, background 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    .wa-btn:hover { opacity: 0.9; }
+    .wa-btn:active { transform: scale(0.98); }
+    
+    .action-btn { background: rgba(10, 132, 255, 0.1); color: var(--accent-color); border: 1px solid rgba(10,132,255,0.3); padding: 12px; border-radius: 16px; font-weight: 600; font-size: 14px; width: 100%; cursor: pointer; transition: 0.2s ease; }
+    .action-btn:hover { background: rgba(10, 132, 255, 0.2); }
+
+    /* --- Modals & Toasts --- */
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
+    .toast { background: var(--text-primary); color: white; padding: 12px 24px; border-radius: 100px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDown 0.4s, fadeOut 0.4s 2.6s forwards; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-content { background: var(--bg-container); padding: 32px; border-radius: 24px; max-width: 95%; width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: left; max-height: 90vh; overflow-y: auto;}
+    .modal-content h3 { margin-bottom: 8px; font-size: 20px; color: var(--text-primary); font-weight: 700; }
+
+    /* --- Hidden PDF Document Layout --- */
+    #print-quote-document {
+        position: absolute; left: -9999px; top: 0; 
+        width: 210mm; min-height: 297mm; 
+        padding: 20mm; background: white; color: black; 
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        box-sizing: border-box; z-index: -1000;
+    }
+
+    @media (max-width: 900px) { .layout-wrapper { grid-template-columns: 1fr; } .right-panel { position: relative; top: 0; } }
+    @media (max-width: 600px) { .glass-header { padding: 0 20px; } .main-content { padding: 16px; } .left-panel { padding: 20px; } .right-box { padding: 20px; } .total-price span { font-size: 32px; } }
+  </style>
+
+<style id="ks-upgrade-v2">
+/* =========================================================
+   KIDZSTUDIOS OPS SUITE · UI UPGRADE V2
+   Additive layer: keeps original business logic intact.
+   ========================================================= */
+:root{
+  --ks-orange:#ff7a00;
+  --ks-orange-2:#ff9f2f;
+  --ks-ink:#0b0d12;
+  --ks-ink-2:#151924;
+  --ks-white:#ffffff;
+  --ks-slate:#64748b;
+  --ks-ring:rgba(255,122,0,.24);
+  --ks-shadow:0 22px 70px rgba(15,23,42,.13);
+  --ks-shadow-soft:0 12px 38px rgba(15,23,42,.09);
+}
+html{scroll-behavior:smooth;}
+::selection{background:rgba(255,122,0,.22);color:inherit;}
+body[data-ks-ui="v2"]{
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]){
+  background:
+    radial-gradient(900px 460px at -10% -10%, rgba(255,122,0,.11), transparent 65%),
+    radial-gradient(760px 420px at 110% 8%, rgba(59,130,246,.10), transparent 66%),
+    linear-gradient(180deg,#f8fafc 0%,#f3f5f9 100%) !important;
+}
+
+/* Unified product header */
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .glass-header{
+  height:68px !important;
+  padding:0 clamp(16px,3vw,36px) !important;
+  background:rgba(8,10,16,.88) !important;
+  border-bottom:1px solid rgba(255,255,255,.09) !important;
+  box-shadow:0 12px 35px rgba(2,6,23,.16) !important;
+  backdrop-filter:blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(150%) !important;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .brand-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  color:#fff !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+  white-space:nowrap;
+}
+.ks-brand-lockup{display:inline-flex;align-items:baseline;gap:0;font-weight:900;font-style:italic;letter-spacing:-.7px;}
+.ks-brand-lockup .ks-kidz{color:var(--ks-orange);}
+.ks-brand-lockup .ks-studios{color:#fff;margin-left:3px;}
+.ks-suite-label{
+  font-size:10px;
+  line-height:1;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  font-style:normal;
+  font-weight:800;
+  color:#94a3b8;
+  padding-left:10px;
+  border-left:1px solid rgba(255,255,255,.16);
+}
+.ks-tool-id{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:42vw;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.35px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);
+  padding:7px 12px;
+  border-radius:999px;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link{
+  color:#e2e8f0 !important;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  padding:9px 13px;
+  line-height:1;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link:hover{
+  color:#fff !important;
+  background:rgba(255,122,0,.15);
+  border-color:rgba(255,122,0,.38);
+  transform:translateX(-2px) !important;
+}
+
+/* Universal interaction quality */
+body[data-ks-ui="v2"] button,
+body[data-ks-ui="v2"] a,
+body[data-ks-ui="v2"] input,
+body[data-ks-ui="v2"] select,
+body[data-ks-ui="v2"] textarea,
+body[data-ks-ui="v2"] [contenteditable="true"]{
+  -webkit-tap-highlight-color:transparent;
+}
+body[data-ks-ui="v2"] :where(button,a,input,select,textarea,[contenteditable="true"]):focus-visible{
+  outline:3px solid var(--ks-ring) !important;
+  outline-offset:2px !important;
+}
+body[data-ks-ui="v2"] :where(input,select,textarea,[contenteditable="true"]){
+  transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+body[data-ks-ui="v2"] :where(input,select,textarea,[contenteditable="true"]):focus{
+  box-shadow:0 0 0 4px var(--ks-ring) !important;
+}
+body[data-ks-ui="v2"] button:disabled{
+  cursor:not-allowed !important;
+  opacity:.52 !important;
+}
+body[data-ks-ui="v2"] img{max-width:100%;}
+body[data-ks-ui="v2"] *{scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar{width:8px;height:8px;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-track{background:transparent;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+
+/* Page surface polish */
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box,
+body[data-ks-page="commission"] .commission-form,
+body[data-ks-page="file-generator"] .container,
+body[data-ks-page="simple-markup-calculator"] .calculator-card,
+body[data-ks-page="compress"] .section-panel,
+body[data-ks-page="orderform"] .action-column,
+body[data-ks-page="orderform2"] .action-column{
+  border-color:rgba(148,163,184,.22) !important;
+  box-shadow:var(--ks-shadow-soft) !important;
+}
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box{
+  border-radius:26px !important;
+}
+body[data-ks-page="commission"] .commission-form{
+  border:1px solid rgba(148,163,184,.2);
+  box-shadow:var(--ks-shadow) !important;
+}
+body[data-ks-page="file-generator"] .container{
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 25px 70px rgba(2,6,23,.25) !important;
+}
+body[data-ks-page="compress"] .tab-card{
+  border-color:rgba(148,163,184,.26) !important;
+  box-shadow:0 5px 18px rgba(15,23,42,.05) !important;
+}
+body[data-ks-page="compress"] .tab-card:hover{
+  transform:translateY(-2px);
+}
+body[data-ks-page="simple-markup-calculator"] .calculator-card{
+  box-shadow:var(--ks-shadow) !important;
+}
+
+/* Order form: preserve A4 sheet, improve shell only */
+body[data-ks-page="orderform"] .a4-sheet,
+body[data-ks-page="orderform2"] .a4-sheet{
+  box-shadow:0 28px 80px rgba(15,23,42,.16) !important;
+}
+body[data-ks-page="orderform"] .action-column,
+body[data-ks-page="orderform2"] .action-column{
+  background:rgba(255,255,255,.88) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+/* Premium accent on primary actions, without changing semantic warning/success colors */
+body[data-ks-page="file-generator"] .btn-generate{
+  background:linear-gradient(135deg,var(--ks-orange),#f97316) !important;
+  box-shadow:0 10px 30px rgba(249,115,22,.26) !important;
+}
+body[data-ks-page="file-generator"] .btn-generate:hover{
+  box-shadow:0 14px 36px rgba(249,115,22,.34) !important;
+}
+body[data-ks-page="calculator"] .category-card.active{
+  border-color:var(--ks-orange) !important;
+  background:rgba(255,122,0,.08) !important;
+}
+body[data-ks-page="calculator"] .category-card.active .cat-icon,
+body[data-ks-page="calculator"] .category-card.active .cat-name{
+  color:var(--ks-orange) !important;
+}
+
+/* Floating utility: only appears after scroll */
+.ks-scroll-top{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:9997;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(10,12,18,.88);
+  color:#fff;
+  box-shadow:0 12px 30px rgba(2,6,23,.24);
+  cursor:pointer;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(8px);
+  transition:.2s ease;
+  backdrop-filter:blur(12px);
+}
+.ks-scroll-top.ks-show{opacity:1;pointer-events:auto;transform:translateY(0);}
+.ks-scroll-top:hover{background:var(--ks-orange);}
+
+/* Index portal additions */
+body[data-ks-page="index"] .dashboard-nav{
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+}
+body[data-ks-page="index"] .brand-group span{
+  letter-spacing:-.4px;
+}
+.ks-index-status{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#cbd5e1;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.ks-index-status .ks-live-dot{
+  width:7px;height:7px;border-radius:999px;background:#22c55e;
+  box-shadow:0 0 0 5px rgba(34,197,94,.09),0 0 18px rgba(34,197,94,.45);
+}
+body[data-ks-page="index"] .bento-card{
+  isolation:isolate;
+}
+body[data-ks-page="index"] .bento-card:hover{
+  border-color:rgba(255,122,0,.28) !important;
+  box-shadow:0 28px 70px rgba(0,0,0,.28),0 0 0 1px rgba(255,122,0,.05) inset;
+}
+body[data-ks-page="index"] .bento-card .arrow-icon{
+  transition:transform .25s ease,color .25s ease;
+}
+body[data-ks-page="index"] .bento-card:hover .arrow-icon{
+  transform:translate(3px,-3px);
+  color:var(--ks-orange);
+}
+
+/* Mobile and tablet */
+@media (max-width:900px){
+  .ks-tool-id{display:none;}
+}
+@media (max-width:768px){
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .glass-header{
+    height:62px !important;
+    padding:0 12px !important;
+  }
+  .ks-suite-label{display:none;}
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link{
+    font-size:12px !important;
+    padding:8px 10px;
+  }
+  body[data-ks-ui="v2"] input,
+  body[data-ks-ui="v2"] select,
+  body[data-ks-ui="v2"] textarea{
+    font-size:16px; /* prevents accidental mobile zoom */
+  }
+  .ks-index-status{display:none;}
+}
+@media (max-width:480px){
+  .ks-brand-lockup{font-size:13px;}
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link svg{width:15px;height:15px;}
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  body[data-ks-ui="v2"] *,body[data-ks-ui="v2"] *::before,body[data-ks-ui="v2"] *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
+
+/* Print must stay clean and predictable */
+@media print{
+  .ks-scroll-top,.ks-tool-id,.ks-index-status{display:none !important;}
+  body[data-ks-ui="v2"]{background:#fff !important;}
+}
+</style>
+
+
+<style id="ks-office-unified-v12">
+:root{--kso-orange:#ef7b45;--kso-orange-2:#ff9864;--kso-text:#2f3336;--kso-muted:#73787d;--kso-bg:#f7f7f5;--kso-line:rgba(43,47,50,.09);--kso-ease:cubic-bezier(.2,.75,.22,1)}
+.ks-office-shell{position:sticky;top:0;z-index:9998;padding:14px 18px 7px;background:linear-gradient(180deg,rgba(247,247,245,.96),rgba(247,247,245,.80) 72%,transparent);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.ks-office-topbar{max-width:1500px;margin:0 auto;min-height:64px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.84);border:1px solid var(--kso-line);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.065);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-office-brand{display:flex;align-items:center;gap:9px;color:var(--kso-text);text-decoration:none;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap}
+.ks-office-nav{display:flex;align-items:center;gap:7px;overflow:auto;scrollbar-width:none;padding:2px 1px}.ks-office-nav::-webkit-scrollbar{display:none}
+.ks-office-nav-btn{flex:0 0 auto;height:38px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid rgba(45,48,50,.07);background:rgba(247,247,245,.76);color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s var(--kso-ease),background .22s var(--kso-ease),border-color .22s var(--kso-ease),color .22s var(--kso-ease),box-shadow .22s var(--kso-ease)}
+.ks-office-nav-btn:hover,.ks-office-nav-btn.active{background:rgba(239,123,69,.10);border-color:rgba(239,123,69,.22);color:#d9632f;box-shadow:0 6px 16px rgba(239,123,69,.08);transform:translateY(-1px)}
+.ks-office-nav-icon{width:21px;height:21px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(45,48,50,.06);font-size:11px;font-weight:850;color:#5b6166}.ks-office-nav-btn.active .ks-office-nav-icon,.ks-office-nav-btn:hover .ks-office-nav-icon{color:#d9632f;background:#fff6f1}.ks-office-nav-icon-text{font-size:7px;letter-spacing:-.04em}
+.ks-office-home{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--kso-line);border-radius:12px;background:#fff;color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;transition:.2s var(--kso-ease)}.ks-office-home:hover{color:var(--kso-text);transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-office-page-title{max-width:1500px;margin:4px auto 0;padding:0 17px;color:#8b9094;font-size:9px;font-weight:720;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body{animation:ksoPageIn .38s var(--kso-ease) both}
+@keyframes ksoPageIn{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:1180px){.ks-office-topbar{grid-template-columns:auto auto}.ks-office-nav{grid-column:1/-1;grid-row:2}.ks-office-home{grid-column:2;grid-row:1;justify-self:end}}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px}.ks-office-topbar{border-radius:18px;padding:8px;gap:7px}.ks-office-brand-name{display:none}.ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}.ks-office-nav-icon{width:18px;height:18px;border-radius:6px}.ks-office-home{width:36px;height:36px;padding:0;justify-content:center}.ks-office-home-text{display:none}.ks-office-page-title{padding:0 10px;font-size:8px}}
+@media print{.ks-office-shell{display:none!important}}
+@media(prefers-reduced-motion:reduce){body{animation:none}.ks-office-nav-btn,.ks-office-home{transition:none}}
+</style>
+
+
+<style id="ks-office-nav-v14-unified">
+/* Unified centered eight-tool header across the Kidzstudios Office suite */
+.ks-office-nav{justify-content:center;gap:4px;min-width:0}
+.ks-office-nav-btn{height:36px;font-size:9.1px;padding:0 8px;gap:5px}
+.ks-office-nav-icon{width:19px;height:19px;font-size:9px}
+@media (min-width:1181px) and (max-width:1560px){
+  .ks-office-topbar{gap:8px;padding-left:12px;padding-right:10px}
+  .ks-office-nav{gap:3px}
+  .ks-office-nav-btn{font-size:8.55px;padding:0 7px;gap:4px}
+  .ks-office-nav-icon{width:18px;height:18px;font-size:8px}
+  .ks-office-brand{font-size:12.5px}
+  .ks-office-home{padding:0 10px}
+}
+@media (max-width:1180px){.ks-office-nav{justify-content:center}}
+@media (max-width:720px){
+  .ks-office-nav{justify-content:flex-start;gap:4px}
+  .ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}
+  .ks-office-nav-icon{width:18px;height:18px}
+}
+</style>
+<style>
+/* Netlify shared state status */
+.ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:9px;padding:6px 8px}}
+</style>
+
+<style id="ks-version-footer-style">
+.ks-version-footer{position:fixed;left:14px;bottom:10px;z-index:9998;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(29,32,34,.09);box-shadow:0 5px 15px rgba(25,28,30,.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#8b9095;font:750 9px/1 Inter,Arial,sans-serif;letter-spacing:.04em;pointer-events:none}
+@media(max-width:650px){.ks-version-footer{left:8px;bottom:5px;font-size:8px;padding:4px 6px}}
+@media print{.ks-version-footer{display:none!important}}
+</style>
+
+<style id="ks-v28-tool-ux">
+/* V26 tool-page usability polish */
+.ks-office-home{min-height:38px}
+.ks-office-nav-btn{min-height:38px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable="true"]:focus-visible{outline:2px solid rgba(239,123,69,.5)!important;outline-offset:2px!important}
+@media(min-width:1200px){.ks-office-nav-btn{height:38px!important;font-size:9.35px!important;padding-left:8px!important;padding-right:8px!important}}
+@media(max-width:720px){.ks-office-nav{scroll-padding-inline:8px}.ks-office-nav-btn{min-height:36px}}
+</style>
+
+<style id="ks-v28-main-theme">
+:root{--ks25-bg:#f7f7f5;--ks25-card:rgba(255,255,255,.92);--ks25-text:#1d2022;--ks25-muted:#767b80;--ks25-line:rgba(29,32,34,.09);--ks25-orange:#ef7b45;--ks25-soft:#fff0e8;--ks25-shadow:0 16px 44px rgba(32,35,38,.08)}
+html{background:var(--ks25-bg)}
+body{background:radial-gradient(circle at 50% 0,rgba(255,255,255,.96),transparent 30%),linear-gradient(180deg,#fbfbfa,var(--ks25-bg))!important;color:var(--ks25-text)!important}
+.ks-office-shell{padding:14px 18px 8px!important;background:transparent!important;box-shadow:none!important;border:0!important}
+.ks-office-topbar{max-width:1500px!important;margin:0 auto!important;min-height:62px!important;padding:9px 11px 9px 14px!important;border:1px solid var(--ks25-line)!important;border-radius:22px!important;background:var(--ks25-card)!important;box-shadow:0 12px 36px rgba(30,33,35,.055)!important;backdrop-filter:blur(18px) saturate(125%)!important}
+.ks-office-brand,.ks-office-brand-name{color:var(--ks25-text)!important;text-decoration:none!important;font-weight:760!important}
+.ks-office-nav-btn{border:1px solid transparent!important;background:transparent!important;color:var(--ks25-muted)!important;border-radius:999px!important;box-shadow:none!important}
+.ks-office-nav-btn:hover{background:var(--ks25-bg)!important;color:var(--ks25-text)!important;border-color:var(--ks25-line)!important}
+.ks-office-nav-btn.active{background:var(--ks25-orange)!important;color:#fff!important;border-color:var(--ks25-orange)!important;box-shadow:0 7px 18px rgba(239,123,69,.22)!important}
+.ks-office-nav-icon{background:var(--ks25-soft)!important;color:#e7662c!important}
+.ks-office-nav-btn.active .ks-office-nav-icon{background:rgba(255,255,255,.2)!important;color:#fff!important}
+.ks-office-home{background:#fff!important;color:var(--ks25-muted)!important;border:1px solid var(--ks25-line)!important;border-radius:12px!important}
+.ks-office-page-title{color:var(--ks25-muted)!important;font-weight:700!important}
+body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,.section-panel,.action-column){border-color:var(--ks25-line)!important;box-shadow:var(--ks25-shadow)!important}
+.ks-version-footer{background:rgba(255,255,255,.86)!important}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px!important}.ks-office-topbar{border-radius:18px!important}}
+</style>
+<style id="ks-v34-master-header">
+/* Master header copied from the approved Index reference. */
+.ks-master-header{padding:16px 20px 9px;position:relative;z-index:110;background:transparent!important;border:0!important;box-shadow:none!important;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif}
+.ks-master-header *{box-sizing:border-box}
+.ks-master-header .topbar{max-width:1500px;margin:auto;min-height:64px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.92);border:1px solid rgba(29,32,34,.08);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.055);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-master-header .brand{display:flex;align-items:center;gap:9px;color:#1d2022;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap;cursor:pointer;user-select:none}
+.ks-master-header .tool-nav{display:flex;align-items:center;justify-content:center;gap:7px;overflow:auto;scrollbar-width:none;min-width:0;padding:2px}
+.ks-master-header .tool-nav::-webkit-scrollbar{display:none}
+.ks-master-header .tool-nav-btn{flex:0 0 auto;height:40px;display:flex;align-items:center;gap:7px;padding:0 12px;border-radius:999px;border:1px solid rgba(29,32,34,.08);background:rgba(255,255,255,.82);color:#767b80;text-decoration:none;font-size:10.2px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s cubic-bezier(.22,1,.36,1),background .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+.ks-master-header .tool-nav-btn:hover,.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:#fff0e8;border-color:rgba(239,123,69,.24);color:#e7662c;box-shadow:0 8px 18px rgba(239,123,69,.10);transform:translateY(-1px)}
+.ks-master-header .nav-tool-icon{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto;background:rgba(239,123,69,.10);color:#e7662c;font-size:11px;font-weight:900;line-height:1}
+.ks-master-header .nav-tool-icon-text{font-size:8.5px;letter-spacing:-.04em}
+.ks-master-header .header-tools{display:flex;gap:8px;align-items:center;justify-self:end;min-width:40px}
+.ks-master-header .search-wrap{position:relative;display:block!important}
+.ks-master-header .search{width:220px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:13px;background:rgba(247,247,245,.72);padding:0 38px 0 34px;color:#1d2022;outline:none;font-size:12.5px;transition:.24s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .search:focus{width:250px;background:#fff;border-color:rgba(239,123,69,.36);box-shadow:0 0 0 4px rgba(239,123,69,.08)}
+.ks-master-header .search-icon{position:absolute;left:11px;top:50%;translate:0 -50%;color:#767b80;pointer-events:none}
+.ks-master-header .search-kbd{position:absolute;right:9px;top:50%;translate:0 -50%;font-size:9px;color:#767b80;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:6px;padding:2px 4px;pointer-events:none}
+.ks-master-header .autocomplete{display:none;position:absolute;right:0;top:48px;width:320px;max-height:390px;overflow:auto;padding:7px;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:16px;box-shadow:0 18px 55px rgba(32,35,38,.12);z-index:180}
+.ks-master-header .autocomplete.open{display:block;animation:ksHeaderPop .2s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .suggestion{display:flex;gap:9px;align-items:center;padding:9px;border-radius:11px;cursor:pointer;color:#1d2022;text-decoration:none}
+.ks-master-header .suggestion:hover{background:#f7f7f5}
+.ks-master-header .mini-avatar{width:28px;height:28px;border-radius:9px;background:#fff0e8;display:grid;place-items:center;color:#e7662c;font-size:9px;font-weight:800;flex:0 0 auto}
+.ks-master-header .suggestion b{display:block;font-size:11.5px}.ks-master-header .suggestion small{display:block;color:#767b80;font-size:9.5px;margin-top:2px}
+.ks-master-header .icon-btn{width:42px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:12px;background:#fff;color:#767b80;display:grid;place-items:center;cursor:pointer;text-decoration:none;transition:.22s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .icon-btn:hover{color:#1d2022;transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-master-header .notification-wrap{position:relative}.ks-master-header .notification-button{position:relative}.ks-master-header .notification-button>i{position:absolute;right:-3px;top:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#ef7b45;color:#fff;display:grid;place-items:center;font:800 7px/1 Inter,Arial,sans-serif;font-style:normal;box-shadow:0 0 0 2px rgba(255,255,255,.94)}.ks-master-header .notification-button>i[hidden]{display:none!important}
+.ks-master-header .notification-panel{position:absolute;right:0;top:49px;width:340px;max-height:420px;padding:10px;border:1px solid rgba(29,32,34,.08);border-radius:16px;background:rgba(255,255,255,.98);box-shadow:0 18px 55px rgba(32,35,38,.13);backdrop-filter:blur(18px);opacity:0;transform:translateY(-5px) scale(.985);pointer-events:none;transition:.2s cubic-bezier(.22,1,.36,1);z-index:190}
+.ks-master-header .notification-panel.open{opacity:1;transform:none;pointer-events:auto}.ks-master-header .notification-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 9px;border-bottom:1px solid rgba(29,32,34,.08)}.ks-master-header .notification-panel-head span{display:block;color:#767b80;font-size:7px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.ks-master-header .notification-panel-head strong{display:block;color:#1d2022;font-size:11px;margin-top:1px}.ks-master-header .notification-panel-head button{border:0;background:transparent;color:#767b80;font-size:8px;font-weight:750;cursor:pointer}.ks-master-header .notification-list{display:grid;gap:3px;margin-top:7px;overflow:auto;max-height:330px}.ks-master-header .notification-empty{padding:18px 10px;text-align:center;color:#8b9095;font-size:10px}.ks-master-header .notification-item{padding:9px;border-radius:11px;background:#f7f7f5}.ks-master-header .notification-item b{display:block;color:#1d2022;font-size:9.6px}.ks-master-header .notification-item span{display:block;color:#767b80;font-size:8.4px;margin-top:3px;line-height:1.35}.ks-master-header .notification-item time{display:block;color:#a0a4a8;font-size:7.2px;margin-top:4px}
+.ks-master-header .mobile-search-button{display:none!important}
+.ks-header-mobile-sheet{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,22,24,.28);backdrop-filter:blur(8px);padding:72px 10px 10px;align-items:flex-start;justify-content:center}.ks-header-mobile-sheet.open{display:flex}.ks-header-mobile-card{width:min(560px,100%);background:#fff;border:1px solid rgba(29,32,34,.08);box-shadow:0 18px 55px rgba(32,35,38,.14);border-radius:19px;padding:10px}.ks-header-mobile-row{display:grid;grid-template-columns:1fr auto;gap:8px}.ks-header-mobile-input{height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#f7f7f5;color:#1d2022;padding:0 12px;outline:none}.ks-header-mobile-close{width:44px;height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#fff;color:#767b80;font-size:19px}.ks-header-mobile-results{display:grid;gap:3px;margin-top:8px;max-height:55vh;overflow:auto}
+@keyframes ksHeaderPop{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:none}}
+@media(max-width:1500px){.ks-master-header .tool-nav-btn{padding:0 9px;font-size:9.6px;gap:5px}.ks-master-header .nav-tool-icon{width:20px;height:20px}.ks-master-header .search{width:165px}.ks-master-header .search:focus{width:190px}}
+@media(max-width:1180px){.ks-master-header .brand span{display:none}.ks-master-header .search{width:170px}.ks-master-header .search:focus{width:195px}.ks-master-header .tool-nav{justify-content:flex-start}}
+@media(max-width:920px){.ks-master-header{padding:10px 10px 6px}.ks-master-header .topbar{grid-template-columns:auto auto;gap:8px;border-radius:20px;padding:8px}.ks-master-header .tool-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start}.ks-master-header .header-tools{grid-column:2;grid-row:1}.ks-master-header .search-wrap{display:none!important}.ks-master-header .mobile-search-button{display:grid!important}.ks-master-header .brand span{display:block}}
+@media(max-width:650px){.ks-master-header{padding:8px 8px 4px}.ks-master-header .topbar{border-radius:18px}.ks-master-header .tool-nav-btn{height:36px;font-size:9px;padding:0 9px}.ks-master-header .nav-tool-icon{width:18px;height:18px;border-radius:6px}.ks-master-header .notification-panel{position:fixed;left:8px;right:8px;top:66px;width:auto;max-height:60vh}}
+@media print{.ks-master-header,.ks-header-mobile-sheet{display:none!important}}
+</style>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-bridge.js"></script>
+</head>
+<body data-ks-ui="v2" data-ks-page="calculator">
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- NEW GLASS HEADER (replaces old .plain-header) -->
+  <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
+  <div class="brand"><span>Kidzstudios Office</span></div>
+  <nav class="tool-nav" id="toolNav" aria-label="Tool shortcuts">
+    <a class="tool-nav-btn" href="job-management.html" data-tool="Job Management"><span class="nav-tool-icon">▦</span><span>Job Management</span></a>
+    <a class="tool-nav-btn" href="pricelist-calculator.html" data-tool="Pricelist"><span class="nav-tool-icon nav-tool-icon-text">RM</span><span>Pricelist</span></a>
+    <a class="tool-nav-btn" href="markup-calculator.html" data-tool="Markup Calculator"><span class="nav-tool-icon">∑</span><span>Markup Calculator</span></a>
+    <a class="tool-nav-btn" href="orderform1.html" data-tool="Orderform 1"><span class="nav-tool-icon">▤</span><span>Orderform 1</span></a>
+    <a class="tool-nav-btn" href="orderform2.html" data-tool="Orderform 2"><span class="nav-tool-icon">▤</span><span>Orderform 2</span></a>
+    <a class="tool-nav-btn" href="commission.html" data-tool="Commission / Claim"><span class="nav-tool-icon nav-tool-icon-text">CL</span><span>Commission / Claim</span></a>
+    <a class="tool-nav-btn" href="file-name-generator.html" data-tool="File Name Generator"><span class="nav-tool-icon nav-tool-icon-text">Aa</span><span>File Name Generator</span></a>
+    <a class="tool-nav-btn" href="files-compress.html" data-tool="Files Compress"><span class="nav-tool-icon">⇩</span><span>Files Compress</span></a>
+  </nav>
+  <div class="header-tools">
+<div class="notification-wrap">
+      <button class="icon-btn notification-button" id="notificationBtn" aria-label="Office notifications" aria-expanded="false" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <i id="notificationUnread" hidden>0</i>
+      </button>
+      <div class="notification-panel" id="notificationPanel" aria-hidden="true">
+        <div class="notification-panel-head"><div><span>Office updates</span><strong>Notifications</strong></div><button id="notificationClearBtn" type="button">Clear</button></div>
+        <div class="notification-list" id="notificationList"><div class="notification-empty">No new updates yet.</div></div>
+      </div>
+    </div>
+</div>
+</div></header>
+
+  <main class="main-content">
+    <div class="layout-wrapper">
+      
+      <div class="left-panel">
+        <div class="header-flex">
+          <div class="brand-subtitle">Select Product Category</div>
+        </div>
+
+        <div class="category-grid">
+          <div class="category-card active" data-category="sublimation" onclick="switchCategory('sublimation')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
+            <span class="cat-name">Sublimation</span>
+          </div>
+          <div class="category-card" data-category="silkscreen" onclick="switchCategory('silkscreen')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
+            <span class="cat-name">Silkscreen</span>
+          </div>
+          <div class="category-card" data-category="dtf_shirt" onclick="switchCategory('dtf_shirt')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
+            <span class="cat-name">DTF Shirt</span>
+          </div>
+          <div class="category-card" data-category="lanyard" onclick="switchCategory('lanyard')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4M12 2v4M8 6h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM9 10h6M9 14h4"/></svg></div>
+            <span class="cat-name">Lanyard</span>
+          </div>
+          <div class="category-card" data-category="apron" onclick="switchCategory('apron')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8v4M6 6h12l1.5 16H4.5L6 6zM9 12h6v5H9z"/></svg></div>
+            <span class="cat-name">Apron</span>
+          </div>
+          <div class="category-card" data-category="cap" onclick="switchCategory('cap')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h14"/><path d="M6 16a6 6 0 0 1 12 0"/><path d="M18 16c2 0 3 1 4 2"/><circle cx="12" cy="9" r="1"/></svg></div>
+            <span class="cat-name">Cap</span>
+          </div>
+          <div class="category-card" data-category="bunting" onclick="switchCategory('bunting')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="12" rx="1"/><path d="M12 16v6M9 22h6M12 4V2"/></svg></div>
+            <span class="cat-name">Bunting</span>
+          </div>
+          <div class="category-card" data-category="banner" onclick="switchCategory('banner')">
+            <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="8" rx="1"/><path d="M4 4v16M20 4v16"/></svg></div>
+            <span class="cat-name">Banner</span>
+          </div>
+        </div>
+
+        <div id="panel-sublimation" class="panel active">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+            <h2>Full Print Sublimation Jersey</h2>
+          </div>
+          <div class="grid-layout">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="section-title">Sizes & Quantity <span class="pill-tag" style="background: var(--bg-body); color: var(--text-primary);">Total: <span id="sub_totalQty">0</span></span></label>
+              <div class="size-grid" id="sub_sizeGridContainer"></div>
+            </div>
+            <div class="form-group">
+              <label class="section-title">Order Details</label>
+              <label class="field-label">Design Type</label>
+              <select id="sub_design" class="select-field calc-trigger"><option value="0">Catalogue Design (Free)</option><option value="50">Custom Design (+RM50)</option></select>
+              <label class="field-label">Production</label>
+              <select id="sub_urgent" class="select-field calc-trigger"><option value="0">Standard (14-28 Days)</option><option value="5">Urgent Order (+RM5/pcs)</option></select>
+              <label class="field-label">Material Update</label>
+              <select id="sub_material" class="select-field calc-trigger"><option value="0">Microfiber Reverse Eyelet</option><option value="3">Diamond 155GSM (+RM3)</option><option value="3">RJPK 170GSM (+RM3)</option><option value="8">Lycra 280GSM (+RM8)</option></select>
+            </div>
+            
+            <div class="form-group">
+              <label class="section-title">Features & Add-Ons</label>
+              <div class="addon-row" style="flex-wrap: wrap; gap: 12px; align-items: flex-end; border-bottom: 1px solid var(--border-main); padding-bottom: 16px;">
+                <div style="flex: 1; min-width: 180px;">
+                  <span class="addon-label">Collar Selection</span>
+                  <select id="sub_collar_type" class="select-field calc-trigger" style="margin-top: 8px; margin-bottom: 0; padding: 12px; font-size: 14px;">
+                    <option value="0" data-name="Round Neck">Round Neck (+RM0)</option>
+                    <option value="3" data-name="V-Neck">V-Neck (+RM3)</option>
+                    <option value="3" data-name="V-Neck End">V-Neck End (+RM3)</option>
+                    <option value="3" data-name="V-Neck Split">V-Neck Split (+RM3)</option>
+                    <option value="5" data-name="Round Neck (Insert)">Round Neck (Insert) (+RM5)</option>
+                    <option value="5" data-name="V-Neck (1 Button)">V-Neck (1 Button) (+RM5)</option>
+                    <option value="5" data-name="V-Neck Insert">V-Neck Insert (+RM5)</option>
+                    <option value="5" data-name="V-Neck Insert Overlap">V-Neck Insert Overlap (+RM5)</option>
+                    <option value="5" data-name="Collar (Button)">Collar (Button) (+RM5)</option>
+                    <option value="5" data-name="Collar Zip">Collar Zip (+RM5)</option>
+                    <option value="5" data-name="Mandarin Collar (Button)">Mandarin Collar (Button) (+RM5)</option>
+                    <option value="5" data-name="Mandarin Collar (Zip)">Mandarin Collar (Zip) (+RM5)</option>
+                    <option value="7" data-name="V-Neck NFL">V-Neck NFL (+RM7)</option>
+                    <option value="7" data-name="V-Neck NFL (Flat)">V-Neck NFL (Flat) (+RM7)</option>
+                    <option value="7" data-name="Retro Collar">Retro Collar (+RM7)</option>
+                    <option value="7" data-name="Retro Collar (No Diamond)">Retro Collar (No Diamond) (+RM7)</option>
+                    <option value="10" data-name="Jacket Turtle (Zip)">Jacket Turtle (Zip) (+RM10)</option>
+                    <option value="15" data-name="Hoodie (No Zip)">Hoodie (No Zip) (+RM15)</option>
+                    <option value="15" data-name="Hoodie (Zip)">Hoodie (Zip) (+RM15)</option>
+                  </select>
+                </div>
+                <div class="general-stepper" style="width: 120px; margin:0; height: 45px;"><button onclick="stepVal('sub_add_collar', -1)">-</button><input type="number" id="sub_add_collar" class="calc-trigger" min="0" value="0"><button onclick="stepVal('sub_add_collar', 1)">+</button></div>
+              </div>
+              <div class="addon-row"><div><span class="addon-label">Long Sleeves</span><span class="addon-price">+RM5/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_long', -1)">-</button><input type="number" id="sub_add_long" class="calc-trigger sub-addon-qty" data-name="Long Sleeves" data-price="5" min="0" value="0"><button onclick="stepVal('sub_add_long', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Raglan Sleeves</span><span class="addon-price">+RM5/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_raglan', -1)">-</button><input type="number" id="sub_add_raglan" class="calc-trigger sub-addon-qty" data-name="Raglan Sleeves" data-price="5" min="0" value="0"><button onclick="stepVal('sub_add_raglan', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Muslimah Cut</span><span class="addon-price">+RM15/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_muslimah', -1)">-</button><input type="number" id="sub_add_muslimah" class="calc-trigger sub-addon-qty" data-name="Muslimah Cut" data-price="15" min="0" value="0"><button onclick="stepVal('sub_add_muslimah', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Oversize Cut</span><span class="addon-price">+RM15/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_oversize', -1)">-</button><input type="number" id="sub_add_oversize" class="calc-trigger sub-addon-qty" data-name="Oversize" data-price="15" min="0" value="0"><button onclick="stepVal('sub_add_oversize', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Chest Pocket</span><span class="addon-price">+RM3/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_chest', -1)">-</button><input type="number" id="sub_add_chest" class="calc-trigger sub-addon-qty" data-name="Chest Pocket" data-price="3" min="0" value="0"><button onclick="stepVal('sub_add_chest', 1)">+</button></div></div>
+
+              <label class="section-title" style="margin-top: 24px;">Personalization</label>
+              <div class="addon-row"><div><span class="addon-label">Personal Name Only</span><span class="addon-price">+RM4/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_name', -1)">-</button><input type="number" id="sub_add_name" class="calc-trigger sub-addon-qty" data-name="Personal Name" data-price="4" min="0" value="0"><button onclick="stepVal('sub_add_name', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Personal Number Only</span><span class="addon-price">+RM4/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_num', -1)">-</button><input type="number" id="sub_add_num" class="calc-trigger sub-addon-qty" data-name="Personal Number" data-price="4" min="0" value="0"><button onclick="stepVal('sub_add_num', 1)">+</button></div></div>
+              <div class="addon-row"><div><span class="addon-label">Name & Number Combo</span><span class="addon-price">+RM7/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('sub_add_namenum', -1)">-</button><input type="number" id="sub_add_namenum" class="calc-trigger sub-addon-qty" data-name="Name & Number" data-price="7" min="0" value="0"><button onclick="stepVal('sub_add_namenum', 1)">+</button></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-silkscreen" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+            <h2>T-Shirt (Silkscreen)</h2>
+          </div>
+          <div class="grid-layout">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="section-title">Sizes & Quantity <span class="pill-tag" style="background: var(--bg-body); color: var(--text-primary);">Total: <span id="silk_totalQty">0</span></span></label>
+              <div class="size-grid" id="silk_sizeGridContainer"></div>
+            </div>
+            <div class="form-group">
+              <label class="section-title">Base Shirt</label>
+              <label class="field-label">Shirt Type</label>
+              <select id="silk_shirtType" class="select-field calc-trigger"><option value="13.50">Roundneck (RM13.50)</option><option value="18.50">Collar (RM18.50)</option><option value="23.00">Polo (RM23.00)</option></select>
+              <div class="addon-row" style="margin-top: 12px; border-bottom: none;"><div><span class="addon-label">Long Sleeve Upgrade</span><span class="addon-price">+RM5/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('silk_ls_qty', -1)">-</button><input type="number" id="silk_ls_qty" class="calc-trigger" min="0" value="0"><button onclick="stepVal('silk_ls_qty', 1)">+</button></div></div>
+            </div>
+            <div class="form-group">
+              <label class="section-title">Silkscreen Printing</label>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 120px;"><label class="field-label" style="margin-top: 0;">Front Colors</label><select id="silk_front_colors" class="select-field calc-trigger"><option value="-1">No Print</option><option value="0" selected>1 Color (1C)</option><option value="1">2 Colors (2C)</option><option value="2">3 Colors (3C)</option><option value="3">4 Colors (4C)</option><option value="4">5 Colors (5C)</option><option value="5">6 Colors (6C)</option><option value="6">7 Colors (7C)</option><option value="7">8 Colors (8C)</option></select></div>
+                <div style="flex: 1; min-width: 120px;"><label class="field-label" style="margin-top: 0;">Back Colors</label><select id="silk_back_colors" class="select-field calc-trigger"><option value="-1" selected>No Print</option><option value="0">1 Color (1C)</option><option value="1">2 Colors (2C)</option><option value="2">3 Colors (3C)</option><option value="3">4 Colors (4C)</option><option value="4">5 Colors (5C)</option><option value="5">6 Colors (6C)</option><option value="6">7 Colors (7C)</option><option value="7">8 Colors (8C)</option></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-dtf_shirt" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+            <h2>T-Shirt (DTF Print)</h2>
+          </div>
+          <div class="grid-layout">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="section-title">Sizes & Quantity <span class="pill-tag" style="background: var(--bg-body); color: var(--text-primary);">Total: <span id="dtf_totalQty">0</span></span></label>
+              <div class="size-grid" id="dtf_sizeGridContainer"></div>
+            </div>
+            <div class="form-group">
+              <label class="section-title">Base Shirt</label>
+              <label class="field-label">Shirt Type</label>
+              <select id="dtf_shirtType" class="select-field calc-trigger"><option value="13.50">Roundneck (RM13.50)</option><option value="18.50">Collar (RM18.50)</option><option value="23.00">Polo (RM23.00)</option></select>
+              <div class="addon-row" style="margin-top: 12px; border-bottom: none;"><div><span class="addon-label">Long Sleeve Upgrade</span><span class="addon-price">+RM5/pcs</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('dtf_ls_qty', -1)">-</button><input type="number" id="dtf_ls_qty" class="calc-trigger" min="0" value="0"><button onclick="stepVal('dtf_ls_qty', 1)">+</button></div></div>
+            </div>
+            <div class="form-group">
+              <label class="section-title">DTF Print Size</label>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 120px;"><label class="field-label" style="margin-top: 0;">Front Size</label><select id="dtf_front_size" class="select-field calc-trigger"><option value="0">No Print</option><option value="4">Smaller Than A4 (~RM4)</option><option value="8" selected>A4 (RM8)</option><option value="10">A3 (RM10)</option><option value="12">Bigger Than A3 (RM12)</option></select></div>
+                <div style="flex: 1; min-width: 120px;"><label class="field-label" style="margin-top: 0;">Back Size</label><select id="dtf_back_size" class="select-field calc-trigger"><option value="0" selected>No Print</option><option value="4">Smaller Than A4 (~RM4)</option><option value="8">A4 (RM8)</option><option value="10">A3 (RM10)</option><option value="12">Bigger Than A3 (RM12)</option></select></div>
+              </div>
+              <div class="addon-row" style="margin-top: 16px; border-bottom: none;"><div><span class="addon-label">Sleeve Prints (Per arm)</span><span class="addon-price">+RM3/arm</span></div><div class="general-stepper" style="width: 120px; margin:0;"><button onclick="stepVal('dtf_sleeve_qty', -1)">-</button><input type="number" id="dtf_sleeve_qty" class="calc-trigger" min="0" value="0" placeholder="0"><button onclick="stepVal('dtf_sleeve_qty', 1)">+</button></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-lanyard" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4M12 2v4M8 6h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM9 10h6M9 14h4"/></svg>
+            <h2>Lanyard (Sublimation)</h2>
+          </div>
+          <div class="form-group">
+            <label class="section-title">Lanyard Details</label>
+            <div class="grid-layout">
+              <div><label class="field-label">Quantity (Min 10)</label><div class="general-stepper"><button onclick="stepVal('lan_qty', -1)">-</button><input type="number" id="lan_qty" class="calc-trigger" min="10" value="10"><button onclick="stepVal('lan_qty', 1)">+</button></div></div>
+              <div><label class="field-label">Size Option</label><select id="lan_size" class="select-field calc-trigger"><option>20MM</option><option>25MM</option></select></div>
+              <div><label class="field-label">Buckle Option</label><select id="lan_buckle" class="select-field calc-trigger"><option>With Buckle</option><option>No Buckle</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-apron" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8v4M6 6h12l1.5 16H4.5L6 6zM9 12h6v5H9z"/></svg>
+            <h2>Custom Apron</h2>
+          </div>
+          <div class="form-group">
+            <label class="section-title">Apron Details</label>
+            <div class="grid-layout">
+              <div><label class="field-label">Quantity</label><div class="general-stepper"><button onclick="stepVal('apr_qty', -1)">-</button><input type="number" id="apr_qty" class="calc-trigger" min="1" value="10"><button onclick="stepVal('apr_qty', 1)">+</button></div></div>
+              <div><label class="field-label">Apron Type</label><select id="apr_type" class="select-field calc-trigger"><option value="basic">Basic (100% Polyester)</option><option value="exclusive">Exclusive (Polyester+Cotton)</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-cap" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h14"/><path d="M6 16a6 6 0 0 1 12 0"/><path d="M18 16c2 0 3 1 4 2"/><circle cx="12" cy="9" r="1"/></svg>
+            <h2>Custom Cap</h2>
+          </div>
+          <div class="form-group">
+            <label class="section-title">Cap Details</label>
+            <div class="grid-layout">
+              <div><label class="field-label">Quantity (Min 10)</label><div class="general-stepper"><button onclick="stepVal('cap_qty', -1)">-</button><input type="number" id="cap_qty" class="calc-trigger" min="10" value="10"><button onclick="stepVal('cap_qty', 1)">+</button></div></div>
+              <div><label class="field-label">Printing Type</label><select id="cap_type" class="select-field calc-trigger"><option value="dtf">DTF Print</option><option value="embroidery">Embroidery</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-bunting" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="12" rx="1"/><path d="M12 16v6M9 22h6M12 4V2"/></svg>
+            <h2>Bunting (Vertical)</h2>
+          </div>
+          <div class="form-group">
+            <label class="section-title">Bunting Details</label>
+            <div class="grid-layout">
+              <div><label class="field-label">Quantity</label><div class="general-stepper"><button onclick="stepVal('bun_qty', -1)">-</button><input type="number" id="bun_qty" class="calc-trigger" min="1" value="1"><button onclick="stepVal('bun_qty', 1)">+</button></div></div>
+              <div>
+                <label class="field-label">Size (W x H) in Feet</label>
+                <select id="bun_size" class="select-field calc-trigger">
+                  <option value="32">Standard: 2 x 6 FT (RM32.00)</option>
+                  <option value="custom">🛠️ Use Custom Size Below...</option>
+                  <option disabled>--- 1 FT Width ---</option>
+                  <option value="23">1 x 1 FT (RM23.00)</option><option value="24">1 x 2 FT (RM24.00)</option><option value="25">1 x 3 FT (RM25.00)</option>
+                  <option disabled>--- 2 FT Width ---</option>
+                  <option value="23">2 x 2 FT (RM23.00)</option><option value="26">2 x 3 FT (RM26.00)</option><option value="28">2 x 4 FT (RM28.00)</option><option value="30">2 x 5 FT (RM30.00)</option><option value="32">2 x 6 FT (RM32.00)</option><option value="36">2 x 7 FT (RM36.00)</option><option value="38">2 x 8 FT (RM38.00)</option>
+                  <option disabled>--- 3 FT Width ---</option>
+                  <option value="23">3 x 3 FT (RM23.00)</option><option value="26">3 x 4 FT (RM26.00)</option><option value="30">3 x 5 FT (RM30.00)</option><option value="36">3 x 6 FT (RM36.00)</option><option value="42">3 x 7 FT (RM42.00)</option><option value="48">3 x 8 FT (RM48.00)</option><option value="54">3 x 9 FT (RM54.00)</option><option value="60">3 x 10 FT (RM60.00)</option>
+                  <option disabled>--- 4 FT Width ---</option>
+                  <option value="32">4 x 4 FT (RM32.00)</option><option value="40">4 x 5 FT (RM40.00)</option><option value="48">4 x 6 FT (RM48.00)</option><option value="56">4 x 7 FT (RM56.00)</option><option value="64">4 x 8 FT (RM64.00)</option><option value="72">4 x 9 FT (RM72.00)</option><option value="80">4 x 10 FT (RM80.00)</option>
+                  <option disabled>--- 5 FT Width ---</option>
+                  <option value="50">5 x 5 FT (RM50.00)</option><option value="60">5 x 6 FT (RM60.00)</option><option value="70">5 x 7 FT (RM70.00)</option><option value="80">5 x 8 FT (RM80.00)</option><option value="90">5 x 9 FT (RM90.00)</option><option value="100">5 x 10 FT (RM100.00)</option>
+                </select>
+                
+                <div class="custom-size-box" style="display: block;">
+                  <label class="field-label">Custom Dimensions:</label>
+                  <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;"><input type="number" id="bun_w" class="input-field calc-trigger" min="1" placeholder="Width (ft)" style="margin-bottom: 0;"></div>
+                    <div style="flex: 1;"><input type="number" id="bun_h" class="input-field calc-trigger" min="1" placeholder="Height (ft)" style="margin-bottom: 0;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-banner" class="panel">
+          <div class="panel-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="8" rx="1"/><path d="M4 4v16M20 4v16"/></svg>
+            <h2>Banner (Horizontal)</h2>
+          </div>
+          <div class="form-group">
+            <label class="section-title">Banner Details</label>
+            <div class="grid-layout">
+              <div><label class="field-label">Quantity</label><div class="general-stepper"><button onclick="stepVal('banner_qty', -1)">-</button><input type="number" id="banner_qty" class="calc-trigger" min="1" value="1"><button onclick="stepVal('banner_qty', 1)">+</button></div></div>
+              <div>
+                <label class="field-label">Size (H x W) in Feet</label>
+                <select id="banner_size" class="select-field calc-trigger">
+                  <option value="39">Standard: 3' x 6' (RM39.00)</option>
+                  <option value="custom">🛠️ Use Custom Size Below...</option>
+                  <option disabled>--- 1 FT Series ---</option>
+                  <option value="23">1' x 2' (RM23.00)</option><option value="24">1' x 3' (RM24.00)</option><option value="25">1' x 4' (RM25.00)</option><option value="26">1' x 5' (RM26.00)</option><option value="27">1' x 6' (RM27.00)</option><option value="28">1' x 8' (RM28.00)</option>
+                  <option disabled>--- 2 FT Series ---</option>
+                  <option value="23">2' x 2' (RM23.00)</option><option value="26">2' x 3' (RM26.00)</option><option value="28">2' x 4' (RM28.00)</option><option value="33">2' x 6' (RM33.00)</option><option value="38">2' x 8' (RM38.00)</option><option value="43">2' x 10' (RM43.00)</option>
+                  <option disabled>--- 3 FT Series ---</option>
+                  <option value="39">3' x 6' (RM39.00)</option><option value="51">3' x 8' (RM51.00)</option><option value="63">3' x 10' (RM63.00)</option><option value="75">3' x 12' (RM75.00)</option><option value="99">3' x 16' (RM99.00)</option><option value="123">3' x 20' (RM123.00)</option>
+                  <option disabled>--- 4 FT Series ---</option>
+                  <option value="51">4' x 6' (RM51.00)</option><option value="67">4' x 8' (RM67.00)</option><option value="83">4' x 10' (RM83.00)</option><option value="99">4' x 12' (RM99.00)</option><option value="131">4' x 16' (RM131.00)</option><option value="163">4' x 20' (RM163.00)</option>
+                  <option disabled>--- 6 FT Series ---</option>
+                  <option value="75">6' x 6' (RM75.00)</option><option value="99">6' x 8' (RM99.00)</option><option value="123">6' x 10' (RM123.00)</option><option value="147">6' x 12' (RM147.00)</option><option value="195">6' x 16' (RM195.00)</option><option value="243">6' x 20' (RM243.00)</option>
+                  <option disabled>--- 8 FT Series ---</option>
+                  <option value="131">8' x 8' (RM131.00)</option><option value="163">8' x 10' (RM163.00)</option><option value="195">8' x 12' (RM195.00)</option><option value="227">8' x 14' (RM227.00)</option><option value="259">8' x 16' (RM259.00)</option><option value="323">8' x 20' (RM323.00)</option>
+                  <option disabled>--- 10 FT Series ---</option>
+                  <option value="203">10' x 10' (RM203.00)</option><option value="243">10' x 12' (RM243.00)</option><option value="283">10' x 14' (RM283.00)</option><option value="323">10' x 16' (RM323.00)</option><option value="403">10' x 20' (RM403.00)</option><option value="483">10' x 24' (RM483.00)</option>
+                  <option disabled>--- 12 FT Series ---</option>
+                  <option value="291">12' x 12' (RM291.00)</option><option value="339">12' x 14' (RM339.00)</option><option value="387">12' x 16' (RM387.00)</option><option value="435">12' x 18' (RM435.00)</option><option value="483">12' x 20' (RM483.00)</option><option value="579">12' x 24' (RM579.00)</option>
+                </select>
+
+                <div class="custom-size-box" style="display: block;">
+                  <label class="field-label">Custom Dimensions:</label>
+                  <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;"><input type="number" id="banner_w" class="input-field calc-trigger" min="1" placeholder="Width (ft)" style="margin-bottom: 0;"></div>
+                    <div style="flex: 1;"><input type="number" id="banner_h" class="input-field calc-trigger" min="1" placeholder="Height (ft)" style="margin-bottom: 0;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 40px;"></div>
+      </div> 
+      
+      <div class="right-panel">
+        
+        <div class="right-box" style="padding-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+             <div style="font-size: 12px; font-weight: 700; color: var(--accent-color); text-transform: uppercase;">1. Current Item Preview</div>
+             <button class="reset-btn" onclick="resetItemForm()" style="padding: 4px 10px; font-size: 11px;">Reset Item</button>
+          </div>
+          
+          <div class="price-breakdown">
+             <div>Base Cost <strong id="out_item_base">RM 0.00</strong></div>
+             <div>Surcharges <strong id="out_item_sur">RM 0.00</strong></div>
+          </div>
+          
+          <div style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.05); border: 1px dashed #FF3B30; border-radius: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: #FF3B30; text-transform: uppercase; margin-bottom: 8px;">🕵️ Internal Commission</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="comm_type" class="select-field calc-trigger" style="flex: 1; margin: 0; border-color: #FF3B30; padding: 6px; font-size: 12px;">
+                <option value="none">None</option><option value="per_item">Per Item</option><option value="flat">Total Flat</option>
+              </select>
+              <input type="number" id="comm_value" class="input-field calc-trigger" min="0" placeholder="0.00" style="width: 80px; margin: 0; border-color: #FF3B30; padding: 6px; font-size: 13px; text-align: right;">
+            </div>
+            <div style="font-size: 11px; color: #FF3B30; margin-top: 6px; text-align: right;">Added to Surcharge: <span id="out_commission_val" style="font-weight:bold;">RM 0.00</span></div>
+          </div>
+
+          <div class="total-price" style="border-top: none; padding-top: 16px;">
+             Item Total <span id="out_item_total" style="font-size: 32px;">0.00</span>
+          </div>
+
+          <div id="breakdown-list" class="breakdown-list" style="display: block; margin-top: 16px; background: var(--bg-body);"></div>
+          
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+             <button class="action-btn" onclick="generatePriceTiers()" style="flex: 1; padding: 12px; font-size: 12px; background: white;">Tiers</button>
+             <button class="wa-btn" onclick="addToCart()" style="flex: 2; margin-top: 0; padding: 12px; font-size: 14px; box-shadow: none;">🛒 Add to Quote</button>
+          </div>
+        </div>
+
+        <div class="right-box" style="padding-top: 24px;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--accent-color); text-transform: uppercase;">2. Quote Cart</div>
+            <button onclick="clearCart()" style="background: none; border: none; color: #FF3B30; font-size: 11px; font-weight: 600; cursor: pointer;">Clear Cart</button>
+          </div>
+          
+          <div id="cart-items-container" style="min-height: 40px; margin-bottom: 16px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+             <div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 16px 0; font-style: italic;">Cart is empty. Add items above.</div>
+          </div>
+          
+          <div style="border-top: 1px solid var(--border-main); padding-top: 16px; margin-top: 16px;">
+            <label class="section-title" style="font-size: 14px; margin-bottom: 12px;">Global Quote Add-ons</label>
+            
+            <label class="checkbox-label" style="justify-content: flex-start; gap: 12px; margin-bottom: 12px; font-size: 13px;">
+              <input type="checkbox" id="custom_design_enabled" class="calc-global">
+              <span style="flex:1;">Custom Design Fee</span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="color: var(--text-secondary);">RM</span>
+                <input type="number" id="custom_design_amount" class="input-field calc-global" min="0" value="50" style="width: 80px; padding: 6px; text-align: right; font-size: 13px;" disabled>
+              </div>
+            </label>
+
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+              <span style="flex: 1; font-size: 13px; font-weight: 500;">Shipping / Postage</span>
+              <span style="color: var(--text-secondary); font-weight: 600; font-size: 13px;">RM</span>
+              <input type="number" id="shipping_fee" class="input-field calc-global" min="0" value="0" style="width: 80px; margin: 0; padding: 6px; font-size: 13px; text-align: right;" placeholder="0.00">
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="discount_type" class="select-field calc-global" style="width: 100px; margin: 0; padding: 6px 24px 6px 8px; font-size: 12px;">
+                <option value="none">Discount</option><option value="percent">Percent (%)</option><option value="fixed">Amount (RM)</option>
+              </select>
+              <input type="number" id="discount_value" class="input-field calc-global" min="0" placeholder="0.00" style="flex: 1; margin: 0; padding: 6px; font-size: 13px; text-align: right;" disabled>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-main); padding-top: 16px; margin-top: 16px;">
+            <div class="price-breakdown" style="margin-bottom: 6px;">
+                <div style="text-align: left;">Cart Subtotal</div><strong id="out_cart_subtotal" style="margin: 0; font-size: 14px;">RM 0.00</strong>
+            </div>
+            <div id="row_out_discount" class="price-breakdown" style="display: none; margin-bottom: 6px; color: #FF3B30;">
+                <div style="text-align: left;">Discount</div><strong id="out_cart_discount" style="margin: 0; font-size: 14px; color: #FF3B30;">-RM 0.00</strong>
+            </div>
+            
+            <div class="total-price" style="border-top: 1px dashed var(--border-main); margin-top: 16px; padding-top: 16px;">
+                Grand Total <span id="out_cart_grand" style="font-size: 32px;">RM 0.00</span>
+            </div>
+            
+            <div class="deposit-terms" style="margin-top: 16px;">
+                <div>70% Deposit Needed <span id="out_cart_deposit">RM 0.00</span></div>
+                <div class="balance">Balance Due <span id="out_cart_balance">RM 0.00</span></div>
+            </div>
+          </div>
+
+          <button class="wa-btn" onclick="openFinalizeModal()" style="background: #34C759; margin-top: 20px;">📄 Finalize Quotation</button>
+        </div>
+      </div>
+
+    </div> 
+  </main>
+
+  <footer class="plain-footer" style="background: var(--bg-container); height: 48px; border-top: 1px solid var(--border-main); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary);">
+    © 2026 KidzStudios. All Rights Reserved. · v39
+  </footer>
+
+  <div id="finalize-modal" class="modal-overlay" onclick="if(event.target===this) document.getElementById('finalize-modal').classList.remove('show')">
+    <div class="modal-content">
+      <h3>Finalize Quotation</h3>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Enter client details to generate official documents.</p>
+      
+      <label class="field-label" style="margin-top: 0;">Client / Attention To</label>
+      <input type="text" id="client_name" class="input-field" placeholder="e.g. Mr. Ahmad" style="margin-bottom: 12px;">
+      
+      <label class="field-label" style="margin-top: 0;">Company / School Name</label>
+      <input type="text" id="client_company" class="input-field" placeholder="e.g. SMK Shah Alam" style="margin-bottom: 12px;">
+      
+      <label class="field-label" style="margin-top: 0;">Client WhatsApp (For Sending)</label>
+      <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+        <select id="wa_country_code" class="select-field" style="width: 100px; margin:0;">
+          <option value="60" selected>+60</option><option value="65">+65</option><option value="62">+62</option>
+        </select>
+        <input type="tel" id="wa_target_number" class="input-field" placeholder="123456789" style="margin:0;">
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="wa-btn" onclick="previewCorporateDocument()" style="margin: 0; background: var(--accent-color);">👁️ Preview Quotation</button>
+        <button class="wa-btn" onclick="generateCorporatePDF()" style="margin: 0; background: #1e3a5f;">🖨️ Download Official PDF (A4)</button>
+        <button class="wa-btn" onclick="generateCorporatePNG()" style="margin: 0; background: #5856D6;">🖼️ Download Image (PNG)</button>
+        <button class="wa-btn" onclick="sendWhatsApp()" style="margin: 0; background: #25D366; color: white;">💬 Send via WhatsApp</button>
+        <button class="reset-btn" onclick="document.getElementById('finalize-modal').classList.remove('show')" style="margin: 0; padding: 14px; width: 100%; text-align: center; border: 1px solid #fca5a5;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="preview-modal" class="modal-overlay" onclick="if(event.target===this) closePreviewModal()">
+    <div class="modal-content" style="width: 500px; max-height: 95vh; overflow-y: auto;">
+      <h3>Quotation Preview</h3>
+      <img id="preview-img" style="max-width: 100%; border: 1px solid var(--border-main); border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);" src="" alt="Quote Preview">
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="reset-btn" onclick="closePreviewModal()" style="width: 100%; padding: 12px; border: 1px solid #fca5a5;">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tier-modal" class="modal-overlay" onclick="if(event.target===this) document.getElementById('tier-modal').classList.remove('show')">
+    <div class="modal-content" style="width: 500px;">
+      <h3>Volume Price Tiers</h3>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Estimated pricing based on the *currently configured item*.</p>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+        <thead>
+          <tr><th style="padding: 12px; border-bottom: 1px solid var(--border-main); background: var(--bg-input);">Qty</th><th style="padding: 12px; border-bottom: 1px solid var(--border-main); background: var(--bg-input);">Unit Price</th><th style="padding: 12px; border-bottom: 1px solid var(--border-main); background: var(--bg-input);">Total</th></tr>
+        </thead>
+        <tbody id="tier-tbody"></tbody>
+      </table>
+
+      <div style="display: flex; gap: 12px; flex-direction: column;">
+          <button class="wa-btn" onclick="copyTiersToClipboard()" style="margin: 0; background: var(--accent-color);">📋 Copy Table to Clipboard</button>
+          <button class="reset-btn" onclick="document.getElementById('tier-modal').classList.remove('show')" style="margin: 0; padding: 14px; width: 100%; text-align: center; border: 1px solid #fca5a5;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="print-quote-document" style="position: absolute; left: -9999px; top: 0; width: 210mm; min-height: 297mm; padding: 20mm; background: white; color: black; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; z-index: -1000;">
+      <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #1e3a5f; padding-bottom: 20px; margin-bottom: 30px;">
+          <img src="https://via.placeholder.com/200x70.png?text=KidzStudios+Logo" style="height: 60px;">
+          <div style="text-align: right;">
+              <h1 style="color: #1e3a5f; margin: 0; font-size: 32px; text-transform: uppercase; letter-spacing: 1px;">Quotation</h1>
+              <div style="font-size: 14px; color: #666; margin-top: 8px; font-weight: bold;">Ref: <span id="pdf-ref">KS-Q-0000</span></div>
+              <div style="font-size: 14px; color: #666; margin-top: 4px;">Date: <span id="pdf-date">DD MM YYYY</span></div>
+              <div style="font-size: 14px; color: #666; margin-top: 4px;">Valid Until: <span id="pdf-valid">DD MM YYYY</span></div>
+          </div>
+      </div>
+
+      <div style="margin-bottom: 30px; font-size: 14px; line-height: 1.6;">
+          <strong style="font-size: 16px; color: #1e3a5f;">Quotation For:</strong><br>
+          <span id="pdf-client-name" style="font-weight: bold; font-size: 16px;">Client Name</span><br>
+          <span id="pdf-client-company">Company Name</span>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+          <thead>
+              <tr style="background: #1e3a5f; color: white;">
+                  <th style="padding: 12px 10px; text-align: center; border: 1px solid #1e3a5f; width: 5%;">#</th>
+                  <th style="padding: 12px 10px; text-align: left; border: 1px solid #1e3a5f; width: 60%;">Item Description</th>
+                  <th style="padding: 12px 10px; text-align: center; border: 1px solid #1e3a5f; width: 15%;">Qty</th>
+                  <th style="padding: 12px 10px; text-align: right; border: 1px solid #1e3a5f; width: 20%;">Total (RM)</th>
+              </tr>
+          </thead>
+          <tbody id="pdf-tbody">
+             </tbody>
+       </table>
+
+      <div style="display: flex; justify-content: flex-end;">
+          <table style="width: 350px; font-size: 14px; line-height: 2;">
+              <tr><td style="font-weight: bold;">Items Subtotal:</td><td style="text-align: right;" id="pdf-subtotal">RM 0.00</td></tr>
+              <tr id="pdf-row-design" style="display:none;"><td style="font-weight: bold;">Custom Design Fee:</td><td style="text-align: right;" id="pdf-design">RM 0.00</td></tr>
+              <tr id="pdf-row-shipping" style="display:none;"><td style="font-weight: bold;">Shipping / Postage:</td><td style="text-align: right;" id="pdf-shipping">RM 0.00</td></tr>
+              <tr id="pdf-row-discount" style="display:none; color: #FF3B30;"><td style="font-weight: bold;">Discount:</td><td style="text-align: right;" id="pdf-discount">-RM 0.00</td></tr>
+              
+              <tr style="border-top: 2px solid #1e3a5f;">
+                  <td style="font-weight: 900; font-size: 18px; padding-top: 10px; color: #1e3a5f;">Grand Total:</td>
+                  <td style="text-align: right; font-weight: 900; font-size: 18px; padding-top: 10px; color: #1e3a5f;" id="pdf-grand">RM 0.00</td>
+              </tr>
+          </table>
+      </div>
+
+      <div style="margin-top: 60px; font-size: 12px; color: #444; border-top: 1px solid #eee; padding-top: 20px;">
+          <strong style="font-size: 14px; color: #1e3a5f;">Terms & Conditions / Payment Info</strong><br><br>
+          <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #1e3a5f; margin-bottom: 20px;">
+              <strong style="color: #000; font-size: 14px;">70% Deposit Required to Commence Production: <span id="pdf-deposit">RM 0.00</span></strong><br>
+              <span style="color: #000;">Balance Due prior to delivery: <strong id="pdf-balance">RM 0.00</strong></span>
+          </div>
+          <p style="line-height: 1.6;">
+              1. Please make all payments payable to <strong>KidzStudios (Maybank Acc: 1234567890)</strong>.<br>
+              2. Production lead time begins only upon receipt of the deposit and approval of final artwork.<br>
+              3. Goods sold are not returnable or refundable unless defective upon receipt.<br>
+              4. This quotation is computer generated and valid for 14 days. No signature is required.
+          </p>
+      </div>
+  </div>
+
+<script>
+    // --- Toast Notifications ---
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `⚠️ <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // --- Global State ---
+    let currentCategory = 'sublimation';
+    let cart = [];
+    window.quoteData = null; // Stores calculation data for exporting
+    
+    const categoryNames = {
+      'sublimation': 'Full Print Sublimation Jersey',
+      'silkscreen': 'T-Shirt (Silkscreen Printing)',
+      'dtf_shirt': 'T-Shirt (DTF Printing)',
+      'lanyard': 'Lanyard (Sublimation)',
+      'apron': 'Apron (DTF/Silkscreen)',
+      'cap': 'Cap (DTF/Embroidery)',
+      'bunting': 'Bunting (Tarpaulin 380gsm)',
+      'banner': 'Banner (Tarpaulin 380gsm)'
+    };
+
+    function switchCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.category-card[data-category="${cat}"]`).classList.add('active');
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + cat).classList.add('active');
+      calculateCurrentItem();
+    }
+
+    // --- Data Matrices ---
+    const shirtSizeConfig = [
+      { id: 'xs', label: 'XS', sur: 0 }, { id: 's', label: 'S', sur: 0 }, { id: 'm', label: 'M', sur: 0 },
+      { id: 'l', label: 'L', sur: 0 }, { id: 'xl', label: 'XL', sur: 0 }, { id: '2xl', label: '2XL', sur: 0 },
+      { id: '3xl', label: '3XL', sur: 3 }, { id: '5xl', label: '5XL', sur: 6 }, { id: '7xl', label: '7XL', sur: 9 }
+    ];
+
+    const ssMatrix = [
+      [7.82, 8.84, 9.86, 10.88, 11.90, 12.92, 13.94, 15.30], [5.55, 6.57, 7.59, 8.61, 9.63, 10.65, 11.67, 13.03],
+      [3.74, 4.76, 5.78, 6.80, 7.82, 8.84, 9.86, 11.22], [2.72, 3.74, 4.76, 5.78, 6.80, 7.82, 8.84, 10.20],
+      [1.99, 3.01, 4.03, 5.05, 6.07, 7.09, 8.11, 9.47], [1.78, 2.80, 3.82, 4.84, 5.86, 6.88, 7.90, 9.26],
+      [1.59, 2.61, 3.63, 4.65, 5.67, 6.69, 7.71, 9.07], [1.29, 2.31, 3.33, 4.35, 5.37, 6.39, 7.41, 8.77],
+      [1.20, 2.22, 3.24, 4.26, 5.28, 6.30, 7.32, 8.68], [1.10, 2.12, 3.14, 4.16, 5.18, 6.20, 7.22, 8.58] 
+    ];
+
+    function getSSTier(qty) {
+      if(qty < 11) return 0; if(qty < 21) return 1; if(qty < 31) return 2; if(qty < 51) return 3;
+      if(qty < 81) return 4; if(qty < 101) return 5; if(qty < 201) return 6; if(qty < 301) return 7;
+      if(qty < 501) return 8; return 9;
+    }
+
+    function buildSizeGrid(prefix) {
+      let html = '';
+      shirtSizeConfig.forEach(s => {
+        let badge = s.sur > 0 ? `+RM${s.sur}` : '';
+        html += `<div class="size-item"><label>${s.label}</label><div class="surcharge-badge">${badge}</div>
+                 <div class="stepper-wrapper">
+                    <button type="button" class="stepper-btn" onclick="stepVal('${prefix}_qty_${s.id}', -1)">-</button>
+                    <input type="number" id="${prefix}_qty_${s.id}" class="size-input calc-trigger" min="0" value="0">
+                    <button type="button" class="stepper-btn" onclick="stepVal('${prefix}_qty_${s.id}', 1)">+</button>
+                 </div></div>`;
+      });
+      document.getElementById(`${prefix}_sizeGridContainer`).innerHTML = html;
+    }
+    
+    buildSizeGrid('sub'); buildSizeGrid('silk'); buildSizeGrid('dtf');
+
+    function stepVal(id, delta) {
+      let el = document.getElementById(id);
+      if(!el) return;
+      let min = parseInt(el.min) || 0;
+      let val = parseInt(el.value) || 0;
+      val += delta;
+      if(val < min) val = min;
+      el.value = val;
+      
+      // Dispatch an event to ensure listeners trigger calculation properly
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function resetItemForm() {
+      document.querySelectorAll('.calc-trigger').forEach(el => {
+          if (el.tagName === 'SELECT') { el.selectedIndex = 0; } 
+          else if (el.type === 'number') { el.value = el.min || ''; }
+      });
+      calculateCurrentItem();
+      showToast("Item configuration cleared.");
+    }
+
+    // Auto-select "Custom Size" in dropdown
+    ['bun_w', 'bun_h'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        document.getElementById('bun_size').value = 'custom';
+        calculateCurrentItem();
+      });
+    });
+    ['banner_w', 'banner_h'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        document.getElementById('banner_size').value = 'custom';
+        calculateCurrentItem();
+      });
+    });
+
+    // Auto-enable dropdowns when typing numbers in Global inputs
+    document.getElementById('discount_value').addEventListener('input', function() {
+        if (this.value > 0 && document.getElementById('discount_type').value === 'none') {
+            document.getElementById('discount_type').value = 'fixed';
+        }
+        renderCart();
+    });
+
+    document.getElementById('custom_design_amount').addEventListener('input', function() {
+        if (this.value > 0) document.getElementById('custom_design_enabled').checked = true;
+        renderCart();
+    });
+
+
+    // --- ITEM CALCULATION LOGIC ---
+    function calcSublimation() {
+      let qty = 0, sizeSur = 0, bDown = [];
+      let sizeBreakdown = [];
+      shirtSizeConfig.forEach(s => { 
+        let q = parseInt(document.getElementById(`sub_qty_${s.id}`).value)||0; 
+        qty += q; sizeSur += (q * s.sur); 
+        if(q>0) sizeBreakdown.push(`${s.label}:${q}`);
+      });
+      document.getElementById('sub_totalQty').innerText = qty;
+
+      let unitBase = 0;
+      if(qty>0 && qty<=10) unitBase=45; else if(qty<=30) unitBase=35; else if(qty<=50) unitBase=33; 
+      else if(qty<=100) unitBase=30; else if(qty<=200) unitBase=28; else if(qty<=300) unitBase=25; 
+      else if(qty<=500) unitBase=23; else if(qty<=1000) unitBase=20; else if(qty>1000) unitBase=18;
+
+      let bCost = qty * unitBase;
+      if(qty>0) {
+        bDown.push(`👕 Sizes: ${sizeBreakdown.join(', ')}`);
+        bDown.push(`💰 Base Cost: ${qty} pcs x RM${unitBase}`);
+        if(sizeSur>0) bDown.push(`📏 Extra Size Surcharge: RM${sizeSur}`);
+      }
+
+      let subAddonsList = [
+        {id: 'sub_add_long', price: 5, name: 'Long Sleeves'},
+        {id: 'sub_add_raglan', price: 5, name: 'Raglan Sleeves'},
+        {id: 'sub_add_muslimah', price: 15, name: 'Muslimah Cut'},
+        {id: 'sub_add_oversize', price: 15, name: 'Oversize Cut'},
+        {id: 'sub_add_chest', price: 3, name: 'Chest Pocket'},
+        {id: 'sub_add_name', price: 4, name: 'Personal Name'},
+        {id: 'sub_add_num', price: 4, name: 'Personal Number'},
+        {id: 'sub_add_namenum', price: 7, name: 'Name & Number'}
+      ];
+
+      let perPieceAddonsTotal = 0;
+      let mat = parseFloat(document.getElementById('sub_material').value);
+      if(mat > 0) { perPieceAddonsTotal += (qty*mat); bDown.push(`🧵 Material Upgrade: ${qty} pcs x RM${mat}`); }
+      
+      let urg = parseFloat(document.getElementById('sub_urgent').value);
+      if(urg > 0) { perPieceAddonsTotal += (qty*urg); bDown.push(`⏱️ Urgent Order: ${qty} pcs x RM${urg}`); }
+
+      let collarDropdown = document.getElementById('sub_collar_type');
+      if(collarDropdown) {
+          let collarQty = parseInt(document.getElementById('sub_add_collar').value) || 0;
+          let collarPrice = parseFloat(collarDropdown.value);
+          let collarName = collarDropdown.options[collarDropdown.selectedIndex].getAttribute('data-name');
+
+          if(collarQty > 0) {
+              let cost = collarQty * collarPrice;
+              perPieceAddonsTotal += cost;
+              bDown.push(`✨ Collar (${collarName}): ${collarQty} pcs ${collarPrice > 0 ? 'x RM'+collarPrice : '(Free)'}`);
+          }
+      }
+
+      subAddonsList.forEach(a => {
+        let el = document.getElementById(a.id);
+        if(el) {
+            let q = parseInt(el.value) || 0;
+            if(q > 0) {
+              perPieceAddonsTotal += (q * a.price);
+              bDown.push(`✨ ${a.name}: ${q} pcs x RM${a.price}`);
+            }
+        }
+      });
+
+      let sCost = perPieceAddonsTotal + sizeSur;
+      return { base: bCost, sur: sCost, total: bCost + sCost, breakdown: bDown, qty: qty };
+    }
+
+    function calcSilkscreen() {
+      let qty = 0, sizeSur = 0, bDown = [];
+      shirtSizeConfig.forEach(s => { 
+        let q = parseInt(document.getElementById(`silk_qty_${s.id}`).value)||0; 
+        qty += q; sizeSur += (q * s.sur); 
+      });
+      document.getElementById('silk_totalQty').innerText = qty;
+
+      if(qty > 0 && qty < 10) { 
+        if(!window.simulatingPricing) showToast("Silkscreen requires a minimum of 10 pieces!"); 
+        return {base:0, sur:0, breakdown: ["⚠️ Minimum 10 pieces required."], qty: qty}; 
+      }
+      if(qty === 0) return {base:0, sur:0, breakdown: [], qty: 0};
+
+      let sBase = parseFloat(document.getElementById('silk_shirtType').value);
+      let bCost = qty * sBase;
+      bDown.push(`👕 Base Shirt: ${qty} pcs x RM${sBase}`);
+
+      let fColors = parseInt(document.getElementById('silk_front_colors').value);
+      let bColors = parseInt(document.getElementById('silk_back_colors').value);
+      let pCost = 0; let tier = getSSTier(qty);
+
+      if (qty>0 && fColors >= 0) { let fc = ssMatrix[tier][fColors]; pCost += (qty*fc); bDown.push(`🎨 Front Print (${fColors+1}C): ${qty} pcs x RM${fc}`); }
+      if (qty>0 && bColors >= 0) { let bc = ssMatrix[tier][bColors]; pCost += (qty*bc); bDown.push(`🎨 Back Print (${bColors+1}C): ${qty} pcs x RM${bc}`); }
+
+      let lsQty = parseInt(document.getElementById('silk_ls_qty').value) || 0;
+      let lsCost = lsQty * 5;
+      if(lsQty>0) bDown.push(`🧵 Long Sleeve Upgrade: ${lsQty} pcs x RM5`);
+      if(sizeSur>0) bDown.push(`📏 Size Surcharge: RM${sizeSur}`);
+
+      let sCost = pCost + lsCost + sizeSur;
+      return { base: bCost, sur: sCost, breakdown: bDown, qty: qty };
+    }
+
+    function calcDTF() {
+      let qty = 0, sizeSur = 0, bDown = [];
+      shirtSizeConfig.forEach(s => { 
+        let q = parseInt(document.getElementById(`dtf_qty_${s.id}`).value)||0; 
+        qty += q; sizeSur += (q * s.sur); 
+      });
+      document.getElementById('dtf_totalQty').innerText = qty;
+      if(qty === 0) return {base:0, sur:0, breakdown: [], qty: 0};
+
+      let sBase = parseFloat(document.getElementById('dtf_shirtType').value);
+      let bCost = qty * sBase;
+      bDown.push(`👕 Base Shirt: ${qty} pcs x RM${sBase}`);
+
+      let fSize = parseFloat(document.getElementById('dtf_front_size').value);
+      let bSize = parseFloat(document.getElementById('dtf_back_size').value);
+      let pSizeCost = (qty * fSize) + (qty * bSize);
+
+      if(fSize > 0) bDown.push(`🖨️ Front Print: ${qty} pcs x RM${fSize}`);
+      if(bSize > 0) bDown.push(`🖨️ Back Print: ${qty} pcs x RM${bSize}`);
+
+      let slvQty = parseInt(document.getElementById('dtf_sleeve_qty').value) || 0;
+      let slvCost = slvQty * 3;
+      if(slvQty>0) bDown.push(`💪 Sleeve Print: ${slvQty} arms x RM3`);
+
+      let lsQty = parseInt(document.getElementById('dtf_ls_qty').value) || 0;
+      let lsCost = lsQty * 5;
+      if(lsQty>0) bDown.push(`🧵 Long Sleeve Upgrade: ${lsQty} pcs x RM5`);
+      if(sizeSur>0) bDown.push(`📏 Size Surcharge: RM${sizeSur}`);
+
+      let sCost = pSizeCost + slvCost + lsCost + sizeSur;
+      return { base: bCost, sur: sCost, breakdown: bDown, qty: qty };
+    }
+
+    function calcSimple(type) {
+      let prefix = type === 'silkscreen' ? 'silk' : (type === 'bunting' ? 'bun' : (type === 'banner' ? 'banner' : type.substring(0,3)));
+      let el = document.getElementById(prefix+'_qty');
+      let qty = el ? parseInt(el.value) || 0 : 0;
+      let bDown = [];
+
+      if((type === 'lanyard' || type === 'cap') && qty > 0 && qty < 10) {
+        if(!window.simulatingPricing) showToast(`Minimum 10 pieces required for ${type}.`);
+        return {base:0, sur:0, breakdown: ["⚠️ Minimum 10 pieces required."], qty: qty};
+      }
+      if(qty === 0) return {base:0, sur:0, breakdown: [], qty: 0};
+
+      let unit = 0;
+      if (type === 'lanyard') {
+        if(qty>=20000) unit=3.5; else if(qty>=10000) unit=4; else if(qty>=1000) unit=5.5; else if(qty>=900) unit=5.7;
+        else if(qty>=800) unit=6; else if(qty>=700) unit=6.5; else if(qty>=600) unit=7; else if(qty>=500) unit=7.5;
+        else if(qty>=400) unit=8; else if(qty>=300) unit=8.5; else if(qty>=200) unit=9; else if(qty>=100) unit=10;
+        else if(qty>=80) unit=12; else if(qty>=50) unit=13; else if(qty>=40) unit=14; else if(qty>=30) unit=15;
+        else if(qty>=20) unit=16; else unit=19;
+      } else if (type === 'apron') {
+        let aType = document.getElementById('apr_type').value;
+        if(aType === 'basic') { if(qty<10) unit=20; else if(qty<20) unit=19; else if(qty<30) unit=17; else if(qty<=50) unit=15; else unit=13.5; } 
+        else { if(qty<10) unit=30; else if(qty<20) unit=25; else if(qty<30) unit=23; else if(qty<=50) unit=20; else unit=18.5; }
+      } else if (type === 'cap') {
+        let cType = document.getElementById('cap_type').value;
+        if(cType === 'dtf') { if(qty===10) unit=15; else if(qty<=20) unit=14.5; else if(qty<=30) unit=14; else if(qty<=50) unit=13.5; else if(qty<=100) unit=13; else unit=12; } 
+        else { if(qty===10) unit=22.5; else if(qty<=20) unit=19.6; else if(qty<=30) unit=17.8; else if(qty<=50) unit=16.9; else if(qty<=100) unit=15.7; else unit=14.9; }
+      } else if (type === 'bunting' || type === 'banner') {
+        let sizeVal = document.getElementById(prefix+'_size').value;
+        if (sizeVal === 'custom') {
+           let w = parseFloat(document.getElementById(prefix+'_w').value) || 0;
+           let h = parseFloat(document.getElementById(prefix+'_h').value) || 0;
+           let area = w * h;
+           if(area === 0) unit = 0; else unit = Math.max(23, (area * 2) + 3); 
+           bDown.push(`📐 Custom Size (${w}' x ${h}'): ${area} sqft`);
+        } else { unit = parseFloat(sizeVal); }
+      }
+
+      if(unit > 0) { bDown.push(`📦 Base Price: ${qty} pcs x RM${unit}`); }
+      return { base: qty * unit, sur: 0, breakdown: bDown, qty: qty };
+    }
+
+    // Calculates and displays the ACTIVE item currently being configured
+    function calculateCurrentItem() {
+      let res;
+      if(currentCategory === 'sublimation') res = calcSublimation();
+      else if(currentCategory === 'silkscreen') res = calcSilkscreen();
+      else if(currentCategory === 'dtf_shirt') res = calcDTF();
+      else res = calcSimple(currentCategory);
+
+      // We calculate the commission PER ITEM so it ties to this exact quote
+      let commType = document.getElementById('comm_type').value;
+      let commVal = parseFloat(document.getElementById('comm_value').value) || 0;
+      let commAmt = 0;
+      if (res.qty > 0 && commVal > 0) {
+          if (commType === 'per_item') commAmt = res.qty * commVal;
+          else if (commType === 'flat') commAmt = commVal;
+      }
+
+      // We fold the commission into the item's surcharge secretly
+      let displayedSurcharge = res.sur + commAmt;
+      let itemTotal = res.base + displayedSurcharge;
+
+      if(!window.simulatingPricing) {
+        document.getElementById('out_item_base').innerText = `RM ${res.base.toFixed(2)}`;
+        document.getElementById('out_item_sur').innerText = `RM ${displayedSurcharge.toFixed(2)}`;
+        document.getElementById('out_item_total').innerText = itemTotal.toFixed(2);
+        
+        // Staff-only view
+        document.getElementById('out_commission_val').innerText = `RM ${commAmt.toFixed(2)}`;
+        
+        let bdHtml = res.breakdown.length > 0 ? "<ul><li>" + res.breakdown.join("</li><li>") + "</li></ul>" : "<i style='color:var(--text-secondary);'>No configurations added yet.</i>";
+        document.getElementById('breakdown-list').innerHTML = bdHtml;
+      }
+
+      // Return a fully packaged item
+      return {
+          catId: currentCategory,
+          name: categoryNames[currentCategory],
+          base: res.base,
+          sur: displayedSurcharge, // This now secretly includes the commission!
+          total: itemTotal,
+          breakdown: res.breakdown,
+          qty: res.qty
+      };
+    }
+
+    // --- CART LOGIC ---
+    function addToCart() {
+        let item = calculateCurrentItem();
+        if(item.qty === 0) { showToast("Item quantity cannot be 0."); return; }
+
+        cart.push({
+            id: Date.now(),
+            ...item
+        });
+
+        renderCart();
+        resetItemForm(); // Clear the left panel
+        showToast("Added to Quote Cart!");
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(item => item.id !== id);
+        renderCart();
+    }
+
+    function clearCart() {
+        if(confirm("Clear all items from the quote?")) {
+            cart = [];
+            renderCart();
+        }
+    }
+
+    function renderCart() {
+        let container = document.getElementById('cart-items-container');
+        let html = '';
+        let totalQty = 0;
+
+        if (cart.length === 0) {
+            html = `<div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 16px 0; font-style: italic;">Cart is empty. Configure an item and click Add to Quote.</div>`;
+        } else {
+            cart.forEach((item, i) => {
+                totalQty += item.qty;
+                let breakdownHtml = item.breakdown.map(b => `<li style="margin-bottom:2px;">${b}</li>`).join('');
+                
+                html += `
+                <div class="cart-item">
+                    <div style="flex: 1; text-align: left;">
+                        <div class="cart-item-title">${i+1}. ${item.name} <span style="font-weight:normal; color:var(--text-secondary);">(Qty: ${item.qty})</span></div>
+                        <ul style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; padding-left: 16px; line-height: 1.4;">
+                            ${breakdownHtml}
+                        </ul>
+                    </div>
+                    <div style="text-align: right; padding-left: 12px; padding-right: 12px;">
+                        <div class="cart-item-price">RM ${item.total.toFixed(2)}</div>
+                    </div>
+                    <button class="btn-remove-cart" onclick="removeFromCart(${item.id})">✕</button>
+                </div>`;
+            });
+        }
+        
+        container.innerHTML = html;
+        calculateQuoteGlobals(totalQty);
+    }
+
+    function calculateQuoteGlobals(totalQty) {
+        let cartBase = 0;
+        let itemSurcharges = 0;
+        
+        cart.forEach(item => {
+            cartBase += item.base;
+            itemSurcharges += item.sur;
+        });
+
+        // Add Global Addons
+        let designFee = 0;
+        if(document.getElementById('custom_design_enabled').checked) {
+            designFee = parseFloat(document.getElementById('custom_design_amount').value) || 0;
+        }
+
+        let shippingFee = parseFloat(document.getElementById('shipping_fee').value) || 0;
+
+        let grossTotal = cartBase + itemSurcharges + designFee + shippingFee;
+
+        // Apply Discount
+        let dType = document.getElementById('discount_type').value;
+        let dVal = parseFloat(document.getElementById('discount_value').value) || 0;
+        let discountAmt = 0;
+        
+        if (grossTotal > 0 && dVal > 0) {
+            if (dType === 'percent') discountAmt = grossTotal * (dVal / 100);
+            else if (dType === 'fixed') discountAmt = dVal > grossTotal ? grossTotal : dVal;
+        }
+
+        let grandTotal = grossTotal - discountAmt;
+        let depositAmt = grandTotal * 0.70;
+        let balanceAmt = grandTotal - depositAmt;
+
+        // Update Cart UI
+        document.getElementById('out_cart_subtotal').innerText = `RM ${(cartBase + itemSurcharges).toFixed(2)}`;
+        
+        if(discountAmt > 0) { 
+            document.getElementById('row_out_discount').style.display = 'flex'; 
+            document.getElementById('out_cart_discount').innerText = `-RM ${discountAmt.toFixed(2)}`;
+        } else { 
+            document.getElementById('row_out_discount').style.display = 'none'; 
+        }
+        
+        document.getElementById('out_cart_grand').innerText = `RM ${grandTotal.toFixed(2)}`;
+        document.getElementById('out_cart_deposit').innerText = `RM ${depositAmt.toFixed(2)}`;
+        document.getElementById('out_cart_balance').innerText = `RM ${balanceAmt.toFixed(2)}`;
+
+        // Save state for Document Generation
+        window.quoteData = { cart: [...cart], cartSubtotal: (cartBase + itemSurcharges), discountAmt, shippingFee, designFee, grandTotal, depositAmt, balanceAmt };
+    }
+
+    // --- TIERS GENERATOR (Simulates Current Item) ---
+    function simulatePricing(targetQty) {
+      window.simulatingPricing = true;
+      let cat = currentCategory;
+      let prefix = cat === 'silkscreen' ? 'silk' : (cat === 'bunting' ? 'bun' : (cat === 'banner' ? 'banner' : cat.substring(0,3)));
+      let savedState = {};
+
+      if (cat === 'sublimation' || cat === 'silkscreen' || cat === 'dtf_shirt') {
+          shirtSizeConfig.forEach(s => {
+              let el = document.getElementById(`${prefix}_qty_${s.id}`);
+              savedState[s.id] = el.value;
+              el.value = (s.id === 'm') ? targetQty : 0; 
+          });
+      } else {
+          let el = document.getElementById(prefix + '_qty');
+          if(el) {
+            savedState['qty'] = el.value;
+            el.value = targetQty;
+          }
+      }
+
+      let res = calculateCurrentItem();
+
+      if (cat === 'sublimation' || cat === 'silkscreen' || cat === 'dtf_shirt') {
+          shirtSizeConfig.forEach(s => { document.getElementById(`${prefix}_qty_${s.id}`).value = savedState[s.id]; });
+      } else {
+          let el = document.getElementById(prefix + '_qty');
+          if(el) el.value = savedState['qty'];
+      }
+
+      window.simulatingPricing = false;
+      return { total: res.total, unit: res.total / targetQty };
+    }
+
+    function generatePriceTiers() {
+      let q1 = 30, q2 = 50, q3 = 100, q4 = 200;
+      let t1 = simulatePricing(q1);
+      let t2 = simulatePricing(q2);
+      let t3 = simulatePricing(q3);
+      let t4 = simulatePricing(q4);
+
+      calculateCurrentItem(); 
+
+      let tbody = document.getElementById('tier-tbody');
+      tbody.innerHTML = `
+        <tr><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">${q1} pcs</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">RM ${t1.unit.toFixed(2)}</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main); font-weight: bold;">RM ${t1.total.toFixed(2)}</td></tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">${q2} pcs</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">RM ${t2.unit.toFixed(2)}</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main); font-weight: bold;">RM ${t2.total.toFixed(2)}</td></tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">${q3} pcs</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">RM ${t3.unit.toFixed(2)}</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main); font-weight: bold;">RM ${t3.total.toFixed(2)}</td></tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">${q4} pcs</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main);">RM ${t4.unit.toFixed(2)}</td><td style="padding: 12px; border-bottom: 1px solid var(--border-main); font-weight: bold;">RM ${t4.total.toFixed(2)}</td></tr>
+      `;
+
+      document.getElementById('tier-modal').classList.add('show');
+    }
+    
+    function copyTiersToClipboard() {
+      let q1 = 30, q2 = 50, q3 = 100, q4 = 200;
+      let t1 = simulatePricing(q1);
+      let t2 = simulatePricing(q2);
+      let t3 = simulatePricing(q3);
+      let t4 = simulatePricing(q4);
+      calculateCurrentItem();
+
+      let text = `*Volume Pricing Estimate:*\n_(${categoryNames[currentCategory]})_\n\n`;
+      text += `• *${q1} pcs:* RM ${t1.unit.toFixed(2)} /pc (Total: RM ${t1.total.toFixed(2)})\n`;
+      text += `• *${q2} pcs:* RM ${t2.unit.toFixed(2)} /pc (Total: RM ${t2.total.toFixed(2)})\n`;
+      text += `• *${q3} pcs:* RM ${t3.unit.toFixed(2)} /pc (Total: RM ${t3.total.toFixed(2)})\n`;
+      text += `• *${q4} pcs:* RM ${t4.unit.toFixed(2)} /pc (Total: RM ${t4.total.toFixed(2)})\n`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Pricing tiers copied to clipboard!");
+        document.getElementById('tier-modal').classList.remove('show');
+      }).catch(err => {
+        showToast("Failed to copy. Try selecting manually.");
+      });
+    }
+
+    // --- FINALIZE QUOTE ---
+    function openFinalizeModal() {
+        if(!window.quoteData || window.quoteData.grandTotal === 0) { showToast("Add items to the quote cart first."); return; }
+        document.getElementById('finalize-modal').classList.add('show');
+    }
+
+    function prepareDocumentData() {
+        let q = window.quoteData;
+        let d = new Date();
+        
+        let dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        let validDate = new Date(d);
+        validDate.setDate(validDate.getDate() + 14);
+        let validStr = validDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        let refStr = `KS-Q-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*9000)+1000}`;
+
+        document.getElementById('pdf-ref').innerText = refStr;
+        document.getElementById('pdf-date').innerText = dateStr;
+        document.getElementById('pdf-valid').innerText = validStr;
+
+        document.getElementById('pdf-client-name').innerText = document.getElementById('client_name').value || 'Valued Customer';
+        document.getElementById('pdf-client-company').innerText = document.getElementById('client_company').value || '';
+
+        // Safely Build Cart HTML
+        let tbody = document.getElementById('pdf-tbody');
+        let html = '';
+        q.cart.forEach((item, i) => {
+            let detailString = item.breakdown.map(b => b.replace(/<\/?[^>]+(>|$)/g, "").replace('📦 ', '').replace('👕 ', '')).join('<br>');
+            html += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 10px; text-align: center; vertical-align: top;">${i+1}</td>
+                <td style="padding: 12px 10px; text-align: left;">
+                    <strong style="color: #1e3a5f;">${item.name}</strong><br>
+                    <span style="font-size: 11px; color: #555;">${detailString}</span>
+                </td>
+                <td style="padding: 12px 10px; text-align: center; vertical-align: top;">${item.qty}</td>
+                <td style="padding: 12px 10px; text-align: right; vertical-align: top; font-weight: bold;">RM ${item.total.toFixed(2)}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+
+        document.getElementById('pdf-subtotal').innerText = `RM ${q.cartSubtotal.toFixed(2)}`;
+        
+        if(q.designFee > 0) { document.getElementById('pdf-row-design').style.display = 'table-row'; document.getElementById('pdf-design').innerText = `RM ${q.designFee.toFixed(2)}`;
+        } else { document.getElementById('pdf-row-design').style.display = 'none'; }
+
+        if(q.shippingFee > 0) { document.getElementById('pdf-row-shipping').style.display = 'table-row'; document.getElementById('pdf-shipping').innerText = `RM ${q.shippingFee.toFixed(2)}`;
+        } else { document.getElementById('pdf-row-shipping').style.display = 'none'; }
+
+        if(q.discountAmt > 0) { document.getElementById('pdf-row-discount').style.display = 'table-row'; document.getElementById('pdf-discount').innerText = `-RM ${q.discountAmt.toFixed(2)}`;
+        } else { document.getElementById('pdf-row-discount').style.display = 'none'; }
+
+        document.getElementById('pdf-grand').innerText = `RM ${q.grandTotal.toFixed(2)}`;
+        document.getElementById('pdf-deposit').innerText = `RM ${q.depositAmt.toFixed(2)}`;
+        document.getElementById('pdf-balance').innerText = `RM ${q.balanceAmt.toFixed(2)}`;
+        
+        return refStr;
+    }
+
+    function previewCorporateDocument() {
+        prepareDocumentData();
+        const target = document.getElementById('print-quote-document');
+        target.style.left = '0';
+        target.style.zIndex = '-1000';
+        
+        setTimeout(() => {
+            html2canvas(target, { scale: 1.5, useCORS: true, logging: false }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                document.getElementById('preview-img').src = imgData;
+                document.getElementById('preview-modal').classList.add('show');
+                target.style.left = '-9999px';
+            });
+        }, 100);
+    }
+    
+    function closePreviewModal() {
+        document.getElementById('preview-modal').classList.remove('show');
+    }
+
+    function generateCorporatePDF() {
+        let refStr = prepareDocumentData();
+        const target = document.getElementById('print-quote-document');
+        target.style.left = '0';
+        target.style.zIndex = '-1000';
+        
+        setTimeout(() => {
+            html2canvas(target, { scale: 2, useCORS: true, logging: false }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const { jsPDF } = window.jspdf;
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`Quotation_${refStr}.pdf`);
+                
+                target.style.left = '-9999px';
+                document.getElementById('finalize-modal').classList.remove('show');
+                showToast("Official PDF Downloaded!");
+            }).catch(err => {
+                target.style.left = '-9999px';
+                showToast("Failed to generate PDF.");
+            });
+        }, 100);
+    }
+
+    function generateCorporatePNG() {
+        let refStr = prepareDocumentData();
+        const target = document.getElementById('print-quote-document');
+        target.style.left = '0';
+        target.style.zIndex = '-1000';
+        
+        setTimeout(() => {
+            html2canvas(target, { scale: 2, useCORS: true, logging: false }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                let link = document.createElement('a');
+                link.download = `Quotation_${refStr}.png`;
+                link.href = imgData;
+                link.click();
+                
+                target.style.left = '-9999px';
+                document.getElementById('finalize-modal').classList.remove('show');
+                showToast("Image Downloaded!");
+            });
+        }, 100);
+    }
+
+    function sendWhatsApp() {
+      let client = document.getElementById('client_name').value || 'Customer';
+      let company = document.getElementById('client_company').value;
+      let countryCode = document.getElementById('wa_country_code').value;
+      let rawNumber = document.getElementById('wa_target_number').value;
+      let cleanNumber = rawNumber.replace(/\D/g, ''); 
+      if (cleanNumber.startsWith('0')) cleanNumber = cleanNumber.substring(1);
+      
+      if(!cleanNumber) { showToast("Please enter a WhatsApp number."); return; }
+
+      let q = window.quoteData;
+      let msg = `*OFFICIAL QUOTATION*\n*KidzStudios*\n\n`;
+      msg += `*To:* ${client} ${company ? `(${company})` : ''}\n\n`;
+      
+      msg += `*ORDER ITEMS:*\n`;
+      q.cart.forEach((item, i) => {
+          msg += `*${i+1}. ${item.name} (Qty: ${item.qty})*\n`;
+          item.breakdown.forEach(b => { msg += ` - ${b.replace(/<\/?[^>]+(>|$)/g, "")}\n`; });
+          msg += ` _Item Total: RM ${item.total.toFixed(2)}_\n\n`;
+      });
+      
+      msg += `*SUMMARY:*\n`;
+      msg += `Items Subtotal: RM ${q.cartSubtotal.toFixed(2)}\n`;
+      
+      if(q.designFee > 0) msg += `Design Fee: RM ${q.designFee.toFixed(2)}\n`;
+      if(q.shippingFee > 0) msg += `Shipping: RM ${q.shippingFee.toFixed(2)}\n`;
+      if(q.discountAmt > 0) msg += `Discount: -RM ${q.discountAmt.toFixed(2)}\n`;
+      
+      msg += `\n*GRAND TOTAL: RM ${q.grandTotal.toFixed(2)}*\n`;
+      msg += `_70% Deposit Required: RM ${q.depositAmt.toFixed(2)}_\n`;
+      msg += `_Balance on Completion: RM ${q.balanceAmt.toFixed(2)}_\n\n`;
+      msg += `Thank you! Please let us know if you have any questions.`;
+      
+      window.open(`https://api.whatsapp.com/send?phone=${countryCode}${cleanNumber}&text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('input', function(e) { 
+        if(e.target.classList.contains('calc-trigger')) calculateCurrentItem(); 
+        if(e.target.classList.contains('calc-global')) renderCart();
+    });
+    
+    // Init
+    calculateCurrentItem();
+    renderCart();
+
+  </script>
+
+<script id="ks-upgrade-v2-js">
+(() => {
+  'use strict';
+
+  // Make accidental form submissions less likely in tool-style UIs.
+  document.querySelectorAll('button:not([type])').forEach(btn => btn.setAttribute('type','button'));
+
+  // Keyboard shortcut: Alt/Option + P = Portal.
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey && event.key.toLowerCase() === 'p') {
+      event.preventDefault();
+      if (!document.body || document.body.dataset.ksPage === 'index') return;
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Compact back-to-top utility on long pages.
+  if (document.body && document.body.dataset.ksPage !== 'index') {
+    const topBtn = document.createElement('button');
+    topBtn.type = 'button';
+    topBtn.className = 'ks-scroll-top no-print';
+    topBtn.setAttribute('aria-label','Back to top');
+    topBtn.setAttribute('title','Back to top');
+    topBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>';
+    topBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+    document.body.appendChild(topBtn);
+
+    const syncTopButton = () => {
+      topBtn.classList.toggle('ks-show', window.scrollY > 520);
+    };
+    window.addEventListener('scroll', syncTopButton, { passive:true });
+    syncTopButton();
+  }
+
+  // Better semantics for clickable non-button upload zones.
+  document.querySelectorAll('[onclick*="Upload"], .design-area, .header-logo-area').forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
+    if (!el.hasAttribute('role')) el.setAttribute('role','button');
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+  });
+  // Self-contained fallback for the legacy Job Sheet logo asset.
+  const legacyLogo = document.getElementById('logoImg');
+  if (legacyLogo) {
+    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="72" viewBox="0 0 280 72">
+      <rect width="280" height="72" rx="10" fill="#0b0d12"/>
+      <text x="18" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ff7a00">KIDZ</text>
+      <text x="94" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ffffff">STUDIOS</text>
+      <rect x="93" y="51" width="137" height="4" rx="2" fill="#ff7a00"/>
+      <text x="188" y="65" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="700" fill="#ffffff">SINCE 2013</text>
+    </svg>`;
+    const fallbackSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fallbackSvg);
+    const applyLegacyFallback = () => {
+      legacyLogo.onerror = null;
+      legacyLogo.src = fallbackSrc;
+    };
+    legacyLogo.addEventListener('error', applyLegacyFallback);
+    if (legacyLogo.complete && legacyLogo.naturalWidth === 0) applyLegacyFallback();
+  }
+
+})();
+</script>
+
+<script src="netlify-sync.js" defer></script>
+
+<footer class="ks-version-footer no-print" aria-label="Build version">v48</footer>
+<script src="suite-header.js" defer></script>
+</body>
+</html>

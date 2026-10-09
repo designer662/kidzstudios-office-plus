@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="description" content="KidzStudios internal operations tool.">
+
+    <title>Markup & Margin Calculator | KidzStudios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Glass Header (matching orderform.html) --- */
+        .glass-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            padding: 0 32px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+        .brand-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .back-link:hover {
+            color: #3b82f6;
+            transform: translateX(-4px);
+        }
+        @media (max-width: 768px) {
+            .glass-header { padding: 0 20px; }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+        .calculator-container {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            max-width: 1180px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .calculator-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 36px 32px 32px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(224, 224, 230, 0.7);
+            flex: 1;
+            min-width: 300px;
+        }
+        .card-header { text-align: center; margin-bottom: 20px; }
+        .card-header .icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(10, 132, 255, 0.1);
+            margin-bottom: 12px;
+            color: #0A84FF;
+        }
+        .card-header h1 { font-size: 1.6rem; font-weight: 700; }
+        .card-header .subtitle { font-size: 0.9rem; color: #8E8E93; margin-top: 4px; }
+
+        .mode-toggle {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #E5E5EA;
+            border-radius: 14px;
+            background: #F2F2F7;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #8E8E93;
+        }
+        .mode-btn.active {
+            background: #0A84FF;
+            color: #FFF;
+            border-color: #0A84FF;
+        }
+        .sub-mode-toggle {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0 20px;
+            background: #F2F2F7;
+            padding: 6px;
+            border-radius: 20px;
+        }
+        .sub-mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 14px;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #8E8E93;
+        }
+        .sub-mode-btn.active {
+            background: #0A84FF;
+            color: white;
+        }
+        .markup-section, .margin-section { display: none; }
+        .markup-section.visible, .margin-section.visible { display: block; }
+        .input-group { margin-bottom: 18px; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: #8E8E93; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+        .optional-badge { font-size: 0.7rem; font-weight: 500; color: #8E8E93; background: #F2F2F7; padding: 2px 8px; border-radius: 20px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .currency-symbol, .percent-symbol { position: absolute; font-weight: 600; color: #8E8E93; pointer-events: none; }
+        .currency-symbol { left: 14px; font-size: 0.95rem; }
+        .percent-symbol { right: 14px; font-size: 0.95rem; }
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-family: monospace;
+            font-weight: 500;
+            background: #F9F9FB;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            outline: none;
+        }
+        .input-wrapper input.currency-input { padding-left: 40px; }
+        .input-wrapper input.percent-input { padding-right: 38px; }
+        .input-wrapper input:focus { border-color: #0A84FF; background: #FFF; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15); }
+        .results-section {
+            background: #F2F8FF;
+            border: 1px solid #D1E4FF;
+            border-radius: 20px;
+            padding: 20px 18px;
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .result-item { text-align: center; }
+        .result-item .result-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #8E8E93; margin-bottom: 6px; }
+        .result-item .result-value { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+        .result-item.highlight .result-value { color: #0A84FF; font-size: 1.25rem; }
+        .profit-detail {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .profit-detail.positive { background: #EDFFF5; border: 1px solid #C6F6D5; color: #2F855A; }
+        .profit-detail.negative { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; }
+        .profit-detail.neutral { background: #F7F7FA; border: 1px solid #E5E5EA; color: #8E8E93; }
+        .profit-detail .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .profit-detail.positive .dot { background: #2F855A; }
+        .profit-detail.negative .dot { background: #C53030; }
+        .profit-detail.neutral .dot { background: #A0AEC0; }
+
+        /* Job Profit Calculator Enhancements */
+        #markupCard { flex: 1.35; }
+        .calculator-card.basic-card { flex: 0.8; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .field-grid .input-group { margin-bottom: 14px; }
+        .section-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 22px 0 12px;
+            padding-top: 18px;
+            border-top: 1px solid #E5E5EA;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: #636366;
+        }
+        .section-label:first-of-type { margin-top: 6px; padding-top: 0; border-top: none; }
+        .helper-text { font-size: 0.72rem; color: #8E8E93; line-height: 1.45; margin-top: 6px; }
+        .quick-presets { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+        .preset-btn, .delivery-mode-btn, .round-btn {
+            border: 1px solid #D1D1D6;
+            background: #FFF;
+            color: #3A3A3C;
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s ease;
+        }
+        .preset-btn:hover, .delivery-mode-btn:hover, .round-btn:hover { border-color: #0A84FF; color: #0A84FF; }
+        .delivery-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 8px; }
+        .delivery-mode-btn.active { background: #0A84FF; color: #FFF; border-color: #0A84FF; }
+        .extra-costs {
+            background: #F9F9FB;
+            border: 1px solid #E5E5EA;
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .extra-costs .input-group:last-child { margin-bottom: 0; }
+        .pricing-mode-toggle {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+            margin: 10px 0 16px;
+            background: #F2F2F7;
+            padding: 6px;
+            border-radius: 16px;
+        }
+        .pricing-mode-btn {
+            padding: 9px 7px;
+            border: none;
+            border-radius: 11px;
+            background: transparent;
+            color: #8E8E93;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .pricing-mode-btn.active { background: #0A84FF; color: #FFF; box-shadow: 0 3px 8px rgba(10,132,255,.2); }
+        .rounding-panel {
+            margin-top: 14px;
+            padding: 12px;
+            border: 1px dashed #C7C7CC;
+            border-radius: 14px;
+            background: #FCFCFE;
+        }
+        .rounding-title { font-size: 0.75rem; font-weight: 800; color: #636366; margin-bottom: 8px; }
+        .rounding-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+        .round-btn { padding: 9px 7px; }
+        .round-btn strong { display: block; font-size: 0.82rem; color: inherit; }
+        .round-btn span { display: block; font-size: 0.65rem; opacity: .68; margin-top: 2px; }
+        .override-note { margin-top: 8px; font-size: 0.7rem; color: #0A84FF; font-weight: 700; display: none; }
+        .job-dashboard {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .metric-card {
+            padding: 16px;
+            border-radius: 16px;
+            background: #F7F7FA;
+            border: 1px solid #E5E5EA;
+            min-width: 0;
+        }
+        .metric-card.income { background: #F2F8FF; border-color: #D1E4FF; }
+        .metric-card.cost { background: #FFF9EE; border-color: #FFE2A8; }
+        .metric-card.profit { background: #EDFFF5; border-color: #C6F6D5; }
+        .metric-card.selling { background: #F5F2FF; border-color: #DDD2FF; }
+        .metric-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .55px; color: #8E8E93; margin-bottom: 7px; }
+        .metric-value { font-family: monospace; font-size: 1.28rem; font-weight: 800; color: #1C1C1E; word-break: break-word; }
+        .metric-card.profit .metric-value { color: #248A3D; font-size: 1.45rem; }
+        .metric-sub { margin-top: 6px; color: #8E8E93; font-size: 0.69rem; line-height: 1.4; }
+        .order-summary {
+            margin-top: 14px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid #D1E4FF;
+            background: #FFF;
+        }
+        .order-summary-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px 15px;
+            background: linear-gradient(135deg, #0A84FF, #0066CC);
+            color: #FFF;
+            font-size: .78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .55px;
+        }
+        .order-summary-body { padding: 10px 15px; }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 0;
+            border-bottom: 1px solid #F0F0F2;
+            font-size: .79rem;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row span:first-child { color: #8E8E93; }
+        .summary-row strong { text-align: right; color: #1C1C1E; font-family: monospace; }
+        .margin-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 92px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 800;
+        }
+        .margin-badge.loss { background: #FFF0F0; color: #C53030; }
+        .margin-badge.low { background: #FFF5E8; color: #A45A00; }
+        .margin-badge.moderate { background: #FFFBEA; color: #8A6D00; }
+        .margin-badge.healthy { background: #EDFFF5; color: #2F855A; }
+        .margin-badge.neutral { background: #F2F2F7; color: #636366; }
+        .profit-detail.low { background: #FFF5E8; border: 1px solid #FFD7A3; color: #A45A00; }
+        .profit-detail.moderate { background: #FFFBEA; border: 1px solid #F4E39C; color: #7D6700; }
+        .profit-detail.healthy { background: #EDFFF5; border: 1px solid #C6F6D5; color: #2F855A; }
+        .profit-detail.low .dot { background: #FF9F0A; }
+        .profit-detail.moderate .dot { background: #FFD60A; }
+        .profit-detail.healthy .dot { background: #34C759; }
+        @media (max-width: 560px) {
+            .field-grid, .job-dashboard { grid-template-columns: 1fr; }
+            .pricing-mode-toggle { grid-template-columns: 1fr; }
+            .rounding-actions { grid-template-columns: 1fr; }
+            .order-summary-head { flex-direction: column; gap: 5px; }
+        }
+        .button-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+        .btn-reset { background: #F2F2F7; color: #1C1C1E; }
+        .btn-reset:hover { background: #E5E5EA; }
+        .btn-copy { background: #0A84FF; color: #FFF; box-shadow: 0 2px 8px rgba(10, 132, 255, 0.25); }
+        .btn-copy:hover { background: #0077ED; }
+
+        /* Basic Calculator Card */
+        .basic-calc-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; }
+        .basic-calc-header h2 { font-size: 1.3rem; font-weight: 700; }
+        .calculator-display {
+            background: #F9F9FB;
+            border: 2px solid #E5E5EA;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-family: monospace;
+            min-height: 80px;
+        }
+        .expression-line { font-size: 1rem; color: #8E8E93; min-height: 1.2em; word-break: break-all; }
+        .result-number { font-size: 2rem; font-weight: 500; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .calc-btn {
+            aspect-ratio: 1/1;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #F2F2F7;
+            transition: 0.1s;
+        }
+        .calc-btn:active { transform: scale(0.96); }
+        .calc-btn.operator { background: #FF9F0A; color: #FFF; }
+        .calc-btn.equals { background: #0A84FF; color: #FFF; }
+        .calc-btn.clear { background: #FF3B30; color: #FFF; }
+        .calc-btn.backspace { background: #D1D1D6; }
+        .calc-btn.zero { grid-column: span 2; aspect-ratio: auto; padding: 16px; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1C1C1E;
+            color: #FFF;
+            padding: 10px 22px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: 0.35s;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @media (max-width: 800px) { .calculator-container { flex-direction: column; max-width: 500px; } }
+    </style>
+
+<style id="ks-upgrade-v2">
+/* =========================================================
+   KIDZSTUDIOS OPS SUITE · UI UPGRADE V2
+   Additive layer: keeps original business logic intact.
+   ========================================================= */
+:root{
+  --ks-orange:#ff7a00;
+  --ks-orange-2:#ff9f2f;
+  --ks-ink:#0b0d12;
+  --ks-ink-2:#151924;
+  --ks-white:#ffffff;
+  --ks-slate:#64748b;
+  --ks-ring:rgba(255,122,0,.24);
+  --ks-shadow:0 22px 70px rgba(15,23,42,.13);
+  --ks-shadow-soft:0 12px 38px rgba(15,23,42,.09);
+}
+html{scroll-behavior:smooth;}
+::selection{background:rgba(255,122,0,.22);color:inherit;}
+body[data-ks-ui="v2"]{
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]){
+  background:
+    radial-gradient(900px 460px at -10% -10%, rgba(255,122,0,.11), transparent 65%),
+    radial-gradient(760px 420px at 110% 8%, rgba(59,130,246,.10), transparent 66%),
+    linear-gradient(180deg,#f8fafc 0%,#f3f5f9 100%) !important;
+}
+
+/* Unified product header */
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .glass-header{
+  height:68px !important;
+  padding:0 clamp(16px,3vw,36px) !important;
+  background:rgba(8,10,16,.88) !important;
+  border-bottom:1px solid rgba(255,255,255,.09) !important;
+  box-shadow:0 12px 35px rgba(2,6,23,.16) !important;
+  backdrop-filter:blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(150%) !important;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .brand-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  color:#fff !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+  white-space:nowrap;
+}
+.ks-brand-lockup{display:inline-flex;align-items:baseline;gap:0;font-weight:900;font-style:italic;letter-spacing:-.7px;}
+.ks-brand-lockup .ks-kidz{color:var(--ks-orange);}
+.ks-brand-lockup .ks-studios{color:#fff;margin-left:3px;}
+.ks-suite-label{
+  font-size:10px;
+  line-height:1;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  font-style:normal;
+  font-weight:800;
+  color:#94a3b8;
+  padding-left:10px;
+  border-left:1px solid rgba(255,255,255,.16);
+}
+.ks-tool-id{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:42vw;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.35px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);
+  padding:7px 12px;
+  border-radius:999px;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link{
+  color:#e2e8f0 !important;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  padding:9px 13px;
+  line-height:1;
+}
+body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link:hover{
+  color:#fff !important;
+  background:rgba(255,122,0,.15);
+  border-color:rgba(255,122,0,.38);
+  transform:translateX(-2px) !important;
+}
+
+/* Universal interaction quality */
+body[data-ks-ui="v2"] button,
+body[data-ks-ui="v2"] a,
+body[data-ks-ui="v2"] input,
+body[data-ks-ui="v2"] select,
+body[data-ks-ui="v2"] textarea,
+body[data-ks-ui="v2"] [contenteditable="true"]{
+  -webkit-tap-highlight-color:transparent;
+}
+body[data-ks-ui="v2"] :where(button,a,input,select,textarea,[contenteditable="true"]):focus-visible{
+  outline:3px solid var(--ks-ring) !important;
+  outline-offset:2px !important;
+}
+body[data-ks-ui="v2"] :where(input,select,textarea,[contenteditable="true"]){
+  transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+body[data-ks-ui="v2"] :where(input,select,textarea,[contenteditable="true"]):focus{
+  box-shadow:0 0 0 4px var(--ks-ring) !important;
+}
+body[data-ks-ui="v2"] button:disabled{
+  cursor:not-allowed !important;
+  opacity:.52 !important;
+}
+body[data-ks-ui="v2"] img{max-width:100%;}
+body[data-ks-ui="v2"] *{scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar{width:8px;height:8px;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-track{background:transparent;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px;}
+body[data-ks-ui="v2"] *::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+
+/* Page surface polish */
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box,
+body[data-ks-page="commission"] .commission-form,
+body[data-ks-page="file-generator"] .container,
+body[data-ks-page="simple-markup-calculator"] .calculator-card,
+body[data-ks-page="compress"] .section-panel,
+body[data-ks-page="orderform"] .action-column,
+body[data-ks-page="orderform2"] .action-column{
+  border-color:rgba(148,163,184,.22) !important;
+  box-shadow:var(--ks-shadow-soft) !important;
+}
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box{
+  border-radius:26px !important;
+}
+body[data-ks-page="commission"] .commission-form{
+  border:1px solid rgba(148,163,184,.2);
+  box-shadow:var(--ks-shadow) !important;
+}
+body[data-ks-page="file-generator"] .container{
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 25px 70px rgba(2,6,23,.25) !important;
+}
+body[data-ks-page="compress"] .tab-card{
+  border-color:rgba(148,163,184,.26) !important;
+  box-shadow:0 5px 18px rgba(15,23,42,.05) !important;
+}
+body[data-ks-page="compress"] .tab-card:hover{
+  transform:translateY(-2px);
+}
+body[data-ks-page="simple-markup-calculator"] .calculator-card{
+  box-shadow:var(--ks-shadow) !important;
+}
+
+/* Order form: preserve A4 sheet, improve shell only */
+body[data-ks-page="orderform"] .a4-sheet,
+body[data-ks-page="orderform2"] .a4-sheet{
+  box-shadow:0 28px 80px rgba(15,23,42,.16) !important;
+}
+body[data-ks-page="orderform"] .action-column,
+body[data-ks-page="orderform2"] .action-column{
+  background:rgba(255,255,255,.88) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+/* Premium accent on primary actions, without changing semantic warning/success colors */
+body[data-ks-page="file-generator"] .btn-generate{
+  background:linear-gradient(135deg,var(--ks-orange),#f97316) !important;
+  box-shadow:0 10px 30px rgba(249,115,22,.26) !important;
+}
+body[data-ks-page="file-generator"] .btn-generate:hover{
+  box-shadow:0 14px 36px rgba(249,115,22,.34) !important;
+}
+body[data-ks-page="calculator"] .category-card.active{
+  border-color:var(--ks-orange) !important;
+  background:rgba(255,122,0,.08) !important;
+}
+body[data-ks-page="calculator"] .category-card.active .cat-icon,
+body[data-ks-page="calculator"] .category-card.active .cat-name{
+  color:var(--ks-orange) !important;
+}
+
+/* Floating utility: only appears after scroll */
+.ks-scroll-top{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:9997;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(10,12,18,.88);
+  color:#fff;
+  box-shadow:0 12px 30px rgba(2,6,23,.24);
+  cursor:pointer;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(8px);
+  transition:.2s ease;
+  backdrop-filter:blur(12px);
+}
+.ks-scroll-top.ks-show{opacity:1;pointer-events:auto;transform:translateY(0);}
+.ks-scroll-top:hover{background:var(--ks-orange);}
+
+/* Index portal additions */
+body[data-ks-page="index"] .dashboard-nav{
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+}
+body[data-ks-page="index"] .brand-group span{
+  letter-spacing:-.4px;
+}
+.ks-index-status{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#cbd5e1;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.ks-index-status .ks-live-dot{
+  width:7px;height:7px;border-radius:999px;background:#22c55e;
+  box-shadow:0 0 0 5px rgba(34,197,94,.09),0 0 18px rgba(34,197,94,.45);
+}
+body[data-ks-page="index"] .bento-card{
+  isolation:isolate;
+}
+body[data-ks-page="index"] .bento-card:hover{
+  border-color:rgba(255,122,0,.28) !important;
+  box-shadow:0 28px 70px rgba(0,0,0,.28),0 0 0 1px rgba(255,122,0,.05) inset;
+}
+body[data-ks-page="index"] .bento-card .arrow-icon{
+  transition:transform .25s ease,color .25s ease;
+}
+body[data-ks-page="index"] .bento-card:hover .arrow-icon{
+  transform:translate(3px,-3px);
+  color:var(--ks-orange);
+}
+
+/* Mobile and tablet */
+@media (max-width:900px){
+  .ks-tool-id{display:none;}
+}
+@media (max-width:768px){
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .glass-header{
+    height:62px !important;
+    padding:0 12px !important;
+  }
+  .ks-suite-label{display:none;}
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link{
+    font-size:12px !important;
+    padding:8px 10px;
+  }
+  body[data-ks-ui="v2"] input,
+  body[data-ks-ui="v2"] select,
+  body[data-ks-ui="v2"] textarea{
+    font-size:16px; /* prevents accidental mobile zoom */
+  }
+  .ks-index-status{display:none;}
+}
+@media (max-width:480px){
+  .ks-brand-lockup{font-size:13px;}
+  body[data-ks-ui="v2"]:not([data-ks-page="index"]) .back-link svg{width:15px;height:15px;}
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  body[data-ks-ui="v2"] *,body[data-ks-ui="v2"] *::before,body[data-ks-ui="v2"] *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
+
+/* Print must stay clean and predictable */
+@media print{
+  .ks-scroll-top,.ks-tool-id,.ks-index-status{display:none !important;}
+  body[data-ks-ui="v2"]{background:#fff !important;}
+}
+</style>
+
+
+<style id="ks-office-unified-v12">
+:root{--kso-orange:#ef7b45;--kso-orange-2:#ff9864;--kso-text:#2f3336;--kso-muted:#73787d;--kso-bg:#f7f7f5;--kso-line:rgba(43,47,50,.09);--kso-ease:cubic-bezier(.2,.75,.22,1)}
+.ks-office-shell{position:sticky;top:0;z-index:9998;padding:14px 18px 7px;background:linear-gradient(180deg,rgba(247,247,245,.96),rgba(247,247,245,.80) 72%,transparent);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.ks-office-topbar{max-width:1500px;margin:0 auto;min-height:64px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.84);border:1px solid var(--kso-line);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.065);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-office-brand{display:flex;align-items:center;gap:9px;color:var(--kso-text);text-decoration:none;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap}
+.ks-office-nav{display:flex;align-items:center;gap:7px;overflow:auto;scrollbar-width:none;padding:2px 1px}.ks-office-nav::-webkit-scrollbar{display:none}
+.ks-office-nav-btn{flex:0 0 auto;height:38px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid rgba(45,48,50,.07);background:rgba(247,247,245,.76);color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s var(--kso-ease),background .22s var(--kso-ease),border-color .22s var(--kso-ease),color .22s var(--kso-ease),box-shadow .22s var(--kso-ease)}
+.ks-office-nav-btn:hover,.ks-office-nav-btn.active{background:rgba(239,123,69,.10);border-color:rgba(239,123,69,.22);color:#d9632f;box-shadow:0 6px 16px rgba(239,123,69,.08);transform:translateY(-1px)}
+.ks-office-nav-icon{width:21px;height:21px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(45,48,50,.06);font-size:11px;font-weight:850;color:#5b6166}.ks-office-nav-btn.active .ks-office-nav-icon,.ks-office-nav-btn:hover .ks-office-nav-icon{color:#d9632f;background:#fff6f1}.ks-office-nav-icon-text{font-size:7px;letter-spacing:-.04em}
+.ks-office-home{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--kso-line);border-radius:12px;background:#fff;color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;transition:.2s var(--kso-ease)}.ks-office-home:hover{color:var(--kso-text);transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-office-page-title{max-width:1500px;margin:4px auto 0;padding:0 17px;color:#8b9094;font-size:9px;font-weight:720;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body{animation:ksoPageIn .38s var(--kso-ease) both}
+@keyframes ksoPageIn{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:1180px){.ks-office-topbar{grid-template-columns:auto auto}.ks-office-nav{grid-column:1/-1;grid-row:2}.ks-office-home{grid-column:2;grid-row:1;justify-self:end}}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px}.ks-office-topbar{border-radius:18px;padding:8px;gap:7px}.ks-office-brand-name{display:none}.ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}.ks-office-nav-icon{width:18px;height:18px;border-radius:6px}.ks-office-home{width:36px;height:36px;padding:0;justify-content:center}.ks-office-home-text{display:none}.ks-office-page-title{padding:0 10px;font-size:8px}}
+@media print{.ks-office-shell{display:none!important}}
+@media(prefers-reduced-motion:reduce){body{animation:none}.ks-office-nav-btn,.ks-office-home{transition:none}}
+</style>
+
+
+<style id="ks-office-nav-v14-unified">
+/* Unified centered eight-tool header across the Kidzstudios Office suite */
+.ks-office-nav{justify-content:center;gap:4px;min-width:0}
+.ks-office-nav-btn{height:36px;font-size:9.1px;padding:0 8px;gap:5px}
+.ks-office-nav-icon{width:19px;height:19px;font-size:9px}
+@media (min-width:1181px) and (max-width:1560px){
+  .ks-office-topbar{gap:8px;padding-left:12px;padding-right:10px}
+  .ks-office-nav{gap:3px}
+  .ks-office-nav-btn{font-size:8.55px;padding:0 7px;gap:4px}
+  .ks-office-nav-icon{width:18px;height:18px;font-size:8px}
+  .ks-office-brand{font-size:12.5px}
+  .ks-office-home{padding:0 10px}
+}
+@media (max-width:1180px){.ks-office-nav{justify-content:center}}
+@media (max-width:720px){
+  .ks-office-nav{justify-content:flex-start;gap:4px}
+  .ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}
+  .ks-office-nav-icon{width:18px;height:18px}
+}
+</style>
+<style>
+/* Netlify shared state status */
+.ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:9px;padding:6px 8px}}
+</style>
+
+<style id="ks-version-footer-style">
+.ks-version-footer{position:fixed;left:14px;bottom:10px;z-index:9998;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(29,32,34,.09);box-shadow:0 5px 15px rgba(25,28,30,.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#8b9095;font:750 9px/1 Inter,Arial,sans-serif;letter-spacing:.04em;pointer-events:none}
+@media(max-width:650px){.ks-version-footer{left:8px;bottom:5px;font-size:8px;padding:4px 6px}}
+@media print{.ks-version-footer{display:none!important}}
+</style>
+
+<style id="ks-v28-tool-ux">
+/* V26 tool-page usability polish */
+.ks-office-home{min-height:38px}
+.ks-office-nav-btn{min-height:38px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable="true"]:focus-visible{outline:2px solid rgba(239,123,69,.5)!important;outline-offset:2px!important}
+@media(min-width:1200px){.ks-office-nav-btn{height:38px!important;font-size:9.35px!important;padding-left:8px!important;padding-right:8px!important}}
+@media(max-width:720px){.ks-office-nav{scroll-padding-inline:8px}.ks-office-nav-btn{min-height:36px}}
+</style>
+
+<style id="ks-v28-main-theme">
+:root{--ks25-bg:#f7f7f5;--ks25-card:rgba(255,255,255,.92);--ks25-text:#1d2022;--ks25-muted:#767b80;--ks25-line:rgba(29,32,34,.09);--ks25-orange:#ef7b45;--ks25-soft:#fff0e8;--ks25-shadow:0 16px 44px rgba(32,35,38,.08)}
+html{background:var(--ks25-bg)}
+body{background:radial-gradient(circle at 50% 0,rgba(255,255,255,.96),transparent 30%),linear-gradient(180deg,#fbfbfa,var(--ks25-bg))!important;color:var(--ks25-text)!important}
+.ks-office-shell{padding:14px 18px 8px!important;background:transparent!important;box-shadow:none!important;border:0!important}
+.ks-office-topbar{max-width:1500px!important;margin:0 auto!important;min-height:62px!important;padding:9px 11px 9px 14px!important;border:1px solid var(--ks25-line)!important;border-radius:22px!important;background:var(--ks25-card)!important;box-shadow:0 12px 36px rgba(30,33,35,.055)!important;backdrop-filter:blur(18px) saturate(125%)!important}
+.ks-office-brand,.ks-office-brand-name{color:var(--ks25-text)!important;text-decoration:none!important;font-weight:760!important}
+.ks-office-nav-btn{border:1px solid transparent!important;background:transparent!important;color:var(--ks25-muted)!important;border-radius:999px!important;box-shadow:none!important}
+.ks-office-nav-btn:hover{background:var(--ks25-bg)!important;color:var(--ks25-text)!important;border-color:var(--ks25-line)!important}
+.ks-office-nav-btn.active{background:var(--ks25-orange)!important;color:#fff!important;border-color:var(--ks25-orange)!important;box-shadow:0 7px 18px rgba(239,123,69,.22)!important}
+.ks-office-nav-icon{background:var(--ks25-soft)!important;color:#e7662c!important}
+.ks-office-nav-btn.active .ks-office-nav-icon{background:rgba(255,255,255,.2)!important;color:#fff!important}
+.ks-office-home{background:#fff!important;color:var(--ks25-muted)!important;border:1px solid var(--ks25-line)!important;border-radius:12px!important}
+.ks-office-page-title{color:var(--ks25-muted)!important;font-weight:700!important}
+body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,.section-panel,.action-column){border-color:var(--ks25-line)!important;box-shadow:var(--ks25-shadow)!important}
+.ks-version-footer{background:rgba(255,255,255,.86)!important}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px!important}.ks-office-topbar{border-radius:18px!important}}
+</style>
+<style id="ks-v34-master-header">
+/* Master header copied from the approved Index reference. */
+.ks-master-header{padding:16px 20px 9px;position:relative;z-index:110;background:transparent!important;border:0!important;box-shadow:none!important;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif}
+.ks-master-header *{box-sizing:border-box}
+.ks-master-header .topbar{max-width:1500px;margin:auto;min-height:64px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.92);border:1px solid rgba(29,32,34,.08);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.055);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-master-header .brand{display:flex;align-items:center;gap:9px;color:#1d2022;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap;cursor:pointer;user-select:none}
+.ks-master-header .tool-nav{display:flex;align-items:center;justify-content:center;gap:7px;overflow:auto;scrollbar-width:none;min-width:0;padding:2px}
+.ks-master-header .tool-nav::-webkit-scrollbar{display:none}
+.ks-master-header .tool-nav-btn{flex:0 0 auto;height:40px;display:flex;align-items:center;gap:7px;padding:0 12px;border-radius:999px;border:1px solid rgba(29,32,34,.08);background:rgba(255,255,255,.82);color:#767b80;text-decoration:none;font-size:10.2px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s cubic-bezier(.22,1,.36,1),background .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+.ks-master-header .tool-nav-btn:hover,.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:#fff0e8;border-color:rgba(239,123,69,.24);color:#e7662c;box-shadow:0 8px 18px rgba(239,123,69,.10);transform:translateY(-1px)}
+.ks-master-header .nav-tool-icon{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto;background:rgba(239,123,69,.10);color:#e7662c;font-size:11px;font-weight:900;line-height:1}
+.ks-master-header .nav-tool-icon-text{font-size:8.5px;letter-spacing:-.04em}
+.ks-master-header .header-tools{display:flex;gap:8px;align-items:center;justify-self:end;min-width:40px}
+.ks-master-header .search-wrap{position:relative;display:block!important}
+.ks-master-header .search{width:220px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:13px;background:rgba(247,247,245,.72);padding:0 38px 0 34px;color:#1d2022;outline:none;font-size:12.5px;transition:.24s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .search:focus{width:250px;background:#fff;border-color:rgba(239,123,69,.36);box-shadow:0 0 0 4px rgba(239,123,69,.08)}
+.ks-master-header .search-icon{position:absolute;left:11px;top:50%;translate:0 -50%;color:#767b80;pointer-events:none}
+.ks-master-header .search-kbd{position:absolute;right:9px;top:50%;translate:0 -50%;font-size:9px;color:#767b80;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:6px;padding:2px 4px;pointer-events:none}
+.ks-master-header .autocomplete{display:none;position:absolute;right:0;top:48px;width:320px;max-height:390px;overflow:auto;padding:7px;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:16px;box-shadow:0 18px 55px rgba(32,35,38,.12);z-index:180}
+.ks-master-header .autocomplete.open{display:block;animation:ksHeaderPop .2s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .suggestion{display:flex;gap:9px;align-items:center;padding:9px;border-radius:11px;cursor:pointer;color:#1d2022;text-decoration:none}
+.ks-master-header .suggestion:hover{background:#f7f7f5}
+.ks-master-header .mini-avatar{width:28px;height:28px;border-radius:9px;background:#fff0e8;display:grid;place-items:center;color:#e7662c;font-size:9px;font-weight:800;flex:0 0 auto}
+.ks-master-header .suggestion b{display:block;font-size:11.5px}.ks-master-header .suggestion small{display:block;color:#767b80;font-size:9.5px;margin-top:2px}
+.ks-master-header .icon-btn{width:42px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:12px;background:#fff;color:#767b80;display:grid;place-items:center;cursor:pointer;text-decoration:none;transition:.22s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .icon-btn:hover{color:#1d2022;transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-master-header .notification-wrap{position:relative}.ks-master-header .notification-button{position:relative}.ks-master-header .notification-button>i{position:absolute;right:-3px;top:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#ef7b45;color:#fff;display:grid;place-items:center;font:800 7px/1 Inter,Arial,sans-serif;font-style:normal;box-shadow:0 0 0 2px rgba(255,255,255,.94)}.ks-master-header .notification-button>i[hidden]{display:none!important}
+.ks-master-header .notification-panel{position:absolute;right:0;top:49px;width:340px;max-height:420px;padding:10px;border:1px solid rgba(29,32,34,.08);border-radius:16px;background:rgba(255,255,255,.98);box-shadow:0 18px 55px rgba(32,35,38,.13);backdrop-filter:blur(18px);opacity:0;transform:translateY(-5px) scale(.985);pointer-events:none;transition:.2s cubic-bezier(.22,1,.36,1);z-index:190}
+.ks-master-header .notification-panel.open{opacity:1;transform:none;pointer-events:auto}.ks-master-header .notification-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 9px;border-bottom:1px solid rgba(29,32,34,.08)}.ks-master-header .notification-panel-head span{display:block;color:#767b80;font-size:7px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.ks-master-header .notification-panel-head strong{display:block;color:#1d2022;font-size:11px;margin-top:1px}.ks-master-header .notification-panel-head button{border:0;background:transparent;color:#767b80;font-size:8px;font-weight:750;cursor:pointer}.ks-master-header .notification-list{display:grid;gap:3px;margin-top:7px;overflow:auto;max-height:330px}.ks-master-header .notification-empty{padding:18px 10px;text-align:center;color:#8b9095;font-size:10px}.ks-master-header .notification-item{padding:9px;border-radius:11px;background:#f7f7f5}.ks-master-header .notification-item b{display:block;color:#1d2022;font-size:9.6px}.ks-master-header .notification-item span{display:block;color:#767b80;font-size:8.4px;margin-top:3px;line-height:1.35}.ks-master-header .notification-item time{display:block;color:#a0a4a8;font-size:7.2px;margin-top:4px}
+.ks-master-header .mobile-search-button{display:none!important}
+.ks-header-mobile-sheet{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,22,24,.28);backdrop-filter:blur(8px);padding:72px 10px 10px;align-items:flex-start;justify-content:center}.ks-header-mobile-sheet.open{display:flex}.ks-header-mobile-card{width:min(560px,100%);background:#fff;border:1px solid rgba(29,32,34,.08);box-shadow:0 18px 55px rgba(32,35,38,.14);border-radius:19px;padding:10px}.ks-header-mobile-row{display:grid;grid-template-columns:1fr auto;gap:8px}.ks-header-mobile-input{height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#f7f7f5;color:#1d2022;padding:0 12px;outline:none}.ks-header-mobile-close{width:44px;height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#fff;color:#767b80;font-size:19px}.ks-header-mobile-results{display:grid;gap:3px;margin-top:8px;max-height:55vh;overflow:auto}
+@keyframes ksHeaderPop{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:none}}
+@media(max-width:1500px){.ks-master-header .tool-nav-btn{padding:0 9px;font-size:9.6px;gap:5px}.ks-master-header .nav-tool-icon{width:20px;height:20px}.ks-master-header .search{width:165px}.ks-master-header .search:focus{width:190px}}
+@media(max-width:1180px){.ks-master-header .brand span{display:none}.ks-master-header .search{width:170px}.ks-master-header .search:focus{width:195px}.ks-master-header .tool-nav{justify-content:flex-start}}
+@media(max-width:920px){.ks-master-header{padding:10px 10px 6px}.ks-master-header .topbar{grid-template-columns:auto auto;gap:8px;border-radius:20px;padding:8px}.ks-master-header .tool-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start}.ks-master-header .header-tools{grid-column:2;grid-row:1}.ks-master-header .search-wrap{display:none!important}.ks-master-header .mobile-search-button{display:grid!important}.ks-master-header .brand span{display:block}}
+@media(max-width:650px){.ks-master-header{padding:8px 8px 4px}.ks-master-header .topbar{border-radius:18px}.ks-master-header .tool-nav-btn{height:36px;font-size:9px;padding:0 9px}.ks-master-header .nav-tool-icon{width:18px;height:18px;border-radius:6px}.ks-master-header .notification-panel{position:fixed;left:8px;right:8px;top:66px;width:auto;max-height:60vh}}
+@media print{.ks-master-header,.ks-header-mobile-sheet{display:none!important}}
+</style>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-bridge.js"></script>
+</head>
+<body data-ks-ui="v2" data-ks-page="simple-markup-calculator">
+
+    <!-- Glass Header -->
+    <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
+  <div class="brand"><span>Kidzstudios Office</span></div>
+  <nav class="tool-nav" id="toolNav" aria-label="Tool shortcuts">
+    <a class="tool-nav-btn" href="job-management.html" data-tool="Job Management"><span class="nav-tool-icon">▦</span><span>Job Management</span></a>
+    <a class="tool-nav-btn" href="pricelist-calculator.html" data-tool="Pricelist"><span class="nav-tool-icon nav-tool-icon-text">RM</span><span>Pricelist</span></a>
+    <a class="tool-nav-btn" href="markup-calculator.html" data-tool="Markup Calculator"><span class="nav-tool-icon">∑</span><span>Markup Calculator</span></a>
+    <a class="tool-nav-btn" href="orderform1.html" data-tool="Orderform 1"><span class="nav-tool-icon">▤</span><span>Orderform 1</span></a>
+    <a class="tool-nav-btn" href="orderform2.html" data-tool="Orderform 2"><span class="nav-tool-icon">▤</span><span>Orderform 2</span></a>
+    <a class="tool-nav-btn" href="commission.html" data-tool="Commission / Claim"><span class="nav-tool-icon nav-tool-icon-text">CL</span><span>Commission / Claim</span></a>
+    <a class="tool-nav-btn" href="file-name-generator.html" data-tool="File Name Generator"><span class="nav-tool-icon nav-tool-icon-text">Aa</span><span>File Name Generator</span></a>
+    <a class="tool-nav-btn" href="files-compress.html" data-tool="Files Compress"><span class="nav-tool-icon">⇩</span><span>Files Compress</span></a>
+  </nav>
+  <div class="header-tools">
+<div class="notification-wrap">
+      <button class="icon-btn notification-button" id="notificationBtn" aria-label="Office notifications" aria-expanded="false" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <i id="notificationUnread" hidden>0</i>
+      </button>
+      <div class="notification-panel" id="notificationPanel" aria-hidden="true">
+        <div class="notification-panel-head"><div><span>Office updates</span><strong>Notifications</strong></div><button id="notificationClearBtn" type="button">Clear</button></div>
+        <div class="notification-list" id="notificationList"><div class="notification-empty">No new updates yet.</div></div>
+      </div>
+    </div>
+</div>
+</div></header>
+
+    <main class="main-content">
+        <div class="calculator-container">
+            <!-- Job Profit Calculator -->
+            <div class="calculator-card" id="markupCard">
+                <div class="card-header">
+                    <div class="icon-wrapper">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M7 16l4-5 4 3 5-7"></path>
+                        </svg>
+                    </div>
+                    <h1 id="calcTitle">Job Profit Calculator</h1>
+                    <p class="subtitle" id="calcSubtitle">Price smarter. See the full job profit before quoting.</p>
+                </div>
+
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="btnMarkupMode">Build Selling Price</button>
+                    <button class="mode-btn" id="btnMarginMode">Reverse Margin</button>
+                </div>
+
+                <div class="section-label"><span>1. Job Setup</span><span class="optional-badge">live calculation</span></div>
+                <div class="field-grid">
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="quantityInput" placeholder="1" min="1" step="1" value="1">
+                        </div>
+                        <div class="quick-presets" id="quantityPresets">
+                            <button class="preset-btn" data-qty="10">10</button>
+                            <button class="preset-btn" data-qty="20">20</button>
+                            <button class="preset-btn" data-qty="50">50</button>
+                            <button class="preset-btn" data-qty="100">100</button>
+                            <button class="preset-btn" data-qty="500">500</button>
+                            <button class="preset-btn" data-qty="1000">1000</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Base Cost / Unit (RM)</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">RM</span>
+                            <input type="number" id="costPrice" class="currency-input" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                        <div class="helper-text">Supplier or blank-product cost per unit.</div>
+                    </div>
+                </div>
+
+                <div class="section-label"><span>2. Extra Cost / Unit</span><span class="optional-badge">optional</span></div>
+                <div class="extra-costs">
+                    <div class="field-grid">
+                        <div class="input-group">
+                            <label>Printing</label>
+                            <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="printingCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Packaging</label>
+                            <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="packagingCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Design</label>
+                            <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="designCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Commission / Other</label>
+                            <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="commissionCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label"><span>3. Delivery</span><span class="optional-badge">optional</span></div>
+                <div class="field-grid">
+                    <div class="input-group">
+                        <label>Delivery Cost (RM)</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">RM</span>
+                            <input type="number" id="deliveryCost" class="currency-input" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>How is delivery charged?</label>
+                        <div class="delivery-mode-toggle">
+                            <button class="delivery-mode-btn active" id="deliveryPerOrder">Per Order</button>
+                            <button class="delivery-mode-btn" id="deliveryPerUnit">Per Unit</button>
+                        </div>
+                        <div class="helper-text" id="deliveryHelp">RM delivery is counted once for the whole order.</div>
+                    </div>
+                </div>
+
+                <div class="markup-section visible" id="markupSection">
+                    <div class="section-label"><span>4. Pricing Method</span></div>
+                    <div class="pricing-mode-toggle">
+                        <button class="pricing-mode-btn active" id="btnMarkupSubMode">Markup %</button>
+                        <button class="pricing-mode-btn" id="btnMultiplierSubMode">Multiplier</button>
+                        <button class="pricing-mode-btn" id="btnTargetMarginSubMode">Target Margin</button>
+                    </div>
+
+                    <div class="input-group" id="markupPercentGroup">
+                        <label>Markup (%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="markupPercent" class="percent-input" placeholder="0" min="0" step="0.01">
+                            <span class="percent-symbol">%</span>
+                        </div>
+                    </div>
+                    <div class="input-group" id="multiplierGroup" style="display:none;">
+                        <label>Multiplier (Selling Price ÷ All-in Cost)</label>
+                        <div class="input-wrapper"><input type="number" id="multiplierInput" placeholder="1.50" min="0" step="0.01"></div>
+                    </div>
+                    <div class="input-group" id="targetMarginGroup" style="display:none;">
+                        <label>Target Margin (%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="targetMarginInput" class="percent-input" placeholder="30" min="0" max="99.99" step="0.01">
+                            <span class="percent-symbol">%</span>
+                        </div>
+                        <div class="helper-text">Selling price = all-in cost ÷ (1 − target margin).</div>
+                    </div>
+                </div>
+
+                <div class="margin-section" id="marginSection">
+                    <div class="section-label"><span>4. Selling Price</span></div>
+                    <div class="input-group">
+                        <label>Selling Price / Unit (RM)</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">RM</span>
+                            <input type="number" id="sellingPriceInput" class="currency-input" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                        <div class="helper-text">Enter your intended selling price to inspect actual job margin.</div>
+                    </div>
+                </div>
+
+                <div class="rounding-panel" id="roundingPanel">
+                    <div class="rounding-title">Quick Price Rounding</div>
+                    <div class="rounding-actions">
+                        <button class="round-btn" data-round="down"><strong id="roundDownPreview">RM 0.00</strong><span>Round down</span></button>
+                        <button class="round-btn" data-round="half"><strong id="roundHalfPreview">RM 0.00</strong><span>Nearest RM0.50</span></button>
+                        <button class="round-btn" data-round="up"><strong id="roundUpPreview">RM 0.00</strong><span>Round up</span></button>
+                    </div>
+                    <div class="override-note" id="overrideNote">Rounded price applied. Change any pricing input to return to automatic calculation.</div>
+                </div>
+
+                <div class="job-dashboard">
+                    <div class="metric-card selling">
+                        <div class="metric-label">Selling / Unit</div>
+                        <div class="metric-value" id="metricSelling">RM 0.00</div>
+                        <div class="metric-sub" id="metricSellingSub">Calculated selling price</div>
+                    </div>
+                    <div class="metric-card income">
+                        <div class="metric-label">Total Income</div>
+                        <div class="metric-value" id="metricIncome">RM 0.00</div>
+                        <div class="metric-sub" id="incomeFormula">1 × RM 0.00</div>
+                    </div>
+                    <div class="metric-card cost">
+                        <div class="metric-label">Total Cost</div>
+                        <div class="metric-value" id="metricCost">RM 0.00</div>
+                        <div class="metric-sub" id="costFormula">All job costs included</div>
+                    </div>
+                    <div class="metric-card profit">
+                        <div class="metric-label">Total Profit</div>
+                        <div class="metric-value" id="metricProfit">RM 0.00</div>
+                        <div class="metric-sub" id="profitFormula">Profit / unit: RM 0.00</div>
+                    </div>
+                </div>
+
+                <div class="profit-detail neutral" id="profitDetail">
+                    <span class="dot"></span>
+                    <span id="profitDetailText">Enter job costs and pricing to see profitability</span>
+                </div>
+
+                <div class="order-summary">
+                    <div class="order-summary-head">
+                        <span>Order Summary</span>
+                        <span class="margin-badge neutral" id="marginBadge">Margin 0.00%</span>
+                    </div>
+                    <div class="order-summary-body">
+                        <div class="summary-row"><span>Quantity</span><strong id="summaryQuantity">1 pcs</strong></div>
+                        <div class="summary-row"><span>All-in Cost / Unit</span><strong id="summaryAllInUnitCost">RM 0.00</strong></div>
+                        <div class="summary-row"><span>Selling Price / Unit</span><strong id="summaryUnitPrice">RM 0.00</strong></div>
+                        <div class="summary-row"><span>Total Cost</span><strong id="summaryTotalCost">RM 0.00</strong></div>
+                        <div class="summary-row"><span>Total Income</span><strong id="summaryTotalIncome">RM 0.00</strong></div>
+                        <div class="summary-row"><span>Total Profit</span><strong id="summaryTotalProfit">RM 0.00</strong></div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn btn-reset" id="resetBtn">Reset</button>
+                    <button class="btn btn-copy" id="copyBtn">Copy Quotation Summary</button>
+                </div>
+            </div>
+
+            <!-- Basic Calculator -->
+            <div class="calculator-card basic-card">
+                <div class="basic-calc-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
+                        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                        <line x1="8" y1="6" x2="16" y2="6"></line>
+                        <line x1="8" y1="10" x2="16" y2="10"></line>
+                        <line x1="8" y1="14" x2="12" y2="14"></line>
+                    </svg>
+                    <h2>Basic Calculator</h2>
+                </div>
+                <div class="calculator-display">
+                    <div class="expression-line" id="expressionLine"></div>
+                    <div class="result-number" id="displayNumber">0</div>
+                </div>
+                <div class="calc-grid" id="basicCalcGrid">
+                    <button class="calc-btn clear" id="btnClear">C</button>
+                    <button class="calc-btn operator" data-op="/">÷</button>
+                    <button class="calc-btn operator" data-op="*">×</button>
+                    <button class="calc-btn operator" id="btnPercent" data-op="%">%</button>
+                    <button class="calc-btn digit" data-digit="7">7</button>
+                    <button class="calc-btn digit" data-digit="8">8</button>
+                    <button class="calc-btn digit" data-digit="9">9</button>
+                    <button class="calc-btn operator" data-op="-">−</button>
+                    <button class="calc-btn digit" data-digit="4">4</button>
+                    <button class="calc-btn digit" data-digit="5">5</button>
+                    <button class="calc-btn digit" data-digit="6">6</button>
+                    <button class="calc-btn operator" data-op="+">+</button>
+                    <button class="calc-btn digit" data-digit="1">1</button>
+                    <button class="calc-btn digit" data-digit="2">2</button>
+                    <button class="calc-btn digit" data-digit="3">3</button>
+                    <button class="calc-btn backspace" id="btnBackspace">⌫</button>
+                    <button class="calc-btn digit zero" data-digit="0">0</button>
+                    <button class="calc-btn digit" data-digit=".">.</button>
+                    <button class="calc-btn equals" id="btnEquals">=</button>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // -------- BASIC CALCULATOR (fully functional) --------
+            const expressionLine = document.getElementById('expressionLine');
+            const displayNumber = document.getElementById('displayNumber');
+            const digitBtns = document.querySelectorAll('#basicCalcGrid .digit');
+            const operatorBtns = document.querySelectorAll('#basicCalcGrid .operator:not(#btnPercent)');
+            const percentBtn = document.getElementById('btnPercent');
+            const backspaceBtn = document.getElementById('btnBackspace');
+            const equalsBtn = document.getElementById('btnEquals');
+            const clearBtn = document.getElementById('btnClear');
+
+            let currentInput = '';
+            let previousInput = '';
+            let currentOperator = null;
+            let resetDisplay = false;
+            let expression = '';
+
+            const updateDisplay = (val) => { displayNumber.textContent = val || '0'; };
+            const updateExpression = (expr) => { expressionLine.textContent = expr; };
+            const setActiveOperator = (op) => {
+                operatorBtns.forEach(btn => btn.classList.remove('active'));
+                if (op) {
+                    const active = document.querySelector(`#basicCalcGrid .operator[data-op="${op}"]`);
+                    if (active) active.classList.add('active');
+                }
+            };
+            const getOperatorSymbol = (op) => {
+                const map = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+                return map[op] || '';
+            };
+            const calculate = () => {
+                const prev = parseFloat(previousInput);
+                const curr = parseFloat(currentInput);
+                if (isNaN(prev) || isNaN(curr)) return isNaN(curr) ? prev : curr;
+                switch (currentOperator) {
+                    case '+': return prev + curr;
+                    case '-': return prev - curr;
+                    case '*': return prev * curr;
+                    case '/': return curr !== 0 ? prev / curr : 'Error';
+                    default: return curr;
+                }
+            };
+            const clearAll = () => {
+                currentInput = '';
+                previousInput = '';
+                currentOperator = null;
+                resetDisplay = false;
+                expression = '';
+                updateDisplay('0');
+                updateExpression('');
+                setActiveOperator(null);
+            };
+
+            digitBtns.forEach(btn => btn.addEventListener('click', () => {
+                const digit = btn.dataset.digit;
+                if (resetDisplay) { currentInput = ''; resetDisplay = false; expression = ''; }
+                if (digit === '.' && currentInput.includes('.')) return;
+                currentInput += digit;
+                updateDisplay(currentInput);
+                updateExpression(expression);
+                setActiveOperator(null);
+            }));
+
+            operatorBtns.forEach(btn => btn.addEventListener('click', () => {
+                const op = btn.dataset.op;
+                const sym = getOperatorSymbol(op);
+                if (currentInput === '' && previousInput !== '' && currentOperator) {
+                    currentOperator = op;
+                    expression = previousInput + ' ' + sym + ' ';
+                    updateExpression(expression);
+                    setActiveOperator(op);
+                    resetDisplay = true;
+                    return;
+                }
+                if (previousInput !== '' && currentOperator && !resetDisplay && currentInput !== '') {
+                    const result = calculate();
+                    previousInput = result.toString();
+                    updateDisplay(previousInput);
+                } else if (currentInput !== '') {
+                    previousInput = currentInput;
+                }
+                currentOperator = op;
+                resetDisplay = true;
+                expression = previousInput + ' ' + sym + ' ';
+                updateExpression(expression);
+                setActiveOperator(op);
+            }));
+
+            percentBtn.addEventListener('click', () => {
+                if (currentInput === '') return;
+                const val = parseFloat(currentInput);
+                if (currentOperator && previousInput !== '') {
+                    const prevVal = parseFloat(previousInput);
+                    currentInput = ((prevVal * val) / 100).toString();
+                } else {
+                    currentInput = (val / 100).toString();
+                }
+                updateDisplay(currentInput);
+                expression += currentInput + '%';
+                updateExpression(expression);
+            });
+
+            backspaceBtn.addEventListener('click', () => {
+                if (resetDisplay) { clearAll(); return; }
+                currentInput = currentInput.slice(0, -1);
+                if (currentInput === '') currentInput = '0';
+                updateDisplay(currentInput);
+            });
+
+            equalsBtn.addEventListener('click', () => {
+                if (currentOperator && previousInput !== '' && currentInput !== '') {
+                    const result = calculate();
+                    updateExpression(previousInput + ' ' + getOperatorSymbol(currentOperator) + ' ' + currentInput + ' =');
+                    updateDisplay(result);
+                    previousInput = result.toString();
+                    currentInput = '';
+                    currentOperator = null;
+                    resetDisplay = true;
+                    setActiveOperator(null);
+                }
+            });
+            clearBtn.addEventListener('click', clearAll);
+
+            // -------- JOB PROFIT CALCULATOR --------
+            const btnMarkup = document.getElementById('btnMarkupMode');
+            const btnMargin = document.getElementById('btnMarginMode');
+            const markupSection = document.getElementById('markupSection');
+            const marginSection = document.getElementById('marginSection');
+            const calcTitle = document.getElementById('calcTitle');
+            const calcSubtitle = document.getElementById('calcSubtitle');
+
+            const quantityInput = document.getElementById('quantityInput');
+            const costPriceInput = document.getElementById('costPrice');
+            const printingCostInput = document.getElementById('printingCost');
+            const packagingCostInput = document.getElementById('packagingCost');
+            const designCostInput = document.getElementById('designCost');
+            const commissionCostInput = document.getElementById('commissionCost');
+            const deliveryCostInput = document.getElementById('deliveryCost');
+            const deliveryPerOrderBtn = document.getElementById('deliveryPerOrder');
+            const deliveryPerUnitBtn = document.getElementById('deliveryPerUnit');
+            const deliveryHelp = document.getElementById('deliveryHelp');
+
+            const btnMarkupSub = document.getElementById('btnMarkupSubMode');
+            const btnMultiplierSub = document.getElementById('btnMultiplierSubMode');
+            const btnTargetMarginSub = document.getElementById('btnTargetMarginSubMode');
+            const markupPercentGroup = document.getElementById('markupPercentGroup');
+            const multiplierGroup = document.getElementById('multiplierGroup');
+            const targetMarginGroup = document.getElementById('targetMarginGroup');
+            const markupPercentInput = document.getElementById('markupPercent');
+            const multiplierInput = document.getElementById('multiplierInput');
+            const targetMarginInput = document.getElementById('targetMarginInput');
+            const sellingPriceInput = document.getElementById('sellingPriceInput');
+
+            const roundDownPreview = document.getElementById('roundDownPreview');
+            const roundHalfPreview = document.getElementById('roundHalfPreview');
+            const roundUpPreview = document.getElementById('roundUpPreview');
+            const overrideNote = document.getElementById('overrideNote');
+
+            const metricSelling = document.getElementById('metricSelling');
+            const metricIncome = document.getElementById('metricIncome');
+            const metricCost = document.getElementById('metricCost');
+            const metricProfit = document.getElementById('metricProfit');
+            const metricSellingSub = document.getElementById('metricSellingSub');
+            const incomeFormula = document.getElementById('incomeFormula');
+            const costFormula = document.getElementById('costFormula');
+            const profitFormula = document.getElementById('profitFormula');
+            const profitDetail = document.getElementById('profitDetail');
+            const profitDetailText = document.getElementById('profitDetailText');
+            const marginBadge = document.getElementById('marginBadge');
+
+            const summaryQuantity = document.getElementById('summaryQuantity');
+            const summaryAllInUnitCost = document.getElementById('summaryAllInUnitCost');
+            const summaryUnitPrice = document.getElementById('summaryUnitPrice');
+            const summaryTotalCost = document.getElementById('summaryTotalCost');
+            const summaryTotalIncome = document.getElementById('summaryTotalIncome');
+            const summaryTotalProfit = document.getElementById('summaryTotalProfit');
+
+            const resetBtn = document.getElementById('resetBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const toast = document.getElementById('toast');
+
+            let currentSubMode = 'markup';
+            let deliveryMode = 'order';
+            let sellingOverride = null;
+            let latest = null;
+
+            const num = (el) => Math.max(0, parseFloat(el.value) || 0);
+            const qty = () => Math.max(1, Math.floor(parseFloat(quantityInput.value) || 1));
+            const formatCurrency = (val) => {
+                if (!isFinite(val)) return 'RM —';
+                const sign = val < 0 ? '-' : '';
+                return sign + 'RM ' + Math.abs(val).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+            const formatPercent = (val) => isFinite(val) ? val.toFixed(2) + '%' : '—';
+
+            const getCostBreakdown = () => {
+                const quantity = qty();
+                const base = num(costPriceInput);
+                const printing = num(printingCostInput);
+                const packaging = num(packagingCostInput);
+                const design = num(designCostInput);
+                const commission = num(commissionCostInput);
+                const delivery = num(deliveryCostInput);
+                const nonDeliveryUnitCost = base + printing + packaging + design + commission;
+                const deliveryTotal = deliveryMode === 'order' ? delivery : delivery * quantity;
+                const totalCost = nonDeliveryUnitCost * quantity + deliveryTotal;
+                const allInUnitCost = totalCost / quantity;
+                return { quantity, base, printing, packaging, design, commission, delivery, nonDeliveryUnitCost, deliveryTotal, totalCost, allInUnitCost };
+            };
+
+            const getAutoSelling = (allInUnitCost) => {
+                if (!btnMarkup.classList.contains('active')) return num(sellingPriceInput);
+                if (currentSubMode === 'markup') {
+                    const markup = num(markupPercentInput);
+                    return allInUnitCost * (1 + markup / 100);
+                }
+                if (currentSubMode === 'multiplier') {
+                    const multiplier = parseFloat(multiplierInput.value);
+                    return allInUnitCost * (isFinite(multiplier) && multiplier >= 0 ? multiplier : 1);
+                }
+                const targetMargin = Math.min(99.99, num(targetMarginInput));
+                return targetMargin >= 100 ? 0 : allInUnitCost / (1 - targetMargin / 100);
+            };
+
+            const getStatus = (margin, totalProfit, totalIncome) => {
+                if (totalIncome <= 0) return { cls: 'neutral', label: 'No sale yet', text: 'Enter job costs and pricing to see profitability' };
+                if (totalProfit < -0.005) return { cls: 'negative', badge: 'loss', label: 'Loss', text: 'Loss: selling price is below the full job cost.' };
+                if (Math.abs(totalProfit) <= 0.005) return { cls: 'neutral', badge: 'neutral', label: 'Break-even', text: 'Break-even: no profit is being generated.' };
+                if (margin < 15) return { cls: 'low', badge: 'low', label: 'Low Margin', text: 'Low margin: under 15%. Small cost changes can wipe out profit.' };
+                if (margin < 30) return { cls: 'moderate', badge: 'moderate', label: 'Moderate', text: 'Moderate margin: between 15% and 30%.' };
+                return { cls: 'healthy', badge: 'healthy', label: 'Healthy', text: 'Healthy margin: 30% or higher.' };
+            };
+
+            const updateRoundingPreviews = (selling) => {
+                const down = Math.floor(selling);
+                const half = Math.round(selling * 2) / 2;
+                const up = Math.ceil(selling);
+                roundDownPreview.textContent = formatCurrency(down);
+                roundHalfPreview.textContent = formatCurrency(half);
+                roundUpPreview.textContent = formatCurrency(up);
+            };
+
+            const updateResults = () => {
+                const c = getCostBreakdown();
+                const autoSelling = getAutoSelling(c.allInUnitCost);
+                const selling = sellingOverride !== null ? sellingOverride : autoSelling;
+                const totalIncome = selling * c.quantity;
+                const totalProfit = totalIncome - c.totalCost;
+                const profitPerUnit = totalProfit / c.quantity;
+                const margin = totalIncome > 0 ? (totalProfit / totalIncome) * 100 : 0;
+                const status = getStatus(margin, totalProfit, totalIncome);
+
+                latest = { ...c, autoSelling, selling, totalIncome, totalProfit, profitPerUnit, margin, status };
+
+                metricSelling.textContent = formatCurrency(selling);
+                metricIncome.textContent = formatCurrency(totalIncome);
+                metricCost.textContent = formatCurrency(c.totalCost);
+                metricProfit.textContent = formatCurrency(totalProfit);
+                metricSellingSub.textContent = sellingOverride !== null ? `Rounded from ${formatCurrency(autoSelling)}` : (btnMarkup.classList.contains('active') ? 'Calculated selling price' : 'Entered selling price');
+                incomeFormula.textContent = `${c.quantity.toLocaleString('en-MY')} × ${formatCurrency(selling)}`;
+                costFormula.textContent = deliveryMode === 'order' ? `Includes ${formatCurrency(c.deliveryTotal)} delivery / order` : `Includes ${formatCurrency(c.delivery)} delivery / unit`;
+                profitFormula.textContent = `Profit / unit: ${formatCurrency(profitPerUnit)}`;
+
+                summaryQuantity.textContent = `${c.quantity.toLocaleString('en-MY')} pcs`;
+                summaryAllInUnitCost.textContent = formatCurrency(c.allInUnitCost);
+                summaryUnitPrice.textContent = formatCurrency(selling);
+                summaryTotalCost.textContent = formatCurrency(c.totalCost);
+                summaryTotalIncome.textContent = formatCurrency(totalIncome);
+                summaryTotalProfit.textContent = formatCurrency(totalProfit);
+
+                profitDetail.className = `profit-detail ${status.cls}`;
+                profitDetailText.textContent = status.text;
+                marginBadge.className = `margin-badge ${status.badge || status.cls}`;
+                marginBadge.textContent = `${status.label} · ${formatPercent(margin)}`;
+                overrideNote.style.display = sellingOverride !== null ? 'block' : 'none';
+                updateRoundingPreviews(sellingOverride !== null ? autoSelling : selling);
+            };
+
+            const clearOverrideAndUpdate = () => { sellingOverride = null; updateResults(); };
+
+            const setSubMode = (mode) => {
+                currentSubMode = mode;
+                btnMarkupSub.classList.toggle('active', mode === 'markup');
+                btnMultiplierSub.classList.toggle('active', mode === 'multiplier');
+                btnTargetMarginSub.classList.toggle('active', mode === 'target');
+                markupPercentGroup.style.display = mode === 'markup' ? 'block' : 'none';
+                multiplierGroup.style.display = mode === 'multiplier' ? 'block' : 'none';
+                targetMarginGroup.style.display = mode === 'target' ? 'block' : 'none';
+                clearOverrideAndUpdate();
+            };
+
+            const setMainMode = (mode) => {
+                const isMarkup = mode === 'markup';
+                btnMarkup.classList.toggle('active', isMarkup);
+                btnMargin.classList.toggle('active', !isMarkup);
+                markupSection.classList.toggle('visible', isMarkup);
+                marginSection.classList.toggle('visible', !isMarkup);
+                calcTitle.textContent = isMarkup ? 'Job Profit Calculator' : 'Reverse Margin Calculator';
+                calcSubtitle.textContent = isMarkup ? 'Build a selling price from the full job cost.' : 'Enter selling price and inspect the true job margin.';
+                sellingOverride = null;
+                updateResults();
+            };
+
+            const setDeliveryMode = (mode) => {
+                deliveryMode = mode;
+                deliveryPerOrderBtn.classList.toggle('active', mode === 'order');
+                deliveryPerUnitBtn.classList.toggle('active', mode === 'unit');
+                deliveryHelp.textContent = mode === 'order'
+                    ? 'RM delivery is counted once for the whole order.'
+                    : 'RM delivery is multiplied by quantity.';
+                clearOverrideAndUpdate();
+            };
+
+            const applyRounding = (type) => {
+                if (!latest) return;
+                const source = sellingOverride !== null ? latest.autoSelling : latest.selling;
+                let rounded = source;
+                if (type === 'down') rounded = Math.floor(source);
+                if (type === 'half') rounded = Math.round(source * 2) / 2;
+                if (type === 'up') rounded = Math.ceil(source);
+                rounded = Math.max(0, rounded);
+                if (btnMargin.classList.contains('active')) {
+                    sellingPriceInput.value = rounded.toFixed(2);
+                    sellingOverride = null;
+                } else {
+                    sellingOverride = rounded;
+                }
+                updateResults();
+                showToast(`Price set to ${formatCurrency(rounded)}`);
+            };
+
+            const resetFields = () => {
+                quantityInput.value = '1';
+                [costPriceInput, printingCostInput, packagingCostInput, designCostInput, commissionCostInput, deliveryCostInput, markupPercentInput, multiplierInput, targetMarginInput, sellingPriceInput].forEach(el => el.value = '');
+                deliveryMode = 'order';
+                deliveryPerOrderBtn.classList.add('active');
+                deliveryPerUnitBtn.classList.remove('active');
+                deliveryHelp.textContent = 'RM delivery is counted once for the whole order.';
+                sellingOverride = null;
+                setMainMode('markup');
+                setSubMode('markup');
+                updateResults();
+                showToast('Calculator reset');
+            };
+
+            const copyResults = () => {
+                if (!latest) return;
+                const modeName = btnMarkup.classList.contains('active') ? 'Build Selling Price' : 'Reverse Margin';
+                const deliveryText = deliveryMode === 'order'
+                    ? `${formatCurrency(latest.delivery)} / order`
+                    : `${formatCurrency(latest.delivery)} / unit`;
+                const text = [
+                    'JOB PRICING SUMMARY',
+                    `Mode: ${modeName}`,
+                    `Quantity: ${latest.quantity.toLocaleString('en-MY')} pcs`,
+                    `Base Cost / Unit: ${formatCurrency(latest.base)}`,
+                    `Extra Cost / Unit: ${formatCurrency(latest.printing + latest.packaging + latest.design + latest.commission)}`,
+                    `Delivery: ${deliveryText}`,
+                    `All-in Cost / Unit: ${formatCurrency(latest.allInUnitCost)}`,
+                    `Selling Price / Unit: ${formatCurrency(latest.selling)}`,
+                    `${latest.quantity.toLocaleString('en-MY')} pcs × ${formatCurrency(latest.selling)} = ${formatCurrency(latest.totalIncome)}`,
+                    `Total Cost: ${formatCurrency(latest.totalCost)}`,
+                    `Total Income: ${formatCurrency(latest.totalIncome)}`,
+                    `Total Profit: ${formatCurrency(latest.totalProfit)}`,
+                    `Profit / Unit: ${formatCurrency(latest.profitPerUnit)}`,
+                    `Margin: ${formatPercent(latest.margin)} (${latest.status.label})`
+                ].join('\n');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => showToast('Quotation summary copied!')).catch(() => showToast('Unable to access clipboard'));
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    showToast('Quotation summary copied!');
+                }
+            };
+
+            const showToast = (msg) => {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            };
+
+            btnMarkup.addEventListener('click', () => setMainMode('markup'));
+            btnMargin.addEventListener('click', () => setMainMode('margin'));
+            btnMarkupSub.addEventListener('click', () => setSubMode('markup'));
+            btnMultiplierSub.addEventListener('click', () => setSubMode('multiplier'));
+            btnTargetMarginSub.addEventListener('click', () => setSubMode('target'));
+            deliveryPerOrderBtn.addEventListener('click', () => setDeliveryMode('order'));
+            deliveryPerUnitBtn.addEventListener('click', () => setDeliveryMode('unit'));
+
+            document.querySelectorAll('#quantityPresets .preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    quantityInput.value = btn.dataset.qty;
+                    clearOverrideAndUpdate();
+                });
+            });
+            document.querySelectorAll('.round-btn').forEach(btn => btn.addEventListener('click', () => applyRounding(btn.dataset.round)));
+
+            const pricingInputs = [quantityInput, costPriceInput, printingCostInput, packagingCostInput, designCostInput, commissionCostInput, deliveryCostInput, markupPercentInput, multiplierInput, targetMarginInput];
+            pricingInputs.forEach(el => el.addEventListener('input', clearOverrideAndUpdate));
+            sellingPriceInput.addEventListener('input', () => { sellingOverride = null; updateResults(); });
+            resetBtn.addEventListener('click', resetFields);
+            copyBtn.addEventListener('click', copyResults);
+
+            setDeliveryMode('order');
+            setSubMode('markup');
+            setMainMode('markup');
+        })();
+    </script>
+
+<script id="ks-upgrade-v2-js">
+(() => {
+  'use strict';
+
+  // Make accidental form submissions less likely in tool-style UIs.
+  document.querySelectorAll('button:not([type])').forEach(btn => btn.setAttribute('type','button'));
+
+  // Keyboard shortcut: Alt/Option + P = Portal.
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey && event.key.toLowerCase() === 'p') {
+      event.preventDefault();
+      if (!document.body || document.body.dataset.ksPage === 'index') return;
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Compact back-to-top utility on long pages.
+  if (document.body && document.body.dataset.ksPage !== 'index') {
+    const topBtn = document.createElement('button');
+    topBtn.type = 'button';
+    topBtn.className = 'ks-scroll-top no-print';
+    topBtn.setAttribute('aria-label','Back to top');
+    topBtn.setAttribute('title','Back to top');
+    topBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>';
+    topBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+    document.body.appendChild(topBtn);
+
+    const syncTopButton = () => {
+      topBtn.classList.toggle('ks-show', window.scrollY > 520);
+    };
+    window.addEventListener('scroll', syncTopButton, { passive:true });
+    syncTopButton();
+  }
+
+  // Better semantics for clickable non-button upload zones.
+  document.querySelectorAll('[onclick*="Upload"], .design-area, .header-logo-area').forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
+    if (!el.hasAttribute('role')) el.setAttribute('role','button');
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+  });
+  // Self-contained fallback for the legacy Job Sheet logo asset.
+  const legacyLogo = document.getElementById('logoImg');
+  if (legacyLogo) {
+    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="72" viewBox="0 0 280 72">
+      <rect width="280" height="72" rx="10" fill="#0b0d12"/>
+      <text x="18" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ff7a00">KIDZ</text>
+      <text x="94" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ffffff">STUDIOS</text>
+      <rect x="93" y="51" width="137" height="4" rx="2" fill="#ff7a00"/>
+      <text x="188" y="65" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="700" fill="#ffffff">SINCE 2013</text>
+    </svg>`;
+    const fallbackSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fallbackSvg);
+    const applyLegacyFallback = () => {
+      legacyLogo.onerror = null;
+      legacyLogo.src = fallbackSrc;
+    };
+    legacyLogo.addEventListener('error', applyLegacyFallback);
+    if (legacyLogo.complete && legacyLogo.naturalWidth === 0) applyLegacyFallback();
+  }
+
+})();
+</script>
+
+<script src="netlify-sync.js" defer></script>
+
+<footer class="ks-version-footer no-print" aria-label="Build version">v48</footer>
+<script src="suite-header.js" defer></script>
+</body>
+</html>

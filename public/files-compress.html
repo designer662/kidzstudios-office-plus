@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="description" content="KidzStudios internal operations tool.">
+
+    <title>Kidzstudios Files Compress</title>
+
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-light: #eef2ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+            --radius: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- GLASS HEADER (matching calculator & orderform) --- */
+        .glass-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            padding: 0 32px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+        .brand-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .back-link:hover {
+            color: #3b82f6;
+            transform: translateX(-4px);
+        }
+        @media (max-width: 768px) {
+            .glass-header { padding: 0 20px; }
+            .brand-title { font-size: 13px; }
+            .back-link { font-size: 13px; }
+        }
+
+        /* ── Card Tab Grid ── */
+        #tabGrid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+        @media (max-width: 640px) {
+            #tabGrid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.4rem;
+            }
+        }
+
+        .tab-card {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .tab-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--tab-color, #94a3b8);
+            transition: all 0.2s ease;
+        }
+        .tab-card i {
+            font-size: 1.15rem;
+            color: var(--tab-color, #64748b);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            width: 1.4rem;
+            text-align: center;
+        }
+        .tab-card .tab-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.05rem;
+            min-width: 0;
+        }
+        .tab-card .tab-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .tab-card .tab-hint {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            line-height: 1.2;
+            opacity: 0.75;
+        }
+        .tab-card:hover {
+            border-color: var(--tab-color, var(--accent));
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            background: #fafbfd;
+        }
+        .tab-card:active {
+            transform: scale(0.98);
+            transition: all 0.08s ease;
+        }
+        .tab-active {
+            background: var(--tab-color, var(--accent)) !important;
+            border-color: var(--tab-color, var(--accent)) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+        .tab-active::after {
+            opacity: 0;
+        }
+        .tab-active i,
+        .tab-active .tab-name,
+        .tab-active .tab-hint {
+            color: #fff !important;
+        }
+
+        /* ── Section Panels ── */
+        .section-panel {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+        }
+        @media (min-width: 768px) {
+            .section-panel {
+                padding: 2rem 2.25rem;
+            }
+        }
+
+        /* ── Drop Zone ── */
+        .drop-zone {
+            background: #fafbfd;
+            border: 2px dashed #d4d8e0;
+            border-radius: var(--radius-lg);
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .drop-zone.drop-active {
+            border-color: var(--accent);
+            background: #eef2ff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+        }
+        .drop-zone.drop-bounce {
+            animation: dropPop 0.45s ease;
+        }
+        @keyframes dropPop {
+            0% { transform: scale(1.03); }
+            70% { transform: scale(0.97); }
+            100% { transform: scale(1); }
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            padding: 0.55rem 1.2rem;
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+            box-shadow: var(--shadow-md);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            box-shadow: var(--shadow-md);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover:not(:disabled) {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .btn-xs {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.7rem;
+            gap: 0.25rem;
+        }
+
+        /* ── Progress ── */
+        .progress-bar {
+            width: 100%;
+            height: 0.45rem;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--accent), #818cf8, var(--accent));
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite linear;
+            transition: width 0.3s ease;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* ── File List Items ── */
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.65rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .file-item[draggable="true"] {
+            cursor: grab;
+        }
+        .file-item[draggable="true"]:active {
+            cursor: grabbing;
+            opacity: 0.7;
+        }
+        .file-item img,
+        .file-item canvas {
+            width: 54px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .file-item .file-icon {
+            font-size: 2.4rem;
+            width: 54px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .file-item .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .file-item .file-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-item .file-meta {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Result Items ── */
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: var(--radius);
+            padding: 0.7rem 0.8rem;
+        }
+        .result-item img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        /* ── Page Thumbnails ── */
+        .page-thumb {
+            position: relative;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: all 0.15s ease;
+            aspect-ratio: 3/4;
+        }
+        .page-thumb:hover {
+            border-color: #c7d2fe;
+        }
+        .page-thumb.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+        .page-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .page-thumb .check-mark {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .page-thumb.selected .check-mark {
+            opacity: 1;
+        }
+
+        /* ── Control Row ── */
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border);
+        }
+        @media (max-width: 480px) {
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .file-item {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* ── Misc ── */
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        select,
+        input[type="number"],
+        input[type="range"] {
+            font-family: inherit;
+        }
+        .bounce-dl {
+            animation: bounceDl 0.5s ease 3;
+        }
+        @keyframes bounceDl {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer style (plain) */
+        .simple-footer {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 2rem;
+        }
+    </style>
+
+<style id="ks-office-unified-v12">
+:root{--kso-orange:#ef7b45;--kso-orange-2:#ff9864;--kso-text:#2f3336;--kso-muted:#73787d;--kso-bg:#f7f7f5;--kso-line:rgba(43,47,50,.09);--kso-ease:cubic-bezier(.2,.75,.22,1)}
+.ks-office-shell{position:sticky;top:0;z-index:9998;padding:14px 18px 7px;background:linear-gradient(180deg,rgba(247,247,245,.96),rgba(247,247,245,.80) 72%,transparent);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.ks-office-topbar{max-width:1500px;margin:0 auto;min-height:64px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.84);border:1px solid var(--kso-line);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.065);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-office-brand{display:flex;align-items:center;gap:9px;color:var(--kso-text);text-decoration:none;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap}
+.ks-office-nav{display:flex;align-items:center;gap:7px;overflow:auto;scrollbar-width:none;padding:2px 1px}.ks-office-nav::-webkit-scrollbar{display:none}
+.ks-office-nav-btn{flex:0 0 auto;height:38px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid rgba(45,48,50,.07);background:rgba(247,247,245,.76);color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s var(--kso-ease),background .22s var(--kso-ease),border-color .22s var(--kso-ease),color .22s var(--kso-ease),box-shadow .22s var(--kso-ease)}
+.ks-office-nav-btn:hover,.ks-office-nav-btn.active{background:rgba(239,123,69,.10);border-color:rgba(239,123,69,.22);color:#d9632f;box-shadow:0 6px 16px rgba(239,123,69,.08);transform:translateY(-1px)}
+.ks-office-nav-icon{width:21px;height:21px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(45,48,50,.06);font-size:11px;font-weight:850;color:#5b6166}.ks-office-nav-btn.active .ks-office-nav-icon,.ks-office-nav-btn:hover .ks-office-nav-icon{color:#d9632f;background:#fff6f1}.ks-office-nav-icon-text{font-size:7px;letter-spacing:-.04em}
+.ks-office-home{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--kso-line);border-radius:12px;background:#fff;color:var(--kso-muted);text-decoration:none;font-size:10px;font-weight:760;transition:.2s var(--kso-ease)}.ks-office-home:hover{color:var(--kso-text);transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-office-page-title{max-width:1500px;margin:4px auto 0;padding:0 17px;color:#8b9094;font-size:9px;font-weight:720;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body{animation:ksoPageIn .38s var(--kso-ease) both}
+@keyframes ksoPageIn{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:1180px){.ks-office-topbar{grid-template-columns:auto auto}.ks-office-nav{grid-column:1/-1;grid-row:2}.ks-office-home{grid-column:2;grid-row:1;justify-self:end}}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px}.ks-office-topbar{border-radius:18px;padding:8px;gap:7px}.ks-office-brand-name{display:none}.ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}.ks-office-nav-icon{width:18px;height:18px;border-radius:6px}.ks-office-home{width:36px;height:36px;padding:0;justify-content:center}.ks-office-home-text{display:none}.ks-office-page-title{padding:0 10px;font-size:8px}}
+@media print{.ks-office-shell{display:none!important}}
+@media(prefers-reduced-motion:reduce){body{animation:none}.ks-office-nav-btn,.ks-office-home{transition:none}}
+</style>
+
+
+<style id="ks-office-nav-v14-unified">
+/* Unified centered eight-tool header across the Kidzstudios Office suite */
+.ks-office-nav{justify-content:center;gap:4px;min-width:0}
+.ks-office-nav-btn{height:36px;font-size:9.1px;padding:0 8px;gap:5px}
+.ks-office-nav-icon{width:19px;height:19px;font-size:9px}
+@media (min-width:1181px) and (max-width:1560px){
+  .ks-office-topbar{gap:8px;padding-left:12px;padding-right:10px}
+  .ks-office-nav{gap:3px}
+  .ks-office-nav-btn{font-size:8.55px;padding:0 7px;gap:4px}
+  .ks-office-nav-icon{width:18px;height:18px;font-size:8px}
+  .ks-office-brand{font-size:12.5px}
+  .ks-office-home{padding:0 10px}
+}
+@media (max-width:1180px){.ks-office-nav{justify-content:center}}
+@media (max-width:720px){
+  .ks-office-nav{justify-content:flex-start;gap:4px}
+  .ks-office-nav-btn{height:34px;font-size:9px;padding:0 9px}
+  .ks-office-nav-icon{width:18px;height:18px}
+}
+</style>
+<style>
+/* Netlify shared state status */
+.ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:9px;padding:6px 8px}}
+</style>
+
+<style id="ks-version-footer-style">
+.ks-version-footer{position:fixed;left:14px;bottom:10px;z-index:9998;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(29,32,34,.09);box-shadow:0 5px 15px rgba(25,28,30,.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#8b9095;font:750 9px/1 Inter,Arial,sans-serif;letter-spacing:.04em;pointer-events:none}
+@media(max-width:650px){.ks-version-footer{left:8px;bottom:5px;font-size:8px;padding:4px 6px}}
+@media print{.ks-version-footer{display:none!important}}
+</style>
+
+<style id="ks-v28-tool-ux">
+/* V26 tool-page usability polish */
+.ks-office-home{min-height:38px}
+.ks-office-nav-btn{min-height:38px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable="true"]:focus-visible{outline:2px solid rgba(239,123,69,.5)!important;outline-offset:2px!important}
+@media(min-width:1200px){.ks-office-nav-btn{height:38px!important;font-size:9.35px!important;padding-left:8px!important;padding-right:8px!important}}
+@media(max-width:720px){.ks-office-nav{scroll-padding-inline:8px}.ks-office-nav-btn{min-height:36px}}
+</style>
+
+<style id="ks-v28-main-theme">
+:root{--ks26-bg:#f7f7f5;--ks26-card:rgba(255,255,255,.92);--ks26-text:#1d2022;--ks26-muted:#767b80;--ks26-line:rgba(29,32,34,.09);--ks26-orange:#ef7b45;--ks26-soft:#fff0e8;--ks26-shadow:0 16px 44px rgba(32,35,38,.08)}
+html{background:var(--ks26-bg)}
+body{background:radial-gradient(circle at 50% 0,rgba(255,255,255,.96),transparent 30%),linear-gradient(180deg,#fbfbfa,var(--ks26-bg))!important;color:var(--ks26-text)!important}
+.ks-office-shell{padding:14px 18px 8px!important;background:transparent!important;box-shadow:none!important;border:0!important}
+.ks-office-topbar{max-width:1500px!important;margin:0 auto!important;min-height:62px!important;padding:9px 11px 9px 14px!important;border:1px solid var(--ks26-line)!important;border-radius:22px!important;background:var(--ks26-card)!important;box-shadow:0 12px 36px rgba(30,33,35,.055)!important;backdrop-filter:blur(18px) saturate(125%)!important}
+.ks-office-brand,.ks-office-brand-name{color:var(--ks26-text)!important;text-decoration:none!important;font-weight:760!important}
+.ks-office-nav-btn{border:1px solid transparent!important;background:transparent!important;color:var(--ks26-muted)!important;border-radius:999px!important;box-shadow:none!important}
+.ks-office-nav-btn:hover{background:var(--ks26-bg)!important;color:var(--ks26-text)!important;border-color:var(--ks26-line)!important}
+.ks-office-nav-btn.active{background:var(--ks26-orange)!important;color:#fff!important;border-color:var(--ks26-orange)!important;box-shadow:0 7px 18px rgba(239,123,69,.22)!important}
+.ks-office-nav-icon{background:var(--ks26-soft)!important;color:#e7662c!important}
+.ks-office-nav-btn.active .ks-office-nav-icon{background:rgba(255,255,255,.2)!important;color:#fff!important}
+.ks-office-home{background:#fff!important;color:var(--ks26-muted)!important;border:1px solid var(--ks26-line)!important;border-radius:12px!important}
+.ks-office-page-title{color:var(--ks26-muted)!important;font-weight:700!important}
+body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,.section-panel,.action-column){border-color:var(--ks26-line)!important;box-shadow:var(--ks26-shadow)!important}
+.ks-version-footer{background:rgba(255,255,255,.86)!important}
+@media(max-width:720px){.ks-office-shell{padding:8px 8px 4px!important}.ks-office-topbar{border-radius:18px!important}}
+</style>
+
+<style id="ks-v26-compress-fix">
+body[data-ks-page="compress"]{--accent:#ef7b45;--accent-hover:#dd6530;--accent-light:#fff0e8}
+body[data-ks-page="compress"] main{width:min(1180px,100%);margin:0 auto}
+body[data-ks-page="compress"] .section-panel{border:1px solid rgba(29,32,34,.09)!important;border-radius:22px!important;box-shadow:0 16px 44px rgba(32,35,38,.08)!important}
+body[data-ks-page="compress"] .drop-zone{background:#fbfbfa;border-color:rgba(29,32,34,.14);border-radius:18px}
+body[data-ks-page="compress"] .drop-zone:hover,body[data-ks-page="compress"] .drop-zone.drop-active{border-color:#ef7b45;background:#fff7f2}
+body[data-ks-page="compress"] .btn-primary{background:#ef7b45}.btn-primary:hover:not(:disabled){background:#dd6530}
+body[data-ks-page="compress"] .tab-active{background:var(--tab-color,#ef7b45)!important}
+.compress-title{margin:0;color:#1d2022;font:850 clamp(27px,3vw,38px)/1.05 Inter,Arial,sans-serif;letter-spacing:-.045em}.compress-title::after{content:"";display:block;width:46px;height:4px;margin:10px auto 0;border-radius:999px;background:#ef7b45}
+.compress-lib-warning{display:none;margin:0 auto 16px;max-width:1180px;padding:10px 12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font:650 12px/1.4 Inter,Arial,sans-serif}.compress-lib-warning.show{display:block}
+</style>
+<style id="ks-v34-master-header">
+/* Master header copied from the approved Index reference. */
+.ks-master-header{padding:16px 20px 9px;position:relative;z-index:110;background:transparent!important;border:0!important;box-shadow:none!important;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif}
+.ks-master-header *{box-sizing:border-box}
+.ks-master-header .topbar{max-width:1500px;margin:auto;min-height:64px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px 10px 15px;background:rgba(255,255,255,.92);border:1px solid rgba(29,32,34,.08);border-radius:23px;box-shadow:0 12px 36px rgba(30,33,35,.055);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)}
+.ks-master-header .brand{display:flex;align-items:center;gap:9px;color:#1d2022;font-size:14px;font-weight:760;letter-spacing:-.035em;white-space:nowrap;cursor:pointer;user-select:none}
+.ks-master-header .tool-nav{display:flex;align-items:center;justify-content:center;gap:7px;overflow:auto;scrollbar-width:none;min-width:0;padding:2px}
+.ks-master-header .tool-nav::-webkit-scrollbar{display:none}
+.ks-master-header .tool-nav-btn{flex:0 0 auto;height:40px;display:flex;align-items:center;gap:7px;padding:0 12px;border-radius:999px;border:1px solid rgba(29,32,34,.08);background:rgba(255,255,255,.82);color:#767b80;text-decoration:none;font-size:10.2px;font-weight:760;letter-spacing:-.02em;white-space:nowrap;transition:transform .22s cubic-bezier(.22,1,.36,1),background .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+.ks-master-header .tool-nav-btn:hover,.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:#fff0e8;border-color:rgba(239,123,69,.24);color:#e7662c;box-shadow:0 8px 18px rgba(239,123,69,.10);transform:translateY(-1px)}
+.ks-master-header .nav-tool-icon{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto;background:rgba(239,123,69,.10);color:#e7662c;font-size:11px;font-weight:900;line-height:1}
+.ks-master-header .nav-tool-icon-text{font-size:8.5px;letter-spacing:-.04em}
+.ks-master-header .header-tools{display:flex;gap:8px;align-items:center;justify-self:end;min-width:40px}
+.ks-master-header .search-wrap{position:relative;display:block!important}
+.ks-master-header .search{width:220px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:13px;background:rgba(247,247,245,.72);padding:0 38px 0 34px;color:#1d2022;outline:none;font-size:12.5px;transition:.24s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .search:focus{width:250px;background:#fff;border-color:rgba(239,123,69,.36);box-shadow:0 0 0 4px rgba(239,123,69,.08)}
+.ks-master-header .search-icon{position:absolute;left:11px;top:50%;translate:0 -50%;color:#767b80;pointer-events:none}
+.ks-master-header .search-kbd{position:absolute;right:9px;top:50%;translate:0 -50%;font-size:9px;color:#767b80;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:6px;padding:2px 4px;pointer-events:none}
+.ks-master-header .autocomplete{display:none;position:absolute;right:0;top:48px;width:320px;max-height:390px;overflow:auto;padding:7px;border:1px solid rgba(29,32,34,.08);background:#fff;border-radius:16px;box-shadow:0 18px 55px rgba(32,35,38,.12);z-index:180}
+.ks-master-header .autocomplete.open{display:block;animation:ksHeaderPop .2s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .suggestion{display:flex;gap:9px;align-items:center;padding:9px;border-radius:11px;cursor:pointer;color:#1d2022;text-decoration:none}
+.ks-master-header .suggestion:hover{background:#f7f7f5}
+.ks-master-header .mini-avatar{width:28px;height:28px;border-radius:9px;background:#fff0e8;display:grid;place-items:center;color:#e7662c;font-size:9px;font-weight:800;flex:0 0 auto}
+.ks-master-header .suggestion b{display:block;font-size:11.5px}.ks-master-header .suggestion small{display:block;color:#767b80;font-size:9.5px;margin-top:2px}
+.ks-master-header .icon-btn{width:42px;height:42px;border:1px solid rgba(29,32,34,.08);border-radius:12px;background:#fff;color:#767b80;display:grid;place-items:center;cursor:pointer;text-decoration:none;transition:.22s cubic-bezier(.22,1,.36,1)}
+.ks-master-header .icon-btn:hover{color:#1d2022;transform:translateY(-1px);box-shadow:0 7px 18px rgba(30,33,35,.07)}
+.ks-master-header .notification-wrap{position:relative}.ks-master-header .notification-button{position:relative}.ks-master-header .notification-button>i{position:absolute;right:-3px;top:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#ef7b45;color:#fff;display:grid;place-items:center;font:800 7px/1 Inter,Arial,sans-serif;font-style:normal;box-shadow:0 0 0 2px rgba(255,255,255,.94)}.ks-master-header .notification-button>i[hidden]{display:none!important}
+.ks-master-header .notification-panel{position:absolute;right:0;top:49px;width:340px;max-height:420px;padding:10px;border:1px solid rgba(29,32,34,.08);border-radius:16px;background:rgba(255,255,255,.98);box-shadow:0 18px 55px rgba(32,35,38,.13);backdrop-filter:blur(18px);opacity:0;transform:translateY(-5px) scale(.985);pointer-events:none;transition:.2s cubic-bezier(.22,1,.36,1);z-index:190}
+.ks-master-header .notification-panel.open{opacity:1;transform:none;pointer-events:auto}.ks-master-header .notification-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 9px;border-bottom:1px solid rgba(29,32,34,.08)}.ks-master-header .notification-panel-head span{display:block;color:#767b80;font-size:7px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.ks-master-header .notification-panel-head strong{display:block;color:#1d2022;font-size:11px;margin-top:1px}.ks-master-header .notification-panel-head button{border:0;background:transparent;color:#767b80;font-size:8px;font-weight:750;cursor:pointer}.ks-master-header .notification-list{display:grid;gap:3px;margin-top:7px;overflow:auto;max-height:330px}.ks-master-header .notification-empty{padding:18px 10px;text-align:center;color:#8b9095;font-size:10px}.ks-master-header .notification-item{padding:9px;border-radius:11px;background:#f7f7f5}.ks-master-header .notification-item b{display:block;color:#1d2022;font-size:9.6px}.ks-master-header .notification-item span{display:block;color:#767b80;font-size:8.4px;margin-top:3px;line-height:1.35}.ks-master-header .notification-item time{display:block;color:#a0a4a8;font-size:7.2px;margin-top:4px}
+.ks-master-header .mobile-search-button{display:none!important}
+.ks-header-mobile-sheet{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,22,24,.28);backdrop-filter:blur(8px);padding:72px 10px 10px;align-items:flex-start;justify-content:center}.ks-header-mobile-sheet.open{display:flex}.ks-header-mobile-card{width:min(560px,100%);background:#fff;border:1px solid rgba(29,32,34,.08);box-shadow:0 18px 55px rgba(32,35,38,.14);border-radius:19px;padding:10px}.ks-header-mobile-row{display:grid;grid-template-columns:1fr auto;gap:8px}.ks-header-mobile-input{height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#f7f7f5;color:#1d2022;padding:0 12px;outline:none}.ks-header-mobile-close{width:44px;height:44px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:#fff;color:#767b80;font-size:19px}.ks-header-mobile-results{display:grid;gap:3px;margin-top:8px;max-height:55vh;overflow:auto}
+@keyframes ksHeaderPop{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:none}}
+@media(max-width:1500px){.ks-master-header .tool-nav-btn{padding:0 9px;font-size:9.6px;gap:5px}.ks-master-header .nav-tool-icon{width:20px;height:20px}.ks-master-header .search{width:165px}.ks-master-header .search:focus{width:190px}}
+@media(max-width:1180px){.ks-master-header .brand span{display:none}.ks-master-header .search{width:170px}.ks-master-header .search:focus{width:195px}.ks-master-header .tool-nav{justify-content:flex-start}}
+@media(max-width:920px){.ks-master-header{padding:10px 10px 6px}.ks-master-header .topbar{grid-template-columns:auto auto;gap:8px;border-radius:20px;padding:8px}.ks-master-header .tool-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start}.ks-master-header .header-tools{grid-column:2;grid-row:1}.ks-master-header .search-wrap{display:none!important}.ks-master-header .mobile-search-button{display:grid!important}.ks-master-header .brand span{display:block}}
+@media(max-width:650px){.ks-master-header{padding:8px 8px 4px}.ks-master-header .topbar{border-radius:18px}.ks-master-header .tool-nav-btn{height:36px;font-size:9px;padding:0 9px}.ks-master-header .nav-tool-icon{width:18px;height:18px;border-radius:6px}.ks-master-header .notification-panel{position:fixed;left:8px;right:8px;top:66px;width:auto;max-height:60vh}}
+@media print{.ks-master-header,.ks-header-mobile-sheet{display:none!important}}
+</style>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-bridge.js"></script>
+</head>
+<body data-ks-ui="v2" data-ks-page="compress">
+
+    <!-- GLASS HEADER (identical to calculator) -->
+    <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
+  <div class="brand"><span>Kidzstudios Office</span></div>
+  <nav class="tool-nav" id="toolNav" aria-label="Tool shortcuts">
+    <a class="tool-nav-btn" href="job-management.html" data-tool="Job Management"><span class="nav-tool-icon">▦</span><span>Job Management</span></a>
+    <a class="tool-nav-btn" href="pricelist-calculator.html" data-tool="Pricelist"><span class="nav-tool-icon nav-tool-icon-text">RM</span><span>Pricelist</span></a>
+    <a class="tool-nav-btn" href="markup-calculator.html" data-tool="Markup Calculator"><span class="nav-tool-icon">∑</span><span>Markup Calculator</span></a>
+    <a class="tool-nav-btn" href="orderform1.html" data-tool="Orderform 1"><span class="nav-tool-icon">▤</span><span>Orderform 1</span></a>
+    <a class="tool-nav-btn" href="orderform2.html" data-tool="Orderform 2"><span class="nav-tool-icon">▤</span><span>Orderform 2</span></a>
+    <a class="tool-nav-btn" href="commission.html" data-tool="Commission / Claim"><span class="nav-tool-icon nav-tool-icon-text">CL</span><span>Commission / Claim</span></a>
+    <a class="tool-nav-btn" href="file-name-generator.html" data-tool="File Name Generator"><span class="nav-tool-icon nav-tool-icon-text">Aa</span><span>File Name Generator</span></a>
+    <a class="tool-nav-btn" href="files-compress.html" data-tool="Files Compress"><span class="nav-tool-icon">⇩</span><span>Files Compress</span></a>
+  </nav>
+  <div class="header-tools">
+<div class="notification-wrap">
+      <button class="icon-btn notification-button" id="notificationBtn" aria-label="Office notifications" aria-expanded="false" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <i id="notificationUnread" hidden>0</i>
+      </button>
+      <div class="notification-panel" id="notificationPanel" aria-hidden="true">
+        <div class="notification-panel-head"><div><span>Office updates</span><strong>Notifications</strong></div><button id="notificationClearBtn" type="button">Clear</button></div>
+        <div class="notification-list" id="notificationList"><div class="notification-empty">No new updates yet.</div></div>
+      </div>
+    </div>
+</div>
+</div></header>
+
+    <!-- Main Content -->
+    <div id="compress-lib-warning" class="compress-lib-warning">Some compression libraries could not load. Check your internet connection, then reload this page.</div>
+
+    <main class="flex-1 w-full max-w-4xl mx-auto px-3 md:px-6 py-4 md:py-6">
+        <!-- Hero -->
+        <div class="text-center mb-5">
+            <h1 class="compress-title">Kidzstudios File Tools</h1>
+            <p class="text-slate-500 text-sm mt-1">Batch processing · Up to 10 files · Original filenames preserved</p>
+        </div>
+
+        <!-- Tab Grid -->
+        <div id="tabGrid">
+            <button class="tab-card tab-active" data-tab="pdf" style="--tab-color:#ef4444;">
+                <i class="fas fa-file-pdf"></i><span class="tab-info"><span class="tab-name">PDF Compressor</span><span class="tab-hint">Compress PDFs</span></span>
+            </button>
+            <button class="tab-card" data-tab="imgComp" style="--tab-color:#10b981;">
+                <i class="fas fa-compress-alt"></i><span class="tab-info"><span class="tab-name">Image Compressor</span><span class="tab-hint">JPEG/PNG/WEBP</span></span>
+            </button>
+            <button class="tab-card" data-tab="imgConv" style="--tab-color:#3b82f6;">
+                <i class="fas fa-exchange-alt"></i><span class="tab-info"><span class="tab-name">Image Converter</span><span class="tab-hint">Switch formats</span></span>
+            </button>
+            <button class="tab-card" data-tab="merge" style="--tab-color:#f59e0b;">
+                <i class="fas fa-object-group"></i><span class="tab-info"><span class="tab-name">Merge PDF</span><span class="tab-hint">Combine PDFs</span></span>
+            </button>
+            <button class="tab-card" data-tab="split" style="--tab-color:#8b5cf6;">
+                <i class="fas fa-cut"></i><span class="tab-info"><span class="tab-name">Split PDF</span><span class="tab-hint">Extract pages</span></span>
+            </button>
+            <button class="tab-card" data-tab="img2pdf" style="--tab-color:#6366f1;">
+                <i class="fas fa-file-image"></i><span class="tab-info"><span class="tab-name">Image to PDF</span><span class="tab-hint">Images → PDF</span></span>
+            </button>
+            <button class="tab-card" data-tab="pdf2word" style="--tab-color:#2563eb;">
+                <i class="fas fa-file-word"></i><span class="tab-info"><span class="tab-name">PDF to Word</span><span class="tab-hint">Extract text</span></span>
+            </button>
+            <button class="tab-card" data-tab="pdf2excel" style="--tab-color:#16a34a;">
+                <i class="fas fa-file-excel"></i><span class="tab-info"><span class="tab-name">PDF to Excel</span><span class="tab-hint">Extract tables</span></span>
+            </button>
+        </div>
+
+        <!-- All sections (identical to original, functionality unchanged) -->
+        <div id="sectionsContainer">
+            <!-- 1) PDF COMPRESSOR -->
+            <section id="sec-pdf" class="section-panel">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-file-pdf text-red-500 mr-2"></i>PDF Compressor</h2>
+                <div id="pdf-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop PDFs here or click to browse</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 250 MB</p><input type="file" id="pdf-input" accept=".pdf" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="pdf-count">0</span> file(s)</span><button id="pdf-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="pdf-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <div id="pdf-settings" class="mt-3 hidden control-row">
+                    <select id="pdf-mode" class="text-sm border border-slate-200 rounded-lg px-2.5 py-2 bg-white text-slate-700">
+                        <option value="light">📄 Light (preserve text)</option>
+                        <option value="balanced">⚖️ Balanced (85% JPEG)</option>
+                        <option value="maximum">🔥 Maximum (50% JPEG)</option>
+                        <option value="custom">🎛️ Custom JPEG quality</option>
+                    </select>
+                    <div id="pdf-custom-wrap" class="hidden items-center gap-1.5">
+                        <span class="text-xs text-slate-500">Quality:</span>
+                        <input type="range" id="pdf-quality" min="0.3" max="0.9" step="0.01" value="0.65" class="w-16">
+                        <span id="pdf-quality-val" class="text-xs font-medium text-slate-700">65%</span>
+                    </div>
+                    <button id="pdf-btn" class="btn btn-primary"><i class="fas fa-compress-alt"></i> Compress All</button>
+                </div>
+                <div id="pdf-progress" class="mt-3 hidden"><div class="flex justify-between text-xs text-slate-600 mb-1"><span id="pdf-prog-label">Processing...</span><span id="pdf-prog-pct">0%</span></div><div class="progress-bar"><div id="pdf-prog-fill" class="progress-fill" style="width:0%"></div></div></div>
+                <div id="pdf-results" class="mt-4 hidden space-y-2"></div>
+                <p class="text-xs text-slate-400 text-center mt-3">⚠️ Aggressive modes flatten text to images. Best for scanned documents.</p>
+            </section>
+
+            <!-- 2) IMAGE COMPRESSOR -->
+            <section id="sec-imgComp" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-compress-alt text-emerald-500 mr-2"></i>Image Compressor</h2>
+                <div id="imgcomp-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop images here (JPEG, PNG, WEBP)</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 35 MB</p><input type="file" id="imgcomp-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="imgcomp-count">0</span> file(s)</span><button id="imgcomp-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="imgcomp-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <div id="imgcomp-settings" class="mt-3 hidden control-row">
+                    <span class="text-xs text-slate-500">Quality:</span>
+                    <input type="range" id="imgcomp-quality" min="0.1" max="1.0" step="0.01" value="0.5" class="w-20">
+                    <span id="imgcomp-quality-val" class="text-xs font-medium">50%</span>
+                    <span class="text-xs text-slate-500 ml-2">Scale:</span>
+                    <select id="imgcomp-scale" class="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white">
+                        <option value="1">100%</option><option value="0.75" selected>75%</option><option value="0.5">50%</option><option value="0.25">25%</option>
+                    </select>
+                    <button id="imgcomp-apply-scale" class="btn btn-ghost btn-xs">Apply</button>
+                    <label class="flex items-center gap-1 text-xs text-slate-600 ml-2"><input type="checkbox" id="imgcomp-force-jpeg" checked> Force JPEG</label>
+                    <button id="imgcomp-btn" class="btn btn-danger"><i class="fas fa-fire"></i> Compress All</button>
+                </div>
+                <div id="imgcomp-preview" class="mt-4 hidden"><p class="text-sm text-slate-600 mb-2">Live Preview (first image)</p><div class="flex flex-col sm:flex-row gap-4 items-start justify-center"><div class="text-center"><p class="text-xs text-slate-400">Original</p><canvas id="imgcomp-prev-orig" class="max-w-[180px] max-h-[180px] border border-slate-200 rounded"></canvas></div><div class="text-center"><p class="text-xs text-slate-400">Compressed</p><canvas id="imgcomp-prev-comp" class="max-w-[180px] max-h-[180px] border border-slate-200 rounded"></canvas><p id="imgcomp-prev-size" class="text-xs text-slate-500 mt-1"></p></div></div></div>
+                <div id="imgcomp-progress" class="mt-3 hidden"><div class="flex justify-between text-xs text-slate-600 mb-1"><span id="imgcomp-prog-label">Processing...</span><span id="imgcomp-prog-pct">0%</span></div><div class="progress-bar"><div id="imgcomp-prog-fill" class="progress-fill" style="width:0%"></div></div></div>
+                <div id="imgcomp-results" class="mt-4 hidden space-y-2"></div>
+            </section>
+
+            <!-- 3) IMAGE CONVERTER -->
+            <section id="sec-imgConv" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-exchange-alt text-blue-500 mr-2"></i>Image Converter</h2>
+                <div id="imgconv-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop images here to convert</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 35 MB</p><input type="file" id="imgconv-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="imgconv-count">0</span> file(s)</span><button id="imgconv-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="imgconv-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <div id="imgconv-settings" class="mt-3 hidden control-row">
+                    <select id="imgconv-format" class="text-sm border border-slate-200 rounded-lg px-2.5 py-2 bg-white"><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="webp">WEBP</option></select>
+                    <span class="text-xs text-slate-500">Quality:</span>
+                    <input type="range" id="imgconv-quality" min="0.1" max="1.0" step="0.01" value="0.8" class="w-16">
+                    <span id="imgconv-quality-val" class="text-xs font-medium">80%</span>
+                    <button id="imgconv-btn" class="btn btn-primary"><i class="fas fa-exchange-alt"></i> Convert All</button>
+                </div>
+                <div id="imgconv-progress" class="mt-3 hidden"><div class="flex justify-between text-xs text-slate-600 mb-1"><span id="imgconv-prog-label">Processing...</span><span id="imgconv-prog-pct">0%</span></div><div class="progress-bar"><div id="imgconv-prog-fill" class="progress-fill" style="width:0%"></div></div></div>
+                <div id="imgconv-results" class="mt-4 hidden space-y-2"></div>
+            </section>
+
+            <!-- 4) MERGE PDF -->
+            <section id="sec-merge" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-object-group text-amber-500 mr-2"></i>Merge PDFs</h2>
+                <div id="merge-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Select PDFs to merge (drag to reorder)</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 250 MB</p><input type="file" id="merge-input" accept=".pdf" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="merge-count">0</span> file(s)</span><button id="merge-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="merge-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <button id="merge-btn" class="btn btn-primary mt-4 w-full sm:w-auto" disabled><i class="fas fa-object-group"></i> Merge & Download</button>
+            </section>
+
+            <!-- 5) SPLIT PDF -->
+            <section id="sec-split" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-cut text-violet-500 mr-2"></i>Split PDF</h2>
+                <div id="split-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop PDFs here – select pages visually</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 250 MB</p><input type="file" id="split-input" accept=".pdf" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="split-count">0</span> file(s)</span><button id="split-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="split-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <div id="split-pages" class="mt-4 hidden"><p class="text-sm text-slate-600 mb-2">Select pages to extract (based on first PDF, up to 50 pages)</p><div class="flex gap-2 mb-3"><button id="split-select-all" class="btn btn-ghost btn-xs">Select All</button><button id="split-deselect-all" class="btn btn-ghost btn-xs">Deselect</button></div><div id="split-thumbs" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5 max-h-80 overflow-y-auto p-1"></div></div>
+                <button id="split-btn" class="btn btn-primary mt-4 w-full sm:w-auto" disabled><i class="fas fa-cut"></i> Extract Pages</button>
+                <div id="split-result" class="mt-3 text-sm text-slate-600"></div>
+            </section>
+
+            <!-- 6) IMAGE TO PDF -->
+            <section id="sec-img2pdf" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-file-image text-indigo-500 mr-2"></i>Image(s) to PDF</h2>
+                <div id="img2pdf-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Select images to convert to PDF</p><p class="text-xs text-slate-400 mt-1">Max 10 files, each ≤ 35 MB</p><input type="file" id="img2pdf-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span class="text-sm text-slate-600"><span id="img2pdf-count">0</span> file(s)</span><button id="img2pdf-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <div id="img2pdf-list" class="mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
+                <div class="mt-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"><label class="text-sm font-medium text-slate-700">Page size:</label><select id="img2pdf-size" class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"><option value="A4">A4</option><option value="Letter">Letter</option><option value="Fit">Fit to image</option></select><button id="img2pdf-btn" class="btn btn-primary w-full sm:w-auto" disabled><i class="fas fa-file-pdf"></i> Convert to PDF</button></div>
+            </section>
+
+            <!-- 7) PDF TO WORD -->
+            <section id="sec-pdf2word" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-file-word text-blue-500 mr-2"></i>PDF to Word</h2>
+                <div id="pdf2word-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop a PDF here</p><p class="text-xs text-slate-400 mt-1">Max 250 MB · OCR available for scans</p><input type="file" id="pdf2word-input" accept=".pdf" class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span id="pdf2word-fname" class="text-sm text-slate-600 truncate">No file chosen</span><button id="pdf2word-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <label class="flex items-center gap-2 mt-3 text-sm text-slate-700"><input type="checkbox" id="pdf2word-ocr"> Enable OCR (slower, for scanned PDFs)</label>
+                <button id="pdf2word-btn" class="btn btn-primary mt-4 w-full sm:w-auto" disabled><i class="fas fa-file-word"></i> Convert to Word</button>
+                <div id="pdf2word-progress" class="mt-3 hidden"><div class="flex justify-between text-xs text-slate-600 mb-1"><span id="pdf2word-prog-label">Processing...</span><span id="pdf2word-prog-pct">0%</span></div><div class="progress-bar"><div id="pdf2word-prog-fill" class="progress-fill" style="width:0%"></div></div></div>
+                <div id="pdf2word-result" class="mt-4 hidden"><a id="pdf2word-dl" class="btn btn-success"><i class="fas fa-download"></i> Download .doc</a></div>
+            </section>
+
+            <!-- 8) PDF TO EXCEL -->
+            <section id="sec-pdf2excel" class="section-panel hidden">
+                <h2 class="text-xl font-bold text-slate-900 mb-4"><i class="fas fa-file-excel text-green-500 mr-2"></i>PDF to Excel</h2>
+                <div id="pdf2excel-drop" class="drop-zone"><i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2 block"></i><p class="font-medium text-slate-600 text-sm">Drop a PDF here</p><p class="text-xs text-slate-400 mt-1">Max 250 MB · OCR available for scans</p><input type="file" id="pdf2excel-input" accept=".pdf" class="hidden"></div>
+                <div class="flex justify-between items-center mt-3"><span id="pdf2excel-fname" class="text-sm text-slate-600 truncate">No file chosen</span><button id="pdf2excel-clear" class="btn btn-ghost btn-xs hidden"><i class="fas fa-trash-alt"></i> Clear</button></div>
+                <label class="flex items-center gap-2 mt-3 text-sm text-slate-700"><input type="checkbox" id="pdf2excel-ocr"> Enable OCR (slower, for scanned PDFs)</label>
+                <button id="pdf2excel-btn" class="btn btn-primary mt-4 w-full sm:w-auto" disabled><i class="fas fa-file-excel"></i> Convert to Excel</button>
+                <div id="pdf2excel-progress" class="mt-3 hidden"><div class="flex justify-between text-xs text-slate-600 mb-1"><span id="pdf2excel-prog-label">Processing...</span><span id="pdf2excel-prog-pct">0%</span></div><div class="progress-bar"><div id="pdf2excel-prog-fill" class="progress-fill" style="width:0%"></div></div></div>
+                <div id="pdf2excel-result" class="mt-4 hidden"><a id="pdf2excel-dl" class="btn btn-success"><i class="fas fa-download"></i> Download .xls</a></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Simplified Footer (glass-like, matches calculator style) -->
+    <footer class="simple-footer">
+        <p>© 2026 Kidzstudios · Files are processed locally in your browser.</p>
+    </footer>
+
+    <script>
+        (function() {
+            // ── Utilities ──
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+            const formatBytes = (b) => {
+                if (b === 0) return '0 Bytes';
+                const k = 1024,
+                    s = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(b) / Math.log(k));
+                return parseFloat((b / Math.pow(k, i)).toFixed(2)) + ' ' + s[i];
+            };
+            const escapeHtml = (value) => String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            const celebrate = () => { if (typeof window.confetti === 'function') window.confetti({ particleCount: 40, spread: 52, origin: { y: 0.55 }, colors: ['#ef7b45','#43a276','#5687c6','#d99a38'] }); };
+            const bounceEl = (el) => { el.classList.add('bounce-dl');
+                setTimeout(() => el.classList.remove('bounce-dl'), 1800); };
+            const dropBounce = (el) => { el.classList.add('drop-bounce');
+                el.addEventListener('animationend', () => el.classList.remove('drop-bounce'), { once: true }); };
+
+            // ── Tab Switching ──
+            const allSections = ['pdf', 'imgComp', 'imgConv', 'merge', 'split', 'img2pdf', 'pdf2word', 'pdf2excel'];
+            const tabCards = $$('.tab-card');
+            tabCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const tab = card.dataset.tab;
+                    tabCards.forEach(c => c.classList.remove('tab-active'));
+                    card.classList.add('tab-active');
+                    allSections.forEach(s => $('#sec-' + s).classList.add('hidden'));
+                    $('#sec-' + tab).classList.remove('hidden');
+                });
+            });
+
+            // ── Generic Drop Zone Setup ──
+            function setupDropZone(dropId, inputId, onFiles, acceptFilter, maxSize, maxCount) {
+                const drop = $(dropId);
+                const input = $(inputId);
+                drop.addEventListener('click', () => input.click());
+                drop.addEventListener('dragover', e => { e.preventDefault();
+                    drop.classList.add('drop-active'); });
+                drop.addEventListener('dragleave', () => drop.classList.remove('drop-active'));
+                drop.addEventListener('drop', e => {
+                    e.preventDefault();
+                    drop.classList.remove('drop-active');
+                    const files = [...e.dataTransfer.files];
+                    const valid = files.filter(f => {
+                        if (acceptFilter && !acceptFilter(f)) return false;
+                        if (maxSize && f.size > maxSize) { alert(`"${f.name}" exceeds ${formatBytes(maxSize)}.`);
+                            return false; }
+                        return true;
+                    });
+                    if (valid.length) { onFiles(valid);
+                        dropBounce(drop); }
+                });
+                input.addEventListener('change', e => {
+                    if (e.target.files.length) {
+                        const files = [...e.target.files];
+                        const valid = files.filter(f => {
+                            if (acceptFilter && !acceptFilter(f)) return false;
+                            if (maxSize && f.size > maxSize) { alert(`"${f.name}" exceeds ${formatBytes(maxSize)}.`);
+                                return false; }
+                            return true;
+                        });
+                        if (valid.length) onFiles(valid);
+                        input.value = '';
+                    }
+                });
+            }
+
+            // ── Drag-to-reorder ──
+            function enableDragReorder(containerSelector, filesArr, renderFn) {
+                const container = $(containerSelector);
+                container.addEventListener('dragstart', e => {
+                    const item = e.target.closest('.file-item');
+                    if (!item) return;
+                    e.dataTransfer.setData('text/plain', item.dataset.index);
+                    item.style.opacity = '0.5';
+                });
+                container.addEventListener('dragend', e => {
+                    const item = e.target.closest('.file-item');
+                    if (item) item.style.opacity = '1';
+                });
+                container.addEventListener('dragover', e => e.preventDefault());
+                container.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const from = parseInt(e.dataTransfer.getData('text/plain'));
+                    const toItem = e.target.closest('.file-item');
+                    if (!toItem || isNaN(from)) return;
+                    const to = parseInt(toItem.dataset.index);
+                    if (isNaN(to) || from === to) return;
+                    const moved = filesArr.splice(from, 1)[0];
+                    filesArr.splice(to, 0, moved);
+                    renderFn();
+                });
+            }
+
+            // ── Generate PDF thumbnail ──
+            async function pdfThumb(file, scale = 0.3) {
+                const buf = await file.arrayBuffer();
+                const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+                const page = await doc.getPage(1);
+                const vp = page.getViewport({ scale });
+                const canvas = document.createElement('canvas');
+                canvas.width = vp.width;
+                canvas.height = vp.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                return canvas.toDataURL();
+            }
+
+            // ── OCR helper ──
+            async function runOCR(canvas, progCb) {
+                const worker = await Tesseract.createWorker('eng', 1, {
+                    logger: m => { if (m.status === 'recognizing text' && progCb) progCb(m.progress); }
+                });
+                const { data: { text } } = await worker.recognize(canvas);
+                await worker.terminate();
+                return text;
+            }
+
+            // ═══════════════ 1) PDF COMPRESSOR ═══════════════
+            (() => {
+                const files = [];
+                const list = $('#pdf-list'),
+                    settings = $('#pdf-settings'),
+                    countEl = $('#pdf-count'),
+                    clearBtn = $('#pdf-clear'),
+                    btn = $('#pdf-btn'),
+                    progress = $('#pdf-progress'),
+                    progFill = $('#pdf-prog-fill'),
+                    progPct = $('#pdf-prog-pct'),
+                    progLabel = $('#pdf-prog-label'),
+                    results = $('#pdf-results'),
+                    modeSel = $('#pdf-mode'),
+                    customWrap = $('#pdf-custom-wrap'),
+                    qualSlider = $('#pdf-quality'),
+                    qualVal = $('#pdf-quality-val');
+
+                modeSel.addEventListener('change', () => customWrap.classList.toggle('hidden', modeSel.value !==
+                    'custom'));
+                qualSlider.addEventListener('input', () => qualVal.textContent = Math.round(qualSlider.value * 100) +
+                    '%');
+
+                async function render() {
+                    countEl.textContent = files.length;
+                    if (!files.length) { list.innerHTML = '';
+                        settings.classList.add('hidden');
+                        clearBtn.classList.add('hidden'); return; }
+                    settings.classList.remove('hidden');
+                    clearBtn.classList.remove('hidden');
+                    list.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        const thumb = await pdfThumb(f);
+                        list.innerHTML +=
+                            `<div class="file-item" draggable="true" data-index="${i}"><img src="${thumb}" alt=""><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`;
+                    }
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        files.splice(parseInt(b.dataset.idx), 1);
+                        render();
+                    }));
+                }
+                enableDragReorder('#pdf-list', files, render);
+                clearBtn.addEventListener('click', () => { files.length = 0;
+                    render(); });
+                setupDropZone('#pdf-drop', '#pdf-input', (newFiles) => {
+                    if (files.length + newFiles.length > 10) { alert('Maximum 10 PDFs.');
+                        newFiles = newFiles.slice(0, 10 - files.length); }
+                    files.push(...newFiles);
+                    render();
+                }, f => f.type === 'application/pdf', 250 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!files.length) return;
+                    const mode = modeSel.value;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Compressing...';
+                    progress.classList.remove('hidden');
+                    results.classList.add('hidden');
+                    results.innerHTML = '';
+                    pdfjsLib.GlobalWorkerOptions.workerSrc =
+                        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    let done = 0;
+                    for (const file of files) {
+                        progLabel.textContent = `Compressing ${file.name} (${++done}/${files.length})...`;
+                        progPct.textContent = '0%';
+                        progFill.style.width = '0%';
+                        try {
+                            const buf = await file.arrayBuffer();
+                            let resultBuf;
+                            if (mode === 'light') {
+                                const pdoc = await PDFLib.PDFDocument.load(buf);
+                                const ndoc = await PDFLib.PDFDocument.create();
+                                const pages = await ndoc.copyPages(pdoc, pdoc.getPageIndices());
+                                pages.forEach(p => ndoc.addPage(p));
+                                ndoc.setTitle('');
+                                ndoc.setAuthor('');
+                                ndoc.setSubject('');
+                                ndoc.setCreator('');
+                                ndoc.setProducer('');
+                                resultBuf = await ndoc.save({ useObjectStreams: true });
+                            } else {
+                                const quality = mode === 'balanced' ? 0.85 : mode === 'maximum' ? 0.5 : Math.min(0.9,
+                                    Math.max(0.3, parseFloat(qualSlider.value)));
+                                const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+                                const pgCount = doc.numPages;
+                                const first = await doc.getPage(1);
+                                const vp = first.getViewport({ scale: 1 });
+                                const wmm = vp.width * 0.352778,
+                                    hmm = vp.height * 0.352778;
+                                const { jsPDF } = window.jspdf;
+                                const pdf = new jsPDF({ unit: 'mm', format: [wmm, hmm], orientation: wmm > hmm ?
+                                        'landscape' : 'portrait' });
+                                let firstPg = true;
+                                for (let p = 1; p <= pgCount; p++) {
+                                    progPct.textContent = Math.floor((p - 1) / pgCount * 100) + '%';
+                                    progFill.style.width = ((p - 1) / pgCount * 100) + '%';
+                                    const page = await doc.getPage(p);
+                                    const vps = page.getViewport({ scale: 2 });
+                                    const cvs = document.createElement('canvas');
+                                    cvs.width = vps.width;
+                                    cvs.height = vps.height;
+                                    const ctx = cvs.getContext('2d');
+                                    await page.render({ canvasContext: ctx, viewport: vps }).promise;
+                                    const dataUrl = cvs.toDataURL('image/jpeg', quality);
+                                    if (firstPg) { pdf.addImage(dataUrl, 'JPEG', 0, 0, wmm, hmm, undefined,
+                                        'FAST');
+                                        firstPg = false; } else { pdf.addPage([wmm, hmm]);
+                                        pdf.addImage(dataUrl, 'JPEG', 0, 0, wmm, hmm, undefined, 'FAST'); }
+                                    await new Promise(r => setTimeout(r, 3));
+                                }
+                                resultBuf = pdf.output('arraybuffer');
+                            }
+                            const newSize = resultBuf.byteLength;
+                            const saved = file.size - newSize;
+                            const pct = (saved / file.size) * 100;
+                            const blob = new Blob([resultBuf], { type: 'application/pdf' });
+                            const url = URL.createObjectURL(blob);
+                            results.innerHTML +=
+                                `<div class="result-item"><i class="fas fa-file-pdf text-red-500 text-2xl"></i><div class="file-info"><p class="font-semibold text-sm truncate">${file.name}</p><p class="text-xs text-slate-500">${formatBytes(file.size)} → ${formatBytes(newSize)} (↓${pct.toFixed(1)}%)</p></div><a href="${url}" download="${file.name}" class="btn btn-success btn-xs ml-auto dl-bounce"><i class="fas fa-download"></i></a></div>`;
+                            progFill.style.width = '100%';
+                            progPct.textContent = '100%';
+                        } catch (err) {
+                            results.innerHTML +=
+                                `<div class="result-item" style="background:#fef2f2;border-color:#fecaca;"><i class="fas fa-exclamation-circle text-red-400 text-2xl"></i><div class="file-info"><p class="text-sm font-medium text-red-500 truncate">${file.name}</p><p class="text-xs text-red-400">${err.message}</p></div></div>`;
+                        }
+                    }
+                    results.classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-compress-alt"></i> Compress All';
+                    if (results.querySelectorAll('.result-item').length) celebrate();
+                    results.querySelectorAll('.dl-bounce').forEach(b => bounceEl(b));
+                });
+            })();
+
+            // ═══════════════ 2) IMAGE COMPRESSOR ═══════════════
+            (() => {
+                const files = [];
+                const origDims = new Map();
+                const list = $('#imgcomp-list'),
+                    settings = $('#imgcomp-settings'),
+                    countEl = $('#imgcomp-count'),
+                    clearBtn = $('#imgcomp-clear'),
+                    btn = $('#imgcomp-btn'),
+                    progress = $('#imgcomp-progress'),
+                    progFill = $('#imgcomp-prog-fill'),
+                    progPct = $('#imgcomp-prog-pct'),
+                    results = $('#imgcomp-results'),
+                    qualSlider = $('#imgcomp-quality'),
+                    qualVal = $('#imgcomp-quality-val'),
+                    scaleSel = $('#imgcomp-scale'),
+                    applyScale = $('#imgcomp-apply-scale'),
+                    forceJpeg = $('#imgcomp-force-jpeg'),
+                    preview = $('#imgcomp-preview'),
+                    prevOrig = $('#imgcomp-prev-orig'),
+                    prevComp = $('#imgcomp-prev-comp'),
+                    prevSize = $('#imgcomp-prev-size');
+                let previewTimeout;
+
+                qualSlider.addEventListener('input', () => { qualVal.textContent = Math.round(qualSlider.value * 100) +
+                        '%';
+                    debouncePreview(); });
+                forceJpeg.addEventListener('change', debouncePreview);
+
+                function debouncePreview() { clearTimeout(previewTimeout);
+                    previewTimeout = setTimeout(updatePreview, 350); }
+
+                async function updatePreview() {
+                    if (!files.length) { preview.classList.add('hidden'); return; }
+                    preview.classList.remove('hidden');
+                    const file = files[0];
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    await new Promise((res, rej) => { img.onload = res;
+                        img.onerror = rej; });
+                    const maxDim = 180;
+                    const s = Math.min(maxDim / img.width, maxDim / img.height, 1);
+                    const w = Math.round(img.width * s),
+                        h = Math.round(img.height * s);
+                    prevOrig.width = w;
+                    prevOrig.height = h;
+                    prevOrig.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const cvs = document.createElement('canvas');
+                    cvs.width = img.width;
+                    cvs.height = img.height;
+                    cvs.getContext('2d').drawImage(img, 0, 0);
+                    const blob = await new Promise(r => cvs.toBlob(r, forceJpeg.checked ? 'image/jpeg' : file.type,
+                        parseFloat(qualSlider.value)));
+                    const compImg = new Image();
+                    compImg.src = URL.createObjectURL(blob);
+                    await new Promise((res, rej) => { compImg.onload = res;
+                        compImg.onerror = rej; });
+                    const cs = Math.min(maxDim / compImg.width, maxDim / compImg.height, 1);
+                    prevComp.width = Math.round(compImg.width * cs);
+                    prevComp.height = Math.round(compImg.height * cs);
+                    prevComp.getContext('2d').drawImage(compImg, 0, 0, prevComp.width, prevComp.height);
+                    prevSize.textContent = formatBytes(blob.size);
+                }
+
+                async function render() {
+                    countEl.textContent = files.length;
+                    if (!files.length) { list.innerHTML = '';
+                        settings.classList.add('hidden');
+                        clearBtn.classList.add('hidden');
+                        preview.classList.add('hidden'); return; }
+                    settings.classList.remove('hidden');
+                    clearBtn.classList.remove('hidden');
+                    list.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        const url = URL.createObjectURL(f);
+                        const img = new Image();
+                        img.src = url;
+                        await new Promise((res, rej) => { img.onload = res;
+                            img.onerror = rej; });
+                        origDims.set(f, { w: img.width, h: img.height });
+                        list.innerHTML +=
+                            `<div class="file-item" draggable="true" data-index="${i}"><img src="${url}" alt=""><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)} · ${img.width}×${img.height}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`;
+                    }
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const idx = parseInt(b.dataset.idx);
+                        origDims.delete(files[idx]);
+                        files.splice(idx, 1);
+                        render();
+                    }));
+                    updatePreview();
+                }
+                enableDragReorder('#imgcomp-list', files, render);
+                clearBtn.addEventListener('click', () => { files.length = 0;
+                    origDims.clear();
+                    render(); });
+                applyScale.addEventListener('click', () => {
+                    if (!origDims.size) return;
+                    const factor = parseFloat(scaleSel.value);
+                    const dim = origDims.values().next().value;
+                    alert(`Scale set to ${Math.round(factor*100)}%. Will apply on compression.`);
+                });
+                setupDropZone('#imgcomp-drop', '#imgcomp-input', (newFiles) => {
+                    if (files.length + newFiles.length > 10) { alert('Maximum 10 images.');
+                        newFiles = newFiles.slice(0, 10 - files.length); }
+                    files.push(...newFiles);
+                    render();
+                }, f => f.type.startsWith('image/'), 35 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!files.length) return;
+                    const quality = parseFloat(qualSlider.value);
+                    const force = forceJpeg.checked;
+                    const scaleFactor = parseFloat(scaleSel.value);
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
+                    progress.classList.remove('hidden');
+                    results.classList.add('hidden');
+                    results.innerHTML = '';
+                    for (const file of files) {
+                        progPct.textContent = '0%';
+                        progFill.style.width = '0%';
+                        try {
+                            const img = new Image();
+                            img.src = URL.createObjectURL(file);
+                            await new Promise((res, rej) => { img.onload = res;
+                                img.onerror = rej; });
+                            const ow = img.width,
+                                oh = img.height;
+                            const w = Math.round(ow * scaleFactor),
+                                h = Math.round(oh * scaleFactor);
+                            const cvs = document.createElement('canvas');
+                            cvs.width = w;
+                            cvs.height = h;
+                            cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+                            const mime = force ? 'image/jpeg' : file.type;
+                            const blob = await new Promise(r => cvs.toBlob(r, mime, quality));
+                            const newSize = blob.size;
+                            const saved = file.size - newSize;
+                            const pct = (saved / file.size) * 100;
+                            const url = URL.createObjectURL(blob);
+                            results.innerHTML +=
+                                `<div class="result-item"><img src="${url}" alt=""><div class="file-info"><p class="font-semibold text-sm truncate">${file.name}</p><p class="text-xs text-slate-500">${formatBytes(file.size)} → ${formatBytes(newSize)} (↓${pct.toFixed(1)}%) · ${w}×${h}</p></div><a href="${url}" download="${file.name}" class="btn btn-success btn-xs ml-auto dl-bounce"><i class="fas fa-download"></i></a></div>`;
+                            progFill.style.width = '100%';
+                            progPct.textContent = '100%';
+                        } catch (err) {
+                            results.innerHTML +=
+                                `<div class="result-item" style="background:#fef2f2;border-color:#fecaca;"><i class="fas fa-exclamation-circle text-red-400 text-2xl"></i><div class="file-info"><p class="text-sm font-medium text-red-500 truncate">${file.name}</p><p class="text-xs text-red-400">${err.message}</p></div></div>`;
+                        }
+                    }
+                    results.classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-fire"></i> Compress All';
+                    if (results.querySelectorAll('.result-item').length) celebrate();
+                    results.querySelectorAll('.dl-bounce').forEach(b => bounceEl(b));
+                });
+            })();
+
+            // ═══════════════ 3) IMAGE CONVERTER ═══════════════
+            (() => {
+                const files = [];
+                const list = $('#imgconv-list'),
+                    settings = $('#imgconv-settings'),
+                    countEl = $('#imgconv-count'),
+                    clearBtn = $('#imgconv-clear'),
+                    btn = $('#imgconv-btn'),
+                    progress = $('#imgconv-progress'),
+                    progFill = $('#imgconv-prog-fill'),
+                    progPct = $('#imgconv-prog-pct'),
+                    results = $('#imgconv-results'),
+                    fmtSel = $('#imgconv-format'),
+                    qualSlider = $('#imgconv-quality'),
+                    qualVal = $('#imgconv-quality-val');
+                qualSlider.addEventListener('input', () => qualVal.textContent = Math.round(qualSlider.value * 100) +
+                    '%');
+
+                async function render() {
+                    countEl.textContent = files.length;
+                    if (!files.length) { list.innerHTML = '';
+                        settings.classList.add('hidden');
+                        clearBtn.classList.add('hidden'); return; }
+                    settings.classList.remove('hidden');
+                    clearBtn.classList.remove('hidden');
+                    list.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        const url = URL.createObjectURL(f);
+                        const img = new Image();
+                        img.src = url;
+                        await new Promise((res, rej) => { img.onload = res;
+                            img.onerror = rej; });
+                        list.innerHTML +=
+                            `<div class="file-item" draggable="true" data-index="${i}"><img src="${url}" alt=""><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)} · ${img.width}×${img.height}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`;
+                    }
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        files.splice(parseInt(b.dataset.idx), 1);
+                        render();
+                    }));
+                }
+                enableDragReorder('#imgconv-list', files, render);
+                clearBtn.addEventListener('click', () => { files.length = 0;
+                    render(); });
+                setupDropZone('#imgconv-drop', '#imgconv-input', (newFiles) => {
+                    if (files.length + newFiles.length > 10) { alert('Maximum 10 images.');
+                        newFiles = newFiles.slice(0, 10 - files.length); }
+                    files.push(...newFiles);
+                    render();
+                }, f => f.type.startsWith('image/'), 35 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!files.length) return;
+                    const format = fmtSel.value;
+                    const quality = parseFloat(qualSlider.value);
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Converting...';
+                    progress.classList.remove('hidden');
+                    results.classList.add('hidden');
+                    results.innerHTML = '';
+                    for (const file of files) {
+                        progPct.textContent = '0%';
+                        progFill.style.width = '0%';
+                        try {
+                            const img = new Image();
+                            img.src = URL.createObjectURL(file);
+                            await new Promise((res, rej) => { img.onload = res;
+                                img.onerror = rej; });
+                            const cvs = document.createElement('canvas');
+                            cvs.width = img.width;
+                            cvs.height = img.height;
+                            cvs.getContext('2d').drawImage(img, 0, 0);
+                            const mime = format === 'jpeg' ? 'image/jpeg' : format === 'png' ? 'image/png' :
+                                'image/webp';
+                            const blob = await new Promise(r => cvs.toBlob(r, mime, quality));
+                            const newSize = blob.size;
+                            const saved = file.size - newSize;
+                            const pct = (saved / file.size) * 100;
+                            const url = URL.createObjectURL(blob);
+                            results.innerHTML +=
+                                `<div class="result-item"><img src="${url}" alt=""><div class="file-info"><p class="font-semibold text-sm truncate">${file.name}</p><p class="text-xs text-slate-500">${formatBytes(file.size)} → ${formatBytes(newSize)} (${pct>=0?'↓':'↑'}${Math.abs(pct).toFixed(1)}%)</p></div><a href="${url}" download="${file.name.replace(/\.[^.]+$/, '')}.${format}" class="btn btn-success btn-xs ml-auto dl-bounce"><i class="fas fa-download"></i></a></div>`;
+                            progFill.style.width = '100%';
+                            progPct.textContent = '100%';
+                        } catch (err) {
+                            results.innerHTML +=
+                                `<div class="result-item" style="background:#fef2f2;border-color:#fecaca;"><i class="fas fa-exclamation-circle text-red-400 text-2xl"></i><div class="file-info"><p class="text-sm font-medium text-red-500 truncate">${file.name}</p><p class="text-xs text-red-400">${err.message}</p></div></div>`;
+                        }
+                    }
+                    results.classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Convert All';
+                    if (results.querySelectorAll('.result-item').length) celebrate();
+                    results.querySelectorAll('.dl-bounce').forEach(b => bounceEl(b));
+                });
+            })();
+
+            // ═══════════════ 4) MERGE PDF ═══════════════
+            (() => {
+                const files = [];
+                const list = $('#merge-list'),
+                    countEl = $('#merge-count'),
+                    clearBtn = $('#merge-clear'),
+                    btn = $('#merge-btn');
+
+                async function render() {
+                    countEl.textContent = files.length;
+                    if (!files.length) { list.innerHTML =
+                            '<p class="text-slate-400 text-center text-sm py-4">No files selected</p>';
+                        btn.disabled = true;
+                        clearBtn.classList.add('hidden'); return; }
+                    clearBtn.classList.remove('hidden');
+                    btn.disabled = files.length < 2;
+                    list.innerHTML = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        const thumb = await pdfThumb(f, 0.22);
+                        list.innerHTML +=
+                            `<div class="file-item" draggable="true" data-index="${i}"><img src="${thumb}" alt=""><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`;
+                    }
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        files.splice(parseInt(b.dataset.idx), 1);
+                        render();
+                    }));
+                }
+                enableDragReorder('#merge-list', files, render);
+                clearBtn.addEventListener('click', () => { files.length = 0;
+                    render(); });
+                setupDropZone('#merge-drop', '#merge-input', (newFiles) => {
+                    if (files.length + newFiles.length > 10) { alert('Maximum 10 PDFs.');
+                        newFiles = newFiles.slice(0, 10 - files.length); }
+                    files.push(...newFiles);
+                    render();
+                }, f => f.type === 'application/pdf', 250 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (files.length < 2) { alert('Select at least 2 PDFs.'); return; }
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Merging...';
+                    try {
+                        const merged = await PDFLib.PDFDocument.create();
+                        for (const f of files) {
+                            const bytes = await f.arrayBuffer();
+                            const pdf = await PDFLib.PDFDocument.load(bytes);
+                            const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+                            pages.forEach(p => merged.addPage(p));
+                        }
+                        const blob = new Blob([await merged.save()], { type: 'application/pdf' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = 'merged.pdf';
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                        celebrate();
+                    } catch (e) { alert('Merge failed: ' + e.message); } finally { btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-object-group"></i> Merge & Download'; }
+                });
+            })();
+
+            // ═══════════════ 5) SPLIT PDF ═══════════════
+            (() => {
+                const files = [];
+                let selectedPages = new Set();
+                const list = $('#split-list'),
+                    countEl = $('#split-count'),
+                    clearBtn = $('#split-clear'),
+                    btn = $('#split-btn'),
+                    pagesDiv = $('#split-pages'),
+                    thumbsDiv = $('#split-thumbs'),
+                    resultDiv = $('#split-result'),
+                    selAll = $('#split-select-all'),
+                    deselAll = $('#split-deselect-all');
+
+                function renderFileList() {
+                    countEl.textContent = files.length;
+                    if (!files.length) { list.innerHTML =
+                            '<p class="text-slate-400 text-center text-sm py-4">No PDFs selected</p>';
+                        clearBtn.classList.add('hidden');
+                        pagesDiv.classList.add('hidden');
+                        btn.disabled = true; return; }
+                    clearBtn.classList.remove('hidden');
+                    list.innerHTML = files.map((f, i) =>
+                        `<div class="file-item"><i class="fas fa-file-pdf text-red-500 file-icon"></i><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`
+                    ).join('');
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        files.splice(parseInt(b.dataset.idx), 1);
+                        selectedPages.clear();
+                        renderFileList();
+                        loadThumbnails();
+                    }));
+                    loadThumbnails();
+                }
+
+                async function loadThumbnails() {
+                    if (!files.length) { pagesDiv.classList.add('hidden'); return; }
+                    const first = files[0];
+                    const buf = await first.arrayBuffer();
+                    const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+                    const total = doc.numPages;
+                    const limit = Math.min(total, 50);
+                    selectedPages.clear();
+                    thumbsDiv.innerHTML = '';
+                    for (let i = 1; i <= limit; i++) {
+                        const page = await doc.getPage(i);
+                        const vp = page.getViewport({ scale: 0.22 });
+                        const cvs = document.createElement('canvas');
+                        cvs.width = vp.width;
+                        cvs.height = vp.height;
+                        await page.render({ canvasContext: cvs.getContext('2d'), viewport: vp }).promise;
+                        const div = document.createElement('div');
+                        div.className = 'page-thumb';
+                        div.innerHTML =
+                            `<img src="${cvs.toDataURL()}" alt="Page ${i}"><div class="check-mark"><i class="fas fa-check"></i></div>`;
+                        div.dataset.page = i;
+                        div.addEventListener('click', () => {
+                            if (selectedPages.has(i)) { selectedPages.delete(i);
+                                div.classList.remove('selected'); } else { selectedPages.add(i);
+                                div.classList.add('selected'); }
+                            btn.disabled = selectedPages.size === 0;
+                        });
+                        thumbsDiv.appendChild(div);
+                    }
+                    pagesDiv.classList.remove('hidden');
+                    btn.disabled = true;
+                }
+
+                selAll.addEventListener('click', () => {
+                    thumbsDiv.querySelectorAll('.page-thumb').forEach(el => {
+                        const p = parseInt(el.dataset.page);
+                        selectedPages.add(p);
+                        el.classList.add('selected');
+                    });
+                    btn.disabled = false;
+                });
+                deselAll.addEventListener('click', () => { selectedPages.clear();
+                    thumbsDiv.querySelectorAll('.page-thumb').forEach(el => el.classList.remove('selected'));
+                    btn.disabled = true; });
+                clearBtn.addEventListener('click', () => { files.length = 0;
+                    selectedPages.clear();
+                    renderFileList(); });
+                setupDropZone('#split-drop', '#split-input', (newFiles) => {
+                    if (files.length + newFiles.length > 10) { alert('Maximum 10 PDFs.');
+                        newFiles = newFiles.slice(0, 10 - files.length); }
+                    files.push(...newFiles);
+                    renderFileList();
+                }, f => f.type === 'application/pdf', 250 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!files.length || selectedPages.size === 0) { alert('Select at least one page.'); return; }
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Extracting...';
+                    resultDiv.innerHTML = '';
+                    try {
+                        for (const file of files) {
+                            const buf = await file.arrayBuffer();
+                            const pdf = await PDFLib.PDFDocument.load(buf);
+                            const total = pdf.getPageCount();
+                            const toExtract = [...selectedPages].filter(p => p >= 1 && p <= total).map(p => p -
+                                1);
+                            if (!toExtract.length) {
+                                resultDiv.innerHTML +=
+                                    `<p class="text-amber-600 text-sm">⚠️ No valid pages in "${file.name}"</p>`;
+                                continue;
+                            }
+                            const newPdf = await PDFLib.PDFDocument.create();
+                            const copied = await newPdf.copyPages(pdf, toExtract);
+                            copied.forEach(p => newPdf.addPage(p));
+                            const blob = new Blob([await newPdf.save()], { type: 'application/pdf' });
+                            const a = document.createElement('a');
+                            a.href = URL.createObjectURL(blob);
+                            a.download = file.name.replace(/\.pdf$/i, '_extracted.pdf');
+                            a.click();
+                            URL.revokeObjectURL(a.href);
+                            resultDiv.innerHTML +=
+                                `<p class="text-emerald-600 text-sm">✅ Extracted ${toExtract.length} pages from "${file.name}"</p>`;
+                        }
+                        celebrate();
+                    } catch (e) { alert('Split error: ' + e.message); } finally { btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-cut"></i> Extract Pages'; }
+                });
+            })();
+
+            // ═══════════════ 6) IMAGE TO PDF ═══════════════
+            (() => {
+                const images = [];
+                const list = $('#img2pdf-list'),
+                    countEl = $('#img2pdf-count'),
+                    clearBtn = $('#img2pdf-clear'),
+                    btn = $('#img2pdf-btn'),
+                    sizeSel = $('#img2pdf-size');
+
+                function render() {
+                    countEl.textContent = images.length;
+                    if (!images.length) { list.innerHTML =
+                            '<p class="text-slate-400 text-center text-sm py-4">No images selected</p>';
+                        btn.disabled = true;
+                        clearBtn.classList.add('hidden'); return; }
+                    clearBtn.classList.remove('hidden');
+                    btn.disabled = false;
+                    list.innerHTML = images.map((f, i) =>
+                        `<div class="file-item" draggable="true" data-index="${i}"><img src="${URL.createObjectURL(f)}" alt=""><div class="file-info"><p class="file-name">${f.name}</p><p class="file-meta">${formatBytes(f.size)}</p></div><button data-idx="${i}" class="text-red-400 hover:text-red-600 p-1 remove-btn"><i class="fas fa-trash-alt"></i></button></div>`
+                    ).join('');
+                    list.querySelectorAll('.remove-btn').forEach(b => b.addEventListener('click', e => {
+                        e.stopPropagation();
+                        images.splice(parseInt(b.dataset.idx), 1);
+                        render();
+                    }));
+                }
+                enableDragReorder('#img2pdf-list', images, render);
+                clearBtn.addEventListener('click', () => { images.length = 0;
+                    render(); });
+                setupDropZone('#img2pdf-drop', '#img2pdf-input', (newFiles) => {
+                    if (images.length + newFiles.length > 10) { alert('Maximum 10 images.');
+                        newFiles = newFiles.slice(0, 10 - images.length); }
+                    images.push(...newFiles);
+                    render();
+                }, f => f.type.startsWith('image/'), 35 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!images.length) return;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating PDF...';
+                    try {
+                        const pdf = await PDFLib.PDFDocument.create();
+                        for (const file of images) {
+                            const bytes = await file.arrayBuffer();
+                            let image;
+                            if (file.type === 'image/jpeg') image = await pdf.embedJpg(bytes);
+                            else if (file.type === 'image/png') image = await pdf.embedPng(bytes);
+                            else if (file.type === 'image/webp') {
+                                const bmp = await createImageBitmap(new Blob([bytes]));
+                                const c = document.createElement('canvas');
+                                c.width = bmp.width;
+                                c.height = bmp.height;
+                                c.getContext('2d').drawImage(bmp, 0, 0);
+                                const pngBuf = await new Promise(r => c.toBlob(r, 'image/png')).then(b => b
+                                    .arrayBuffer());
+                                image = await pdf.embedPng(pngBuf);
+                            } else continue;
+                            const { width, height } = image;
+                            let pw, ph;
+                            if (sizeSel.value === 'A4') { pw = 595;
+                                ph = 842; } else if (sizeSel.value === 'Letter') { pw = 612;
+                                ph = 792; } else { pw = width;
+                                ph = height; }
+                            const page = pdf.addPage([pw, ph]);
+                            const sc = Math.min(pw / width, ph / height);
+                            page.drawImage(image, { x: (pw - width * sc) / 2, y: (ph - height * sc) / 2, width: width *
+                                    sc, height: height * sc });
+                        }
+                        const blob = new Blob([await pdf.save()], { type: 'application/pdf' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = 'images.pdf';
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                        celebrate();
+                    } catch (e) { alert('Conversion failed: ' + e.message); } finally { btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-file-pdf"></i> Convert to PDF'; }
+                });
+            })();
+
+            // ═══════════════ 7) PDF TO WORD ═══════════════
+            (() => {
+                let file = null;
+                const fname = $('#pdf2word-fname'),
+                    clearBtn = $('#pdf2word-clear'),
+                    btn = $('#pdf2word-btn'),
+                    progress = $('#pdf2word-progress'),
+                    progFill = $('#pdf2word-prog-fill'),
+                    progPct = $('#pdf2word-prog-pct'),
+                    progLabel = $('#pdf2word-prog-label'),
+                    result = $('#pdf2word-result'),
+                    dl = $('#pdf2word-dl'),
+                    ocrCheck = $('#pdf2word-ocr');
+
+                function reset() { file = null;
+                    fname.textContent = 'No file chosen';
+                    clearBtn.classList.add('hidden');
+                    btn.disabled = true;
+                    result.classList.add('hidden');
+                    progress.classList.add('hidden'); }
+                clearBtn.addEventListener('click', reset);
+                setupDropZone('#pdf2word-drop', '#pdf2word-input', (newFiles) => {
+                    const f = newFiles[0];
+                    if (f.size > 250 * 1024 * 1024) { alert('File too large.'); return; }
+                    file = f;
+                    fname.textContent = f.name;
+                    clearBtn.classList.remove('hidden');
+                    btn.disabled = false;
+                    result.classList.add('hidden');
+                }, f => f.type === 'application/pdf', 250 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!file) return;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Converting...';
+                    progress.classList.remove('hidden');
+                    result.classList.add('hidden');
+                    progPct.textContent = '0%';
+                    progFill.style.width = '0%';
+                    const useOcr = ocrCheck.checked;
+                    try {
+                        const buf = await file.arrayBuffer();
+                        const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+                        const pages = doc.numPages;
+                        let html = `<!doctype html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${escapeHtml(file.name)}</title><style>body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.5;color:#111;margin:24px}p{margin:0 0 12px;white-space:normal}hr{border:0;border-top:1px solid #ddd;margin:18px 0}</style></head><body>`;
+                        for (let i = 1; i <= pages; i++) {
+                            progPct.textContent = Math.floor((i - 1) / pages * 100) + '%';
+                            progFill.style.width = ((i - 1) / pages * 100) + '%';
+                            if (useOcr) {
+                                progLabel.textContent = `OCR page ${i}/${pages}...`;
+                                const page = await doc.getPage(i);
+                                const vp = page.getViewport({ scale: 2 });
+                                const cvs = document.createElement('canvas');
+                                cvs.width = vp.width;
+                                cvs.height = vp.height;
+                                const ctx = cvs.getContext('2d');
+                                await page.render({ canvasContext: ctx, viewport: vp }).promise;
+                                const text = await runOCR(cvs, (prog) => {
+                                    progPct.textContent = Math.floor(prog * 100) + '%';
+                                    progFill.style.width = (prog * 100) + '%';
+                                });
+                                html += `<p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>`;
+                            } else {
+                                const page = await doc.getPage(i);
+                                const tc = await page.getTextContent();
+                                const text = tc.items.map(it => it.str).join(' ');
+                                html += `<p>${text}</p>`;
+                            }
+                            if (i < pages) html += '<p style="page-break-before:always;">&nbsp;</p>';
+                        }
+                        html += '</body></html>';
+                        const blob = new Blob([html], { type: 'application/msword' });
+                        dl.href = URL.createObjectURL(blob);
+                        dl.download = file.name.replace(/\.pdf$/i, '.doc');
+                        result.classList.remove('hidden');
+                        progress.classList.add('hidden');
+                        celebrate();
+                    } catch (e) { alert('Conversion failed: ' + e.message);
+                        progress.classList.add('hidden'); } finally { btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-file-word"></i> Convert to Word';
+                        progLabel.textContent = 'Processing...'; }
+                });
+            })();
+
+            // ═══════════════ 8) PDF TO EXCEL ═══════════════
+            (() => {
+                let file = null;
+                const fname = $('#pdf2excel-fname'),
+                    clearBtn = $('#pdf2excel-clear'),
+                    btn = $('#pdf2excel-btn'),
+                    progress = $('#pdf2excel-progress'),
+                    progFill = $('#pdf2excel-prog-fill'),
+                    progPct = $('#pdf2excel-prog-pct'),
+                    progLabel = $('#pdf2excel-prog-label'),
+                    result = $('#pdf2excel-result'),
+                    dl = $('#pdf2excel-dl'),
+                    ocrCheck = $('#pdf2excel-ocr');
+
+                function reset() { file = null;
+                    fname.textContent = 'No file chosen';
+                    clearBtn.classList.add('hidden');
+                    btn.disabled = true;
+                    result.classList.add('hidden');
+                    progress.classList.add('hidden'); }
+                clearBtn.addEventListener('click', reset);
+                setupDropZone('#pdf2excel-drop', '#pdf2excel-input', (newFiles) => {
+                    const f = newFiles[0];
+                    if (f.size > 250 * 1024 * 1024) { alert('File too large.'); return; }
+                    file = f;
+                    fname.textContent = f.name;
+                    clearBtn.classList.remove('hidden');
+                    btn.disabled = false;
+                    result.classList.add('hidden');
+                }, f => f.type === 'application/pdf', 250 * 1024 * 1024);
+
+                btn.addEventListener('click', async () => {
+                    if (!file) return;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Converting...';
+                    progress.classList.remove('hidden');
+                    result.classList.add('hidden');
+                    progPct.textContent = '0%';
+                    progFill.style.width = '0%';
+                    const useOcr = ocrCheck.checked;
+                    try {
+                        const buf = await file.arrayBuffer();
+                        const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+                        const pages = doc.numPages;
+                        let html = `<!doctype html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${escapeHtml(file.name)}</title><style>body{font-family:Arial,Helvetica,sans-serif;color:#111}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:6px 8px;vertical-align:top;text-align:left}th{background:#f2f2f2;font-weight:700}td:first-child{width:90px;white-space:nowrap}</style></head><body><table><tr><th>Page</th><th>Content</th></tr>`;
+                        for (let i = 1; i <= pages; i++) {
+                            progPct.textContent = Math.floor((i - 1) / pages * 100) + '%';
+                            progFill.style.width = ((i - 1) / pages * 100) + '%';
+                            let text = '';
+                            if (useOcr) {
+                                progLabel.textContent = `OCR page ${i}/${pages}...`;
+                                const page = await doc.getPage(i);
+                                const vp = page.getViewport({ scale: 2 });
+                                const cvs = document.createElement('canvas');
+                                cvs.width = vp.width;
+                                cvs.height = vp.height;
+                                const ctx = cvs.getContext('2d');
+                                await page.render({ canvasContext: ctx, viewport: vp }).promise;
+                                text = await runOCR(cvs, (prog) => {
+                                    progPct.textContent = Math.floor(prog * 100) + '%';
+                                    progFill.style.width = (prog * 100) + '%';
+                                });
+                            } else {
+                                const page = await doc.getPage(i);
+                                const tc = await page.getTextContent();
+                                text = tc.items.map(it => it.str).join(' ');
+                            }
+                            html +=
+                                `<tr><td>Page ${i}</td><td>${escapeHtml(text).replace(/\n/g, '<br>')}</td></tr>`;
+                        }
+                        html += '</table></body></html>';
+                        const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+                        dl.href = URL.createObjectURL(blob);
+                        dl.download = file.name.replace(/\.pdf$/i, '.xls');
+                        result.classList.remove('hidden');
+                        progress.classList.add('hidden');
+                        celebrate();
+                    } catch (e) { alert('Conversion failed: ' + e.message);
+                        progress.classList.add('hidden'); } finally { btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-file-excel"></i> Convert to Excel';
+                        progLabel.textContent = 'Processing...'; }
+                });
+            })();
+
+            // ── Initialize: set PDF.js worker ──
+            if (window.pdfjsLib?.GlobalWorkerOptions) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+            } else {
+                document.getElementById('compress-lib-warning')?.classList.add('show');
+            }
+        })();
+    </script>
+
+<script id="ks-upgrade-v2-js">
+(() => {
+  'use strict';
+
+  // Make accidental form submissions less likely in tool-style UIs.
+  document.querySelectorAll('button:not([type])').forEach(btn => btn.setAttribute('type','button'));
+
+  // Keyboard shortcut: Alt/Option + P = Portal.
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey && event.key.toLowerCase() === 'p') {
+      event.preventDefault();
+      if (!document.body || document.body.dataset.ksPage === 'index') return;
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Compact back-to-top utility on long pages.
+  if (document.body && document.body.dataset.ksPage !== 'index') {
+    const topBtn = document.createElement('button');
+    topBtn.type = 'button';
+    topBtn.className = 'ks-scroll-top no-print';
+    topBtn.setAttribute('aria-label','Back to top');
+    topBtn.setAttribute('title','Back to top');
+    topBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>';
+    topBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+    document.body.appendChild(topBtn);
+
+    const syncTopButton = () => {
+      topBtn.classList.toggle('ks-show', window.scrollY > 520);
+    };
+    window.addEventListener('scroll', syncTopButton, { passive:true });
+    syncTopButton();
+  }
+
+  // Better semantics for clickable non-button upload zones.
+  document.querySelectorAll('[onclick*="Upload"], .design-area, .header-logo-area').forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
+    if (!el.hasAttribute('role')) el.setAttribute('role','button');
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+  });
+  // Self-contained fallback for the legacy Job Sheet logo asset.
+  const legacyLogo = document.getElementById('logoImg');
+  if (legacyLogo) {
+    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="72" viewBox="0 0 280 72">
+      <rect width="280" height="72" rx="10" fill="#0b0d12"/>
+      <text x="18" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ff7a00">KIDZ</text>
+      <text x="94" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-style="italic" font-weight="900" fill="#ffffff">STUDIOS</text>
+      <rect x="93" y="51" width="137" height="4" rx="2" fill="#ff7a00"/>
+      <text x="188" y="65" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="700" fill="#ffffff">SINCE 2013</text>
+    </svg>`;
+    const fallbackSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fallbackSvg);
+    const applyLegacyFallback = () => {
+      legacyLogo.onerror = null;
+      legacyLogo.src = fallbackSrc;
+    };
+    legacyLogo.addEventListener('error', applyLegacyFallback);
+    if (legacyLogo.complete && legacyLogo.naturalWidth === 0) applyLegacyFallback();
+  }
+
+})();
+</script>
+
+<script src="netlify-sync.js" defer></script>
+
+<footer class="ks-version-footer no-print" aria-label="Build version">v48</footer>
+<script src="suite-header.js" defer></script>
+</body>
+</html>

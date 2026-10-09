@@ -1,0 +1,21 @@
+{
+  "name": "kidzstudios-office-v57",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "build:3d": "node scripts/build-3d.mjs"
+  },
+  "dependencies": {
+    "@netlify/database": "latest",
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "latest",
+    "esbuild": "0.28.0"
+  },
+  "version": "57.0.0"
+}
