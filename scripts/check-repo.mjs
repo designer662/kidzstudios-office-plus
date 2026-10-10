@@ -1,7 +1,7 @@
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 let failures=0;
-const required=['index.html','office-3d.js','supabase-config.js','supabase-bridge.js','job-management.html','netlify-sync.js'];
+const required=['index.html','office-3d.js','supabase-config.js','supabase-bridge.js','job-management.html','shared-sync.js'];
 for(const name of required){if(!existsSync(`public/${name}`)){console.error(`Missing public/${name}`);failures++;}}
 const html=readdirSync('public').filter(n=>n.endsWith('.html'));
 for(const name of html){const s=readFileSync(`public/${name}`,'utf8');

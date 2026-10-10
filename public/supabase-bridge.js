@@ -333,6 +333,7 @@
   function enterApp(){
     signedInOnce=true;loggedOut=false;resolveReady();hideGate();
     document.documentElement.dataset.ksAuth='ok';
+    try{window.dispatchEvent(new Event('ks:auth-ready'));}catch{}
     const so=document.querySelector('#ks-office-signout');if(so)so.dataset.authenticated='true';
     connectRealtime();
   }

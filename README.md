@@ -17,8 +17,7 @@ public/                               Website files published by GitHub Pages
 supabase/migrations/                  PostgreSQL schema, RLS, RPCs, Realtime publication
 scripts/generate-config.mjs          Build config from GitHub repository variables
 scripts/check-repo.mjs               Static repository integrity checks
-source/                               V57 TypeScript character source and original build scripts
-legacy/netlify/                       Historic API functions/migrations, NOT deployed
+source/                               3D scene TypeScript source (see source/readme.md)
 ```
 
 ## Quick start (in order)

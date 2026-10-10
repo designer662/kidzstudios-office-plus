@@ -106,7 +106,8 @@
 </style>
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
-<link rel="stylesheet" href="office-ux.css?v=58.0">
+<script src="ks-motion.js?v=58.1" defer></script>
+<link rel="stylesheet" href="office-ux.css?v=58.1">
 </head>
 <body data-ks-page="job-management">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -388,7 +389,7 @@ async function saveDropdownOptions(reason='updated dropdown options'){
  const btn=$('#saveOptionsBtn');
  try{
   if(btn){btn.disabled=true;btn.textContent='Saving…'}
-  $('#optionsStatus').textContent='Saving dropdown options to shared server…';updateOptionServerMeta('loading','Saving to Netlify Database…');
+  $('#optionsStatus').textContent='Saving dropdown options to shared server…';updateOptionServerMeta('loading','Saving to Supabase…');
   const r=await fetch(API,{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:OPTIONS_SCOPE,payload,clientId})});
   if(!r.ok)throw new Error(`Save failed (${r.status})`);
   const row=await r.json();optionsVersion=Number(row.version||optionsVersion+1);optionsSavedAt=Number(payload.savedAt);optionsLoaded=true;optionDirty=false;

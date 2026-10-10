@@ -457,7 +457,7 @@ button,input{font:inherit}.top-shell{padding:16px 20px 9px;z-index:30}.topbar{ma
 @media(max-width:920px){.today-panel.ops-panel{width:214px}.ops-tab{font-size:10px}.workload-list,.recent-jobs{max-height:185px}}
 @media(max-width:650px){.today-panel.ops-panel{width:176px;max-height:43vh}.ops-head strong{font-size:10px}.ops-source span{display:none}.ops-tabs{gap:2px}.ops-tab{font-size:10px}.workload-list,.recent-jobs{max-height:145px}.workload-row{grid-template-columns:22px 1fr auto;padding:5px;gap:5px}.workload-avatar{width:22px;height:22px}.job-row{padding:6px}.autocomplete{width:min(370px,calc(100vw - 24px))}}
 
-/* Netlify shared state status */
+/* Shared state status */
 .ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:10px;padding:6px 8px}}
 
 /* V17 shared Job Management link editor */
@@ -974,7 +974,10 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v52.css?v=57.0">
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
-<link rel="stylesheet" href="office-ux.css?v=58.0">
+<script src="ks-motion.js?v=58.1" defer></script>
+<script src="office-plus-ui.js?v=58.1" defer></script>
+<link rel="stylesheet" href="office-ux.css?v=58.1">
+<link rel="stylesheet" href="office-plus.css?v=58.1">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1136,7 +1139,7 @@ body{overscroll-behavior:none;}
     <div class="job-link-head"><div><span>Shared setting</span><strong id="jobLinkTitle">Job Management Link</strong></div><button id="jobLinkClose" aria-label="Close">×</button></div>
     <label class="job-link-label" for="jobLinkInput">Google Sheet edit link</label>
     <input id="jobLinkInput" class="job-link-input" type="url" inputmode="url" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=...">
-    <div class="job-link-help" id="jobLinkHelp">This link is shared through Netlify Database and will load for everyone.</div>
+    <div class="job-link-help" id="jobLinkHelp">This link is shared through Supabase and will load for everyone.</div>
     <div class="job-link-actions"><button class="job-link-secondary" id="jobLinkReset">Use default</button><button class="job-link-primary" id="jobLinkSave">Save shared link</button></div>
   </div>
 </div>
@@ -1160,7 +1163,7 @@ body{overscroll-behavior:none;}
     <div class="job-link-head"><div><span>Shared setting</span><strong id="driveLinkTitle">Google Drive Link</strong></div><button id="driveLinkClose" aria-label="Close">×</button></div>
     <label class="job-link-label" for="driveLinkInput">Shared Google Drive folder</label>
     <input id="driveLinkInput" class="job-link-input" type="url" inputmode="url" autocomplete="off" placeholder="https://drive.google.com/drive/folders/...">
-    <div class="job-link-help" id="driveLinkHelp">This link is shared through Netlify Database and will load for everyone.</div>
+    <div class="job-link-help" id="driveLinkHelp">This link is shared through Supabase and will load for everyone.</div>
     <div class="job-link-actions"><button class="job-link-secondary" id="driveLinkReset">Use default</button><button class="job-link-primary" id="driveLinkSave">Save shared link</button></div>
   </div>
 </div>
@@ -1173,7 +1176,7 @@ body{overscroll-behavior:none;}
       <label class="staff-form-field"><span>Department</span><select id="staffDepartmentInput"><option>Creative Department</option><option>Sales and Marketing</option><option>Management</option><option>Production Management</option><option>Finance Department</option></select></label>
       <label class="staff-form-field"><span>Character</span><select id="staffGenderInput"><option value="male">Male</option><option value="female">Female</option></select></label>
     </div>
-    <div class="staff-editor-status" id="staffEditorStatus">Staff details are saved to the shared Netlify Database. Workload is edited from the Workload tab.</div>
+    <div class="staff-editor-status" id="staffEditorStatus">Staff details are saved to the shared Supabase. Workload is edited from the Workload tab.</div>
     <div class="job-link-actions staff-editor-actions"><button class="staff-remove-btn" id="staffRemoveBtn">Remove staff</button><span></span><button class="job-link-primary" id="staffSaveBtn">Save staff</button></div>
   </div>
 </div>
@@ -1182,7 +1185,7 @@ body{overscroll-behavior:none;}
     <div class="job-link-head"><div><span>Workload only</span><strong id="workloadEditorTitle">Update Workload</strong></div><button id="workloadEditorClose" aria-label="Close">×</button></div>
     <div class="workload-editor-person"><div class="workload-editor-avatar" id="workloadEditorAvatar">ST</div><div><b id="workloadEditorName">Staff</b><span id="workloadEditorRole">Role</span></div></div>
     <label class="staff-form-field staff-workload-field"><span>Workload details</span><textarea id="workloadEditorInput" rows="9" placeholder="One task per line&#10;Example:&#10;Family Day jersey artwork&#10;Customer revision · 30 pcs&#10;Prepare print-ready files"></textarea><small>Update workload only. Staff name, role, add and remove are managed from the Staff tab.</small></label>
-    <div class="staff-editor-status" id="workloadEditorStatus">Changes sync to everyone through Netlify Database.</div>
+    <div class="staff-editor-status" id="workloadEditorStatus">Changes sync to everyone through Supabase.</div>
     <div class="job-link-actions"><span></span><button class="job-link-primary" id="workloadEditorSave">Save workload</button></div>
   </div>
 </div>
@@ -1610,7 +1613,7 @@ body{overscroll-behavior:none;}
     const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:GLOBAL_CONFIG_SCOPE,payload,clientId:'dashboard-drive-editor'})});
     if(!res.ok)throw new Error(`Save failed (${res.status})`);applyGoogleDriveUrl(parsed.url);await postOfficeEvent({eventType:'drive_link_updated',title:'Google Drive link updated',message:'Shared Google Drive folder link changed',metadata:{url:parsed.url},dedupeKey:`drive-link:${hashString(parsed.url)}:${Date.now()}`});return parsed;
   }
-  function openDriveLinkEditor(){if(!driveLinkModal)return;driveLinkInput.value=googleDriveUrl;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='This link is shared through Netlify Database and will load for everyone.';driveLinkModal.classList.add('open');driveLinkModal.setAttribute('aria-hidden','false');setTimeout(()=>driveLinkInput.focus(),40)}
+  function openDriveLinkEditor(){if(!driveLinkModal)return;driveLinkInput.value=googleDriveUrl;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='This link is shared through Supabase and will load for everyone.';driveLinkModal.classList.add('open');driveLinkModal.setAttribute('aria-hidden','false');setTimeout(()=>driveLinkInput.focus(),40)}
   function closeDriveLinkEditor(){if(!driveLinkModal)return;driveLinkModal.classList.remove('open');driveLinkModal.setAttribute('aria-hidden','true')}
   function parseLooseDate(v){
     if(!v)return null;
@@ -1860,7 +1863,7 @@ body{overscroll-behavior:none;}
       }
       return list;
     }).catch(async()=>{
-      const cached=await readJobCache();if(cached){jobs=cached.jobs;const mins=Math.max(1,Math.round((Date.now()-cached.savedAt)/60000));setOpsSource('cached','Database',`Live Sheet was unavailable. Showing shared Netlify Database data from ${mins} min ago.`,cached.savedAt)}else{jobs=[];setOpsSource('empty','No Data','No Job Management data is available yet. Add or import a job to begin.')};renderOps();return jobs;
+      const cached=await readJobCache();if(cached){jobs=cached.jobs;const mins=Math.max(1,Math.round((Date.now()-cached.savedAt)/60000));setOpsSource('cached','Database',`Live Sheet was unavailable. Showing shared Supabase data from ${mins} min ago.`,cached.savedAt)}else{jobs=[];setOpsSource('empty','No Data','No Job Management data is available yet. Add or import a job to begin.')};renderOps();return jobs;
     }).finally(()=>{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')});
   }
   function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);jobAutoTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadJobsFromSheet({background:true})},3500)}
@@ -1920,7 +1923,7 @@ body{overscroll-behavior:none;}
       const needsDepartmentMigration=Array.isArray(payload.staff)&&payload.staff.some(r=>normalizeDepartment(r.department,r.position)!==String(r.department||''));
       if(needsDepartmentMigration){await saveStaffDirectory(payload.staff);return}
       if(version>staffDirectoryVersion)applyStaffDirectory(payload,version);
-    }catch(err){if(staffEditorStatus&&staffEditorModal?.classList.contains('open')){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=location.protocol==='file:'?'Deploy to Netlify to save staff on the server.':'Shared staff database is temporarily unavailable.'}}
+    }catch(err){if(staffEditorStatus&&staffEditorModal?.classList.contains('open')){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=location.protocol==='file:'?'Deploy the site and sign in to save staff on the server.':'Shared staff database is temporarily unavailable.'}}
   }
   function renderStaffDirectory(){
     if(!staffDirectoryList)return;
@@ -2264,7 +2267,7 @@ body{overscroll-behavior:none;}
       const res=await fetch(`${CHAT_API}?limit=60`,{cache:'no-store',headers:{accept:'application/json'}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json(),list=Array.isArray(data.messages)?data.messages:[];const newest=list.length?Math.max(...list.map(m=>Number(m.id)||0)):0;
       if(chatInitialized&&newest>chatLastId){const fresh=list.filter(m=>(Number(m.id)||0)>chatLastId);if(!chatOpen)setChatUnread(chatUnreadCount+fresh.length);fresh.slice(-3).forEach(m=>{const emp=employeeById[Number(m.senderId)];if(emp)showBubble(emp,m.message)});}
       chatLastId=Math.max(chatLastId,newest);chatInitialized=true;renderChat(list,!initial||chatOpen);
-    }catch(err){if(initial)chatMessages.innerHTML=`<div class="chat-empty">${location.protocol==='file:'?'Deploy to Netlify to use shared chat.':'Office chat is temporarily offline.'}</div>`}
+    }catch(err){if(initial)chatMessages.innerHTML=`<div class="chat-empty">${location.protocol==='file:'?'Deploy the site and sign in to use shared chat.':'Office chat is temporarily offline.'}</div>`}
   }
   async function sendChat(){
     const message=String(chatInput?.value||'').trim();if(!message||!chatSendBtn)return;const profile=chatDeviceProfile(),senderName=String(profile.name||profile.browserId||'Office').slice(0,80),emp=employees.find(e=>e.name.toLowerCase()===senderName.toLowerCase())||null,senderId=emp?.id||null;chatSendBtn.disabled=true;
@@ -2507,7 +2510,7 @@ body{overscroll-behavior:none;}
   svg.onpointercancel=()=>{dragging=false;rotateDragging=false;svg.classList.remove('dragging','rotating')};
   svg.onclick=e=>{if(dragging||rotateDragging||dragMoved||performance.now()<suppressClickUntil)return;if(e.target.closest?.('.employee,.desk-hit,.room'))return;resetScene();tooltip.classList.remove('show');};
 
-  // Random visual roaming. This is deliberately local/ephemeral: shared Netlify
+  // Random visual roaming. This is deliberately local/ephemeral: shared Supabase
   // job and form data remain synchronized, while avatars wander independently for life.
   const roamZones={
     staff:{roomId:'staff',point:e=>({x:e.deskX??e.x,y:e.deskY??e.y})},

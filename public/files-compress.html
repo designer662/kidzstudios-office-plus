@@ -520,7 +520,7 @@ body{animation:ksoPageIn .38s var(--kso-ease) both}
 }
 </style>
 <style>
-/* Netlify shared state status */
+/* Shared state status */
 .ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:10px;padding:6px 8px}}
 </style>
 
@@ -609,7 +609,8 @@ body[data-ks-page="compress"] .tab-active{background:var(--tab-color,#ef7b45)!im
 </style>
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
-<link rel="stylesheet" href="office-ux.css?v=58.0">
+<script src="ks-motion.js?v=58.1" defer></script>
+<link rel="stylesheet" href="office-ux.css?v=58.1">
 </head>
 <body data-ks-ui="v2" data-ks-page="compress">
 
@@ -1832,7 +1833,7 @@ body[data-ks-page="compress"] .tab-active{background:var(--tab-color,#ef7b45)!im
 })();
 </script>
 
-<script src="netlify-sync.js" defer></script>
+<script src="shared-sync.js" defer></script>
 
 <footer class="ks-version-footer no-print" aria-label="Build version">v48</footer>
 <script src="suite-header.js" defer></script>
