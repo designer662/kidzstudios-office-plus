@@ -1,0 +1,20 @@
+/* Office Plus V58 UX layer: loaded last on every page. Accessibility + comfort fixes only. */
+:focus-visible{outline:3px solid rgba(239,123,69,.55);outline-offset:2px;border-radius:6px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0}
+button,[role="button"],a.tool-nav-btn,select{touch-action:manipulation}
+@media (pointer:coarse){
+  button,.tool-nav-btn,.temp-user-suggestion,select,input:not([type=checkbox]):not([type=radio]){min-height:44px}
+}
+.ks-shared-status{pointer-events:none;max-width:calc(100vw - 16px)}
+@media (max-width:640px){.ks-shared-status{bottom:calc(8px + env(safe-area-inset-bottom,0px))}}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+@media print{#ks-auth-gate,#ks-office-signout,.ks-shared-status,#ksBootFallback{display:none!important}}
+
+/* Status chip and version badge were both pinned to the bottom-left corner and covered each other. */
+.ks-version-footer{left:156px!important}
+@media (max-width:640px){.ks-version-footer{display:none!important}}
+/* Remove the stray few-pixel horizontal scroll caused by full-bleed shells. */
+html{overflow-x:clip}

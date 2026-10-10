@@ -133,6 +133,7 @@
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const row=await res.json();
       if(Number(row.version||0)>lastVersion && row.payload){
+        if(dirty||saving){setStatus('saving','Shared · Syncing');return;}
         apply(row.payload);
         lastVersion=Number(row.version||0);
         lastHash=stableHash(row.payload);
@@ -175,6 +176,7 @@
     document.addEventListener('focusout',e=>{if(isSyncable(e.target) && dirty) queueSave()});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty) save(false)}else pull()});
     window.addEventListener('online',()=>pull());
+    window.addEventListener('pagehide',()=>{if(dirty){clearTimeout(saveTimer);save(false)}});
     // GitHub Pages has no /api endpoint for sendBeacon. Visibility autosave above handles routine switches; periodic sync provides fallback.
     pullGlobalConfig();
     pull({initial:true});
@@ -182,7 +184,13 @@
       if(document.hidden || saving || event.detail?.table!=='ks_shared_state')return;
       pull();pullGlobalConfig();
     });
-    setInterval(()=>{if(!document.hidden&&!saving){pull();pullGlobalConfig()}},3500);
+    let lastPoll=0;
+    setInterval(()=>{
+      if(document.hidden||saving)return;
+      const every=window.OfficeSupabase?.realtimeConnected?.()?20000:3500;
+      if(Date.now()-lastPoll<every)return;
+      lastPoll=Date.now();pull();pullGlobalConfig();
+    },3500);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(start,450),{once:true});
   else setTimeout(start,450);

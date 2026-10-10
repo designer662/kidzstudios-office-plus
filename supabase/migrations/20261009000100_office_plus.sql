@@ -1,5 +1,6 @@
 -- Office Plus V58 / Supabase PostgreSQL
 -- Execute once in a new Supabase project via SQL Editor.
+-- Safe to re-run: tables/functions use IF NOT EXISTS / OR REPLACE and policies are dropped first.
 -- Auth users are created separately. Grant membership manually (README).
 BEGIN;
 
@@ -70,25 +71,34 @@ ALTER TABLE public.ks_shared_state ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ks_office_chat ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ks_office_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS member_directory_read ON public.ks_staff_members;
 CREATE POLICY member_directory_read ON public.ks_staff_members FOR SELECT TO authenticated
 USING ((SELECT auth.uid()) = user_id OR public.ks_is_office_admin());
 
+DROP POLICY IF EXISTS state_read ON public.ks_shared_state;
 CREATE POLICY state_read ON public.ks_shared_state FOR SELECT TO authenticated
 USING (public.ks_is_office_member());
+DROP POLICY IF EXISTS state_insert ON public.ks_shared_state;
 CREATE POLICY state_insert ON public.ks_shared_state FOR INSERT TO authenticated
 WITH CHECK (public.ks_is_office_member());
+DROP POLICY IF EXISTS state_update ON public.ks_shared_state;
 CREATE POLICY state_update ON public.ks_shared_state FOR UPDATE TO authenticated
 USING (public.ks_is_office_member()) WITH CHECK (public.ks_is_office_member());
 
+DROP POLICY IF EXISTS chat_read ON public.ks_office_chat;
 CREATE POLICY chat_read ON public.ks_office_chat FOR SELECT TO authenticated
 USING (public.ks_is_office_member());
+DROP POLICY IF EXISTS chat_insert ON public.ks_office_chat;
 CREATE POLICY chat_insert ON public.ks_office_chat FOR INSERT TO authenticated
 WITH CHECK (public.ks_is_office_member() AND author_uid = (SELECT auth.uid()));
+DROP POLICY IF EXISTS chat_clear_admin ON public.ks_office_chat;
 CREATE POLICY chat_clear_admin ON public.ks_office_chat FOR DELETE TO authenticated
 USING (public.ks_is_office_admin());
 
+DROP POLICY IF EXISTS events_read ON public.ks_office_events;
 CREATE POLICY events_read ON public.ks_office_events FOR SELECT TO authenticated
 USING (public.ks_is_office_member());
+DROP POLICY IF EXISTS events_insert ON public.ks_office_events;
 CREATE POLICY events_insert ON public.ks_office_events FOR INSERT TO authenticated
 WITH CHECK (public.ks_is_office_member() AND author_uid = (SELECT auth.uid()));
 

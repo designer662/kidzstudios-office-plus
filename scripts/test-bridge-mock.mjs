@@ -28,8 +28,8 @@ function element(type){return {
   querySelector(selector){return element(selector);}
 };}
 let domReady,signout;
-const doc={readyState:'loading',hidden:true,head:{append(){}},body:{append(el){if(el.id==='ks-office-signout')signout=el;}},
-  createElement:element,addEventListener(type,fn){if(type==='DOMContentLoaded')domReady=fn;},querySelector(sel){if(sel==='#ks-office-signout')return signout;return element(sel);} };
+const doc={readyState:'loading',hidden:true,documentElement:{dataset:{}},getElementById:()=>null,head:{append(){}},body:{append(el){if(el.id==='ks-office-signout')signout=el;}},
+  createElement:element,addEventListener(type,fn){if(type==='DOMContentLoaded')domReady=fn;},querySelector(sel){if(sel==='#ks-office-signout')return signout;if(sel.includes('header-tools'))return null;return element(sel);} };
 const window={KS_SUPABASE_CONFIG:config,fetch:mockFetch,addEventListener(){},dispatchEvent(){}};
 const ctx={window,document:doc,location:{href:'https://my.github.io/office/',origin:'https://my.github.io'},
   localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
@@ -50,4 +50,6 @@ assert.equal(window.OfficeSupabase.isConfigured,true);
 assert.ok(reqs.some(([path])=>path.endsWith('/rpc/ks_is_office_member')));
 console.log('PASS: saved authenticated session accepted by membership check');
 console.log('PASS: state GET/PUT, chat POST and events GET route to Supabase REST');
+assert.equal(doc.documentElement.dataset.ksAuth,'ok');
+console.log('PASS: page content is revealed only after authentication');
 console.log('PASS: API response shape and status codes are compatible with V57 UI');
