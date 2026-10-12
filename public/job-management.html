@@ -133,6 +133,7 @@
 #confirmModal .danger-confirm{background:#bb5149!important;border-color:#bb5149!important;color:white!important}
 @media(max-width:700px){.job-selection-bar{padding:9px 10px;gap:7px}.job-selection-help{flex-basis:100%;order:5}.job-selection-bar .btn{padding:0 10px}}
 </style>
+<link rel="stylesheet" href="office-command.css?v=86.0">
 </head>
 <body data-ks-page="job-management">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -321,11 +322,13 @@
     </section>
   </div>
 </div></div>
-<div class="toast" id="toast"></div><footer class="ks-version-footer">v85</footer>
+<div class="toast" id="toast"></div><footer class="ks-version-footer">v86</footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-workbook.js?v=70.0"></script>
 <script src="job-data.js?v=70.0"></script>
+<script src="office-command-data.js?v=86.0"></script>
+<script src="job-command-board.js?v=86.0"></script>
 <script>
 (()=>{'use strict';
 const API='/api/state',EVENTS='/api/events',JOBS_SCOPE='dashboard:jobs',STAFF_SCOPE='office:staff',CONFIG_SCOPE='config:global',OPTIONS_SCOPE='dashboard:job-options';
@@ -633,6 +636,7 @@ function render(){
    <button type="button" class="mini trash" data-index="${i}" title="Delete job" aria-label="Delete ${esc(j.jobsheetFiles||'job')}">${trashIcon}</button>
   </div></td></tr>`).join('');
  updateJobSelectionBar(list);
+ window.KSJobEnhanced?.refresh();
 }
 function toggleJobSelection(index,checked){
  if(!jobsLoaded||saving||!Number.isInteger(index)||index<0||index>=jobs.length)return;
@@ -817,6 +821,20 @@ $('#tbody').addEventListener('change',e=>{const checkbox=e.target.closest('.job-
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
 setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);
+window.KSJobEnhanced?.connect({
+  getRows:()=>filtered(),
+  getAll:()=>jobs,
+  isLoaded:()=>jobsLoaded,
+  openEditor:index=>openEditor(index),
+  move:async(index,nextDepartment)=>{
+    if(!jobsLoaded||saving||!Number.isInteger(index)||index<0||index>=jobs.length)return false;
+    if(!['SALES','DESIGN','PRODUCTION','CLOSED'].includes(nextDepartment))return false;
+    const old=jobs[index];
+    if(String(old.currentDepartment).toUpperCase()===nextDepartment)return true;
+    const candidate=jobs.map((j,i)=>i!==index?j:normalizeJob({...j,currentDepartment:nextDepartment,lastUpdate:dateInput(new Date())}));
+    return saveAll(`Moved ${old.jobsheetFiles||old.customer} to ${nextDepartment}`,candidate);
+  }
+});
 Promise.all([loadConfig(),loadStaff()]).then(()=>pull()).then(()=>loadDropdownOptions()).then(()=>{render();clearInterval(pollTimer);let optionPoll=0;pollTimer=setInterval(async()=>{if(document.hidden||$('#editor').classList.contains('open')||$('#optionsModal').classList.contains('open')||$('#excelImportModal').classList.contains('open')||$('#sheetImportModal').classList.contains('open')||saving)return;await pull({quiet:true});optionPoll++;if(optionPoll%4===0){try{const row=await getState(OPTIONS_SCOPE);if(row&&Number(row.version)>optionsVersion){dropdownOptions=sanitizeDropdownOptions(row.payload?.options);optionsVersion=Number(row.version||0);optionsSavedAt=Number(row.payload?.savedAt)||new Date(row.updatedAt||Date.now()).getTime();optionsLoaded=true;renderSmartOptions()}}catch(_){}}},3500)});
 })();
 </script>

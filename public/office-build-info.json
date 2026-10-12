@@ -1,13 +1,17 @@
 {
-  "release": 85,
-  "edition": "Expanded Office Space",
-  "package": "V85 office floor space +25% with unchanged room and furniture layout",
+  "release": 86,
+  "edition": "Operations Command Center",
+  "package": "V86 interactive office operations + Kanban + analytics + adaptive 3D quality",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
     "office-notification-sound.js",
     "office-movement-sync.js",
-    "office-3d.js"
+    "office-3d.js",
+    "office-command-data.js",
+    "office-command-center.js",
+    "office-command.css",
+    "job-command-board.js"
   ],
-  "check": "Uniform horizontal scene scaling after static batching; staff, labels, camera and path points transformed consistently."
+  "check": "Uses existing Supabase job scope, CAS updates through Job Management, live team data, optional 3D quality presets."
 }

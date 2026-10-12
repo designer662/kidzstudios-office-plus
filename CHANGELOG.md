@@ -1,3 +1,12 @@
+## V86 — Operations Command Center + Job Board + Analytics + 3D Quality (2026-10-12)
+
+- Added an interactive read-only Operations Command Center alongside the existing 3D office: job deadlines, department totals, recorded invoices/payment amounts, staff assignments, recent order/completion volume, real sync feedback, and 3D staff focus.
+- Added a Kanban board to Job Management with drag/drop and an accessible stage selector, using the existing saveAll/version CAS workflow; legacy Excel import/export and editor remain intact.
+- Added Job Management Insights using current filters, including workload distribution and overdue queue. Business data remains distinct from simulated 3D activity.
+- Added warm studio fill lighting and Eco/Balanced/High 3D GPU-quality presets; user preference is stored only on the current device. Preserved current character models, movement, layout and scripts. Patched supplied standalone bundle and maintainable scene TypeScript source.
+- No Supabase schema migration required. Job Management remains capped at 500 records by the original application design; no false database-scale claims.
+- Added V86 regression checks, preserved original files and deployment paths.
+
 ## V85 — Expanded Office Space
 
 - Expanded 3D office horizontally by 25% while preserving the existing plan and layout.
