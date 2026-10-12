@@ -4263,6 +4263,133 @@ function createOfficeHijabiRig(person) {
 
 const interp=(a,b,t)=>a+(b-a)*t;
 const smoothstep=(a,b,t)=>{const u=Math.max(0,Math.min(1,(t-a)/(b-a)));return u*u*(3-2*u)};
+// V86.14 — shared, frame-rate-independent choreography for both character models.
+// All poses are local to the imported skeletal pivots; no teleporting or extra colliders.
+const KS_ACTIONS_V8614=['pc','drink','eat','stock','sleep','quiet'];
+const ksClamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value));
+const ksEase=t=>{const x=ksClamp(t);return x*x*(3-2*x)};
+const ksBlend=(current,target,alpha)=>current+(target-current)*alpha;
+function officeInteractionMode(p){
+ if(p.status==='walking')return 'walk';
+ if(p.action==='sleep')return 'sleep';
+ if(p.action==='reading'&&p.status==='break')return 'quiet';
+ if((p.action==='drink'||p.action==='coffee'))return 'drink';
+ if(p.action==='eat')return 'eat';
+ if(p.action==='stocking')return 'stock';
+ if(p.seated&&['pc-work','typing','designing','admin','production','reviewing'].includes(p.action))return 'pc';
+ return 'idle';
+}
+function applyOfficeInteractionV8614(r,p,time,dt){
+ const mode=officeInteractionMode(p),safeDt=ksClamp(Number.isFinite(dt)?dt:0,0,.05);
+ // The outgoing pose fades while the next one fades in. The timeline remains the
+ // only authority over worker activity; these weights are local presentation state.
+ if(!r.interactionV8614){
+  r.interactionV8614={mode,age:0,weights:Object.fromEntries(KS_ACTIONS_V8614.map(key=>[key,0])),lastTime:time};
+ }
+ const state=r.interactionV8614;
+ if(mode!==state.mode){state.mode=mode;state.age=0}
+ else state.age+=safeDt;
+ const alpha=1-Math.exp(-safeDt*7.5);
+ for(const key of KS_ACTIONS_V8614)state.weights[key]=ksBlend(state.weights[key],key===mode?1:0,alpha);
+ const mix=state.weights;
+ const wave=(speed,phase=0)=>.5+.5*Math.sin(time*speed+r.phase+phase);
+ const pc=mix.pc,drink=mix.drink,eat=mix.eat,stock=mix.stock,sleep=mix.sleep,quiet=mix.quiet;
+ const strength=1-ksClamp(r.walk||0);
+ const rest=ksClamp(sleep+quiet);
+ // PC: tilt forearms onto the keyboard; wrists alternate quick, subtle taps.
+ if(pc>.0001){
+  const cadence=13.5;
+  for(const [arm,sign] of [[r.left,-1],[r.right,1]]){
+   const w=pc*strength,offset=Math.sin(time*cadence+r.phase+sign*1.7);
+   arm.joint.rotation.x=ksBlend(arm.joint.rotation.x,-1.23+.045*offset,w);
+   arm.joint.rotation.z=ksBlend(arm.joint.rotation.z,-sign*.27,w);
+   if(arm.end){
+    arm.end.position.y=ksBlend(arm.end.position.y,-1.79+.022*offset,w);
+    arm.end.rotation.x=ksBlend(arm.end.rotation.x,.025*offset,w);
+   }
+  }
+  r.head.rotation.x=ksBlend(r.head.rotation.x,.055+Math.sin(time*.66+r.phase)*.012,pc*strength);
+  r.head.rotation.y+=Math.sin(time*.54+r.phase)*.012*pc*strength;
+ }
+ // Pantry: lift the real right hand near the face, tip cup/snack only near the mouth.
+ if(drink>.0001||eat>.0001){
+  const sipping=ksEase(ksClamp((wave(2.1)-.24)/.58)),biting=ksEase(ksClamp((wave(2.7,.45)-.3)/.55));
+  const lift=(drink*sipping+eat*biting)*strength;
+  r.right.joint.rotation.x=ksBlend(r.right.joint.rotation.x,-1.38-.22*lift,ksClamp(drink+eat)*strength);
+  r.right.joint.rotation.z=ksBlend(r.right.joint.rotation.z,-.16,ksClamp(drink+eat)*strength);
+  if(r.right.end)r.right.end.position.y=ksBlend(r.right.end.position.y,-1.79+.48*lift,ksClamp(drink+eat)*strength);
+  r.head.rotation.x-=.055*lift;
+  if(r.activityProps){
+   r.activityProps.drink.rotation.x=-.28*sipping;
+   r.activityProps.eat.rotation.x=-.08*biting;
+  }
+ }
+ // Store: approach shelf, lift stock with both hands, inspect, then place it.
+ // Sequence is visual only and never modifies inventory or the database.
+ if(stock>.0001){
+  const cycle=(time*.29+r.phase*.11)%1;
+  const picking=ksEase(cycle/.22)*(1-ksEase((cycle-.66)/.25));
+  const lift=.5+.5*Math.sin(time*1.8+r.phase);
+  const w=stock*strength;
+  r.chest.rotation.x=ksBlend(r.chest.rotation.x,-.12+.08*picking,w);
+  for(const [arm,sign] of [[r.left,-1],[r.right,1]]){
+   arm.joint.rotation.x=ksBlend(arm.joint.rotation.x,-.85-.28*picking+.08*lift,w);
+   arm.joint.rotation.z=ksBlend(arm.joint.rotation.z,-sign*.27,w);
+  }
+  if(r.activityProps){
+   r.activityProps.stock.position.y=-.14+.29*picking;
+   r.activityProps.stock.rotation.z=.06*Math.sin(time*2.5+r.phase);
+   r.activityProps.stock.visible=mode==='stock';
+  }
+ }
+ // Surau: ease into a quiet kneel when reading, or a low side-rest on the mat.
+ // The prior V86.11 reclining translation remains compatible with the existing floor.
+ if(quiet>.0001){
+  const w=quiet*strength;
+  r.body.position.y=ksBlend(r.body.position.y,-.54,w);
+  r.body.rotation.x=ksBlend(r.body.rotation.x,.12,w);
+  r.leftLeg.joint.rotation.x=ksBlend(r.leftLeg.joint.rotation.x,-1.45,w);
+  r.rightLeg.joint.rotation.x=ksBlend(r.rightLeg.joint.rotation.x,-1.45,w);
+  r.left.joint.rotation.x=ksBlend(r.left.joint.rotation.x,-.49,w);
+  r.right.joint.rotation.x=ksBlend(r.right.joint.rotation.x,-.49,w);
+  r.head.rotation.x=ksBlend(r.head.rotation.x,.14,w);
+ }
+ if(sleep>.0001){
+  const w=sleep*strength;
+  r.body.rotation.z=ksBlend(r.body.rotation.z,-1.37,w);
+  r.body.position.y+=.011*Math.sin(time*1.3+r.phase)*w;
+  r.body.position.x=ksBlend(r.body.position.x,-.52,w);
+  r.head.rotation.x=ksBlend(r.head.rotation.x,.08,w);
+  r.left.joint.rotation.x=ksBlend(r.left.joint.rotation.x,-.20,w);
+  r.right.joint.rotation.x=ksBlend(r.right.joint.rotation.x,-.20,w);
+ }
+ if(r.activityProps){
+  // Visibility belongs to the authoritative activity, not the outgoing blend.
+  const a=r.activityProps;
+  a.drink.visible=mode==='drink'&&strength>.15;
+  a.eat.visible=mode==='eat'&&strength>.15;
+  a.stock.visible=mode==='stock'&&strength>.15;
+  a.mat.visible=(mode==='sleep'&&sleep>.2||mode==='quiet'&&quiet>.15)&&strength>.15;
+ }
+ // Fade inherited sleeping geometry when leaving the surau; do not suppress walking.
+ if(mode==='walk'&&r.activityProps){
+  const a=r.activityProps;a.drink.visible=false;a.eat.visible=false;a.stock.visible=false;a.mat.visible=false;
+ }
+ return state;
+}
+
+// Aiming uses real furniture stations in the existing V86.12 scene; it never
+// changes a character's navigation coordinates or creates new collision bodies.
+function officeInteractionFacingV8614(action,x,z){
+ if(!Number.isFinite(x)||!Number.isFinite(z))return null;
+ let target=null;
+ if((action==='drink'||action==='coffee')&&x>=-5.9&&x<=-2.15&&z>=1.5&&z<=8.4)target=[-5.08,5.25];
+ else if(action==='eat'&&x>=-5.7&&x<=-2.1&&z>=1.5&&z<=6.9)target=[-3.45,3.65];
+ else if(action==='stocking'&&x>=.7&&x<=5.6&&z>=5.6&&z<=11.1)target=[5.03,z<7.75?6.8:z<9.35?8.65:10.1];
+ if(!target||Math.hypot(target[0]-x,target[1]-z)<.13)return null;
+ return Math.atan2(target[0]-x,target[1]-z);
+}
+
 function animateOfficeHijabi(r,p,time,dt,distance){
  const t=time+r.phase,walkTo=p.status==='walking'?1:0;
  const active=r.emote!==''&&time-r.emoteStart>=0&&time-r.emoteStart<3.6;
@@ -4329,6 +4456,7 @@ function animateOfficeHijabi(r,p,time,dt,distance){
   else if(r.emote==='celebrate'||r.emote==='stretch'){r.left.joint.rotation.z-=1.25*power;r.right.joint.rotation.z+=1.25*power}
   else if(r.emote==='wave')r.right.joint.rotation.z+=1.3*power;
  }
+ applyOfficeInteractionV8614(r,p,time,dt);
 }
 
 /* Office Plus V86.8: supplied customizable male model and compatible animation rig. */
@@ -4743,7 +4871,7 @@ const sceneWheel=L=>{if(!L.cancelable)return;L.preventDefault();L.stopImmediateP
   F=null;it=Hn.clamp(it*Math.exp(-delta*.00165),.65,5);
 };
 r.domElement.addEventListener("wheel",sceneWheel,{capture:!0,passive:!1});
-let ht=new rr,j=new D,Ct=new D,Vt=Vh.map(([L,B])=>new D(L*FLOOR_SPACE_SCALE,.08,B*FLOOR_SPACE_SCALE)),le=Vt.map((L,B)=>L.distanceTo(Vt[(B+1)%Vt.length])),re=le.reduce((L,B)=>L+B,0),tn=L=>{v=L,et=!1,F=null,nt=!1,a.autoRotate=!1,a.enableRotate=L==="isometric",a.target.copy(Lt),o.position.copy(L==="plan"?new D(0,65,.01):mt()),o.zoom=1.14,it=1.14,o.lookAt(a.target),a.update(),It(),t.onZoom(1.14)};function qe(){if(xt)return;tt=requestAnimationFrame(qe);let L=Math.min(ht.getDelta(),.05);if(document.hidden||!Bt||!Ot)return;if(P||(Q+=L),a.dampingFactor=1-Math.exp(-4*L),a.autoRotate=nt&&!P&&!c.matches&&v==="isometric",et&&dt!==null){let Z=H.find(gt=>gt.person.id===dt);Z&&(F=Z.root.position.clone(),F.y=.6)}if(F){let Z=J.copy(F).sub(a.target).multiplyScalar(1-Math.exp(-5*L));a.target.add(Z),o.position.add(Z),it=Y,o.zoom+=(it-o.zoom)*(1-Math.exp(-6*L)),o.updateProjectionMatrix(),Z.length()<.002&&Math.abs(o.zoom-Y)<.002&&(F=null)}else Math.abs(o.zoom-it)>1e-4&&(o.zoom+=(it-o.zoom)*(1-Math.exp(-10*L)),o.updateProjectionMatrix());a.update(L);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P&&(Z.root.position.distanceTo(Z.targetPosition)>4?Z.root.position.copy(Z.targetPosition):Z.root.position.lerp(Z.targetPosition,1-Math.exp(-18*L))),Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*9))}Wh(Z,Mt,Q,P?0:L,P?0:Ft),Z.ring.visible=dt===Mt.id||at!=="all"&&at===Mt.department,Z.ring.visible&&(Z.ring.material.opacity=.65+Math.sin(gt*2)*.15)}/* V80: place all labels together in screen-space, names first and one bubble per person. */
+let ht=new rr,j=new D,Ct=new D,Vt=Vh.map(([L,B])=>new D(L*FLOOR_SPACE_SCALE,.08,B*FLOOR_SPACE_SCALE)),le=Vt.map((L,B)=>L.distanceTo(Vt[(B+1)%Vt.length])),re=le.reduce((L,B)=>L+B,0),tn=L=>{v=L,et=!1,F=null,nt=!1,a.autoRotate=!1,a.enableRotate=L==="isometric",a.target.copy(Lt),o.position.copy(L==="plan"?new D(0,65,.01):mt()),o.zoom=1.14,it=1.14,o.lookAt(a.target),a.update(),It(),t.onZoom(1.14)};function qe(){if(xt)return;tt=requestAnimationFrame(qe);let L=Math.min(ht.getDelta(),.05);if(document.hidden||!Bt||!Ot)return;if(P||(Q+=L),a.dampingFactor=1-Math.exp(-4*L),a.autoRotate=nt&&!P&&!c.matches&&v==="isometric",et&&dt!==null){let Z=H.find(gt=>gt.person.id===dt);Z&&(F=Z.root.position.clone(),F.y=.6)}if(F){let Z=J.copy(F).sub(a.target).multiplyScalar(1-Math.exp(-5*L));a.target.add(Z),o.position.add(Z),it=Y,o.zoom+=(it-o.zoom)*(1-Math.exp(-6*L)),o.updateProjectionMatrix(),Z.length()<.002&&Math.abs(o.zoom-Y)<.002&&(F=null)}else Math.abs(o.zoom-it)>1e-4&&(o.zoom+=(it-o.zoom)*(1-Math.exp(-10*L)),o.updateProjectionMatrix());a.update(L);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P&&(Z.root.position.distanceTo(Z.targetPosition)>4?Z.root.position.copy(Z.targetPosition):Z.root.position.lerp(Z.targetPosition,1-Math.exp(-18*L))),Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*(Mt.status==="walking"?8:4.5)))}Wh(Z,Mt,Q,P?0:L,P?0:Ft),Z.ring.visible=dt===Mt.id||at!=="all"&&at===Mt.department,Z.ring.visible&&(Z.ring.material.opacity=.65+Math.sin(gt*2)*.15)}/* V80: place all labels together in screen-space, names first and one bubble per person. */
 const nameCandidates=[],roomCandidates=[],bubbleCandidates=[];
 for(const Z of Jt){const gt=H.find(oe=>oe.person.id===Z.id);if(!gt)continue;
  Ct.copy(gt.root.position),Ct.y+=3.08-.38*gt.sit,j.copy(Ct).project(o);
@@ -4759,7 +4887,7 @@ if(smart){for(const label of smart.names){const Z=Jt.find(t=>t.id===label.id);if
  for(const bubble of lt.values())bubble.element.style.visibility="hidden";
  for(const label of smart.bubbles){const bubble=lt.get(label.key);if(!bubble||!label.visible)continue;bubble.element.style.left=`${label.x}px`,bubble.element.style.top=`${label.y}px`,bubble.element.style.visibility="visible";}
 }else{for(const Z of Jt)Z.element.style.visibility="hidden";for(const Z of kt)Z.element.style.visibility="hidden";for(const bubble of lt.values())bubble.element.style.visibility="hidden";}
-Math.abs(o.zoom-A)>.006&&(A=o.zoom,t.onZoom(o.zoom)),window.OfficeLiving?.applyLighting?.(l,h,u,r,s),window.OfficeLiving?.screenGlow?.(f,Date.now()),r.render(s,o)}return qe(),{setQuality(L){let B={eco:[1,0],balanced:[1.35,1024],high:[1.75,2048]}[L]||[1.35,1024];r.setPixelRatio(Math.min(window.devicePixelRatio,B[0])),r.shadowMap.enabled=B[1]>0,B[1]&&h.shadow.mapSize.x!==B[1]&&(h.shadow.mapSize.set(B[1],B[1]),h.shadow.map?.dispose(),h.shadow.map=null),r.shadowMap.needsUpdate=!0,accent.intensity=L==="eco"?0:L==="high"?.55:.38,Dt()},playEmote(L,B){let Z=H.find(gt=>gt.person.id===(B??dt))||H[0];return!Z||P?null:(Z.emote=L,Z.emoteStart=Q,L==="wave"&&(Z.waveStart=Q),Z.person.id)},setPaused(L){P=L,i.classList.toggle("scene-paused",L),ht.getDelta()},setRotating(L){nt=L},setView:tn,zoomBy(L){F=null,it=Hn.clamp(it*L,.65,5)},reset(){dt=null,et=!1,tn("isometric")},selectDepartment(L){at=L,dt=null},focusPerson(L){let B=H.find(Z=>Z.person.id===L);B&&(dt=L,B.waveStart=Q,et=!!e.externalMotion,nt=!1,F=B.root.position.clone(),F.y=.6,Y=3.2)},focusRoom(L){let B=Hh.find(Z=>Z.id===L);if(!B)return;dt=null,et=!1,nt=!1,F=new D(B.focus[0]*FLOOR_SPACE_SCALE,0,B.focus[1]*FLOOR_SPACE_SCALE),Y=1.8},rotateBy(L){et=!1,nt=!1;let B=o.position.clone().sub(a.target);B.applyAxisAngle(new D(0,1,0),L),o.position.copy(a.target).add(B),a.update()},stopFollowing(){et=!1,dt=null,F=null;for(let[L,B]of lt)B.kind==="follow"&&(B.element.remove(),lt.delete(L))},updatePeople(L){for(let B of L){let Z=H.find(Pt=>Pt.person.id===B.id);if(!Z)continue;let gt=B.position[0]*FLOOR_SPACE_SCALE-Z.targetPosition.x,Mt=B.position[1]*FLOOR_SPACE_SCALE-Z.targetPosition.z;Math.hypot(gt,Mt)>.002&&B.status==="walking"?Z.targetRotation=Math.atan2(gt,Mt):B.rotation!==void 0&&(B.seated||B.action==="chat"||B.action==="meeting")&&(Z.targetRotation=B.rotation),Z.targetPosition.set(B.position[0]*FLOOR_SPACE_SCALE,.08,B.position[1]*FLOOR_SPACE_SCALE),Z.person.status=B.status,Z.person.seated=B.seated,Z.person.action=B.action;let Ft=Jt.find(Pt=>Pt.id===B.id);Ft&&(setMood(B.id,B.mood||""),Ft.element.classList.toggle("has-alert",!!B.alert),Ft.element.title=`${Z.person.name} \xB7 ${Z.person.role}${B.action?" \xB7 Simulated "+B.action:""}${B.note?" \xB7 "+B.note:""}`)}},showBubble:At,clearBubble:yt,dispose(){xt=!0,cancelAnimationFrame(tt),ct.disconnect(),a.removeEventListener("start",U),a.dispose(),r.domElement.removeEventListener("pointerdown",bt),r.domElement.removeEventListener("pointerup",Yt),r.domElement.removeEventListener("wheel",sceneWheel,!0);let L=new Set;s.traverse(B=>{B instanceof be&&(g.add(B.geometry),Array.isArray(B.material)?B.material.forEach(Z=>L.add(Z)):L.add(B.material))}),g.forEach(B=>B.dispose()),L.forEach(B=>B.dispose()),f.forEach(B=>B.dispose()),r.dispose(),r.domElement.remove(),ut.remove()}}}var kl=document.querySelector("#office3dHost"),fa=document.querySelector("#office3dLoading"),Cn=window.OfficeSuite,un=i=>document.getElementById(i),Zh={1:0,2:1,3:3,4:6,5:4,6:7,7:2,8:5},Te,qh="",Vn=matchMedia("(prefers-reduced-motion: reduce)").matches,$h=0,Yh=!1;function Hl(i){let t=i.visualRoomId||i.roomId;return i.motionWalking?"walking":["pantry","prayer","toilet-a","toilet-b"].includes(t)?"break":t==="showroom"?"showroom":t==="store"?"desk":i.motionStatus==="On break"?"break":i.motionStatus==="In a meeting"?"showroom":"desk"}function Jh(i){return Hl(i)==="desk"&&Math.hypot((i.visualX??i.x)-(i.deskX??i.x),(i.visualY??i.y)-(i.deskY??i.y))<.5}function Kh(i){return[(i.visualX??i.x)/2-5.75,(i.visualY??i.y)/2-17.5]}function v0(i){return i.map((t,e)=>{let n=_s[Zh[t.id]??e%_s.length];return{...n,id:t.id,name:t.name,role:t.position,department:t.department,gender:t.gender||n.gender||"male",appearance:t.appearance,status:Hl(t),position:Kh(t),rotation:t.id===4?Math.PI/2:n.rotation,seated:Jh(t),action:t.motionAction,mood:t.mood||""}})}function M0(i){Te?.dispose(),kl.replaceChildren(),Te=Xh(kl,{onPerson:n=>{window.KSOutsideClose?.markCharacterSelection?.();Cn?.selectPerson(n)},onDepartment:n=>Cn?.selectDepartment(n),onRoom:n=>Cn?.selectRoom(n),onExplore:()=>Cn?.stopFollow(),onZoom:n=>{un("rotationReadout").textContent=`${Math.round(n*100)}%`}},{roster:v0(i),externalMotion:!0}),Te.setView("isometric"),Te.setPaused(Vn),Te.setRotating(!Vn),window.office3d=Te;try{let n=localStorage.getItem("ks-3d-quality-v86");Te.setQuality(["eco","balanced","high"].includes(n)?n:"balanced")}catch{Te.setQuality("balanced")}window.dispatchEvent(new Event("ks:3d-ready"));for(let n of i){let s={happy:"\u{1F60A}",sad:"\u{1F614}",angry:"\u{1F620}",badmood:"\u{1F612}",busy:"\u{1F4BB}"}[n.mood||""];s&&Te.showBubble(n.id,s,0,"emoji")}let t=Te.selectDepartment.bind(Te);Te.selectDepartment=n=>t(n==="All"?"all":n);let e=Te.reset.bind(Te);Te.reset=()=>{e(),Te?.setRotating(!Vn)},document.documentElement.classList.add("studio3d-ready"),un("officeSvg").setAttribute("aria-hidden","true"),un("officeSvg").querySelectorAll("[tabindex]").forEach(n=>n.setAttribute("tabindex","-1")),fa.hidden=!0}function jh(){if(!Yh){if(!document.hidden&&Cn){let i=Cn.getStaff(),t=JSON.stringify(i.map(e=>[e.id,e.name,e.position,e.department,e.gender||"",e.appearance||null]));try{t!==qh&&(M0(i),qh=t)}catch(e){Yh=!0,console.error("Office 3D initialization failed",e),Te?.dispose(),kl.replaceChildren(),document.documentElement.classList.remove("studio3d-ready"),un("officeSvg").removeAttribute("aria-hidden"),un("officeSvg").querySelectorAll(".employee").forEach(n=>n.setAttribute("tabindex","0")),window.office3d=void 0,fa.textContent="3D unavailable in this browser. The office map and tools are still available.",fa.hidden=!1;return}Te?.updatePeople(i.map(e=>({id:e.id,position:Kh(e),status:Hl(e),seated:Jh(e),action:e.motionAction,rotation:e.motionFaceTo&&i.some(t=>t.id===e.motionFaceTo)?Math.atan2(Kh(i.find(t=>t.id===e.motionFaceTo))[0]-Kh(e)[0],Kh(i.find(t=>t.id===e.motionFaceTo))[1]-Kh(e)[1]):e.id===4?Math.PI/2:_s[Zh[e.id]??0].rotation,note:e.currentJob||e.workload?.[0]||"",alert:e.hasAlert,mood:e.mood||""})))}$h=requestAnimationFrame(jh)}}if(Cn){Cn.pause(Vn),un("rotationReadout").onclick=()=>Cn.reset(),un("rotationReadout").title="Reset view",un("rotationReadout").setAttribute("aria-label","Reset view"),un("opsMobileToggle").onclick=()=>{let t=un("todayPanel").classList.toggle("mobile-open");un("opsMobileToggle").setAttribute("aria-expanded",String(t)),un("opsMobileToggle").textContent=t?"Close operations":"Operations"},document.addEventListener("visibilitychange",()=>Te?.setPaused(Vn||document.hidden));let i=matchMedia("(prefers-reduced-motion: reduce)");i.addEventListener("change",()=>{Vn=i.matches,Cn.pause(Vn),Te?.setPaused(Vn||document.hidden),Te?.setRotating(!Vn)}),window.addEventListener("pagehide",()=>{cancelAnimationFrame($h),Te?.dispose()},{once:!0}),jh()}else fa.textContent="The office could not initialize. Reload to try again.";})();
+Math.abs(o.zoom-A)>.006&&(A=o.zoom,t.onZoom(o.zoom)),window.OfficeLiving?.applyLighting?.(l,h,u,r,s),window.OfficeLiving?.screenGlow?.(f,Date.now()),r.render(s,o)}return qe(),{setQuality(L){let B={eco:[1,0],balanced:[1.35,1024],high:[1.75,2048]}[L]||[1.35,1024];r.setPixelRatio(Math.min(window.devicePixelRatio,B[0])),r.shadowMap.enabled=B[1]>0,B[1]&&h.shadow.mapSize.x!==B[1]&&(h.shadow.mapSize.set(B[1],B[1]),h.shadow.map?.dispose(),h.shadow.map=null),r.shadowMap.needsUpdate=!0,accent.intensity=L==="eco"?0:L==="high"?.55:.38,Dt()},playEmote(L,B){let Z=H.find(gt=>gt.person.id===(B??dt))||H[0];return!Z||P?null:(Z.emote=L,Z.emoteStart=Q,L==="wave"&&(Z.waveStart=Q),Z.person.id)},setPaused(L){P=L,i.classList.toggle("scene-paused",L),ht.getDelta()},setRotating(L){nt=L},setView:tn,zoomBy(L){F=null,it=Hn.clamp(it*L,.65,5)},reset(){dt=null,et=!1,tn("isometric")},selectDepartment(L){at=L,dt=null},focusPerson(L){let B=H.find(Z=>Z.person.id===L);B&&(dt=L,B.waveStart=Q,et=!!e.externalMotion,nt=!1,F=B.root.position.clone(),F.y=.6,Y=3.2)},focusRoom(L){let B=Hh.find(Z=>Z.id===L);if(!B)return;dt=null,et=!1,nt=!1,F=new D(B.focus[0]*FLOOR_SPACE_SCALE,0,B.focus[1]*FLOOR_SPACE_SCALE),Y=1.8},rotateBy(L){et=!1,nt=!1;let B=o.position.clone().sub(a.target);B.applyAxisAngle(new D(0,1,0),L),o.position.copy(a.target).add(B),a.update()},stopFollowing(){et=!1,dt=null,F=null;for(let[L,B]of lt)B.kind==="follow"&&(B.element.remove(),lt.delete(L))},updatePeople(L){for(let B of L){let Z=H.find(Pt=>Pt.person.id===B.id);if(!Z)continue;let gt=B.position[0]*FLOOR_SPACE_SCALE-Z.targetPosition.x,Mt=B.position[1]*FLOOR_SPACE_SCALE-Z.targetPosition.z;Math.hypot(gt,Mt)>.002&&B.status==="walking"?Z.targetRotation=Math.atan2(gt,Mt):officeInteractionFacingV8614(B.action,B.position[0],B.position[1])!==null&&!B.seated&&B.status!=="walking"?Z.targetRotation=officeInteractionFacingV8614(B.action,B.position[0],B.position[1]):B.rotation!==void 0&&(B.seated||B.action==="chat"||B.action==="meeting")&&(Z.targetRotation=B.rotation),Z.targetPosition.set(B.position[0]*FLOOR_SPACE_SCALE,.08,B.position[1]*FLOOR_SPACE_SCALE),Z.person.status=B.status,Z.person.seated=B.seated,Z.person.action=B.action;let Ft=Jt.find(Pt=>Pt.id===B.id);Ft&&(setMood(B.id,B.mood||""),Ft.element.classList.toggle("has-alert",!!B.alert),Ft.element.title=`${Z.person.name} \xB7 ${Z.person.role}${B.action?" \xB7 Simulated "+B.action:""}${B.note?" \xB7 "+B.note:""}`)}},showBubble:At,clearBubble:yt,dispose(){xt=!0,cancelAnimationFrame(tt),ct.disconnect(),a.removeEventListener("start",U),a.dispose(),r.domElement.removeEventListener("pointerdown",bt),r.domElement.removeEventListener("pointerup",Yt),r.domElement.removeEventListener("wheel",sceneWheel,!0);let L=new Set;s.traverse(B=>{B instanceof be&&(g.add(B.geometry),Array.isArray(B.material)?B.material.forEach(Z=>L.add(Z)):L.add(B.material))}),g.forEach(B=>B.dispose()),L.forEach(B=>B.dispose()),f.forEach(B=>B.dispose()),r.dispose(),r.domElement.remove(),ut.remove()}}}var kl=document.querySelector("#office3dHost"),fa=document.querySelector("#office3dLoading"),Cn=window.OfficeSuite,un=i=>document.getElementById(i),Zh={1:0,2:1,3:3,4:6,5:4,6:7,7:2,8:5},Te,qh="",Vn=matchMedia("(prefers-reduced-motion: reduce)").matches,$h=0,Yh=!1;function Hl(i){let t=i.visualRoomId||i.roomId;return i.motionWalking?"walking":["pantry","prayer","toilet-a","toilet-b"].includes(t)?"break":t==="showroom"?"showroom":t==="store"?"desk":i.motionStatus==="On break"?"break":i.motionStatus==="In a meeting"?"showroom":"desk"}function Jh(i){return Hl(i)==="desk"&&Math.hypot((i.visualX??i.x)-(i.deskX??i.x),(i.visualY??i.y)-(i.deskY??i.y))<.5}function Kh(i){return[(i.visualX??i.x)/2-5.75,(i.visualY??i.y)/2-17.5]}function v0(i){return i.map((t,e)=>{let n=_s[Zh[t.id]??e%_s.length];return{...n,id:t.id,name:t.name,role:t.position,department:t.department,gender:t.gender||n.gender||"male",appearance:t.appearance,status:Hl(t),position:Kh(t),rotation:t.id===4?Math.PI/2:n.rotation,seated:Jh(t),action:t.motionAction,mood:t.mood||""}})}function M0(i){Te?.dispose(),kl.replaceChildren(),Te=Xh(kl,{onPerson:n=>{window.KSOutsideClose?.markCharacterSelection?.();Cn?.selectPerson(n)},onDepartment:n=>Cn?.selectDepartment(n),onRoom:n=>Cn?.selectRoom(n),onExplore:()=>Cn?.stopFollow(),onZoom:n=>{un("rotationReadout").textContent=`${Math.round(n*100)}%`}},{roster:v0(i),externalMotion:!0}),Te.setView("isometric"),Te.setPaused(Vn),Te.setRotating(!Vn),window.office3d=Te;try{let n=localStorage.getItem("ks-3d-quality-v86");Te.setQuality(["eco","balanced","high"].includes(n)?n:"balanced")}catch{Te.setQuality("balanced")}window.dispatchEvent(new Event("ks:3d-ready"));for(let n of i){let s={happy:"\u{1F60A}",sad:"\u{1F614}",angry:"\u{1F620}",badmood:"\u{1F612}",busy:"\u{1F4BB}"}[n.mood||""];s&&Te.showBubble(n.id,s,0,"emoji")}let t=Te.selectDepartment.bind(Te);Te.selectDepartment=n=>t(n==="All"?"all":n);let e=Te.reset.bind(Te);Te.reset=()=>{e(),Te?.setRotating(!Vn)},document.documentElement.classList.add("studio3d-ready"),un("officeSvg").setAttribute("aria-hidden","true"),un("officeSvg").querySelectorAll("[tabindex]").forEach(n=>n.setAttribute("tabindex","-1")),fa.hidden=!0}function jh(){if(!Yh){if(!document.hidden&&Cn){let i=Cn.getStaff(),t=JSON.stringify(i.map(e=>[e.id,e.name,e.position,e.department,e.gender||"",e.appearance||null]));try{t!==qh&&(M0(i),qh=t)}catch(e){Yh=!0,console.error("Office 3D initialization failed",e),Te?.dispose(),kl.replaceChildren(),document.documentElement.classList.remove("studio3d-ready"),un("officeSvg").removeAttribute("aria-hidden"),un("officeSvg").querySelectorAll(".employee").forEach(n=>n.setAttribute("tabindex","0")),window.office3d=void 0,fa.textContent="3D unavailable in this browser. The office map and tools are still available.",fa.hidden=!1;return}Te?.updatePeople(i.map(e=>({id:e.id,position:Kh(e),status:Hl(e),seated:Jh(e),action:e.motionAction,rotation:e.motionFaceTo&&i.some(t=>t.id===e.motionFaceTo)?Math.atan2(Kh(i.find(t=>t.id===e.motionFaceTo))[0]-Kh(e)[0],Kh(i.find(t=>t.id===e.motionFaceTo))[1]-Kh(e)[1]):e.id===4?Math.PI/2:_s[Zh[e.id]??0].rotation,note:e.currentJob||e.workload?.[0]||"",alert:e.hasAlert,mood:e.mood||""})))}$h=requestAnimationFrame(jh)}}if(Cn){Cn.pause(Vn),un("rotationReadout").onclick=()=>Cn.reset(),un("rotationReadout").title="Reset view",un("rotationReadout").setAttribute("aria-label","Reset view"),un("opsMobileToggle").onclick=()=>{let t=un("todayPanel").classList.toggle("mobile-open");un("opsMobileToggle").setAttribute("aria-expanded",String(t)),un("opsMobileToggle").textContent=t?"Close operations":"Operations"},document.addEventListener("visibilitychange",()=>Te?.setPaused(Vn||document.hidden));let i=matchMedia("(prefers-reduced-motion: reduce)");i.addEventListener("change",()=>{Vn=i.matches,Cn.pause(Vn),Te?.setPaused(Vn||document.hidden),Te?.setRotating(!Vn)}),window.addEventListener("pagehide",()=>{cancelAnimationFrame($h),Te?.dispose()},{once:!0}),jh()}else fa.textContent="The office could not initialize. Reload to try again.";})();
 /*! Bundled license information:
 
 three/build/three.core.js:
