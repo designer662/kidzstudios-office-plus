@@ -1,0 +1,13 @@
+{
+  "release": 85,
+  "edition": "Expanded Office Space",
+  "package": "V85 office floor space +25% with unchanged room and furniture layout",
+  "modules": [
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-movement-sync.js",
+    "office-3d.js"
+  ],
+  "check": "Uniform horizontal scene scaling after static batching; staff, labels, camera and path points transformed consistently."
+}
