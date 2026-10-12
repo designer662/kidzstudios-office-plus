@@ -1,0 +1,11 @@
+{
+  "release": "v79",
+  "edition": "Living Office+",
+  "package": "v79 deploy-ready root ZIP",
+  "modules": [
+    "office-3d.js",
+    "office-living-office.js",
+    "office-movement-sync.js"
+  ],
+  "check": "If this file loads from your GitHub Pages URL, your live site has received this package."
+}

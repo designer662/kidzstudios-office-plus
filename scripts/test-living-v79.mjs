@@ -59,5 +59,5 @@ assert.match(bundle,/L==="wave"&&\(Z\.waveStart=Q\)/,'Shipped 3D bundle must ack
 assert.match(bundle,/t\.action==="production"/);
 assert.match(bundle,/t\.action==="planning"/);
 assert.match(source,/p\.action==='meeting'/,'TypeScript source must include new gestures');
-assert.ok(header.includes('office-living-office.js?v=79.0'));
+assert.ok(header.includes('office-living-office.js?v=79.1'));
 console.log('PASS V79 richer department behaviors, job acknowledgment, social huddles, break cues, opt-in variable ambience and shipped 3D gestures');
