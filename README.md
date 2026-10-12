@@ -1,8 +1,12 @@
+## V76 Update
+
+Character selection and manual mouse-wheel zoom in the 3D office are fixed. See [README-V76.md](README-V76.md).
+
 ## V74 update
 
 See [V74 click-outside / back behavior](README-V74.md).
 
-> **Current build: V75.** Staff profile panels close on empty-space pointerdown and dock without overlapping Office Pulse. All 10 pages share the auto-stamped footer version (`v75.<run number>` on GitHub). See [README-V75.md](README-V75.md).
+> **Current build: V76.** 3D character selection and manual mouse-wheel zoom restored; blank-space clicks still close staff panels without breaking character selection. All 10 pages share the auto-stamped footer version (`v76.<run number>` on GitHub). See [README-V76.md](README-V76.md).
 
 > **Current build: v72.** Job Management now supports selecting and deleting multiple jobs, plus row-level trash buttons next to Duplicate. See [README-V72.md](README-V72.md). No database migration required.
 

@@ -121,14 +121,22 @@
 
   let lastPointerDown = 0;
   let pointerDismissed = false;
+  let selected3DAt = 0;
+  const is3DCanvas = target => Boolean(target?.matches?.("#office3dHost canvas"));
+  function markCharacterSelection(){selected3DAt = Date.now();}
   // Three.js selects a character on pointerup, BEFORE the browser sends click.
   // Dismiss on pointerdown instead, then ignore that same pointer's subsequent
   // click so a freshly opened character profile remains open.
   function pointerDownAway(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
     lastPointerDown = Date.now();
+    selected3DAt = 0;
     pointerDismissed = false;
     if (frontModal()) return; // Modal backdrops use the existing click handler.
+    // Three.js selects on pointerup. Wait for its raycast before deciding
+    // whether this was a blank canvas click. Otherwise the profile and camera
+    // move under the cursor before the hit test finishes.
+    if (is3DCanvas(event.target)) return;
     closeDropdowns(event.target);
     pointerDismissed = closeInlinePanel(event.target);
   }
@@ -145,7 +153,12 @@
     // A pointer's click fires after pointerup and must not close a new profile
     // opened by a 3D raycast. Keyboard/synthetic clicks still dismiss normally.
     const samePointerClick = event.detail > 0 && Date.now() - lastPointerDown < 1600;
-    if (samePointerClick) return;
+    if (samePointerClick) {
+      if (!is3DCanvas(target)) return;
+      // A worker was selected on pointerup. Preserve the just-opened card.
+      if (selected3DAt >= lastPointerDown && Date.now() - selected3DAt < 1600) return;
+      // No worker was selected: allow this same click to close the old card.
+    }
     closeDropdowns(target);
     const didClose = closeInlinePanel(target);
 
@@ -163,5 +176,5 @@
   document.addEventListener('pointerdown',pointerDownAway,true);
   document.addEventListener('click',clickAway,true);
   // Exported only for DOM-level regression tests and diagnosing integrations.
-  window.KSOutsideClose = {frontModal,closeDropdowns,closeInlinePanel,clickAway,pointerDownAway};
+  window.KSOutsideClose = {frontModal,closeDropdowns,closeInlinePanel,clickAway,pointerDownAway,markCharacterSelection};
 })();

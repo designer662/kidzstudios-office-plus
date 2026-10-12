@@ -1,3 +1,9 @@
+## V76 – Character interaction and manual zoom fix
+- 3D click selection and blank-area dismissal coordinated without moving the profile ahead of the raycast.
+- Increased invisible hit area and added projected proximity fallback for character selection.
+- Mouse-wheel zoom now changes the smoothed camera zoom target rather than snapping back.
+- Added 3D interaction regression test.
+
 ## V75 — Reliable blank-space closing and collision-free Office Pulse (2026-10-12)
 
 - Fixed the 3D `pointerup`/`click` race that could immediately close a newly selected character profile.

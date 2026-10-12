@@ -7,7 +7,7 @@ const pages=readdirSync('public').filter(name=>name.endsWith('.html'));
 assert.equal(pages.length,10,'Expected 10 public pages');
 for(const name of pages){
   const html=readFileSync('public/'+name,'utf8');
-  assert.equal((html.match(/office-outside-close\.js\?v=75\.0/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
+  assert.equal((html.match(/office-outside-close\.js\?v=(?:75|76)\.0/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
 }
 
 function setup(){
@@ -18,6 +18,7 @@ function setup(){
       classList:{contains:k=>values.has(k),add:k=>values.add(k),remove:k=>values.delete(k)},
       contains(other){for(let current=other;current;current=current.parent)if(current===obj)return true;return false},
       closest(selector){if(selector.includes('button')&&obj.tagName==='BUTTON')return obj;return null},
+      matches(selector){return selector==='#office3dHost canvas' && obj.id==='office-canvas'},
       querySelector(selector){return obj.children.find(c=>(selector==='.dialog'||selector==='.job-link-dialog')&&c.kind==='dialog'||selector==='.modal-content'&&c.kind==='content'||selector==='.close-btn'&&c.kind==='close-btn'||selector==='.temp-user-dialog'&&c.kind==='temp-user-dialog'||selector==='.close-mini'&&c.kind==='close-mini')||null},
       click(){obj.clicked++;obj.onClick?.()},
       onClick:null};
@@ -101,25 +102,25 @@ function setup(){
  const close=t.element(null,{parent:preview});close.kind='close-btn';close.onClick=()=>preview.style.display='none';
  t.dispatch(t.element());assert.equal(preview.style.display,'none');assert.equal(close.clicked,1);
 }
-// Real pointers close panels on pointerdown, before 3D pointerup raycasting.
-// The following synthetic click must NOT immediately close the newly selected staff.
+// 3D canvas pointerdown must leave the old card in place until pointerup
+// decides whether a worker was actually selected.
 {
   const t=setup();
-  const card=t.element('profileCard');
+  const card=t.element('profileCard',{open:true});
   const close=t.element(null,{parent:card,tag:'button'});close.kind='close-mini';
   const picker=t.element('characterEmojiPicker');picker.hidden=false;
   close.onClick=()=>{card.classList.remove('open');picker.hidden=true};
-  card.classList.add('open');
   const canvas=t.element('office-canvas',{tag:'canvas'});
   t.dispatch(canvas,{detail:1},'pointerdown');
-  assert.equal(card.classList.contains('open'),false,'Empty-space pointerdown closes profile');
-  assert.equal(picker.hidden,true,'Profile dismissal also closes attached emoji');
-  card.classList.add('open'); // e.g. 3D onPerson raycast fires on pointerup
+  assert.equal(card.classList.contains('open'),true,'3D pointerdown must not close the profile before raycasting');
+  t.window.KSOutsideClose.markCharacterSelection(); // 3D raycast selected another person on pointerup
   t.dispatch(canvas,{detail:1});
-  assert.equal(card.classList.contains('open'),true,'Following click must not dismiss 3D selection');
-  // Subsequent unrelated pointerdown should close it again.
-  t.dispatch(t.element(),{detail:1},'pointerdown');
-  assert.equal(card.classList.contains('open'),false,'Next outside click closes the profile');
+  assert.equal(card.classList.contains('open'),true,'Selected worker profile survives the following click');
+  t.dispatch(canvas,{detail:1},'pointerdown');
+  assert.equal(card.classList.contains('open'),true);
+  t.dispatch(canvas,{detail:1}); // clicked empty area, no new character selected
+  assert.equal(card.classList.contains('open'),false,'Blank 3D canvas click closes the card');
+  assert.equal(picker.hidden,true,'Blank click also closes emoji picker');
 }
 // Clicking the emoji picker is an interaction with the selected staff;
 // clicking outside both cards closes them in one action.
@@ -135,4 +136,4 @@ function setup(){
   assert.equal(card.classList.contains('open'),false);
   assert.equal(picker.hidden,true);
 }
-console.log(`PASS click-away tests: modal priority, field protection, dropdowns, shared panels, pointerdown character selection, preview cleanup, ${pages.length} pages.`);
+console.log(`PASS click-away tests: modal priority, field protection, dropdowns, shared panels, pointerup raycast priority and empty canvas dismissal, preview cleanup, ${pages.length} pages.`);
