@@ -1,3 +1,7 @@
+## V74 update
+
+See [V74 click-outside / back behavior](README-V74.md).
+
 > **Current build: V73.** Job Management starts on the **current local month and year**. All 10 pages share a consistent footer version. GitHub Actions automatically stamps each deployment with `v73.<run number>`. See [README-V73.md](README-V73.md).
 
 > **Current build: v72.** Job Management now supports selecting and deleting multiple jobs, plus row-level trash buttons next to Duplicate. See [README-V72.md](README-V72.md). No database migration required.

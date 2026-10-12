@@ -1,3 +1,11 @@
+## V74 — Click outside to close
+
+- Standardized outside-click dismissal across all 10 pages.
+- Preserved modal state through existing Close/Cancel actions.
+- Added foreground-first dismissal for Job Management confirmation dialogs.
+- Added click-away close for notifications, chat, character mood popup, profile cards, Office Pulse/Live Activity, job dropdowns, and orderform previews.
+- Added deployment regression test and bumped release metadata to 74.
+
 ## V73 · Current month and synchronized build footers
 - Job Management opens with local current month/year selected, while other periods remain accessible.
 - Unified footer version across all 10 pages; GitHub Actions stamps a unique build number with every deployment.
