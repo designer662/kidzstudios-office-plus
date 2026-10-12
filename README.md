@@ -1,5 +1,12 @@
 # **Current release: V81 · Realistic Office Ambience**
 
+## V82: Orderform PNG downloads and shared live tool notifications
+
+- Orderform 1/2 can Preview and Download PNG again, with a Canvas fallback and reliable Blob downloads.
+- Non-dashboard tools now show only shared Supabase office events in their notification bells, with realtime refresh and silent loading of older events.
+- All other V81 features are retained. Details in [README-V82.md](README-V82.md).
+
+
 V81 adds reliable browser audio unlock, locally synthesized ventilation, typing, footsteps and quiet conversation, a Preview button, independent volume/mute, and background-tab pause. All V80 Smart Floating Labels and Supabase features are preserved. See [README-V81.md](README-V81.md) and [DEPLOY-AND-VERIFY-V81.md](DEPLOY-AND-VERIFY-V81.md).
 
 > **Previous release: V80 Smart Floating Labels.** Compact name + persistent mood, label collision avoidance, one prioritized notification per character, temporary workload bubbles, zoom-aware clutter reduction, and screen-boundary protection. GitHub Pages + Supabase and the V79 Living Office remain unchanged. See [README-V80.md](README-V80.md).

@@ -79,32 +79,102 @@
   async function loadStaffSuggestions(){if(!tempSuggestions)return;try{const r=await fetch('/api/state?scope=office%3Astaff',{cache:'no-store',headers:{accept:'application/json'}});if(!r.ok)return;const row=await r.json(),list=Array.isArray(row?.payload?.staff)?row.payload.staff:Array.isArray(row?.payload?.records)?row.payload.records:[];const names=[...new Set(list.map(x=>String(x?.name||'').trim()).filter(Boolean))].slice(0,10);const dl=tempModal.querySelector('#tempUserStaffList');if(dl)dl.innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');tempSuggestions.innerHTML=names.slice(0,6).map(n=>`<button type="button" class="temp-user-suggestion" data-temp-name="${esc(n)}">${esc(n)}</button>`).join('')}catch(_){}}
   updateTempUserUI();
 
-  // Tool pages get a lightweight view of the shared event feed. The dashboard keeps its richer native notification controller.
+  // Tool pages: ONLY shared Supabase office events, not browser-local UI messages.
+  // Realtime table changes trigger an immediate refresh; polling is a fallback.
+  // Dashboard keeps its own richer notification controller.
   if(!document.getElementById('officeSvg')){
-    const btn=header.querySelector('#notificationBtn'),panel=header.querySelector('#notificationPanel'),nlist=header.querySelector('#notificationList'),badge=header.querySelector('#notificationUnread'),clear=header.querySelector('#notificationClearBtn');
-    let events=[];let seen=0;let lastSoundEventId=null;
-    try{seen=Number(localStorage.getItem('ksHeaderSeenEvent')||0)||0}catch(_){}
-    const timeAgo=value=>{const t=new Date(value).getTime();if(!Number.isFinite(t))return'';const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return'now';if(s<3600)return`${Math.floor(s/60)}m`;if(s<86400)return`${Math.floor(s/3600)}h`;return`${Math.floor(s/86400)}d`};const clock=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'--:--':d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})};
-    const actorFor=e=>String(e?.metadata?.actor?.name||'').trim();
-    const draw=()=>{if(!nlist)return;nlist.innerHTML=events.length?[...events].reverse().slice(0,10).map(e=>{const actor=actorFor(e);return `<div class="notification-item"><b>${esc(e.title||'Office update')}</b><span>${esc(e.message||'')}${actor?` · by ${esc(actor)}`:''}</span><time>${esc(clock(e.createdAt))} · ${esc(timeAgo(e.createdAt))}</time></div>`}).join(''):'<div class="notification-empty">No new updates yet.</div>';const unread=events.filter(e=>Number(e.id)>seen).length;if(badge){badge.textContent=String(Math.min(99,unread));badge.hidden=!unread}btn?.classList.toggle('has-unread',unread>0)};
+    const btn=header.querySelector('#notificationBtn');
+    const panel=header.querySelector('#notificationPanel');
+    const nlist=header.querySelector('#notificationList');
+    const badge=header.querySelector('#notificationUnread');
+    const clear=header.querySelector('#notificationClearBtn');
+    const subheading=panel?.querySelector('.notification-panel-head span');
+    if(subheading)subheading.textContent='Shared live · Supabase';
+    const KEY_SEEN='ksHeaderSeenEvent';
+    const KEY_CLEARED='ksHeaderClearedThrough';
+    const readNumber=key=>{try{return Math.max(0,Number(localStorage.getItem(key)||0)||0)}catch(_){return 0}};
+    const saveNumber=(key,value)=>{try{localStorage.setItem(key,String(value))}catch(_){}};
+    let events=[],seen=readNumber(KEY_SEEN),cleared=readNumber(KEY_CLEARED);
+    let lastSoundEventId=null,loading=false,needsRefresh=false,lastFetch=0;
+    const timeAgo=value=>{const t=new Date(value).getTime();if(!Number.isFinite(t))return'';const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return'now';if(s<3600)return`${Math.floor(s/60)}m`;if(s<86400)return`${Math.floor(s/3600)}h`;return`${Math.floor(s/86400)}d`};
+    const clock=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'--:--':d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})};
+    const actorFor=event=>String(event?.metadata?.actor?.name||'').trim();
+    const validSharedEvent=event=>Number.isSafeInteger(Number(event?.id))&&Number(event.id)>0&&Boolean(event?.eventType||event?.title);
+    const draw=()=>{
+      if(!nlist)return;
+      const displayed=events.filter(event=>(Number(event.id)||0)>cleared);
+      nlist.innerHTML=displayed.length?[...displayed].reverse().slice(0,10).map(event=>{
+        const actor=actorFor(event);
+        return `<div class="notification-item"><b>${esc(event.title||'Office update')}</b><span>${esc(event.message||'')}${actor?` · by ${esc(actor)}`:''}</span><time>${esc(clock(event.createdAt))} · ${esc(timeAgo(event.createdAt))}</time></div>`;
+      }).join(''):'<div class="notification-empty">No new shared office updates.</div>';
+      const unread=displayed.filter(event=>Number(event.id)>seen).length;
+      if(badge){badge.textContent=String(Math.min(99,unread));badge.hidden=!unread;}
+      btn?.classList.toggle('has-unread',unread>0);
+    };
     async function pull(){
+      if(loading){needsRefresh=true;return;}
+      loading=true;
       try{
-        const res=await fetch('/api/events?limit=20',{cache:'no-store',headers:{accept:'application/json'}});
-        if(!res.ok)return;
+        const res=await fetch('/api/events?limit=40',{cache:'no-store',headers:{accept:'application/json'}});
+        if(!res.ok)throw new Error('Shared events unavailable');
         const data=await res.json();
-        const next=Array.isArray(data.events)?data.events:[];
+        const next=Array.isArray(data.events)?data.events.filter(validSharedEvent):[];
         const maxId=next.reduce((max,event)=>Math.max(max,Number(event.id)||0),0);
-        // First load is only a baseline: never ring for old notifications.
-        if(lastSoundEventId!==null && maxId>lastSoundEventId && !document.hidden){
-          const fresh=next.filter(event=>(Number(event.id)||0)>lastSoundEventId && Date.now()-new Date(event.createdAt||0).getTime()<120000);
-          if(fresh.length)window.KSNotificationSound?.play(fresh.some(e=>e.eventType==='chat_message')?'chat_message':'update');
+        // Initial response is historical baseline, so never ring on page load.
+        if(lastSoundEventId===null){
+          lastSoundEventId=maxId;
+          if(!seen){seen=maxId;saveNumber(KEY_SEEN,seen);}
+        }else if(maxId>lastSoundEventId){
+          const fresh=next.filter(event=>Number(event.id)>lastSoundEventId&&
+            Number(event.id)>cleared&&Date.now()-new Date(event.createdAt||0).getTime()<120000);
+          if(!document.hidden&&fresh.length){
+            window.KSNotificationSound?.play(fresh.some(event=>event.eventType==='chat_message')?'chat_message':'update');
+          }
+          lastSoundEventId=maxId;
         }
-        lastSoundEventId=Math.max(lastSoundEventId||0,maxId);
         events=next;
+        lastFetch=Date.now();
         draw();
-      }catch(_){}
+      }catch(_){
+        if(lastSoundEventId===null&&nlist)nlist.innerHTML='<div class="notification-empty">Shared notifications unavailable. Reconnecting…</div>';
+      }finally{
+        loading=false;
+        if(needsRefresh){needsRefresh=false;pull();}
+      }
     }
-    btn?.addEventListener('click',e=>{e.stopPropagation();const open=!panel.classList.contains('open');panel.classList.toggle('open',open);panel.setAttribute('aria-hidden',String(!open));btn.setAttribute('aria-expanded',String(open));if(open&&events.length){seen=Math.max(seen,...events.map(e=>Number(e.id)||0));try{localStorage.setItem('ksHeaderSeenEvent',String(seen))}catch(_){}draw()}});
-    clear?.addEventListener('click',()=>{events=[];draw()});document.addEventListener('pointerdown',e=>{if(panel?.classList.contains('open')&&!header.querySelector('.notification-wrap')?.contains(e.target)){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');btn?.setAttribute('aria-expanded','false')}});pull();setInterval(pull,15000);
+    btn?.addEventListener('click',event=>{
+      event.stopPropagation();
+      const open=!panel.classList.contains('open');
+      panel.classList.toggle('open',open);
+      panel.setAttribute('aria-hidden',String(!open));
+      btn.setAttribute('aria-expanded',String(open));
+      if(open){
+        seen=Math.max(seen,...events.map(event=>Number(event.id)||0));
+        saveNumber(KEY_SEEN,seen);draw();
+        if(Date.now()-lastFetch>3000)pull();
+      }
+    });
+    clear?.addEventListener('click',event=>{
+      event.stopPropagation();
+      // Clears this browser's view, never deletes the shared Supabase event log.
+      cleared=Math.max(cleared,...events.map(event=>Number(event.id)||0));
+      seen=Math.max(seen,cleared);
+      saveNumber(KEY_CLEARED,cleared);saveNumber(KEY_SEEN,seen);
+      draw();
+    });
+    document.addEventListener('pointerdown',event=>{
+      if(panel?.classList.contains('open')&&!header.querySelector('.notification-wrap')?.contains(event.target)){
+        panel.classList.remove('open');panel.setAttribute('aria-hidden','true');btn?.setAttribute('aria-expanded','false');
+      }
+    });
+    // Supabase-bridge dispatches only for actual database table changes.
+    window.addEventListener('ks:supabase-change',event=>{
+      if(event.detail?.table==='ks_office_events'&&!document.hidden)pull();
+    });
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
+    window.addEventListener('focus',()=>{if(Date.now()-lastFetch>5000)pull()});
+    pull();
+    setInterval(()=>{if(!document.hidden)pull()},15000);
   }
+
 })();

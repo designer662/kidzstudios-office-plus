@@ -7,8 +7,8 @@
 
     <title>Kidz Studios Job Sheet (Mockup & Details)</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-    </script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="orderform-export.js?v=82.0"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1902,6 +1902,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 
             // --- PREVIEW / EXPORT ---
             let currentPreviewDataURL = '';
+            let currentPreviewCanvas = null;
 
             function syncInputAttributes() {
                 document.querySelectorAll('#jobSheetForm input').forEach(inp => {
@@ -1914,21 +1915,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
             }
 
             async function captureSheet(scale = 2) {
-                await document.fonts.ready;
-                await document.fonts.load('1em Poppins');
-                await new Promise(r => requestAnimationFrame(r));
-                await new Promise(r => setTimeout(r, 300));
-                return html2canvas(sheet, {
-                    scale,
-                    useCORS: true,
-                    allowTaint: false,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    width: sheet.offsetWidth,
-                    height: sheet.offsetHeight,
-                    windowWidth: sheet.offsetWidth,
-                    windowHeight: sheet.offsetHeight
-                });
+                return window.KSOrderformExporter.capture(sheet, {scale});
             }
 
             window.openImagePreview = async function() {
@@ -1946,6 +1933,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     });
 
                     const canvas = await captureSheet(2);
+                    currentPreviewCanvas = canvas;
                     currentPreviewDataURL = canvas.toDataURL('image/png');
                     previewImage.src = currentPreviewDataURL;
                     previewModal.style.display = 'block';
@@ -1969,36 +1957,21 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 previewModal.style.display = 'none';
                 previewImage.src = '';
                 currentPreviewDataURL = '';
+                currentPreviewCanvas = null;
             };
 
             // --- DOWNLOAD with ONLY the JOB SHEET detail as filename ---
-            window.downloadImage = function() {
-                if (!currentPreviewDataURL) {
+            window.downloadImage = async function() {
+                if (!currentPreviewCanvas) {
                     showToast('No preview available. Preview first.', 'error');
                     return;
                 }
-
-                // Get the Job Sheet number from the input
-                const jobSheetInput = document.getElementById('jobSheetNumber');
-                let jobSheetVal = jobSheetInput ? jobSheetInput.value.trim() : '';
-                
-                // Sanitize for filename: replace spaces, keep alphanumeric, underscore, hyphen
-                jobSheetVal = jobSheetVal.replace(/[^a-zA-Z0-9\-_]/g, '_');
-                
-                // If empty, default to 'JobSheet'
-                if (jobSheetVal.length === 0) {
-                    jobSheetVal = 'JobSheet';
-                }
-
-                // Filename is ONLY the job sheet value + .png (no prefix)
-                const filename = `${jobSheetVal}.png`;
-
-                const a = document.createElement('a');
-                a.href = currentPreviewDataURL;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                const value = document.getElementById('jobSheetNumber')?.value?.trim() || '';
+                const filename = (value.replace(/[^a-zA-Z0-9_-]/g, '_') || 'JobSheet') + '.png';
+                try {
+                    await window.KSOrderformExporter.download(currentPreviewCanvas, filename);
+                    showToast('PNG downloaded successfully.');
+                } catch (error) { showToast('Download failed: ' + error.message, 'error'); }
             };
 
             // --- INIT ---
@@ -2097,7 +2070,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 
 <script src="shared-sync.js" defer></script>
 
-<footer class="ks-version-footer no-print" aria-label="Build version">v81</footer>
+<footer class="ks-version-footer no-print" aria-label="Build version">v82</footer>
 <script src="office-notification-sound.js?v=69.0" defer></script>
 <script src="suite-header.js" defer></script>
 <script src="office-outside-close.js?v=75.0" defer></script>

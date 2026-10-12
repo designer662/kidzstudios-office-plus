@@ -1,7 +1,13 @@
 {
-  "release": "v81",
+  "release": 82,
   "edition": "Living Office Realistic Ambience",
   "package": "V81 audio unlock and procedural office sound layers",
-  "modules": ["office-ambience-audio.js", "office-living-office.js", "office-notification-sound.js", "office-movement-sync.js", "office-3d.js"],
+  "modules": [
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-movement-sync.js",
+    "office-3d.js"
+  ],
   "check": "Opt-in ambient audio: ventilation, typing, footsteps, soft synthetic conversation, independent notification chimes."
 }

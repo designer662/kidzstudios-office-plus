@@ -183,3 +183,10 @@
 - Displayed the last successful Job Management sync time immediately beside the dashboard build version at the footer, keeping Supabase updates active.
 - Fixed the 3D camera startup sequence so auto-rotation begins automatically on load and refresh (unless reduced-motion is requested by the operating system); adjusted its speed and preserved the intended default zoom.
 - No database schema changes; GitHub Pages + Supabase deployment remains unchanged.
+
+## V82: Reliable Orderform PNG and Supabase-only shared notifications
+
+- Repaired Orderform 1/2 preview and PNG downloading with a Canvas fallback and Blob-based save. Confirmed both downloadable PNGs in an offline Chromium test.
+- Made the external `html2canvas` script non-blocking and retained it as the primary high-fidelity renderer where available.
+- Tool-page notification bells use shared Supabase office events only, refresh on Realtime changes, silently baseline old events, and support browser-local clear/read state.
+- Kept the dashboard's notification system and all prior data, 3D, and sound features unchanged.
