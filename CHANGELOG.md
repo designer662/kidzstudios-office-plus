@@ -1,3 +1,12 @@
+## v70 — data reliability, Google Sheets links, animated moods and smoother 3D
+
+- Added XLSX/CSV/TSV/JSON import and full CSV export, shared previews, duplicate/limit validation and safe save failure handling.
+- Added pasted Google Sheets links with tab selection and callback fallback.
+- Fixed hidden undated/older jobs, automatic legacy-reference removal, blank mood resets and footer Last sync.
+- Added animated moods and Busy; preserved bubbles independently from temporary messages.
+- Smoothed geometry, camera damping/zoom, character motion and label height; aligned TypeScript build with public assets.
+- Added semantic data and character tests. See README-V70.md for tested limits and setup.
+
 ## V69 · Notification Chime
 - Added browser notification sound for new office updates, with a soft chat-specific variant
 - Added per-PC Sound on / Muted control inside the notifications panel

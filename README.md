@@ -1,3 +1,5 @@
+> **Current build: v70.** See [README-V70.md](README-V70.md) for data import/export, Google Sheets links, animated Busy mood, smoother 3D, and current validation commands.
+
 > **Latest update: V69 Notification Sound.** See [README-V69.md](README-V69.md) for deployment notes.
 
 # KIDZSTUDIOS Office Plus V61 · Header & Excel Upgrade

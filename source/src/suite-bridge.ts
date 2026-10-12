@@ -1,6 +1,6 @@
 import {createOffice,type OfficeController} from './office-scene';
 import {people,type Person} from './office-data';
-type Staff={id:number;name:string;position:string;department:string;gender?:'male'|'female';status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
+type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
 type Suite={getStaff:()=>Staff[];selectPerson:(id:number)=>void;selectDepartment:(id:string)=>void;selectRoom:(id:string)=>void;stopFollow:()=>void;reset:()=>void;pause:(paused:boolean)=>void};
 declare global{interface Window{OfficeSuite?:Suite;office3d?:OfficeController}}
 const host=document.querySelector<HTMLDivElement>('#office3dHost')!;
@@ -16,9 +16,10 @@ function roster(staff:Staff[]):Person[]{return staff.map((e,i)=>{const base=peop
 function build(staff:Staff[]){
  controller?.dispose();host.replaceChildren();
  controller=createOffice(host,{onPerson:id=>api?.selectPerson(id),onDepartment:id=>api?.selectDepartment(id),onRoom:id=>api?.selectRoom(id),onExplore:()=>api?.stopFollow(),onZoom:z=>{$('rotationReadout').textContent=`${Math.round(z*100)}%`}},{roster:roster(staff),externalMotion:true});
- controller.setView('isometric');controller.setPaused(paused);window.office3d=controller;
+ controller.setView('isometric');controller.setPaused(paused);controller.setRotating(!paused);window.office3d=controller;
+ for(const person of staff){const emoji=({happy:'😊',sad:'😔',angry:'😠',badmood:'😒',busy:'💻'} as Record<string,string>)[person.mood||''];if(emoji)controller.showBubble(person.id,emoji,0,'emoji')}
  const selectDepartment=controller.selectDepartment.bind(controller);controller.selectDepartment=id=>selectDepartment(id==='All'?'all':id);
- const reset=controller.reset.bind(controller);controller.reset=()=>reset();
+ const reset=controller.reset.bind(controller);controller.reset=()=>{reset();controller?.setRotating(!paused)};
  document.documentElement.classList.add('studio3d-ready');$('officeSvg').setAttribute('aria-hidden','true');$('officeSvg').querySelectorAll('[tabindex]').forEach(el=>el.setAttribute('tabindex','-1'));loading.hidden=true;
 }
 function tick(){
@@ -36,6 +37,7 @@ if(api){
  $('rotationReadout').onclick=()=>api.reset();$('rotationReadout').title='Reset view';$('rotationReadout').setAttribute('aria-label','Reset view');
  $('opsMobileToggle').onclick=()=>{const open=$('todayPanel').classList.toggle('mobile-open');$('opsMobileToggle').setAttribute('aria-expanded',String(open));$('opsMobileToggle').textContent=open?'Close operations':'Operations'};
  document.addEventListener('visibilitychange',()=>controller?.setPaused(paused||document.hidden));
+ const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');motionPreference.addEventListener('change',()=>{paused=motionPreference.matches;api.pause(paused);controller?.setPaused(paused||document.hidden);controller?.setRotating(!paused)});
  window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);controller?.dispose()},{once:true});
  tick();
 }else{loading.textContent='The office could not initialize. Reload to try again.'}

@@ -1013,6 +1013,7 @@ body{overscroll-behavior:none;}
   }
   @media print{.ks-version-footer,#ksDock .ks-version-footer{display:none!important}}
 </style>
+<link rel="stylesheet" href="office-moods.css?v=70.0">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1167,6 +1168,7 @@ body{overscroll-behavior:none;}
     <button type="button" class="emoji-choice-btn" data-emoji-mood="sad" data-emoji="😔"><span class="emoji-icon">😔</span><span class="emoji-copy"><b>Sad</b><small>Low energy</small></span></button>
     <button type="button" class="emoji-choice-btn" data-emoji-mood="angry" data-emoji="😠"><span class="emoji-icon">😠</span><span class="emoji-copy"><b>Angry</b><small>Urgent pressure</small></span></button>
     <button type="button" class="emoji-choice-btn" data-emoji-mood="badmood" data-emoji="😒"><span class="emoji-icon">😒</span><span class="emoji-copy"><b>Bad mood</b><small>Not feeling it</small></span></button>
+    <button type="button" class="emoji-choice-btn" data-emoji-mood="busy" data-emoji="💻" title="Busy · Focus time"><span class="emoji-icon">💻</span><span class="emoji-copy"><b>Busy</b><small>Focus time</small></span></button>
   </div>
   <div class="character-emoji-actions"><button type="button" class="emoji-clear-btn" id="characterEmojiClear">Clear / reset mood</button></div>
 </div>
@@ -1272,7 +1274,7 @@ body{overscroll-behavior:none;}
   const recentJobs = $('#recentJobs');
   const jobsFilterLabel = $('#jobsFilterLabel');
   const opsNote = $('#opsNote');
-  const opsLastSync = $('#opsLastSync');
+  let opsLastSync = $('#opsLastSync');
   const opsTotalJobs = $('#opsTotalJobs');
   const opsActiveJobs = $('#opsActiveJobs');
   const opsCompletedToday = $('#opsCompletedToday');
@@ -1755,6 +1757,7 @@ body{overscroll-behavior:none;}
     return d.getFullYear()===base.getFullYear()&&d.getMonth()===base.getMonth()&&d.getDate()===base.getDate();
   }
   function renderOpsSyncMeta(){
+    if(!opsLastSync)opsLastSync=$('#opsLastSync');
     if(!opsLastSync)return;
     if(!opsLastSyncAt){opsLastSync.textContent='Last sync: waiting';opsLastSync.title='Waiting for Job Management synchronization';return}
     opsLastSync.textContent=`Last sync: ${fullClockTime(opsLastSyncAt)}`;
@@ -1823,28 +1826,28 @@ body{overscroll-behavior:none;}
   function normalizeSharedHtmlJob(job,index=0){
     const j={...(job||{})};j.ref=j.ref||j.jobsheetFiles||j.invoice||`JOB-${index+1}`;j.customer=j.customer||'';j.jobType=j.jobType||j.item||'';j.printingType=j.printingType||j.typeOfPrinting||'';j.title=j.title||[j.jobType,j.printingType].filter(Boolean).join(' · ')||'Job';j.currentDepartment=j.currentDepartment||j.status||'';j.status=j.currentDepartment||j.status||j.artworkStatus||'Active';j.sales=j.sales||j.pic||'';j.pic=j.sales||j.pic||'';j.productionPic=j.productionPic||'';j.due=j.due||j.deliveryTime||'';j.deliveryTime=j.deliveryTime||j.due||'';j.completedDate=j.completedDate||j.actualComplete2||j.actualComplete1||'';j.statusUpdated=j.statusUpdated||j.lastUpdate||'';j.orderDate=j.orderDate||'';j.assignees=Array.isArray(j.assignees)?j.assignees:[j.sales,j.designer,j.productionPic].filter(Boolean);j._index=index;if(!Array.isArray(j._details)&&j._record&&typeof j._record==='object')j._details=Object.entries(j._record).filter(([,v])=>String(v??'').trim()).map(([label,value])=>({label,value:String(value)}));return j;
   }
-  async function readJobCache(){
+  async function readJobCache({strict=false}={}){
     try{
       const res=await fetch('/api/state?scope=dashboard%3Ajobs',{cache:'no-store'});
-      if(!res.ok)return null;
+      if(res.status===404)return null;if(!res.ok)throw new Error(`Job data unavailable (${res.status})`);
       const row=await res.json(),parsed=row?.payload;
-      if(!Array.isArray(parsed?.jobs))return null;
-      return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob).filter(job=>!isLegacyDemoJob(job)),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
-    }catch(_){return null}
+      if(!Array.isArray(parsed?.jobs))throw new Error('Invalid shared job data');
+      return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
+    }catch(error){if(strict)throw error;return null}
   }
   async function loadJobsFromSheet({background=false}={}){
     if(jobSyncInFlight)return jobs;jobSyncInFlight=true;
     if(!background&&opsRefreshBtn)opsRefreshBtn.classList.add('loading');
     if(jobDataSource==='html'){
       try{
-        const shared=await readJobCache();
+        const shared=await readJobCache({strict:true});
         if(shared){
           const changed=Number(shared.version||0)!==jobSharedVersion;jobSharedVersion=Number(shared.version||jobSharedVersion);opsLastSyncAt=shared.savedAt||opsLastSyncAt;
           if(changed||opsDataMode!=='live'){jobs=shared.jobs;setOpsSource('live','Job Management',`${jobs.length} shared jobs synced from the live database · ${fullClockTime()}.`,shared.savedAt);renderOps();}
           else renderOpsSyncMeta();
         }else{jobs=[];jobSharedVersion=0;setOpsSource('empty','No Data','No shared Job Management rows saved yet. Add or import a job to begin.');renderOps();}
         return jobs;
-      }finally{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')}
+      }catch(error){setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);renderOps();return jobs}finally{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')}
     }
     const shared=await readJobCache();
     const previousSignature=shared?.signature||jobsSignature(shared?.jobs||[]);
@@ -1903,7 +1906,7 @@ body{overscroll-behavior:none;}
     const gender=normalizeGender(record.gender||existing?.gender||defaultBase?.gender||'male');
     const base=defaultBase?{...defaultBase}:dynamicStaffBase(id,index,department,gender);
     const runtime=existing?{visualX:existing.visualX,visualY:existing.visualY,visualRoomId:existing.visualRoomId,roam:existing.roam,motionWalking:existing.motionWalking,motionAction:existing.motionAction,moving:existing.moving}:{};
-    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood||existing?.mood||base.mood||'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
+    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood??existing?.mood??base.mood??'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
   }
   function serializeStaffDirectory(){return employees.map(staffRecord)}
   function applyStaffDirectory(payload,version=0){
@@ -2235,7 +2238,7 @@ body{overscroll-behavior:none;}
   function groupedActivityFeed(){const out=[];for(const a of activityFeed){const key=`${a.type||''}|${a.employeeId||''}|${a.title||''}|${a.text||''}`,prev=out.find(x=>x._key===key&&Math.abs((x.createdAt||0)-(a.createdAt||0))<10*60000);if(prev){prev.groupCount=(prev.groupCount||1)+1;prev.createdAt=Math.max(prev.createdAt||0,a.createdAt||0)}else out.push({...a,_key:key,groupCount:1})}return out}
   function renderFeed(){if(!activityList)return;const feed=groupedActivityFeed(),count=livePanel&&livePanel.classList.contains('expanded')?feed.length:4;if(!feed.length){activityList.innerHTML='<div class="ops-note clean-empty">No office activity yet.</div>';return}activityList.innerHTML=feed.slice(0,count).map(a=>{const at=a.createdAt||Date.now(),kind=activityTypeLabel(a.type||a.eventType||'office'),system=String(a.type||'').includes('sync');return `<div class="feed-item${a.employeeId?' feed-clickable':''}${a.realtime?' realtime':''}${system?' feed-system':''}" ${a.employeeId?`data-employee-id="${a.employeeId}" role="button" tabindex="0"`:''} title="${esc(new Date(at).toLocaleString('en-MY'))}"><div class="feed-avatar feed-glyph">${activityFeedGlyph(a.type)}</div><div class="feed-copy"><div class="feed-title-row"><b>${esc(a.title)}${a.groupCount>1?` <small>×${a.groupCount}</small>`:''}</b><em>${esc(kind)}</em></div><span>${esc(a.text)}</span></div><span class="feed-time"><b>${esc(clockTime(at))}</b><small>${esc(relativeEventTime(at))}</small></span></div>`}).join('')}
   function positionBubbleForEmployee(fo,emp){if(!fo||!emp)return;const p=iso(emp.visualX??emp.x,emp.visualY??emp.y);const w=Number(fo.getAttribute('width'))||190;fo.setAttribute('x',p.x-w/2);fo.setAttribute('y',p.y-96)}
-  function showBubble(emp,text,{kind='activity',duration=6800}={}){if(!emp||!text)return null;window.office3d?.showBubble(emp.id,String(text),duration);const existing=bubblesLayer.querySelector(`.activity-bubble-wrap[data-employee-id="${emp.id}"][data-bubble-kind="${kind}"]`);if(existing)existing.remove();const fo=el('foreignObject',{x:0,y:0,width:210,height:86,class:`activity-bubble-wrap bubble-${kind}`,'data-employee-id':emp.id,'data-bubble-kind':kind}),div=document.createElement('div');div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');div.className='activity-bubble';div.textContent=String(text).slice(0,220);fo.append(div);positionBubbleForEmployee(fo,emp);bubblesLayer.append(fo);if(duration>0)setTimeout(()=>fo.isConnected&&fo.remove(),duration);return fo}
+  function showBubble(emp,text,{kind='activity',duration=6800}={}){if(!emp||!text)return null;window.office3d?.showBubble(emp.id,String(text),duration,kind);const existing=bubblesLayer.querySelector(`.activity-bubble-wrap[data-employee-id="${emp.id}"][data-bubble-kind="${kind}"]`);if(existing)existing.remove();const fo=el('foreignObject',{x:0,y:0,width:210,height:86,class:`activity-bubble-wrap bubble-${kind}`,'data-employee-id':emp.id,'data-bubble-kind':kind}),div=document.createElement('div');div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');div.className='activity-bubble';if(kind==='emoji'){fo.dataset.mood=Object.keys(characterEmojiPresets).find(k=>characterEmojiPresets[k].emoji===text)||'happy';const icon=document.createElement('span');icon.className='animated-mood-icon';icon.textContent=String(text);div.appendChild(icon);div.setAttribute('aria-label',fo.dataset.mood);if(fo.dataset.mood==='busy'){const dots=document.createElement('span');dots.className='busy-dots';dots.innerHTML='<i></i><i></i><i></i>';div.appendChild(dots)}}else div.textContent=String(text).slice(0,220);fo.append(div);positionBubbleForEmployee(fo,emp);bubblesLayer.append(fo);if(duration>0)setTimeout(()=>fo.isConnected&&fo.remove(),duration);return fo}
   function updateEmployeeBubbles(emp){bubblesLayer.querySelectorAll(`.activity-bubble-wrap[data-employee-id="${emp.id}"]`).forEach(fo=>positionBubbleForEmployee(fo,emp))}
   function workloadBubbleText(emp){const lines=workloadLines(emp?.workload);if(lines.length)return `Workload: ${lines[0]}${lines.length>1?` +${lines.length-1} more`:''}`;const active=activeJobsForEmployee(emp||{})[0];if(active)return `Workload: ${active.ref||'Job'} · ${active.title||active.customer||'Active job'}`;return emp?.currentJob?`Workload: ${emp.currentJob}`:''}
   function scheduleRandomWorkloadBubble(){if(workloadBubbleTimer)clearTimeout(workloadBubbleTimer);const delay=13000+Math.random()*12000;workloadBubbleTimer=setTimeout(()=>{workloadBubbleTimer=null;if(!document.hidden){const candidates=employees.filter(emp=>workloadBubbleText(emp));if(candidates.length){const emp=candidates[Math.floor(Math.random()*candidates.length)];showBubble(emp,workloadBubbleText(emp),{kind:'workload',duration:7600})}}scheduleRandomWorkloadBubble()},delay)}
@@ -2308,7 +2311,7 @@ body{overscroll-behavior:none;}
     profileCard.innerHTML=`<button class="close-mini" style="position:absolute;right:14px;top:14px">×</button><div class="profile-top"><div class="profile-avatar">${initials(e.name)}</div><div><div class="profile-name">${esc(e.name)}</div><div class="profile-role">${esc(e.position)}</div><div class="profile-badge"><i></i>${esc(effectiveStatus(e))}</div></div></div><div class="profile-details"><div class="detail-row"><span>Department</span><span>${esc(e.department)}</span></div><div class="detail-row"><span>Current location</span><span>${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span></div><div class="detail-row profile-job-row"><span>Current job</span><span>${esc(e.currentJob||'No active job')}</span></div></div><div class="profile-workload"><div class="profile-workload-head"><span>Workload</span><span>${totalWorkload} item${totalWorkload===1?'':'s'}</span></div><div class="profile-workload-list">${workloadHtml}</div></div><div class="profile-job-actions"><button class="profile-job-action" data-edit-profile-workload="${e.id}">Update workload</button><button class="profile-job-action" data-edit-profile-staff="${e.id}">Edit staff</button></div>`;
     profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
   }
-  const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'}};
+  const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'},busy:{emoji:'💻',label:'Busy'}};
   function clearMoodBubble(employeeId){
     if(employeeId==null)return;
     const selector=`.activity-bubble-wrap[data-employee-id="${employeeId}"][data-bubble-kind="emoji"]`;
@@ -2375,19 +2378,19 @@ body{overscroll-behavior:none;}
   }
   async function clearCharacterMood(emp){
     if(!emp)return;
-    emp.mood='';
+    const previousMood=emp.mood;emp.mood='';
     clearMoodBubble(emp.id);
     drawEmployees();
     try{
       await saveCharacterMood(emp,'');
       await postOfficeEvent({eventType:'mood_cleared',title:`${emp.name} · Mood cleared`,message:'Mood reset',employeeId:emp.id,metadata:{mood:''},dedupeKey:`mood-clear:${emp.id}:${Date.now()}`});
-    }catch(err){console.warn('Could not clear mood',err)}
+    }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
     closeCharacterEmojiPicker();
   }
   async function triggerCharacterEmoji(emp,mood){
     const preset=characterEmojiPresets[mood];
     if(!emp||!preset)return;
-    emp.mood=mood;
+    const previousMood=emp.mood;emp.mood=mood;
     characterEmojiPicker?.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===mood));
     drawEmployees();
     syncMoodBubble(emp);
@@ -2395,7 +2398,7 @@ body{overscroll-behavior:none;}
     try{
       await saveCharacterMood(emp,mood);
       await postOfficeEvent({eventType:'mood_updated',title:`${emp.name} · Mood updated`,message:`${preset.label} ${preset.emoji}`,employeeId:emp.id,metadata:{mood,emoji:preset.emoji,label:preset.label},dedupeKey:`mood:${emp.id}:${mood}:${Date.now()}`});
-    }catch(err){console.warn('Could not sync mood',err)}
+    }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
     closeCharacterEmojiPicker();
   }
   function characterFollowText(e){
@@ -3065,9 +3068,9 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v69 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v70 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=69.0" defer></script>
+<script src="office-3d.js?v=70.0" defer></script>
 </body>
 </html>

@@ -117,17 +117,17 @@
           if(col<0||col>100)continue;
           const type=cell.getAttribute('t'),value=first(cell,'v')?.textContent||'',inline=first(cell,'is');
           let data=type==='s'?strings[Number(value)]??'':type==='inlineStr'?byName(inline||cell,'t').map(n=>n.textContent||'').join(''):value;
-          if((type===null||type==='n')&&dateFields.has(col)&&/^\d{5}(?:\.\d+)?$/.test(data))data=serialToDate(data);
+          // Date conversion is applied by the mapped header, not the cell's column number.
           vals[col]=data;
         }
         rows.push(vals);
       }
-      const header=rows.findIndex(r=>r.map(x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()).includes('jobsheet files'));
-      if(header>=0&&header<12){firstValid={headers:rows[header],rows:rows.slice(header+1),sheetName:sh.getAttribute('name')||'Sheet'};break}
+      const header=rows.findIndex(r=>{const names=r.map(x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim());return names.some(n=>['customer','customer name','client'].includes(n))&&names.some(n=>['jobsheet files','jobsheet','job ref','job reference','ref','invoice','invoice no'].includes(n))});
+      if(header>=0&&header<20){firstValid={headers:rows[header],rows:rows.slice(header+1),sheetName:sh.getAttribute('name')||'Sheet'};break}
       if(!firstValid&&rows.length)firstValid={headers:rows[0],rows:rows.slice(1),sheetName:sh.getAttribute('name')||'Sheet'};
     }
     if(!firstValid)throw Error('No readable worksheets found');
-    return firstValid;
+    return {...firstValid,date1904:/^(1|true)$/.test(first(wb,'workbookPr')?.getAttribute('date1904')||'')};
   }
   window.KSOfficeWorkbook=Object.freeze({makeXlsx,readXlsx});
 })();

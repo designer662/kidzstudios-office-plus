@@ -3,7 +3,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { Person } from './office-data';
 
-// Office Plus V57: V53 head preserved exactly; soft, continuous new body geometry.
+// Office Plus V70: smoother silhouettes and frame-independent motion; original character style retained.
 // Deliberately stylised, not portraits of employees or third-party assets.
 export type CharacterLook={hair:'crop'|'sweep'|'bob'|'tied';outfit:'tee'|'polo'|'blazer'|'cardigan';glasses?:boolean;headphones?:boolean;lanyard?:boolean;watch?:boolean};
 type Limb={joint:THREE.Group;lower:THREE.Group;end:THREE.Group};
@@ -27,11 +27,11 @@ export function characterFactory(){
  const geo=new Map<string,THREE.BufferGeometry>();const mats=new Map<string,THREE.MeshStandardMaterial>();
  const geometry=(key:string,fn:()=>THREE.BufferGeometry)=>{if(!geo.has(key))geo.set(key,fn());return geo.get(key)!};
  const material=(color:string,roughness=.72,metalness=0)=>{const key=`${color}/${roughness}/${metalness}`;if(!mats.has(key))mats.set(key,new THREE.MeshStandardMaterial({color,roughness,metalness}));return mats.get(key)!};
- const sphere=geometry('uvball',()=>new THREE.SphereGeometry(1,18,14));
- const smoothSphere=geometry('v57-body-ball',()=>new THREE.SphereGeometry(1,28,20));
+ const sphere=geometry('uvball',()=>new THREE.SphereGeometry(1,24,18));
+ const smoothSphere=geometry('v57-body-ball',()=>new THREE.SphereGeometry(1,32,24));
  const softCube=geometry('softcube',()=>new RoundedBoxGeometry(1,1,1,3,.22));
  const slab=geometry('slab',()=>new RoundedBoxGeometry(1,1,1,3,.12));
- const capsule=geometry('capsule',()=>new THREE.CapsuleGeometry(1,1,5,12));
+ const capsule=geometry('capsule',()=>new THREE.CapsuleGeometry(1,1,8,20));
  function put(p:THREE.Object3D,g:THREE.BufferGeometry,col:string,x:number,y:number,z:number,sx=1,sy=1,sz=1,roughness=.72,metalness=0){const m=new THREE.Mesh(g,material(col,roughness,metalness));m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;m.receiveShadow=true;p.add(m);return m}
  const orb=(p:THREE.Object3D,c:string,x:number,y:number,z:number,w:number,h:number,d:number)=>put(p,sphere,c,x,y,z,w,h,d);
  const softOrb=(p:THREE.Object3D,c:string,x:number,y:number,z:number,w:number,h:number,d:number)=>put(p,smoothSphere,c,x,y,z,w,h,d);
@@ -52,7 +52,7 @@ export function characterFactory(){
   const shirt=p.color,skin=p.skin,hair=p.hair,light='#faf6eb',dark='#374448';
   const pant=look.outfit==='tee'?'#56666e':'#515a60';
   const root=new THREE.Group();root.name=`character:${p.name}`; // outer root remains independent of body animation
-  root.userData.characterVersion=8;root.userData.gender=isFemale?'female':'male';root.scale.setScalar(1.2);
+  root.userData.characterVersion=9;root.userData.gender=isFemale?'female':'male';root.scale.setScalar(1.2);
   const body=group(root,'body');const chest=group(body,'chest',0,1.12,0);
   // Smooth miniature anatomy: retain V53's overall height and head/body ratio.
   // A densely interpolated closed lathe gives a soft silhouette, not a faceted tube.
@@ -96,7 +96,7 @@ export function characterFactory(){
   // Local +Z is forward, and everything stays attached to the existing animated head joint.
   const head=group(chest,'head',0,.688,0);
   const faceShape=geometry('v53-soft-oval',()=>{
-   const g=new THREE.SphereGeometry(1,32,24),a=g.attributes.position;
+   const g=new THREE.SphereGeometry(1,40,30),a=g.attributes.position;
    for(let i=0;i<a.count;i++){
     const x=a.getX(i),y=a.getY(i),z=a.getZ(i),chin=Math.max(0,-y);
     // Slightly fuller temples and a gently tapered jaw: no cube corners or separate chin blob.
