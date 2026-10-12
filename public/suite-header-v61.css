@@ -1,0 +1,61 @@
+/* Office Plus V61 - collision-free shared header, applied to every page after legacy page CSS. */
+.ks-master-header{
+  position:relative!important;z-index:110!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  padding:12px clamp(10px,1.5vw,22px) 8px!important;
+  margin:0!important;flex:0 0 auto!important;
+}
+.ks-master-header *,.ks-master-header *::before,.ks-master-header *::after{box-sizing:border-box}
+.ks-master-header .topbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  gap:9px 14px!important;
+  height:auto!important;min-height:0!important;
+  width:100%!important;max-width:1540px!important;
+  min-width:0!important;margin:0 auto!important;
+  padding:11px 14px 10px!important;
+  overflow:visible!important;
+  border-radius:21px!important;
+}
+.ks-master-header .brand{grid-column:1!important;grid-row:1!important;min-width:0!important;max-width:100%!important;margin:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;display:flex!important;align-items:center!important}
+.ks-master-header .brand span{display:inline!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.ks-master-header .header-tools{grid-column:2!important;grid-row:1!important;justify-self:end!important;align-self:center!important;min-width:0!important;max-width:100%!important;display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;margin:0!important}
+.ks-master-header .tool-nav{
+  grid-column:1/-1!important;grid-row:2!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  flex-wrap:nowrap!important;min-width:0!important;max-width:100%!important;
+  width:100%!important;gap:7px!important;margin:0!important;padding:3px 1px 7px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+  scrollbar-width:thin!important;scrollbar-color:rgba(132,139,145,.28) transparent!important;
+  overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;
+}
+.ks-master-header .tool-nav-btn{flex:0 0 auto!important;min-width:max-content!important;height:39px!important;white-space:nowrap!important;padding:0 12px!important;font-size:10.5px!important;line-height:1.2!important;display:inline-flex!important;align-items:center!important;gap:8px!important}
+.ks-master-header .nav-tool-icon{display:grid!important;place-items:center!important;flex-shrink:0!important;width:22px!important;height:22px!important}
+.ks-master-header .temp-user-chip{flex:0 0 auto!important;min-width:40px!important;max-width:148px!important;white-space:nowrap!important}
+.ks-master-header .icon-btn{flex:0 0 40px!important;width:40px!important;height:40px!important}
+.ks-master-header .notification-wrap{flex-shrink:0!important;position:relative!important}
+.ks-master-header .search-wrap{min-width:0!important;max-width:230px!important}
+.ks-master-header .search{max-width:230px!important}
+@media(max-width:1200px){.ks-master-header .search-wrap{display:none!important}.ks-master-header .mobile-search-button{display:grid!important}}
+@media(max-width:920px){
+ .ks-master-header{padding:8px 9px 5px!important}
+ .ks-master-header .topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;padding:10px 11px 8px!important;gap:8px!important;border-radius:17px!important}
+ .ks-master-header .brand{grid-column:1!important;grid-row:1!important}
+ .ks-master-header .header-tools{grid-column:2!important;grid-row:1!important}
+ .ks-master-header .tool-nav{grid-column:1/-1!important;grid-row:2!important}
+ .ks-master-header .search-wrap{display:none!important}
+}
+@media(max-width:600px){
+ .ks-master-header .topbar{padding:8px 9px 7px!important;gap:7px!important}
+ .ks-master-header .brand{font-size:11px!important;letter-spacing:-.035em!important}
+ .ks-master-header .header-tools{gap:5px!important}
+ .ks-master-header .icon-btn{flex:0 0 34px!important;width:34px!important;height:34px!important}
+ .ks-master-header .temp-user-chip{width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;padding:0!important;justify-content:center!important}
+ .ks-master-header .temp-user-copy{display:none!important}
+ .ks-master-header .tool-nav{gap:6px!important;padding-bottom:5px!important}
+ .ks-master-header .tool-nav-btn{height:34px!important;font-size:10px!important;padding:0 10px!important;gap:6px!important}
+ .ks-master-header .nav-tool-icon{width:18px!important;height:18px!important}
+}
+@media print{.ks-master-header{display:none!important}}

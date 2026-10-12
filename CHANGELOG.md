@@ -1,3 +1,10 @@
+## V61 · Responsive headers + Excel import/export
+
+- Responsive two-row header fixes overlap throughout all 10 pages.
+- Local XLSX reader/writer, Excel import review modal and guarded shared Merge/Replace.
+- Current-view, all-jobs and blank-template XLSX exports for 28 columns.
+- Preserved V60 auto-rotate and click-character Happy/Sad/Angry/Bad Mood emojis.
+
 # V58.2 – layout, redesign, motion, cleanup
 
 ## UI / UX

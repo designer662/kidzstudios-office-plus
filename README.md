@@ -1,3 +1,40 @@
+# KIDZSTUDIOS Office Plus V61 · Header & Excel Upgrade
+
+This GitHub Pages + Supabase release is built on V60. It keeps the local 3D engine, auto-rotate, click-character emoji picker, office chat and staff directory. No new Supabase migration required.
+
+## Changes
+
+- One shared, **two-row responsive header** across all **10 HTML pages**; brand/PC identity/notifications stay on row 1 and the eight tools move to a horizontally scrollable row 2. This prevents overlapping controls on narrower screens.
+- Job Management now has **Import Excel Workbook (.xlsx)** with client-side preview and **Merge/Update** or **Replace** choices. Merge defaults to keeping unmatched shared jobs and updating jobs with matching JOBSHEET/FILES or INVOICE.
+- **Excel (.xlsx) exports** for the filtered view and the full shared list, plus an **empty 28-column Excel template**.
+- Existing Google Sheet import, CSV downloads, JSON backup and Supabase persistence are preserved.
+- Excel parsing/writing is local and self-contained in `public/office-workbook.js` with no third-party CDN dependency; supports typical unencrypted `.xlsx` workbooks with ZIP stored or deflate entries. Modern browsers with `DecompressionStream('deflate-raw')` required for compressed third-party `.xlsx` files.
+- File import limited to 12 MB and shared saves to 500 jobs (existing database UI limit). Import uses the 28-field Excel schema and requires explicit confirmation before overwriting shared state.
+
+## Deploy to GitHub Pages
+
+**Extract this ZIP, upload the *contents* of the repository to GitHub**, including `.github/workflows`, and let GitHub Actions deploy the `public/` folder. Existing `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` GitHub variables remain in place. Do not publish secret keys.
+
+Reload with **Ctrl+Shift+R** after deployment. No new database migrations or keys are required. The link to `suite-header-v61.css` is added in every HTML page and `office-workbook.js` is loaded only by Job Management.
+
+## Important import notes
+
+1. Export **All Shared Jobs .xlsx** or **JSON backup** before importing anything into your production database.
+2. In Job Management, open **Tools → Import Excel Workbook**, choose `.xlsx`, review the count / first 6 records and pick **Merge/Update** (default) or **Replace all shared jobs**.
+3. The import doesn't touch Supabase until final confirmation and save. All connected authorized PCs then receive the new shared job data.
+4. The workbook should use the provided **28-column template** for reliable matching. Excel files with passwords, `.xls` (legacy binary), `.xlsm` macro formats and more than 500 jobs are not supported.
+5. Excel input is for user-provided business records; ensure you trust the source. Workbook formulas are **not evaluated**.
+
+## Tests
+
+- `node scripts/check-repo.mjs` checks the static GitHub repository.
+- `node scripts/test-bridge-mock.mjs` runs mocked Supabase API tests.
+- `node scripts/test-workbook.mjs` checks workbook ZIP generation and header coverage.
+
+Browser-side `readXlsx` works with modern browser APIs but its visual UI and live Supabase save **still need verification on the deployed GitHub site**.
+
+---
+
 # Office Plus V59: Clean Controls Update
 
 This release removes the floating Motion / Mood / Scene control panel and the bottom-right 3D / Top View toggle buttons requested in the screenshots. The default 3D office remains on screen. The existing 3D engine is still self-contained and does not use any external CDN.
