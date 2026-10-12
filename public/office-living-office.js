@@ -5,7 +5,7 @@
  'use strict';
  const STORAGE='ksOfficeAmbientV78'; // Retain existing user preference across upgrade.
  const VOLUME_STORAGE='ksOfficeAmbientVolumeV79';
- const ACTIONS=new Set(['typing','designing','calling','reviewing','admin','production','planning','coffee','meeting','chat','reading','stretching']);
+ const ACTIONS=new Set(['typing','pc-work','designing','calling','reviewing','admin','production','stocking','planning','coffee','drink','eat','sleep','meeting','chat','reading','stretching']);
  const greetings=['💬 Quick team catch-up','💬 Project check-in','💬 Sharing an idea','💬 Office catch-up'];
  const huddles=['🗓 Reviewing a project together','🗓 Team planning session','🗓 Project progress huddle'];
  const coffeeLines=['☕ Coffee break','☕ Taking a quick break','☕ Back in a moment'];
@@ -27,12 +27,12 @@
  const taskPalette=(person,hasWork=false)=>{
   const primary=workFor(person),busy=hasWork?6:3;
   switch(primary){
-   case 'designing':return [['designing',busy],['typing',2],['reviewing',1],['stretching',.45],['reading',.65]];
-   case 'calling':return [['calling',busy],['typing',2],['reviewing',1.4],['stretching',.35]];
+   case 'designing':return [['designing',busy],['pc-work',2],['reviewing',1],['stretching',.45],['reading',.65]];
+   case 'calling':return [['calling',busy],['pc-work',2],['reviewing',1.4],['stretching',.35]];
    case 'reviewing':return [['reviewing',busy],['planning',2],['reading',2],['calling',.8]];
-   case 'production':return [['production',busy],['reviewing',1.7],['typing',1.1],['stretching',.4]];
-   case 'admin':return [['admin',busy],['typing',2],['reviewing',1.6],['reading',.7]];
-   default:return [['typing',busy],['planning',1],['reading',.7]];
+   case 'production':return [['production',busy],['reviewing',1.7],['pc-work',1.1],['stretching',.4]];
+   case 'admin':return [['admin',busy],['pc-work',2],['reviewing',1.6],['reading',.7]];
+   default:return [['pc-work',busy],['planning',1],['reading',.7]];
   }
  };
  const jobReaction=person=>({designing:'🎨 Artwork task updated',calling:'📞 Customer task updated',reviewing:'📋 Management task updated',production:'📦 Production task updated',admin:'🗂 Admin task updated',typing:'📋 Work assignment updated'})[workFor(person)]||'📋 Work assignment updated';
@@ -90,21 +90,31 @@
   // Work is favored when real job data exists; break windows follow MY local time.
   if(currentZone!==home&&['prayer','store','toilet-a','toilet-b'].includes(currentZone)){return {zone:home,action:work,kind:'return'}}
   if(currentZone!==home){return {zone:home,action:work,kind:'return'}}
-  if(h<8||h>=21)return {zone:home,action:weightedPick(taskPalette(person,active)),kind:'work'};
+  // The office is an illustrative simulation even outside business hours: sparse
+  // virtual visits let users preview all activities when testing at night.
+  if(h<8||h>=21){
+    if(roll<.075)return {zone:'prayer',action:'sleep',kind:'break'};
+    if(roll<.15)return {zone:'pantry',action:'drink',kind:'break'};
+    if(roll<.20)return {zone:'pantry',action:'eat',kind:'break'};
+    if(roll<.29&&/admin|production|finance|boss|assistant/.test(roleText))return {zone:'store',action:'stocking',kind:'work'};
+    return {zone:home,action:weightedPick(taskPalette(person,active)),kind:'work'};
+  }
   // Small break windows, never treating simulations as real attendance data.
-  if(h>=12&&h<14&&roll<.26)return {zone:'prayer',action:'reading',kind:'break'};
-  if(h>=15&&h<17&&roll<.12)return {zone:'prayer',action:'reading',kind:'break'};
-  if(h>=12&&h<14&&roll<.49)return {zone:'pantry',action:'coffee',kind:'break'};
+  if(h>=12&&h<14&&roll<.26)return {zone:'prayer',action:roll<.13?'sleep':'reading',kind:'break'};
+  if(h>=15&&h<17&&roll<.12)return {zone:'prayer',action:roll<.055?'sleep':'reading',kind:'break'};
+  if(h>=12&&h<14&&roll<.49)return {zone:'pantry',action:roll<.40?'drink':'eat',kind:'break'};
   if(h>=9&&h<18&&roll<.09)return {zone:person?.gender==='female'?'toilet-b':'toilet-a',action:'idle',kind:'break'};
-  if(h>=9&&h<18&&/admin|production|finance|boss|assistant/.test(roleText)&&roll<.16)return {zone:'store',action:'production',kind:'work'};
-  if(h>=9&&h<18&&roll<.11)return {zone:'pantry',action:'coffee',kind:'break'};
+  if(h>=9&&h<18&&/admin|production|finance|boss|assistant/.test(roleText)&&roll<.16)return {zone:'store',action:'stocking',kind:'work'};
+  if(h>=9&&h<18&&roll<.11)return {zone:'pantry',action:'drink',kind:'break'};
   if(h>=9&&h<18&&roll<.18)return {zone:'showroom',action:'meeting',kind:'meeting'};
   if(h>=9&&h<18&&!active&&roll<.24)return {zone:'corridor',action:'chat',kind:'social'};
   // A weighted task rotation produces variety but real assigned work stays first.
   return {zone:home,action:weightedPick(taskPalette(person,active)),kind:'work'};
  }
- function breakMessage(zone,random=Math.random()){
-  if(zone==='prayer')return 'Quiet personal break';
+ function breakMessage(zone,random=Math.random(),action=''){
+  if(zone==='prayer')return action==='sleep'?'💤 Resting in the surau':'Quiet personal break';
+  if(zone==='pantry'&&action==='eat')return '🥪 Snack break in pantry';
+  if(zone==='pantry'&&action==='drink')return '☕ Having a drink in pantry';
   if(zone==='toilet-a'||zone==='toilet-b')return 'Back shortly';
   const lines=coffeeLines.length?coffeeLines:['Taking a short break'];
   return String(lines[Math.min(lines.length-1,Math.floor(random*lines.length))]);

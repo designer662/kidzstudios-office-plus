@@ -1,7 +1,7 @@
 {
-  "release": "86.10",
+  "release": "86.11",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.10 Worker Spacing: collision-safe routes, doorway waiting, stable worker separation",
+  "package": "V86.11 Interactive Staff Animations — PC, Pantry Drink/Eat, Store Stocking, Surau Rest",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",

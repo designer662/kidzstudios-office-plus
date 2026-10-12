@@ -96,7 +96,7 @@
     const duration=segmentMs.reduce((sum,ms)=>sum+ms,0);
     if(!duration||duration>115000)return null;
     return {from:plan.from,route:plan.route,segmentMs,startedAt:now+delay,endAt:now+delay+duration,
-      targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action||'typing'};
+      targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action==='typing'?'pc-work':intent?.action||'pc-work'};
   }
   function routeHasClearance(snapshot,subject,walk,now){
     const others=snapshot?.staff?.filter(s=>Number(s.id)!==Number(subject.id))||[];
@@ -129,6 +129,11 @@
       const walk=candidateWalk(plan,intent,now,delay);
       if(!walk)return false;
       if(!routeHasClearance(snapshot,s,walk,now))continue;
+      // The sleeping pose extends beyond the standing collision cylinder;
+      // reserve additional floor room on the far end of a surau nap route.
+      if(intent?.action==='sleep'&&snapshot.staff.some(other=>other!==s&&
+        Math.hypot(movementAt(other,walk.endAt).x-(walk.seatGoal?.x??walk.route.at(-1).x),
+                   movementAt(other,walk.endAt).y-(walk.seatGoal?.y??walk.route.at(-1).y))<3.5))continue;
       s.x=walk.from.x;s.y=walk.from.y;
       s.walk=walk;s.action=delay?'waiting':'walking';s.faceTo=null;
       s.nextAt=walk.endAt+14000;
@@ -221,11 +226,15 @@
       const employee=people.get(Number(s.id));if(!employee)continue;
       // Small synchronized social interlude; only when two movement slots exist.
       if(walkers===0&&Math.random()<.15&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
-      const intent=living?.chooseIntent(employee,s.room,now)||{zone:s.room==='staff'?'pantry':'staff',action:'typing',kind:'work'};
+      const intent=living?.chooseIntent(employee,s.room,now)||{zone:s.room==='staff'?'pantry':'staff',action:'pc-work',kind:'work'};
+      // One reclined sleeper at a time: a second surau visitor gets a quiet seated break.
+      if(intent.zone==='prayer'&&intent.action==='sleep'&&snapshot.staff.some(other=>other!==s&&
+        (other.room==='prayer'||other.walk?.targetZone==='prayer')&&
+        (other.action==='sleep'||other.walk?.action==='sleep')))intent.action='reading';
       const work=living?.workFor(employee)||'typing';
       if(intent.zone===((['boss','staff','showroom'].includes(employee.homeRoom))?employee.homeRoom:'staff')&&s.room===intent.zone){
         // Desk / idle animation changes without moving the character through furniture.
-        s.action=intent.action||work;
+        s.action=intent.action==='typing'?'pc-work':intent.action||work;
         if(intent.kind==='meeting')s.scene={kind:'meeting',text:'🗓 Planning at the project desk',from:now,until:now+12500};
         s.nextAt=now+13000+Math.random()*19000;
         changed=true;continue;
@@ -238,8 +247,10 @@
       if(intent.kind==='meeting'){
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
         s.nextAt=s.walk.endAt+15000;
+      }else if(intent.zone==='store'&&intent.action==='stocking'){
+        s.scene={kind:'activity',text:'📦 Checking and arranging stock',from:s.walk.endAt,until:s.walk.endAt+14000};
       }else if(intent.kind==='break'){
-        s.scene={kind:'break',text:living?.breakMessage?.(intent.zone)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
+        s.scene={kind:'break',text:living?.breakMessage?.(intent.zone,Math.random(),intent.action)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
         s.nextAt=s.walk.endAt+19000;
       }
       walkers++;changed=true;

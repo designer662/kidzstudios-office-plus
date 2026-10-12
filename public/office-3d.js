@@ -4196,6 +4196,33 @@ function attachClassicGlasses(model,enabled){
 }
 
 
+// One-time, lightweight handheld props. Only the appropriate activity is visible.
+// Attached to the imported character's real hand joints for both male and female staff.
+function attachOfficeActivityProps(T,model){
+ const hand=model.arms[1].children.find(child=>child.name==='Hand')||model.arms[1];
+ const makeMat=(color)=>new T.MeshStandardMaterial({color,roughness:.82,metalness:0});
+ const matCup=makeMat('#e5eee6'),matCoffee=makeMat('#80604a'),matBread=makeMat('#e7bc7c'),matFilling=makeMat('#8caa7c');
+ const matStock=makeMat('#c39e6d'),matTape=makeMat('#e8d6a8'),matMat=makeMat('#8baaa2');
+ const put=(parent,name,geo,mat,pos,scale)=>{
+  const obj=new T.Mesh(geo,mat);obj.name=name;obj.position.set(...pos);obj.scale.set(...scale);
+  obj.castShadow=true;obj.receiveShadow=true;parent.add(obj);return obj;
+ };
+ const cube=new T.RoundedBoxGeometry(1,1,1,2,.12);
+ const holder=(name)=>{const group=new T.Group();group.name=name;group.visible=false;hand.add(group);return group;};
+ const drink=holder('Activity drinking cup');
+ put(drink,'Water cup',cube,matCup,[0,-.04,.22],[.30,.35,.29]);
+ put(drink,'Coffee surface',cube,matCoffee,[0,.133,.22],[.255,.022,.24]);
+ const eat=holder('Activity snack');
+ put(eat,'Sandwich bread',cube,matBread,[0,.02,.23],[.39,.12,.28]);
+ put(eat,'Sandwich filling',cube,matFilling,[0,-.045,.23],[.36,.04,.29]);
+ const stock=holder('Activity stock box');
+ put(stock,'Cardboard parcel',cube,matStock,[0,.09,.30],[.60,.49,.52]);
+ put(stock,'Parcel tape',cube,matTape,[0,.34,.30],[.09,.016,.52]);
+ const mat=new T.Group();mat.name='Activity resting mat';mat.visible=false;model.root.add(mat);
+ put(mat,'Surau rest mat',cube,matMat,[2.0,.035,0],[5.55,.055,2.70]);
+ return {drink,eat,stock,mat};
+}
+
 function createOfficeHijabiRig(person) {
   const appearance=person.appearance||{};
   const model=appearance.model==='semi-casual'
@@ -4225,9 +4252,10 @@ function createOfficeHijabiRig(person) {
   root.scale.setScalar(.42);
   const eyes=[];
   model.head.traverse(obj=>{if(obj.name==='Glossy oval eye'){obj.userData.baseScaleY=obj.scale.y;eyes.push(obj)}});
-  const limb=joint=>({joint,lower:new __KS3D.Group(),end:new __KS3D.Group()});
+  const limb=joint=>({joint,lower:new __KS3D.Group(),end:joint.children.find(child=>child.name==='Hand')||new __KS3D.Group()});
   const cup=new __KS3D.Group();cup.visible=false;
-  return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,
+  const activityProps=attachOfficeActivityProps(__KS3D,model);
+  return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,activityProps,
     left:limb(model.arms[0]),right:limb(model.arms[1]),leftLeg:limb(model.legs[0]),rightLeg:limb(model.legs[1]),
     cup,phase:person.id*.83,gait:person.id*.81,waveStart:-100,walk:0,sit:person.seated?1:0,
     initialized:false,lastPosition:new __KS3D.Vector3()};
@@ -4236,48 +4264,65 @@ function createOfficeHijabiRig(person) {
 const interp=(a,b,t)=>a+(b-a)*t;
 const smoothstep=(a,b,t)=>{const u=Math.max(0,Math.min(1,(t-a)/(b-a)));return u*u*(3-2*u)};
 function animateOfficeHijabi(r,p,time,dt,distance){
-  const t=time+r.phase,walkTo=p.status==='walking'?1:0;
-  const emoteActive=r.emote!==''&&time-r.emoteStart>=0&&time-r.emoteStart<3.6;
-  const sitTo=p.seated&&p.status!=='walking'&&!emoteActive?1:0;
-  if(!r.initialized){r.walk=walkTo;r.sit=sitTo;r.initialized=true}
-  const k=1-Math.exp(-Math.min(.05,Math.max(0,dt))*9);
-  r.walk=interp(r.walk,walkTo,k);r.sit=interp(r.sit,sitTo,k);
-  r.gait+=Math.min(Math.max(distance,0),.3)*4.3;
-  const stride=Math.sin(r.gait),opposite=Math.sin(r.gait+Math.PI),walk=r.walk,sit=r.sit;
-  r.body.position.y=-.90*sit+Math.abs(stride)*.045*walk;
-  r.body.rotation.y=0;
-  r.body.rotation.z=Math.sin(t*.6)*.008*(1-walk)+stride*.022*walk;
-  r.chest.rotation.z=Math.sin(r.gait+Math.PI)*.014*walk;
-  r.chest.rotation.y=Math.sin(t*.4)*.006*(1-walk);
-  r.head.rotation.x=Math.sin(t*.9)*.018-.02*sit;
-  r.head.rotation.y=Math.sin(t*.55)*.10*(1-walk*.65);
-  r.head.rotation.z=Math.sin(t*.4)*.018*(1-walk);
-  r.eyes.forEach(eye=>{const bl=t%(3.45+(r.phase%2)*.3);const blink=1-.90*Math.max(0,1-Math.abs(bl-.15)/.10);const base=(eye.userData&&typeof eye.userData.baseScaleY==='number')?eye.userData.baseScaleY:(eye.scale.y||1);eye.scale.y=base*blink});
-  // The supplied whole-leg meshes now pivot at the hips, allowing chair sitting and walking.
-  r.leftLeg.joint.rotation.x=interp(stride*.35*walk,-1.15,sit);
-  r.rightLeg.joint.rotation.x=interp(opposite*.35*walk,-1.15,sit);
-  const working=['typing','designing','admin','production'].includes(p.action||'');
-  const typing=sit*(working?1:.20);
-  for(const [arm,sign] of [[r.left,-1],[r.right,1]]){
-    arm.joint.rotation.x=interp(-sign*stride*.32*walk, -.73+Math.sin(t*6+sign)*.025, typing);
-    arm.joint.rotation.z=sign*.17;
-  }
-  if(p.action==='meeting'&&!walk){r.right.joint.rotation.x-=.22;r.head.rotation.y+=Math.sin(t*.8)*.065}
-  if(p.action==='reading'&&!walk){r.head.rotation.x+=.07;r.left.joint.rotation.x-=.22}
-  if(p.action==='production'&&!walk){r.right.joint.rotation.x-=.20}
-  if(p.action==='chat'&&!walk){r.right.joint.rotation.x-=.25;r.head.rotation.y+=Math.sin(t*.7)*.07}
-  // All workplace breaks remain cup-free; only the old male model has the coffee prop.
-  r.cup.visible=false;
-  const age=time-r.waveStart;
-  const wave=age>=0&&age<1.7?smoothstep(0,.25,age)*(1-smoothstep(1.25,1.7,age))*(1-walk):0;
-  if(wave){r.right.joint.rotation.z+=1.52*wave;r.right.joint.rotation.x-=.22*wave}
-  const actionAge=time-r.emoteStart;
-  const power=actionAge>=0&&actionAge<3.6?smoothstep(0,.35,actionAge)*(1-smoothstep(2.9,3.6,actionAge))*(1-walk):0;
-  if(power){
-    if(r.emote==='dance'){r.body.position.y+=Math.abs(Math.sin(actionAge*8))*.17*power;r.left.joint.rotation.z-=.9*power;r.right.joint.rotation.z+=.9*power}
-    else if(r.emote==='celebrate'||r.emote==='stretch'){r.left.joint.rotation.z-=1.25*power;r.right.joint.rotation.z+=1.25*power}
-    else if(r.emote==='wave')r.right.joint.rotation.z+=1.3*power;
-  }
+ const t=time+r.phase,walkTo=p.status==='walking'?1:0;
+ const active=r.emote!==''&&time-r.emoteStart>=0&&time-r.emoteStart<3.6;
+ const sitTo=p.seated&&!walkTo&&!active?1:0;
+ if(!r.initialized){r.walk=walkTo;r.sit=sitTo;r.initialized=true;r.sleep=0}
+ const k=1-Math.exp(-Math.min(.05,Math.max(0,dt))*9);
+ r.walk=interp(r.walk,walkTo,k);r.sit=interp(r.sit,sitTo,k);
+ r.sleep=interp(r.sleep||0,p.action==='sleep'&&!walkTo?1:0,Math.min(.15,k));
+ r.gait+=Math.min(Math.max(distance,0),.3)*4.3;
+ const stride=Math.sin(r.gait),opposite=Math.sin(r.gait+Math.PI),walk=r.walk,sit=r.sit,nap=r.sleep;
+ const pc=sit*(1-walk)*(1-nap)*(['pc-work','typing','designing','admin','reviewing'].includes(p.action||'' )?1:0);
+ const drink=(p.action==='drink'||p.action==='coffee')&&!walk&&!nap;
+ const eat=p.action==='eat'&&!walk&&!nap;
+ const stock=p.action==='stocking'&&!walk&&!nap;
+ r.body.position.y=-.90*sit+Math.abs(stride)*.045*walk-.12*nap+Math.sin(t*1.3)*.012*nap;
+ r.body.position.x=-.55*nap;
+ r.body.rotation.y=0;
+ r.body.rotation.z=(Math.sin(t*.6)*.008*(1-walk)+stride*.022*walk)*(1-nap)-1.33*nap;
+ r.chest.rotation.z=Math.sin(r.gait+Math.PI)*.014*walk;
+ r.chest.rotation.y=Math.sin(t*.4)*.006*(1-walk);
+ r.head.rotation.x=Math.sin(t*.9)*.018-.02*sit+.10*nap;
+ r.head.rotation.y=Math.sin(t*.55)*.10*(1-walk*.65)*(1-nap);
+ r.head.rotation.z=Math.sin(t*.4)*.018*(1-walk)+.20*nap;
+ r.eyes.forEach(eye=>{const bl=t%(3.45+(r.phase%2)*.3);
+  const blinking=1-.90*Math.max(0,1-Math.abs(bl-.15)/.10);
+  const base=typeof eye.userData?.baseScaleY==='number'?eye.userData.baseScaleY:(eye.scale.y||1);
+  eye.scale.y=base*interp(blinking,.09,nap);
+ });
+ r.leftLeg.joint.rotation.x=interp(interp(stride*.35*walk,-1.15,sit),-.34,nap);
+ r.rightLeg.joint.rotation.x=interp(interp(opposite*.35*walk,-1.15,sit),.25,nap);
+ const typing=sit*(1-walk)*(1-nap)*(['typing','pc-work','designing','admin','production','reviewing'].includes(p.action||'')?1:.20);
+ for(const [arm,sign] of [[r.left,-1],[r.right,1]]){
+  arm.joint.rotation.x=interp(-sign*stride*.32*walk,-.79+Math.sin(t*(pc?13:6)+sign)*.07,typing);
+  arm.joint.rotation.z=sign*.17;
+  if(pc&&arm.end)arm.end.rotation.x=Math.sin(t*14+sign)*.075*pc;
+  else if(arm.end)arm.end.rotation.x=0;
+  arm.joint.rotation.x=interp(arm.joint.rotation.x,-.11,nap);
+ }
+ // Occupancy-based activities are exclusive: props never appear in the wrong room.
+ const props=r.activityProps;
+ if(props){props.drink.visible=!!drink;props.eat.visible=!!eat;props.stock.visible=!!stock;props.mat.visible=p.action==='sleep'&&!walk&&nap>.2}
+ if(drink){const sip=.5+.5*Math.sin(t*2.35);r.right.joint.rotation.x=-.40-.45*sip;r.right.joint.rotation.z=-.38;r.head.rotation.x-=.05*sip}
+ if(eat){const bite=.5+.5*Math.sin(t*2.8);r.right.joint.rotation.x=-.42-.55*bite;r.right.joint.rotation.z=-.30;r.head.rotation.x+=.035*bite}
+ if(stock){const handling=.5+.5*Math.sin(t*1.65);r.right.joint.rotation.x=-.24-.32*handling;r.right.joint.rotation.z=-.30;r.left.joint.rotation.x=-.32-.18*handling;r.left.joint.rotation.z=.26;r.head.rotation.x+=.06}
+ if(p.action==='meeting'&&!walk){r.right.joint.rotation.x-=.22;r.head.rotation.y+=Math.sin(t*.8)*.065}
+ if(p.action==='reading'&&!walk){r.head.rotation.x+=.07;r.left.joint.rotation.x-=.22}
+ if(p.action==='production'&&!walk){r.right.joint.rotation.x-=.20}
+ if(p.action==='chat'&&!walk){r.right.joint.rotation.x-=.25;r.head.rotation.y+=Math.sin(t*.7)*.07}
+ // Uploaded character props are managed above, so the legacy coffee prop remains hidden.
+ r.cup.visible=false;
+ const age=time-r.waveStart;
+ const wave=age>=0&&age<1.7?smoothstep(0,.25,age)*(1-smoothstep(1.25,1.7,age))*(1-walk)*(1-nap):0;
+ if(wave){r.right.joint.rotation.z+=1.52*wave;r.right.joint.rotation.x-=.22*wave}
+ const actionAge=time-r.emoteStart;
+ const power=actionAge>=0&&actionAge<3.6?smoothstep(0,.35,actionAge)*(1-smoothstep(2.9,3.6,actionAge))*(1-walk)*(1-nap):0;
+ if(power){
+  if(r.emote==='dance'){r.body.position.y+=Math.abs(Math.sin(actionAge*8))*.17*power;r.left.joint.rotation.z-=.9*power;r.right.joint.rotation.z+=.9*power}
+  else if(r.emote==='celebrate'||r.emote==='stretch'){r.left.joint.rotation.z-=1.25*power;r.right.joint.rotation.z+=1.25*power}
+  else if(r.emote==='wave')r.right.joint.rotation.z+=1.3*power;
+ }
 }
 
 /* Office Plus V86.8: supplied customizable male model and compatible animation rig. */
@@ -4575,9 +4620,10 @@ function createOfficeMaleRig(person){
   root.scale.setScalar(.42);
   const eyes=[];
   model.head.traverse(obj=>{if(obj.name==='Glossy oval eye'){obj.userData.baseScaleY=obj.scale.y;eyes.push(obj)}});
-  const limb=joint=>({joint,lower:new __KS3D.Group(),end:new __KS3D.Group()});
+  const limb=joint=>({joint,lower:new __KS3D.Group(),end:joint.children.find(child=>child.name==='Hand')||new __KS3D.Group()});
   const cup=new __KS3D.Group();cup.visible=false;
-  return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,
+  const activityProps=attachOfficeActivityProps(__KS3D,model);
+  return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,activityProps,
     left:limb(model.arms[0]),right:limb(model.arms[1]),leftLeg:limb(model.legs[0]),rightLeg:limb(model.legs[1]),
     cup,phase:person.id*.83,gait:person.id*.81,waveStart:-100,walk:0,sit:person.seated?1:0,
     initialized:false,lastPosition:new __KS3D.Vector3()};

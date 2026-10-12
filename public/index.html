@@ -2694,7 +2694,7 @@ body{overscroll-behavior:none;}
     pantry:{roomId:'pantry',point:()=>({x:5.5,y:45+Math.random()*3})},
     boss:{roomId:'boss',point:e=>({x:e.deskX??17.9,y:e.deskY??43.1})},
     store:{roomId:'store',point:()=>({x:13.5+Math.random()*5.8,y:50.0+Math.random()*6.6})},
-    prayer:{roomId:'prayer',point:()=>({x:10.2+Math.random()*10.4,y:61.2+Math.random()*5.8})},
+    prayer:{roomId:'prayer',point:()=>({x:10.2+Math.random()*7.4,y:61.2+Math.random()*5.8})},
     'toilet-a':{roomId:'toilet-a',point:()=>({x:.8+Math.random()*2.2,y:60.4+Math.random()*3.7})},
     'toilet-b':{roomId:'toilet-b',point:()=>({x:4.3+Math.random()*2.2,y:60.4+Math.random()*3.7})}
   };
@@ -2914,12 +2914,12 @@ body{overscroll-behavior:none;}
     if(seat){e.visualX=seat.x;e.visualY=seat.y;if(node){const p=iso(seat.x,seat.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}}
     e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
     if(e.visualRoomId==='showroom'){e.status='In a meeting';e.motionAction='meeting';e.activity='Showroom discussion';}
-    else if(e.visualRoomId==='store'){e.status='At desk';e.motionAction='production';e.activity='Store check';}
-    else if(e.visualRoomId==='prayer'){e.status='On break';e.motionAction='reading';e.activity='Prayer break';}
-    else if(e.visualRoomId==='toilet-a'||e.visualRoomId==='toilet-b'){e.status='On break';e.motionAction='coffee';e.activity='Quick break';}
-    else if(e.visualRoomId==='pantry'){e.status='On break';e.motionAction='coffee';e.activity='Pantry break';}
+    else if(e.visualRoomId==='store'){e.status='At desk';e.motionAction='stocking';e.activity='Arranging store stock';}
+    else if(e.visualRoomId==='prayer'){e.status='On break';e.motionAction='sleep';e.activity='Resting in surau';}
+    else if(e.visualRoomId==='toilet-a'||e.visualRoomId==='toilet-b'){e.status='On break';e.motionAction='idle';e.activity='Quick break';}
+    else if(e.visualRoomId==='pantry'){e.status='On break';e.motionAction=Math.random()<.55?'drink':'eat';e.activity='Pantry snack / drink';}
     else if(e.visualRoomId==='corridor'){e.status='At desk';e.motionAction='chat';e.activity='Corridor chat';}
-    else{e.status='At desk';e.motionAction='typing';e.activity='Desk work';}
+    else{e.status='At desk';e.motionAction='pc-work';e.activity='Using PC';}
     e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node){setMotionClass(e,node,false);updateEmployeeBubbles(e)}
   }
   function activeWalkers(){return employees.reduce((n,e)=>n+(e.roam?.phase==='walk'?1:0),0)}
@@ -3233,16 +3233,16 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.10 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.11 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.9" defer></script>
+<script src="office-3d.js?v=86.11" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
-<script src="office-living-office.js?v=86.4" defer></script>
-<script src="office-movement-sync.js?v=86.10" defer></script>
+<script src="office-living-office.js?v=86.11" defer></script>
+<script src="office-movement-sync.js?v=86.11" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>
