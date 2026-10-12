@@ -1,3 +1,12 @@
+## V75 — Reliable blank-space closing and collision-free Office Pulse (2026-10-12)
+
+- Fixed the 3D `pointerup`/`click` race that could immediately close a newly selected character profile.
+- Clicking outside an open staff profile now closes its attached mood picker and camera follow in the same action; clicking the mood picker itself keeps the profile open.
+- Added collision-aware staff card layout: dock beside Office Pulse when space permits, otherwise temporarily hide the Pulse panel until the profile closes.
+- Keep the emoji picker positioned next to the moved profile rather than over Office Pulse.
+- Added real Chromium browser fixture checks and automated pointer/layout regression tests; all 10 pages still share outside-dismissal behavior.
+- Bumped auto-stamped release metadata to V75; no Supabase migration required.
+
 ## V74 — Click outside to close
 
 - Standardized outside-click dismissal across all 10 pages.

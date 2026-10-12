@@ -1,4 +1,4 @@
-/* Office Plus V74: one predictable click-away / back behavior on every page.
+/* Office Plus V75: pointer-safe click-away / back behavior on every page.
  * Uses existing UI close actions to keep app state coherent. No page navigation.
  */
 (() => {
@@ -64,6 +64,19 @@
   }
 
   function closeInlinePanel(target) {
+    // Closing a selected staff profile also closes its attached emoji picker
+    // and follow state. Test the profile before emoji so one blank-space click
+    // never leaves a second floating panel behind.
+    const profile = $('profileCard');
+    if (active(profile) && !hit(target,profile) && !hit(target,$('characterEmojiPicker'))) {
+      const close = profile.querySelector('.close-mini');
+      if (close) {close.click();return true;}
+    }
+    const context = $('contextCard');
+    if (active(context) && !hit(target,context)) {
+      const close = context.querySelector('.close-mini');
+      if (close) {close.click();return true;}
+    }
     const emoji = $('characterEmojiPicker');
     if (emoji && !emoji.hidden && !hit(target,emoji)) {
       if (clickClose('characterEmojiClose')) return true;
@@ -76,16 +89,6 @@
     const chat = $('officeChat');
     if (active(chat) && !hit(target,chat) && !hit(target,$('chatLauncher'))) {
       if (clickClose('chatCloseBtn')) return true;
-    }
-    const profile = $('profileCard');
-    if (active(profile) && !hit(target,profile)) {
-      const close = profile.querySelector('.close-mini');
-      if (close) {close.click();return true;}
-    }
-    const context = $('contextCard');
-    if (active(context) && !hit(target,context)) {
-      const close = context.querySelector('.close-mini');
-      if (close) {close.click();return true;}
     }
     const live = $('livePanel');
     if (live && !hit(target,live)) {
@@ -116,6 +119,20 @@
     return closed;
   }
 
+  let lastPointerDown = 0;
+  let pointerDismissed = false;
+  // Three.js selects a character on pointerup, BEFORE the browser sends click.
+  // Dismiss on pointerdown instead, then ignore that same pointer's subsequent
+  // click so a freshly opened character profile remains open.
+  function pointerDownAway(event) {
+    if (event.button !== 0 || !event.target || !event.target.closest) return;
+    lastPointerDown = Date.now();
+    pointerDismissed = false;
+    if (frontModal()) return; // Modal backdrops use the existing click handler.
+    closeDropdowns(event.target);
+    pointerDismissed = closeInlinePanel(event.target);
+  }
+
   function clickAway(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
     const target = event.target;
@@ -125,8 +142,10 @@
       if (!hit(target,content) && dismissModal(modal)) blockUnderlay(event);
       return;
     }
-    // Nonmodal UI is dismissed if the click is outside. Preserve the normal click
-    // so another button, input, or navigation item still works on the first click.
+    // A pointer's click fires after pointerup and must not close a new profile
+    // opened by a 3D raycast. Keyboard/synthetic clicks still dismiss normally.
+    const samePointerClick = event.detail > 0 && Date.now() - lastPointerDown < 1600;
+    if (samePointerClick) return;
     closeDropdowns(target);
     const didClose = closeInlinePanel(target);
 
@@ -141,7 +160,8 @@
     }
   }
 
+  document.addEventListener('pointerdown',pointerDownAway,true);
   document.addEventListener('click',clickAway,true);
   // Exported only for DOM-level regression tests and diagnosing integrations.
-  window.KSOutsideClose = {frontModal,closeDropdowns,closeInlinePanel,clickAway};
+  window.KSOutsideClose = {frontModal,closeDropdowns,closeInlinePanel,clickAway,pointerDownAway};
 })();

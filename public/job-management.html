@@ -321,7 +321,7 @@
     </section>
   </div>
 </div></div>
-<div class="toast" id="toast"></div><footer class="ks-version-footer">v74</footer>
+<div class="toast" id="toast"></div><footer class="ks-version-footer">v75</footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-workbook.js?v=70.0"></script>
@@ -820,5 +820,5 @@ setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp)
 Promise.all([loadConfig(),loadStaff()]).then(()=>pull()).then(()=>loadDropdownOptions()).then(()=>{render();clearInterval(pollTimer);let optionPoll=0;pollTimer=setInterval(async()=>{if(document.hidden||$('#editor').classList.contains('open')||$('#optionsModal').classList.contains('open')||$('#excelImportModal').classList.contains('open')||$('#sheetImportModal').classList.contains('open')||saving)return;await pull({quiet:true});optionPoll++;if(optionPoll%4===0){try{const row=await getState(OPTIONS_SCOPE);if(row&&Number(row.version)>optionsVersion){dropdownOptions=sanitizeDropdownOptions(row.payload?.options);optionsVersion=Number(row.version||0);optionsSavedAt=Number(row.payload?.savedAt)||new Date(row.updatedAt||Date.now()).getTime();optionsLoaded=true;renderSmartOptions()}}catch(_){}}},3500)});
 })();
 </script>
-<script src="office-outside-close.js?v=74.0" defer></script>
+<script src="office-outside-close.js?v=75.0" defer></script>
 </body></html>

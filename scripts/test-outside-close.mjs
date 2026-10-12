@@ -7,7 +7,7 @@ const pages=readdirSync('public').filter(name=>name.endsWith('.html'));
 assert.equal(pages.length,10,'Expected 10 public pages');
 for(const name of pages){
   const html=readFileSync('public/'+name,'utf8');
-  assert.equal((html.match(/office-outside-close\.js\?v=74\.0/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
+  assert.equal((html.match(/office-outside-close\.js\?v=75\.0/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
 }
 
 function setup(){
@@ -38,10 +38,10 @@ function setup(){
   };
   const window={};
   vm.runInNewContext(source,{document,window});
-  const dispatch=(target,options={})=>{
+  const dispatch=(target,options={},type='click')=>{
     let prevented=false,stopped=false;
     const event={target,button:0,preventDefault:()=>{prevented=true},stopImmediatePropagation:()=>{stopped=true},...options};
-    listeners.get('click')(event);
+    listeners.get(type)(event);
     return {prevented,stopped};
   };
   return {element,nodes,dispatch,window};
@@ -101,4 +101,38 @@ function setup(){
  const close=t.element(null,{parent:preview});close.kind='close-btn';close.onClick=()=>preview.style.display='none';
  t.dispatch(t.element());assert.equal(preview.style.display,'none');assert.equal(close.clicked,1);
 }
-console.log(`PASS click-away tests: modal priority, field protection, dropdowns, shared panels, preview cleanup, ${pages.length} pages.`);
+// Real pointers close panels on pointerdown, before 3D pointerup raycasting.
+// The following synthetic click must NOT immediately close the newly selected staff.
+{
+  const t=setup();
+  const card=t.element('profileCard');
+  const close=t.element(null,{parent:card,tag:'button'});close.kind='close-mini';
+  const picker=t.element('characterEmojiPicker');picker.hidden=false;
+  close.onClick=()=>{card.classList.remove('open');picker.hidden=true};
+  card.classList.add('open');
+  const canvas=t.element('office-canvas',{tag:'canvas'});
+  t.dispatch(canvas,{detail:1},'pointerdown');
+  assert.equal(card.classList.contains('open'),false,'Empty-space pointerdown closes profile');
+  assert.equal(picker.hidden,true,'Profile dismissal also closes attached emoji');
+  card.classList.add('open'); // e.g. 3D onPerson raycast fires on pointerup
+  t.dispatch(canvas,{detail:1});
+  assert.equal(card.classList.contains('open'),true,'Following click must not dismiss 3D selection');
+  // Subsequent unrelated pointerdown should close it again.
+  t.dispatch(t.element(),{detail:1},'pointerdown');
+  assert.equal(card.classList.contains('open'),false,'Next outside click closes the profile');
+}
+// Clicking the emoji picker is an interaction with the selected staff;
+// clicking outside both cards closes them in one action.
+{
+  const t=setup(),card=t.element('profileCard',{open:true});
+  const close=t.element(null,{parent:card,tag:'button'});close.kind='close-mini';
+  const picker=t.element('characterEmojiPicker');picker.hidden=false;
+  close.onClick=()=>{card.classList.remove('open');picker.hidden=true};
+  const emojiButton=t.element(null,{parent:picker,tag:'button'});
+  t.dispatch(emojiButton,{detail:1},'pointerdown');
+  assert.equal(card.classList.contains('open'),true,'Emoji selection does not dismiss staff profile');
+  t.dispatch(t.element(),{detail:1},'pointerdown');
+  assert.equal(card.classList.contains('open'),false);
+  assert.equal(picker.hidden,true);
+}
+console.log(`PASS click-away tests: modal priority, field protection, dropdowns, shared panels, pointerdown character selection, preview cleanup, ${pages.length} pages.`);

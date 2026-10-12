@@ -1014,6 +1014,7 @@ body{overscroll-behavior:none;}
   @media print{.ks-version-footer,#ksDock .ks-version-footer{display:none!important}}
 </style>
 <link rel="stylesheet" href="office-moods.css?v=70.0">
+<link rel="stylesheet" href="office-profile-layout.css?v=75.0">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -2342,7 +2343,13 @@ body{overscroll-behavior:none;}
     if(profileRect){
       left=profileRect.left-shellRect.left-pickerWidth-14;
       top=profileRect.top-shellRect.top+10;
-      if(left<10){left=profileRect.right-shellRect.left+14;top=profileRect.top-shellRect.top+10}
+      if(left<10){
+        // When there is no room beside the staff card, keep the picker on
+        // the office side instead of placing it over Office Pulse.
+        left=profileRect.left-shellRect.left;
+        const below=profileRect.bottom-shellRect.top+12;
+        top=below+pickerHeight<shellRect.height-12?below:Math.max(10,profileRect.top-shellRect.top-pickerHeight-12);
+      }
     }else if(document.documentElement.classList.contains('studio3d-ready')&&office3dHost){
       const hostRect=office3dHost.getBoundingClientRect();
       left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;
@@ -2369,6 +2376,13 @@ body{overscroll-behavior:none;}
     characterEmojiPicker.setAttribute('aria-hidden','false');
     requestAnimationFrame(()=>{positionCharacterEmojiPicker(emp,ev);characterEmojiPicker.classList.add('show')});
   }
+  // Keep the emoji picker anchored if the profile was re-docked by the
+  // responsive anti-overlap layout after a 3D character selection.
+  document.addEventListener('ks:office-profile-layout',()=>{
+    if(characterEmojiPicker?.hidden)return;
+    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)];
+    if(emp)positionCharacterEmojiPicker(emp);
+  });
   async function saveCharacterMood(emp,mood){
     const records=serializeStaffDirectory();
     const at=records.findIndex(r=>Number(r.id)===Number(emp.id));
@@ -3068,10 +3082,11 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v74 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v75 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-3d.js?v=70.0" defer></script>
-<script src="office-outside-close.js?v=74.0" defer></script>
+<script src="office-outside-close.js?v=75.0" defer></script>
+<script src="office-profile-layout.js?v=75.0" defer></script>
 </body>
 </html>
