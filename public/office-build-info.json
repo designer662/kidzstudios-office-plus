@@ -1,7 +1,7 @@
 {
-  "release": "86.5",
-  "edition": "Office Plus · Unified Pulse",
-  "package": "V86.5: uploaded sculpted hijabi model integrated with office rig",
+  "release": "86.6",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.6: user refined hijab face contours, seam normals and continuous scarf folds",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -15,5 +15,5 @@
     "office-v86-3-polish.css",
     "office-pulse-integrated.css"
   ],
-  "check": "26 automated regression tests pass; bundled 3D model and interaction adapter included; live WebGL/Supabase not verified."
+  "check": "Bundled model updated; regression tests and browser WebGL verification reported separately."
 }

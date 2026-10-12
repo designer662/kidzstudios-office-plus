@@ -12,7 +12,7 @@ assert.match(bundle,/if\(_\.gender==="female"\)return createOfficeHijabiRig\(_\)
 assert.match(bundle,/if\(i\.root\.userData\.officeHijabi\)return animateOfficeHijabi/);
 assert.match(bundle,/L\.gender==="female"&&\(Z\.scale\.setScalar/);
 assert.match(scene,/const selectionFactor=1\.2\/rig\.root\.scale\.x/);
-assert.match(html,/office-3d\.js\?v=86\.5/);
+assert.match(html,/office-3d\.js\?v=86\.6/);
 for(const part of ['Sculpted hijab shell','Plain long shirt','Lower scarf fold','Sneaker upper'])assert.ok(bundle.includes(part),`Missing uploaded model: ${part}`);
 for(const original of ['office-pulse-integrated.css','office-living-office.js','office-movement-sync.js'])assert.ok(html.includes(original),`Lost Office Plus feature: ${original}`);
 assert.doesNotMatch(html,/ksRoomJump|office-room-nav\.js/);
@@ -30,13 +30,13 @@ class Node {
  add(child){this.children.push(child);child.parent=this;return this}
  traverse(fn){fn(this);for(const ch of this.children)ch.traverse(fn)}
 }
-class Geometry{constructor(...args){this.args=args;this.attributes={};this.index=null}setAttribute(name,attr){this.attributes[name]=attr}setIndex(v){this.index=v}computeVertexNormals(){return this}}
+class Geometry{constructor(...args){this.args=args;this.attributes={};this.index=null}setAttribute(name,attr){this.attributes[name]=attr;return this}setIndex(v){this.index=v;return this}computeVertexNormals(){const position=this.attributes.position;if(position){const values=position.array,normals=new Float32Array(values.length);for(let i=0;i<values.length;i+=3)normals[i+2]=1;this.attributes.normal=new Attr(normals,3)}return this}}
 class Mesh extends Node{constructor(geo,mat){super();this.geometry=geo;this.material=mat}}
-class Attr{constructor(data,dim){this.array=data;this.itemSize=dim}}
+class Attr{constructor(data,dim){this.array=data;this.itemSize=dim}getX(i){return this.array[i*this.itemSize]}getY(i){return this.array[i*this.itemSize+1]}getZ(i){return this.array[i*this.itemSize+2]}setXYZ(i,x,y,z){this.array[i*this.itemSize]=x;this.array[i*this.itemSize+1]=y;this.array[i*this.itemSize+2]=z;return this}}
 class Curve{constructor(points){this.points=points}getPoint(v){const p=this.points,at=Math.min(p.length-1-1e-9,Math.max(0,v)*(p.length-1)),i=Math.floor(at),t=at-i,a=p[i],b=p[i+1];return new V3(a.x*(1-t)+b.x*t,a.y*(1-t)+b.y*t,a.z*(1-t)+b.z*t)}}
 class Material{constructor(options){this.options=options;this.color={set(){return this},multiplyScalar(){return this}}}}
 const ctx={Le:Node,bi:Material,En:Geometry,Li:Geometry,tr:Geometry,yi:Curve,D:V3,be:Mesh,Ee:Geometry,jt:Attr,Math};
-const start=bundle.indexOf('/* Office Plus V86.5: user-supplied hijabi geometry');
+const start=bundle.indexOf('/* Office Plus V86.6: revised user-supplied hijabi geometry');
 const end=bundle.indexOf('var y0=',start);
 assert.ok(start>=0&&end>start,'Custom model injected before characterFactory');
 const injection=bundle.slice(start,end);
@@ -55,4 +55,4 @@ api.animateOfficeHijabi(rig,{status:'desk',seated:true,action:'typing'},2,.2,0);
 assert.ok(Number.isFinite(gait)&&Number.isFinite(rig.body.position.y),'Walk/seat animation must be finite');
 rig.waveStart=2;api.animateOfficeHijabi(rig,{status:'desk',seated:false,action:'reading'},2.3,.02,0);
 assert.ok(!rig.cup.visible,'No coffee in prayer/toilet simulation');
-console.log(`PASS V86.5 custom uploaded character, 2 eyes, ${vertices} model vertices, walking/sitting/emotes, cache bust, male/source/office preserved`);
+console.log(`PASS V86.6 baseline custom uploaded character, 2 eyes, ${vertices} model vertices, walking/sitting/emotes, cache bust, male/source/office preserved`);
