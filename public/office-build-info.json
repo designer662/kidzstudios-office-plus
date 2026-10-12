@@ -1,7 +1,7 @@
 {
-  "release": "86.12",
+  "release": "86.13",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.12 Visual Upgrade — workstation details, pantry/store/surau ambience and refined staff micro-animation",
+  "package": "V86.13 Smart Worker AI — room occupancy reservations, activity cooldowns and alternate path targets",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -17,5 +17,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Bundled model updated; regression tests and browser WebGL verification reported separately."
+  "check": "Regression suite and JavaScript validation completed; live WebGL and multi-client deployment require smoke test."
 }

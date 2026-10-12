@@ -1,4 +1,4 @@
-/* Office Plus V84: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
+/* Office Plus V86.13: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
@@ -20,10 +20,42 @@
   const point=p=>p&&Number.isFinite(+p.x)&&Number.isFinite(+p.y)&&+p.x>=0&&+p.x<=23&&+p.y>=0&&+p.y<=70;
   const livePeople=()=>motion.getPeople();
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+  // Capacity reflects usable *interaction spots*, not the full room footprint.
+  // All reservations are committed by the timeline leader and replayed by viewers.
+  const ZONE_CAPACITY=Object.freeze({pantry:2,store:2,prayer:2,'toilet-a':1,'toilet-b':1,showroom:3});
+  const BREAK_COOLDOWN_MS=90000, REPEAT_ZONE_MS=150000;
+  const homeFor=e=>['boss','staff','showroom'].includes(e?.homeRoom)?e.homeRoom:'staff';
+  const occupiedZone=s=>s.walk?.targetZone||s.room;
+  function zoneHasSpace(snapshot,subject,zone){
+    const limit=ZONE_CAPACITY[zone];
+    if(!limit||occupiedZone(subject)===zone)return true;
+    let count=0;
+    for(const other of snapshot.staff){
+      if(other===subject)continue;
+      if(occupiedZone(other)===zone&&++count>=limit)return false;
+    }
+    return true;
+  }
+  function chooseSmartIntent(employee,s,now,snapshot){
+    const home=homeFor(employee),work=living?.workFor(employee)||'typing';
+    // Away staff always return to their own assigned desk; don't strand them.
+    if(s.room!==home)return {zone:home,action:work,kind:'return'};
+    const proposed=living?.chooseIntent(employee,s.room,now)||{zone:home,action:work,kind:'work'};
+    const intent={...proposed};
+    if(!intent.zone||!['boss','staff','showroom','corridor','pantry','store','prayer','toilet-a','toilet-b'].includes(intent.zone))
+      return {zone:home,action:work,kind:'work'};
+    if(intent.zone===home)return intent;
+    const isBreak=intent.kind==='break';
+    const coolingBreak=isBreak&&Number.isFinite(s.lastBreakAt)&&now-s.lastBreakAt<BREAK_COOLDOWN_MS;
+    const repeatRoom=s.lastTripZone===intent.zone&&Number.isFinite(s.lastTripAt)&&now-s.lastTripAt<REPEAT_ZONE_MS;
+    if(coolingBreak||repeatRoom||!zoneHasSpace(snapshot,s,intent.zone))
+      return {zone:home,action:work==='typing'?'pc-work':work,kind:'work'};
+    return intent;
+  }
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
     const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,walk:null};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0};
   }
   function validStaff(a){
     return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
@@ -226,7 +258,7 @@
       const employee=people.get(Number(s.id));if(!employee)continue;
       // Small synchronized social interlude; only when two movement slots exist.
       if(walkers===0&&Math.random()<.15&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
-      const intent=living?.chooseIntent(employee,s.room,now)||{zone:s.room==='staff'?'pantry':'staff',action:'pc-work',kind:'work'};
+      const intent=chooseSmartIntent(employee,s,now,snapshot);
       // One reclined sleeper at a time: a second surau visitor gets a quiet seated break.
       if(intent.zone==='prayer'&&intent.action==='sleep'&&snapshot.staff.some(other=>other!==s&&
         (other.room==='prayer'||other.walk?.targetZone==='prayer')&&
@@ -239,11 +271,20 @@
         s.nextAt=now+13000+Math.random()*19000;
         changed=true;continue;
       }
+      // The destination may be open but the initial seat/aisle approach blocked.
+      // Retry a few fresh goal points before declaring the room inaccessible.
       motion.render([movementAt(s,now)]);
-      const plan=motion.plan(Number(s.id),intent.zone);
-      if(!attachWalk(s,plan,intent,now,snapshot)){
-        s.nextAt=now+10000+Math.random()*6000;changed=true;continue;
+      let walked=false;
+      for(let attempt=0;attempt<3&&!walked;attempt++){
+        if(!zoneHasSpace(snapshot,s,intent.zone))break;
+        const plan=motion.plan(Number(s.id),intent.zone);
+        walked=attachWalk(s,plan,intent,now,snapshot);
       }
+      if(!walked){
+        s.nextAt=now+8500+Math.random()*6000;changed=true;continue;
+      }
+      s.lastTripZone=intent.zone;s.lastTripAt=now;
+      if(intent.kind==='break')s.lastBreakAt=now;
       if(intent.kind==='meeting'){
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
         s.nextAt=s.walk.endAt+15000;
