@@ -1046,7 +1046,7 @@ body{overscroll-behavior:none;}
 <main class="map-shell" id="mapShell">
 <div id="office3dHost" role="region" aria-label="Interactive 3D office floor. Drag to rotate, scroll to zoom, or select a staff name."></div>
 <div id="office3dLoading" role="status">Opening your studio…</div>
-<div class="studio-note">People movement is illustrative · Jobs and workload use shared records</div>
+<div class="studio-note">Character movement synced via Supabase · Camera stays personal</div>
 <button id="opsMobileToggle" aria-controls="todayPanel" aria-expanded="false">Operations</button>
 <svg id="officeSvg" viewBox="0 0 1240 760" aria-label="Interactive level 2 office map">
 <defs>
@@ -2633,8 +2633,8 @@ body{overscroll-behavior:none;}
   svg.onpointercancel=()=>{dragging=false;rotateDragging=false;svg.classList.remove('dragging','rotating')};
   svg.onclick=e=>{if(dragging||rotateDragging||dragMoved||performance.now()<suppressClickUntil)return;if(e.target.closest?.('.employee,.desk-hit,.room'))return;resetScene();tooltip.classList.remove('show');};
 
-  // Random visual roaming. This is deliberately local/ephemeral: shared Supabase
-  // job and form data remain synchronized, while avatars wander independently for life.
+  // Roaming routes are planned locally only by the elected Supabase timeline leader.
+  // All connected browsers replay the same route/start-time; see office-movement-sync.js.
   const roamZones={
     staff:{roomId:'staff',point:e=>({x:e.deskX??e.x,y:e.deskY??e.y})},
     showroom:{roomId:'showroom',point:()=>({x:11+Math.random()*2.2,y:30+Math.random()*2.1})},
@@ -2777,36 +2777,34 @@ body{overscroll-behavior:none;}
     node.classList.toggle('busy',!walking&&e.status==='At desk'&&e.id%2===0);
     const dot=node.querySelector('.status-dot');if(dot)dot.setAttribute('fill',statusColor(effectiveStatus(e)));
   }
-  function beginRoam(e,now){
+  function planSharedRoam(e){
     const current=zoneOfEmployee(e),home=e.homeRoom==='boss'?'boss':'staff';
-    // Favor desk work, with an occasional coffee or collaboration trip.
     const away=current!==home,roll=Math.random();
     const targetZone=away?home:roll<.12?'pantry':roll<.27?'showroom':roll<.32?'corridor':home;
     const target=roamZones[targetZone].point(e);
-    if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8){
-      e.motionAction=targetZone==='staff'||targetZone==='boss'?'typing':'meeting';
-      e.roam={phase:'idle',nextAt:now+13000+Math.random()*18000};return false;
-    }
-    // Dock seated characters at their chair while they work. On departure,
-    // switch from chair to its nearest aisle before walking begins. This is a
-    // stand-up transition, not a route across the tabletop.
-    const seatedOrigin={x:e.visualX??e.x,y:e.visualY??e.y};
-    const exit=navSnap(seatedOrigin);
-    if(!exit){e.roam={phase:'idle',nextAt:now+10000};return false}
-    const departure=navBlocked(seatedOrigin.x,seatedOrigin.y)?{x:exit.x,y:exit.y}:seatedOrigin;
+    if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8)return null;
+    const origin={x:e.visualX??e.x,y:e.visualY??e.y};
+    const exit=navSnap(origin);
+    if(!exit)return null;
+    const departure=navBlocked(origin.x,origin.y)?{x:exit.x,y:exit.y}:origin;
     const ownDesk=targetZone===home&&Math.hypot(target.x-(e.deskX??e.x),target.y-(e.deskY??e.y))<.5;
-    // Never snap into a showroom table or pantry counter at the end of a trip.
-    // Only the character's own assigned seat may use the optional desk docking.
     const seatGoal=ownDesk&&navBlocked(target.x,target.y)?{...target}:null;
     const arrival=navBlocked(target.x,target.y)?navSnap(target):target;
-    if(!arrival){e.roam={phase:'idle',nextAt:now+10000};return false}
+    if(!arrival)return null;
     const route=safeWalkingRoute(departure,pathBetweenZones(current,targetZone,arrival));
-    if(!route?.length){e.roam={phase:'idle',nextAt:now+10000};return false}
-    e.visualX=departure.x;e.visualY=departure.y;
+    if(!route?.length)return null;
+    const points=[{x:departure.x,y:departure.y},...route];
+    const durations=route.map((pt,i)=>Math.max(850,Math.hypot(pt.x-points[i].x,pt.y-points[i].y)*470));
+    return {from:points[0],route,segmentMs:durations,targetZone,seatGoal};
+  }
+  function beginRoam(e,now){
+    const plan=planSharedRoam(e);
+    if(!plan){e.roam={phase:'idle',nextAt:now+10000};return false}
+    e.visualX=plan.from.x;e.visualY=plan.from.y;
     const node=employeeNodes.get(e.id);
-    if(node){const p=iso(departure.x,departure.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}
+    if(node){const p=iso(plan.from.x,plan.from.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}
     e.motionAction='walking';
-    e.roam={phase:'walk',route,index:0,startAt:now,startX:departure.x,startY:departure.y,targetZone,seatGoal};
+    e.roam={phase:'walk',route:plan.route,index:0,startAt:now,startX:plan.from.x,startY:plan.from.y,targetZone:plan.targetZone,seatGoal:plan.seatGoal};
     prepareRoamSegment(e,now);
     return true;
   }
@@ -2840,21 +2838,44 @@ body{overscroll-behavior:none;}
     const second=Math.floor(now/1000);if(second!==lastMotionStatsSecond){lastMotionStatsSecond=second;updateStats()}
     if(activeWalkers()>0){roamFrame=requestAnimationFrame(randomRoamFrame)}else{const next=Math.min(...employees.map(e=>e.roam?.nextAt||now+1200));const wait=Math.max(120,Math.min(1800,next-now));roamTimer=setTimeout(()=>{roamTimer=null;roamFrame=requestAnimationFrame(randomRoamFrame)},wait)}
   }
-  function startRandomRoam(){if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null;if(!document.hidden&&!reduceMotion.matches&&!visualPaused)roamFrame=requestAnimationFrame(randomRoamFrame)}
+  let sharedMovementEnabled=false;
+  function startRandomRoam(){if(sharedMovementEnabled)return;if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null;if(!document.hidden&&!reduceMotion.matches&&!visualPaused)roamFrame=requestAnimationFrame(randomRoamFrame)}
   function stopRandomRoam(){if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null}
   document.addEventListener('visibilitychange',()=>{app.classList.toggle('animations-paused',document.hidden);document.hidden?stopRandomRoam():startRandomRoam()});
   reduceMotion.addEventListener?.('change',()=>{reduceMotion.matches?stopRandomRoam():startRandomRoam()});
   let resizeTimer=null;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(viewMode==='overview'){overviewCam=getOverviewCam();cam={...overviewCam};applyCamera()}else if(viewMode==='follow'&&followEmployeeId&&employeeById[followEmployeeId])followCameraForEmployee(employeeById[followEmployeeId],true)},120)},{passive:true});
   startRandomRoam();scheduleRandomWorkloadBubble();
 
+  // A small bridge for the shared movement timeline. Camera and input remain local.
+  function renderSharedPositions(items){
+    if(!Array.isArray(items))return;
+    let statusChanged=false;
+    for(const item of items){
+      const e=employeeById[Number(item.id)],node=e&&employeeNodes.get(e.id);
+      if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
+      e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
+      e.motionAction=item.action||'typing';
+      if(Boolean(e.motionWalking)!==Boolean(item.walking)){setMotionClass(e,node,!!item.walking);statusChanged=true}
+      const p=iso(item.x,item.y);
+      node.setAttribute('transform',`translate(${p.x} ${p.y})`);
+      updateEmployeeBubbles(e);
+    }
+    if(statusChanged)updateStats();
+  }
   window.OfficeSuite={
+    sharedMovement:{
+      enable(){sharedMovementEnabled=true;stopRandomRoam()},
+      getPeople:()=>employees,
+      plan:id=>{const e=employeeById[Number(id)];return e?planSharedRoam(e):null},
+      render:renderSharedPositions
+    },
     getStaff:()=>employees.map(e=>({...e,hasAlert:workloadNoticeIds.has(e.id),motionStatus:effectiveStatus(e)})),
     selectPerson:id=>{const e=employeeById[id];if(e)followCharacter(e)},
     selectDepartment:setDept,
     stopFollow:stopCameraFollow,
     reset:resetScene,
     selectRoom:id=>{const mapping={workspace:'staff',office:'boss',surau:'prayer',toilets:'toilet-a'};const room=roomById[mapping[id]||id];if(room)openRoom(room)},
-    pause:paused=>{visualPaused=paused;app.classList.toggle('animations-paused',paused);if(paused)stopRandomRoam();else {const now=performance.now();for(const e of employees){if(e.roam?.phase==='walk')prepareRoamSegment(e,now)}startRandomRoam()}}
+    pause:paused=>{visualPaused=paused;app.classList.toggle('animations-paused',paused);if(paused)stopRandomRoam();else if(!sharedMovementEnabled){const now=performance.now();for(const e of employees){if(e.roam?.phase==='walk')prepareRoamSegment(e,now)}startRandomRoam()}}
   };
   window.dispatchEvent(new CustomEvent('ks:suite-ready'));
 })();
@@ -3082,10 +3103,11 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v76 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v77 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=76.0" defer></script>
+<script src="office-3d.js?v=77.0" defer></script>
+<script src="office-movement-sync.js?v=77.0" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>

@@ -1,3 +1,9 @@
+## V77: Synced 3D character movement
+- Shared Supabase movement snapshots with one version-checked lease owner.
+- Smooth follower interpolation from route, segment durations and timestamp.
+- Leader handover on disconnect; collision-aware routing preserved.
+- Added 2-PC movement-timeline mock tests to GitHub Actions.
+
 ## V76 – Character interaction and manual zoom fix
 - 3D click selection and blank-area dismissal coordinated without moving the profile ahead of the raycast.
 - Increased invisible hit area and added projected proximity fallback for character selection.

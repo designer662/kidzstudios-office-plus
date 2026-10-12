@@ -1,3 +1,5 @@
+> **V77 update:** Multiple dashboard PCs now share one Supabase-backed character walking timeline. See [README-V77.md](README-V77.md).
+
 ## V76 Update
 
 Character selection and manual mouse-wheel zoom in the 3D office are fixed. See [README-V76.md](README-V76.md).
