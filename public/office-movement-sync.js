@@ -8,7 +8,6 @@
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
-  const living=window.OfficeLiving;
   if(!motion)return;
   // Do not run an independent simulation while waiting for authentication/network.
   motion.enable();
@@ -20,13 +19,10 @@
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
-    const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,walk:null};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:e.motionAction||'typing',nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,walk:null};
   }
   function validStaff(a){
-    return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
-      typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from
-    ))&&(!s.walk||(
+    return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.walk||(
       Number.isFinite(Number(s.walk.startedAt))&&Number.isFinite(Number(s.walk.endAt))&&
       point(s.walk.from)&&Array.isArray(s.walk.route)&&s.walk.route.length<=250&&s.walk.route.every(point)&&
       Array.isArray(s.walk.segmentMs)&&s.walk.segmentMs.length===s.walk.route.length&&
@@ -37,25 +33,22 @@
   function seed(now){return {schema:1,owner:id,leaseUntil:now+LEASE_MS,updatedAt:now,staff:livePeople().map(e=>staffBase(e,now))}}
   function movementAt(s,now){
     const w=s.walk;
-    const scene=s.scene&&now>=s.scene.from&&now<s.scene.until?s.scene:null;
-    const faceTo=scene?.kind==='conversation'?s.faceTo||null:null;
-    if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false,scene,faceTo};
+    if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false};
     let left=clamp(now-Number(w.startedAt),0,Number(w.endAt)-Number(w.startedAt));
     let previous=w.from;
     for(let i=0;i<w.route.length;i++){
       const ms=Number(w.segmentMs[i]),end=w.route[i];
-      if(left<ms){const t=clamp(left/ms,0,1);return {id:s.id,x:previous.x+(end.x-previous.x)*t,y:previous.y+(end.y-previous.y)*t,room:s.room,action:'walking',walking:now<w.endAt,scene,faceTo:null};}
+      if(left<ms){const t=clamp(left/ms,0,1);return {id:s.id,x:previous.x+(end.x-previous.x)*t,y:previous.y+(end.y-previous.y)*t,room:s.room,action:'walking',walking:now<w.endAt};}
       left-=ms;previous=end;
     }
     const final=w.seatGoal&&point(w.seatGoal)?w.seatGoal:previous;
-    return {id:s.id,x:final.x,y:final.y,room:w.targetZone||s.room,action:w.action||'typing',walking:false,scene,faceTo};
+    return {id:s.id,x:final.x,y:final.y,room:w.targetZone||s.room,action:w.action||'typing',walking:false};
   }
   function render(){
     if(stopped)return;
     if(state&&validPayload(state)){
       const now=Date.now(),positions=state.staff.map(s=>movementAt(s,now));
       motion.render(positions);
-      living?.update?.(state,positions);
     }
     if(!document.hidden)frame=requestAnimationFrame(render);else frame=null;
   }
@@ -69,84 +62,31 @@
     for(const e of current)if(!existing.has(Number(e.id))){snapshot.staff.push(staffBase(e,now));changed=true}
     return changed;
   }
-  // Shared behavior state is planned only by the elected leader and persisted
-  // in the same CAS-protected timeline as walking. Browsers only replay it.
-  function attachWalk(s,plan,intent,now){
-    if(!plan||!point(plan.from)||!Array.isArray(plan.route)||!plan.route.length||!plan.route.every(point)||!Array.isArray(plan.segmentMs)||plan.segmentMs.length!==plan.route.length)return false;
-    const segmentMs=plan.segmentMs.map(ms=>Math.round(clamp(Number(ms),850,40000)));
-    const duration=segmentMs.reduce((sum,ms)=>sum+ms,0);
-    s.x=plan.from.x;s.y=plan.from.y;
-    s.walk={from:plan.from,route:plan.route,segmentMs,startedAt:now,endAt:now+duration,
-      targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action||'typing'};
-    s.action='walking';s.faceTo=null;s.nextAt=now+duration+14000;
-    return true;
-  }
-  function pairConversation(snapshot,subject,now){
-    if(!living||subject.room==='corridor'||subject.room==='pantry')return false;
-    const others=snapshot.staff.filter(s=>s!==subject&&!s.walk&&s.room!=='pantry'&&s.room!=='corridor'&&s.nextAt<now+15000);
-    if(!others.length)return false;
-    const partner=others[Math.floor(Math.random()*others.length)];
-    // Two nearby walkable positions, separate so the characters never overlap.
-    const targets=[{x:8.6,y:40.3},{x:9.8,y:40.3}];
-    const p1=motion.plan(Number(subject.id),'corridor',targets[0]),p2=motion.plan(Number(partner.id),'corridor',targets[1]);
-    if(!p1||!p2)return false;
-    const complete=(p)=>now+p.segmentMs.reduce((a,b)=>a+Math.round(clamp(Number(b),850,40000)),0);
-    const meetAt=Math.max(complete(p1),complete(p2))+700;
-    const words=living.greetings[Math.floor(Math.random()*living.greetings.length)]||'💬 Team check-in';
-    for(const [person,plan]of [[subject,p1],[partner,p2]]){
-      attachWalk(person,plan,{action:'chat'},now);
-      person.faceTo=person===subject?Number(partner.id):Number(subject.id);
-      person.scene={kind:'conversation',text:words,from:meetAt,until:meetAt+10000};
-      person.nextAt=meetAt+12500;
-    }
-    return true;
-  }
   function evolve(snapshot,now){
     let changed=reconciled(snapshot,now);
-    const people=new Map(livePeople().map(p=>[Number(p.id),p]));
-    // React only when genuine job/workload data changes, not to guessed jobs.
+    let walkers=snapshot.staff.filter(s=>s.walk&&s.walk.endAt>now).length;
     for(const s of snapshot.staff){
-      const employee=people.get(Number(s.id));if(!employee)continue;
-      const fingerprint=living?.jobKey(employee)||'';
-      if(s.jobKey===undefined){s.jobKey=fingerprint;changed=true}
-      else if(s.jobKey!==fingerprint){
-        s.jobKey=fingerprint;changed=true;
-        s.scene=fingerprint?{kind:'job',text:'📋 New work assignment',from:now,until:now+7500}:null;
-        if(!s.walk){s.action=living?.workFor(employee)||'typing';s.nextAt=now+9000}
-      }
-      if(s.scene&&s.scene.until<=now){s.scene=null;changed=true}
       if(s.walk&&s.walk.endAt<=now){
         const p=movementAt(s,now);
         s.x=p.x;s.y=p.y;s.room=p.room;s.action=p.action;
-        s.walk=null;
-        s.nextAt=s.scene?.kind==='conversation'?Math.max(now+3000,s.scene.until+2500):now+(s.room==='pantry'?14000:19000)+Math.random()*15000;
-        changed=true;
+        s.walk=null;s.nextAt=now+19000+Math.random()*26000;changed=true;
       }
-    }
-    let walkers=snapshot.staff.filter(s=>s.walk&&s.walk.endAt>now).length;
-    for(const s of snapshot.staff){
       if(s.walk||s.nextAt>now||walkers>=2)continue;
-      const employee=people.get(Number(s.id));if(!employee)continue;
-      // Small synchronized social interlude; only when two movement slots exist.
-      if(walkers===0&&Math.random()<.12&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
-      const intent=living?.chooseIntent(employee,s.room,now)||{zone:s.room==='staff'?'pantry':'staff',action:'typing',kind:'work'};
-      const work=living?.workFor(employee)||'typing';
-      if(intent.zone===((['boss','staff','showroom'].includes(employee.homeRoom))?employee.homeRoom:'staff')&&s.room===intent.zone){
-        // Desk / idle animation changes without moving the character through furniture.
-        s.action=intent.action||work;
-        s.nextAt=now+13000+Math.random()*19000;
-        changed=true;continue;
-      }
+      // Keep the planning character in sync with the persisted position/room.
+      // Movement paths are generated only by the leader, using the existing
+      // furniture-aware A* path planner from OfficeSuite.
       motion.render([movementAt(s,now)]);
-      const plan=motion.plan(Number(s.id),intent.zone);
-      if(!attachWalk(s,plan,intent,now)){
-        s.nextAt=now+10000+Math.random()*6000;changed=true;continue;
+      const plan=motion.plan(Number(s.id));
+      if(!plan||!point(plan.from)||!Array.isArray(plan.route)||!plan.route.length||!plan.route.every(point)){
+        s.nextAt=now+10000+Math.random()*5000;changed=true;continue;
       }
-      if(intent.kind==='meeting'){
-        s.scene={kind:'meeting',text:'🗓 Simulated project huddle',from:s.walk.endAt,until:s.walk.endAt+11000};
-        s.nextAt=s.walk.endAt+14000;
-      }
-      walkers++;changed=true;
+      const segmentMs=plan.segmentMs.map(ms=>Math.round(clamp(Number(ms),850,40000)));
+      const duration=segmentMs.reduce((sum,ms)=>sum+ms,0);
+      s.x=plan.from.x;s.y=plan.from.y;
+      s.walk={from:plan.from,route:plan.route,segmentMs,startedAt:now,endAt:now+duration,
+        targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,
+        action:plan.targetZone==='pantry'?'coffee':plan.targetZone==='showroom'?'meeting':plan.targetZone==='corridor'?'chat':'typing'};
+      s.action='walking';walkers++;changed=true;
     }
     return changed;
   }

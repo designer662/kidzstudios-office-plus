@@ -1,10 +1,3 @@
-## V78 · Living Office (2026-10-12)
-- Added Supabase-timed shared behavior states for department tasks, coffee breaks, huddles, paired staff conversations and job reactions.
-- Updated Three.js character poses for simulated calls, design/desk work, conversations, reviewing, reading and stretching. Added subtle monitor-screen glow and local daylight profiles.
-- Added opt-in ambient roomtone with per-device mute and automatic background-tab pause; notification audio is unchanged.
-- Preserved V77 authority election, safe walking routes, independent cameras, moods, Job Management, Excel, and outside-click behavior.
-- Added scripted V78 behavior and two-browser timeline regression tests to the GitHub deployment workflow.
-
 ## V77: Synced 3D character movement
 - Shared Supabase movement snapshots with one version-checked lease owner.
 - Smooth follower interpolation from route, segment durations and timestamp.

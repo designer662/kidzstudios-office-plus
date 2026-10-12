@@ -247,7 +247,7 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
  const blinkCycle=(t%(3.45+(r.phase%2)*.3));
  const blink=1-.94*Math.max(0,1-Math.abs(blinkCycle-.15)/.11);
  r.eyes.forEach(eye=>eye.scale.y=blink);
- r.head.rotation.y=Math.sin(t*.59)*.11*(1-walk*.7)+(['meeting','chat'].includes(p.action||'')?Math.sin(t*.7)*.075:0);
+ r.head.rotation.y=Math.sin(t*.59)*.11*(1-walk*.7)+(p.action==='meeting'?Math.sin(t*.7)*.075:0);
  r.head.rotation.x=-.04*sit+Math.sin(t*.93)*.019;
  r.head.rotation.z=Math.sin(t*.4)*.02*(1-walk);
  for(const [leg,phase]of [[r.leftLeg,stride],[r.rightLeg,other]] as const){
@@ -257,7 +257,7 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
   leg.lower.scale.y=1+.2*sit;leg.end.scale.y=1/(1+.2*sit);
  }
  const pause=.8+.2*Math.sin(t*.43+Math.sin(t*.16))**2;
- const typing=sit*(1-walk)*pause*(['typing','designing','admin','production'].includes(p.action||'typing')?1:.18);
+ const typing=sit*(1-walk)*pause;
  for(const [arm,sign]of [[r.left,-1],[r.right,1]] as const){
   arm.joint.rotation.x=mix(-.08+sign*stride*.35*walk,-.91+Math.sin(t*7.3+sign)*.032,typing);
   arm.joint.rotation.z=sign*.064;
@@ -270,12 +270,6 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
  const sip=rest*smooth(2.8,3.5,t%12)*(1-smooth(5.2,6,t%12));
  r.cup.visible=rest>.2;
  if(rest){r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.43-.4*sip,rest);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-1.08-.83*sip,rest);r.head.rotation.x-=.065*sip}
- // Quiet simulated tasks make idle poses more varied without disturbing gait.
- if(p.action==='chat'&&!walk){const strength=(1-sit)*(.35+.18*Math.sin(t*.9));r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.55,strength);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,.52,strength);r.head.rotation.y+=Math.sin(t*.85)*.08}
- if(p.action==='calling'&&!walk){const strength=1-sit*.2;r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-1.3,strength);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,.68,strength);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-1.24,strength);r.head.rotation.z-=.045*strength}
- if(p.action==='reviewing'&&!walk){r.head.rotation.x-=.07;r.left.joint.rotation.x=mix(r.left.joint.rotation.x,-.52,.6)}
- if(p.action==='reading'&&!walk){r.head.rotation.x+=.06;r.left.joint.rotation.x=mix(r.left.joint.rotation.x,-.78,.45)}
- if(p.action==='stretching'&&!walk){const stretch=.45+.45*Math.sin(t*.5);r.left.joint.rotation.z-=1.65*stretch;r.right.joint.rotation.z+=1.65*stretch;r.head.rotation.x-=.035*stretch}
  const waveAge=time-r.waveStart;
  const wave=waveAge>=0&&waveAge<1.7?smooth(0,.25,waveAge)*(1-smooth(1.25,1.7,waveAge))*(1-walk)*(1-rest):0;
  if(wave){r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.1,wave);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,2.05,wave);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-.8,wave);r.right.end.rotation.z=Math.sin(waveAge*15)*.27*wave;r.head.rotation.z-=.05*wave}
