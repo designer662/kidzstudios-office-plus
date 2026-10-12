@@ -6,6 +6,8 @@
   'use strict';
   const SCOPE='office:movement:v1';
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
+  // Office floor-plan units: roughly two units per world-space metre.
+  const MIN_STAFF_GAP=1.75, CHECK_MS=180, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
   const living=window.OfficeLiving;
@@ -42,6 +44,8 @@
     const scene=s.scene&&now>=s.scene.from&&now<s.scene.until?s.scene:null;
     const faceTo=['conversation','huddle'].includes(scene?.kind)?s.faceTo||null:null;
     if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false,scene,faceTo};
+    // Delayed departures stay at the starting point until the reserved lane clears.
+    if(now<Number(w.startedAt))return {id:s.id,x:w.from.x,y:w.from.y,room:s.room,action:'waiting',walking:false,scene,faceTo:null};
     let left=clamp(now-Number(w.startedAt),0,Number(w.endAt)-Number(w.startedAt));
     let previous=w.from;
     for(let i=0;i<w.route.length;i++){
@@ -81,15 +85,56 @@
   }
   // Shared behavior state is planned only by the elected leader and persisted
   // in the same CAS-protected timeline as walking. Browsers only replay it.
-  function attachWalk(s,plan,intent,now){
-    if(!plan||!point(plan.from)||!Array.isArray(plan.route)||!plan.route.length||!plan.route.every(point)||!Array.isArray(plan.segmentMs)||plan.segmentMs.length!==plan.route.length)return false;
+  // Simulate the whole reserved trajectory, including the worker's stationary
+  // position before departure and after arrival. The leader runs this once per
+  // planned walk, and all followers replay the same committed timestamps.
+  function candidateWalk(plan,intent,now,delay){
+    if(!plan||!point(plan.from)||!Array.isArray(plan.route)||!plan.route.length||!plan.route.every(point)||
+       !Array.isArray(plan.segmentMs)||plan.segmentMs.length!==plan.route.length)return null;
     const segmentMs=plan.segmentMs.map(ms=>Math.round(clamp(Number(ms),850,40000)));
+    if(segmentMs.some(ms=>!Number.isFinite(ms)))return null;
     const duration=segmentMs.reduce((sum,ms)=>sum+ms,0);
-    s.x=plan.from.x;s.y=plan.from.y;
-    s.walk={from:plan.from,route:plan.route,segmentMs,startedAt:now,endAt:now+duration,
+    if(!duration||duration>115000)return null;
+    return {from:plan.from,route:plan.route,segmentMs,startedAt:now+delay,endAt:now+delay+duration,
       targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action||'typing'};
-    s.action='walking';s.faceTo=null;s.nextAt=now+duration+14000;
+  }
+  function routeHasClearance(snapshot,subject,walk,now){
+    const others=snapshot?.staff?.filter(s=>Number(s.id)!==Number(subject.id))||[];
+    if(!others.length)return true;
+    const candidate={...subject,x:walk.from.x,y:walk.from.y,walk};
+    // Sampling at 180ms with a 1.75-unit buffer protects avatars against
+    // both direct intersections and near misses; walking pace is <2.2 units/s.
+    // Allow existing stationary actors to keep their assigned desk locations.
+    const until=walk.endAt+CHECK_MS;
+    for(let time=now;time<=until;time+=CHECK_MS){
+      const here=movementAt(candidate,time);
+      for(const other of others){
+        const there=movementAt(other,time);
+        const dx=here.x-there.x,dy=here.y-there.y;
+        if(dx*dx+dy*dy<(MIN_STAFF_GAP*MIN_STAFF_GAP))return false;
+      }
+    }
+    // Verify exact endpoints, which do not necessarily align with a sampling tick.
+    const final=movementAt(candidate,walk.endAt);
+    for(const other of others){
+      const there=movementAt(other,walk.endAt);
+      if(Math.hypot(final.x-there.x,final.y-there.y)<MIN_STAFF_GAP)return false;
+    }
     return true;
+  }
+  function attachWalk(s,plan,intent,now,snapshot){
+    // Don't send two people through the same doorway / workstation at once.
+    // If no free time slot exists, leave the worker in place and retry later.
+    for(let delay=0;delay<=MAX_DEPARTURE_WAIT_MS;delay+=DEPARTURE_STEP_MS){
+      const walk=candidateWalk(plan,intent,now,delay);
+      if(!walk)return false;
+      if(!routeHasClearance(snapshot,s,walk,now))continue;
+      s.x=walk.from.x;s.y=walk.from.y;
+      s.walk=walk;s.action=delay?'waiting':'walking';s.faceTo=null;
+      s.nextAt=walk.endAt+14000;
+      return true;
+    }
+    return false;
   }
   // A friendly conversational distance: 4.2 plan units = 2.1 world units.
   // Two characters share a corridor lane and face one another from a safe gap.
@@ -118,12 +163,14 @@
       if(Math.hypot(at1.x-at2.x,at1.y-at2.y)<SOCIAL_SPACING)continue;
       // Do not silently use a snapped location far from the chosen safe meeting position.
       if(Math.hypot(at1.x-targets[0].x,at1.y-targets[0].y)>.65||Math.hypot(at2.x-targets[1].x,at2.y-targets[1].y)>.65)continue;
-      pairing=[p1,p2];break;
+      // The pair must both fit safely, or neither is committed.
+      const probe=clone(snapshot),a=probe.staff.find(s=>Number(s.id)===Number(subject.id)),b=probe.staff.find(s=>Number(s.id)===Number(partner.id));
+      if(!attachWalk(a,p1,{action:'chat'},now,probe)||!attachWalk(b,p2,{action:'chat'},now,probe))continue;
+      pairing=[a.walk,b.walk];break;
     }
     if(!pairing)return false;
-    const [p1,p2]=pairing;
-    const complete=p=>now+p.segmentMs.reduce((a,b)=>a+Math.round(clamp(Number(b),850,40000)),0);
-    const meetAt=Math.max(complete(p1),complete(p2))+900;
+    const [w1,w2]=pairing;
+    const meetAt=Math.max(w1.endAt,w2.endAt)+900;
     const huddle=Math.random()<.42;
     const dialogueSets=living.dialogues?.[huddle?'huddle':'conversation'];
     const dialogue=Array.isArray(dialogueSets)&&dialogueSets.length?dialogueSets[Math.floor(Math.random()*dialogueSets.length)]:[
@@ -132,8 +179,10 @@
     const turns=dialogue.slice(0,8).map(t=>String(t).slice(0,80));
     const turnMs=2800;
     const kind=huddle?'huddle':'conversation';
-    for(const [person,plan]of [[subject,p1],[partner,p2]]){
-      attachWalk(person,plan,{action:huddle?'meeting':'chat'},now);
+    for(const [person,reserved]of [[subject,w1],[partner,w2]]){
+      person.x=reserved.from.x;person.y=reserved.from.y;
+      person.walk={...reserved,action:huddle?'meeting':'chat'};
+      person.action=reserved.startedAt>now?'waiting':'walking';
       person.faceTo=person===subject?Number(partner.id):Number(subject.id);
       // A single shared script produces alternating speech bubbles on all PCs.
       person.scene={kind,text:turns[0],dialogue:turns,speakerId:Number(subject.id),partnerId:Number(partner.id),turnMs,from:meetAt,until:meetAt+turns.length*turnMs};
@@ -183,7 +232,7 @@
       }
       motion.render([movementAt(s,now)]);
       const plan=motion.plan(Number(s.id),intent.zone);
-      if(!attachWalk(s,plan,intent,now)){
+      if(!attachWalk(s,plan,intent,now,snapshot)){
         s.nextAt=now+10000+Math.random()*6000;changed=true;continue;
       }
       if(intent.kind==='meeting'){

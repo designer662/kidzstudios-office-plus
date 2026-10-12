@@ -1,7 +1,7 @@
 {
-  "release": "86.9",
-  "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.8 Male Character Studio: supplied male 3D model; 5 hairstyles; hair colours; glasses; outfit colours",
+  "release": "86.10",
+  "edition": "Office Plus · Unified Pulse",
+  "package": "V86.10 Worker Spacing: collision-safe routes, doorway waiting, stable worker separation",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",

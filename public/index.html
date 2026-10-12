@@ -2948,11 +2948,39 @@ body{overscroll-behavior:none;}
   let resizeTimer=null;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(viewMode==='overview'){overviewCam=getOverviewCam();cam={...overviewCam};applyCamera()}else if(viewMode==='follow'&&followEmployeeId&&employeeById[followEmployeeId])followCameraForEmployee(employeeById[followEmployeeId],true)},120)},{passive:true});
   startRandomRoam();scheduleRandomWorkloadBubble();
 
+  // Existing shared snapshots may pre-date the V86.10 route scheduler. Keep
+  // seated workers anchored while moving avatars shift slightly onto a clear
+  // adjacent floor tile if any two actors become too close. No network writes.
+  function separateWorkerPositions(items){
+    const gap=1.75, placed=[];
+    const ordered=items.filter(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y))
+      .map(p=>({...p})).sort((a,b)=>Number(a.walking)-Number(b.walking)||Number(a.id)-Number(b.id));
+    const clear=(pt)=>!navBlocked(pt.x,pt.y)&&placed.every(q=>Math.hypot(pt.x-q.x,pt.y-q.y)>=gap-.005);
+    for(const worker of ordered){
+      const original={x:worker.x,y:worker.y};
+      if(!placed.every(other=>Math.hypot(original.x-other.x,original.y-other.y)>=gap-.005)){
+        let choice=null,score=Infinity;
+        for(const radius of [gap*.5,gap,gap*1.45,gap*1.9]){
+          for(let i=0;i<24;i++){
+            const angle=i*Math.PI/12+(Number(worker.id)%7)*.15;
+            const test={x:original.x+Math.cos(angle)*radius,y:original.y+Math.sin(angle)*radius};
+            if(!clear(test)||(!navBlocked(original.x,original.y)&&!navClearLine(original,test)))continue;
+            const distance=Math.hypot(test.x-original.x,test.y-original.y);
+            if(distance<score){choice=test;score=distance}
+          }
+          if(choice)break;
+        }
+        if(choice){worker.x=choice.x;worker.y=choice.y}
+      }
+      placed.push(worker);
+    }
+    return ordered;
+  }
   // A small bridge for the shared movement timeline. Camera and input remain local.
   function renderSharedPositions(items){
     if(!Array.isArray(items))return;
     let statusChanged=false;
-    for(const item of items){
+    for(const item of separateWorkerPositions(items)){
       const e=employeeById[Number(item.id)],node=e&&employeeNodes.get(e.id);
       if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
       e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
@@ -3205,7 +3233,7 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.8 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.10 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
@@ -3214,7 +3242,7 @@ body{overscroll-behavior:none;}
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.4" defer></script>
-<script src="office-movement-sync.js?v=84.0" defer></script>
+<script src="office-movement-sync.js?v=86.10" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>
