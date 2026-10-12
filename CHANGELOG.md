@@ -58,3 +58,15 @@
 - Reclaimed the unused space above the 3D scene.
 - Preserved automatic staff movement and random workload notifications; removed automatic reaction emote bubbles from the V58 UI addition.
 - No database migration needed.
+
+## V65 - Path safety, Mapping removal, linear navigation
+
+- Added obstacle-aware grid navigation for office staff to walk around furniture rather than through work tables.
+- Removed Status-to-Pipeline Mapping editor and its event handlers. Fixed default stage categories still drive Office Pulse counts.
+- Replaced the two-row suite header with one compact, horizontal desktop bar across all 10 pages, with scrollable shortcuts on narrow screens.
+- Supabase schema unchanged.
+
+## V66: Centered header and stronger collision avoidance
+- Centered navigation within header and added safe scrolling on small screens.
+- Rebuilt 3D furniture clearance map and path planner with verified line-of-sight path smoothing.
+- Safer chair transitions and walking concurrency handling.

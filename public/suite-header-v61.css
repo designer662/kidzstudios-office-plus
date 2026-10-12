@@ -1,80 +1,31 @@
-/* Office Plus V64 - redesigned shared dashboard header */
-.ks-master-header{
-  position:relative!important;z-index:110!important;
-  width:100%!important;max-width:100%!important;min-width:0!important;
-  padding:14px clamp(12px,1.7vw,24px) 8px!important;
-  margin:0!important;flex:0 0 auto!important;
-}
+/* V65: one-line Office Plus navigation with graceful horizontal scrolling. */
+.ks-master-header{position:relative!important;z-index:110!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:10px clamp(8px,1vw,16px) 7px!important;margin:0!important;flex:0 0 auto!important}
 .ks-master-header *,.ks-master-header *::before,.ks-master-header *::after{box-sizing:border-box}
-.ks-master-header .topbar{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  grid-template-rows:auto auto!important;
-  align-items:center!important;
-  gap:12px 14px!important;
-  height:auto!important;min-height:0!important;
-  width:100%!important;max-width:1560px!important;min-width:0!important;
-  margin:0 auto!important;padding:14px 16px 12px!important;overflow:visible!important;
-  border-radius:26px!important;
-  border:1px solid rgba(228,218,206,.82)!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(252,248,243,.94))!important;
-  box-shadow:0 22px 52px rgba(30,34,38,.09),0 6px 18px rgba(239,123,69,.08)!important;
-  backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;
-}
-.ks-master-header .brand{
-  grid-column:1!important;grid-row:1!important;min-width:0!important;max-width:100%!important;margin:0!important;
-  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
-  display:flex!important;align-items:center!important;gap:10px!important;
-  padding:6px 10px!important;border-radius:18px!important;background:rgba(255,250,246,.88)!important;
-  border:1px solid rgba(239,123,69,.12)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.65)!important;
-}
-.ks-master-header .brand .brand-mark,.ks-master-header .brand img{flex-shrink:0!important}
-.ks-master-header .brand span{display:inline!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-weight:800!important;letter-spacing:-.03em!important}
-.ks-master-header .header-tools{
-  grid-column:2!important;grid-row:1!important;justify-self:end!important;align-self:center!important;min-width:0!important;max-width:100%!important;
-  display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;margin:0!important;
-  padding:4px!important;border-radius:18px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(35,39,43,.05)!important;
-}
-.ks-master-header .tool-nav{
-  grid-column:1/-1!important;grid-row:2!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
-  flex-wrap:nowrap!important;min-width:0!important;max-width:100%!important;width:100%!important;
-  gap:8px!important;margin:0!important;padding:2px 1px 4px!important;
-  overflow-x:auto!important;overflow-y:hidden!important;
-  scrollbar-width:thin!important;scrollbar-color:rgba(132,139,145,.28) transparent!important;
-  overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;
-}
-.ks-master-header .tool-nav-btn{
-  flex:0 0 auto!important;min-width:max-content!important;height:41px!important;white-space:nowrap!important;padding:0 14px!important;
-  font-size:10.6px!important;line-height:1.2!important;display:inline-flex!important;align-items:center!important;gap:8px!important;
-  border-radius:14px!important;border:1px solid rgba(224,228,231,.9)!important;background:#fff!important;color:#55606a!important;
-  box-shadow:0 4px 10px rgba(30,34,38,.04)!important;
-}
-.ks-master-header .tool-nav-btn:hover,.ks-master-header .tool-nav-btn:focus-visible{transform:translateY(-1px)!important;border-color:rgba(239,123,69,.24)!important;box-shadow:0 10px 18px rgba(239,123,69,.12)!important;color:#d56531!important;outline:none!important}
-.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:linear-gradient(180deg,#fff5ee,#ffefe3)!important;border-color:rgba(239,123,69,.24)!important;color:#d56531!important;box-shadow:0 10px 22px rgba(239,123,69,.14)!important}
-.ks-master-header .nav-tool-icon{display:grid!important;place-items:center!important;flex-shrink:0!important;width:22px!important;height:22px!important;border-radius:8px!important;background:rgba(239,123,69,.08)!important;color:#de6e36!important}
-.ks-master-header .temp-user-chip{flex:0 0 auto!important;min-width:40px!important;max-width:160px!important;white-space:nowrap!important;border-radius:14px!important;border:1px solid rgba(228,231,233,.92)!important;background:#fff!important;box-shadow:0 4px 10px rgba(30,34,38,.04)!important}
-.ks-master-header .icon-btn{flex:0 0 40px!important;width:40px!important;height:40px!important;border-radius:14px!important;border:1px solid rgba(228,231,233,.92)!important;background:#fff!important;box-shadow:0 4px 10px rgba(30,34,38,.04)!important}
-.ks-master-header .notification-wrap{flex-shrink:0!important;position:relative!important}
-.ks-master-header .search-wrap{min-width:0!important;max-width:240px!important}
-.ks-master-header .search{max-width:240px!important;border-radius:14px!important;background:#fff!important;border:1px solid rgba(228,231,233,.92)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.72)!important}
-@media(max-width:1200px){.ks-master-header .search-wrap{display:none!important}.ks-master-header .mobile-search-button{display:grid!important}}
-@media(max-width:920px){
- .ks-master-header{padding:9px 10px 6px!important}
- .ks-master-header .topbar{padding:11px 11px 10px!important;gap:9px!important;border-radius:20px!important}
- .ks-master-header .brand{padding:6px 9px!important;border-radius:15px!important}
- .ks-master-header .header-tools{padding:3px!important;border-radius:15px!important}
- .ks-master-header .tool-nav-btn{height:37px!important;padding:0 12px!important}
-}
-@media(max-width:600px){
- .ks-master-header .topbar{padding:9px 9px 8px!important;gap:7px!important;border-radius:18px!important}
- .ks-master-header .brand{font-size:11px!important;letter-spacing:-.035em!important;padding:6px 8px!important}
- .ks-master-header .header-tools{gap:5px!important}
- .ks-master-header .icon-btn{flex:0 0 34px!important;width:34px!important;height:34px!important;border-radius:12px!important}
- .ks-master-header .temp-user-chip{width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;padding:0!important;justify-content:center!important;border-radius:12px!important}
- .ks-master-header .temp-user-copy{display:none!important}
- .ks-master-header .tool-nav{gap:6px!important;padding-bottom:3px!important}
- .ks-master-header .tool-nav-btn{height:34px!important;font-size:9.8px!important;padding:0 10px!important;gap:6px!important;border-radius:12px!important}
- .ks-master-header .nav-tool-icon{width:18px!important;height:18px!important;border-radius:7px!important}
-}
+.ks-master-header .topbar{display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;grid-template-rows:minmax(44px,auto)!important;align-items:center!important;gap:12px!important;width:100%!important;max-width:1600px!important;min-width:0!important;height:auto!important;min-height:58px!important;margin:0 auto!important;padding:8px 12px!important;overflow:visible!important;border-radius:19px!important;border:1px solid rgba(223,228,228,.9)!important;background:rgba(255,255,255,.97)!important;box-shadow:0 9px 24px rgba(30,35,38,.055)!important;backdrop-filter:blur(14px)!important}
+.ks-master-header .brand{grid-column:1!important;grid-row:1!important;display:flex!important;align-items:center!important;gap:6px!important;min-width:0!important;max-width:175px!important;overflow:hidden!important;padding:7px 5px!important;margin:0!important;white-space:nowrap!important;text-overflow:ellipsis!important;color:#242b30!important;font-size:13px!important;font-weight:850!important;letter-spacing:-.04em!important;border:0!important;background:none!important;box-shadow:none!important}
+.ks-master-header .brand span{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.ks-master-header .tool-nav{grid-column:2!important;grid-row:1!important;display:flex!important;align-items:center!important;justify-content:safe center!important;flex-wrap:nowrap!important;min-width:0!important;max-width:100%!important;width:100%!important;gap:6px!important;padding:3px 0!important;margin:0!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important;scrollbar-color:rgba(122,129,136,.28) transparent!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important}
+.ks-master-header .tool-nav-btn{flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;gap:7px!important;height:38px!important;min-width:max-content!important;padding:0 11px!important;margin:0!important;border:1px solid rgba(225,229,231,.82)!important;border-radius:11px!important;background:#f8f9f9!important;color:#697279!important;box-shadow:none!important;font-size:10px!important;line-height:1!important;font-weight:780!important;white-space:nowrap!important;transition:background .18s ease,color .18s ease,border-color .18s ease!important}
+.ks-master-header .tool-nav-btn:hover,.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:#fff1e8!important;color:#d76432!important;border-color:rgba(239,123,69,.28)!important;transform:none!important;box-shadow:none!important}
+.ks-master-header .nav-tool-icon{display:grid!important;place-items:center!important;flex:0 0 auto!important;width:21px!important;height:21px!important;border-radius:7px!important;background:rgba(239,123,69,.1)!important;color:#d86b36!important;font-size:11px!important}
+.ks-master-header .header-tools{grid-column:3!important;grid-row:1!important;justify-self:end!important;align-self:center!important;display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important}
+.ks-master-header .search-wrap{display:none!important}
+.ks-master-header .mobile-search-button{display:none!important}
+.ks-master-header .temp-user-chip{flex:0 0 auto!important;min-width:35px!important;max-width:122px!important;white-space:nowrap!important;border-radius:11px!important;background:#fff!important}
+.ks-master-header .temp-user-copy b{max-width:58px!important}
+.ks-master-header .icon-btn{flex:0 0 37px!important;width:37px!important;height:37px!important;border-radius:11px!important;background:#fff!important}
+.ks-master-header .notification-wrap{position:relative!important;flex-shrink:0!important}
+@media(max-width:1100px){.ks-master-header .brand{max-width:130px!important;font-size:11px!important}.ks-master-header .tool-nav-btn{height:35px!important;padding:0 9px!important;font-size:9.5px!important;gap:5px!important}.ks-master-header .nav-tool-icon{width:18px!important;height:18px!important}.ks-master-header .header-tools{gap:4px!important}}
+@media(max-width:700px){.ks-master-header{padding:7px 7px 5px!important}.ks-master-header .topbar{gap:6px!important;padding:7px 7px!important;border-radius:15px!important}.ks-master-header .brand{max-width:38px!important;width:38px!important;font-size:0!important;padding:0!important}.ks-master-header .brand:before{content:'KS';font-size:12px;font-weight:900;letter-spacing:-.06em;display:grid;place-items:center;width:33px;height:33px;border-radius:10px;background:#fff0e8;color:#d66a38}.ks-master-header .brand span{display:none!important}.ks-master-header .tool-nav-btn{height:34px!important;min-width:33px!important;padding:0 8px!important}.ks-master-header .tool-nav-btn>span:not(.nav-tool-icon){display:none!important}.ks-master-header .nav-tool-icon{width:20px!important;height:20px!important}.ks-master-header .header-tools{gap:3px!important}.ks-master-header .temp-user-chip{min-width:32px!important;max-width:32px!important;width:32px!important;height:32px!important;padding:0!important;justify-content:center!important}.ks-master-header .temp-user-copy{display:none!important}.ks-master-header .icon-btn{flex:0 0 33px!important;width:33px!important;height:33px!important}}
 @media print{.ks-master-header{display:none!important}}
+
+/* V66: keep nav group centred in available header space, scrolling when needed. */
+@media(min-width:1450px){
+ .ks-master-header .topbar{grid-template-columns:max-content minmax(0,1fr) max-content!important}
+ .ks-master-header .tool-nav{justify-content:safe center!important;max-width:100%!important}
+ .ks-master-header .brand{justify-self:start!important}
+ .ks-master-header .header-tools{justify-self:end!important}
+}
+@media(min-width:701px) and (max-width:1449px){
+ .ks-master-header .tool-nav{justify-content:safe center!important}
+}

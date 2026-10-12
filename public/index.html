@@ -910,7 +910,7 @@ body{overscroll-behavior:none;}
 @media(max-width:650px){.ops-sync-strip small{display:none}.ops-sync-strip>div{grid-template-columns:auto minmax(0,1fr)}.ops-insights{grid-template-columns:repeat(2,1fr)}.ops-insights>div{padding:5px 4px}.ops-insights b{font-size:10px}.ops-insights span{font-size:10px}.feed-title-row em{display:none}}
 
 /* V42 · Operations Refinement */
-.ops-sync-strip{align-items:flex-start}.ops-sync-strip .ops-sync-main{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px;align-items:center}.ops-sync-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.ops-data-age{font-size:10px;color:var(--muted);white-space:nowrap}.ops-data-age.stale{color:#a56f25;font-weight:800}.ops-sync-strip span[data-mode="stale"]{background:rgba(217,154,56,.14);color:#98691f}.ops-mapping-btn{border:1px solid var(--line);background:var(--solid);color:#666d72;border-radius:8px;padding:4px 6px;font-size:10px;font-weight:850;cursor:pointer}.ops-mapping-btn:hover{background:var(--orangeSoft);color:var(--orange2);border-color:rgba(239,123,69,.24)}
+.ops-sync-strip{align-items:flex-start}.ops-sync-strip .ops-sync-main{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px;align-items:center}.ops-sync-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.ops-data-age{font-size:10px;color:var(--muted);white-space:nowrap}.ops-data-age.stale{color:#a56f25;font-weight:800}.ops-sync-strip span[data-mode="stale"]{background:rgba(217,154,56,.14);color:#98691f}
 .ops-reconcile{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:6px;padding:6px 7px;border-radius:9px;background:rgba(247,247,245,.72);border:1px solid var(--line)}.ops-reconcile span{font-size:10px;color:#676d72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ops-unmapped-btn{border:0;border-radius:999px;background:#f0f1ef;color:#6f7478;padding:4px 6px;font-size:10px;font-weight:850;cursor:pointer;white-space:nowrap}.ops-unmapped-btn.warning{background:rgba(217,154,56,.14);color:#9a6a21}.ops-unmapped-btn[hidden]{display:none}
 .ops-secondary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:5px}.ops-secondary-metrics .today-metric{min-height:42px;padding:7px 6px;text-align:center}.ops-secondary-metrics .today-number{font-size:14px}.ops-secondary-metrics .today-label{font-size:10px}.ops-secondary-metrics .danger .today-number{color:#c65353}.ops-secondary-metrics .good .today-number{color:#43a276}
 .ops-daily-summary{margin-top:7px;padding:8px 9px;border-radius:10px;background:linear-gradient(135deg,rgba(239,123,69,.08),rgba(255,255,255,.72));border:1px solid rgba(239,123,69,.12)}.ops-daily-summary b{display:block;font-size:10px}.ops-daily-summary span{display:block;margin-top:3px;font-size:10px;line-height:1.35;color:var(--muted)}
@@ -920,9 +920,8 @@ body{overscroll-behavior:none;}
 .workload-smart{grid-template-columns:32px minmax(0,1fr) auto auto!important}.workload-mini{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}.workload-mini i{font-style:normal;font-size:10px;padding:2px 4px;border-radius:999px;background:#f1f2f0;color:#73797d}.workload-mini i.danger{background:rgba(203,74,74,.08);color:#b95050}.workload-level{align-self:center}
 .job-status.unmapped{background:rgba(217,154,56,.13);color:#96681f}
 .feed-system{opacity:.64}.feed-system:hover{opacity:.9}.feed-glyph{font-size:11px;background:#f1f2ef;color:#747a7f}.feed-title-row b small{font-size:10px;color:#9a6d4f;font-weight:900}
-.stage-mapping-dialog{width:min(560px,calc(100vw - 28px))}.stage-mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.stage-map-field{display:grid;gap:5px}.stage-map-field span{font-size:10px;font-weight:800;color:#62686d}.stage-map-field textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:11px;background:var(--bg);padding:8px;color:var(--text);font:600 10px/1.4 var(--ui);outline:none}.stage-map-field textarea:focus{background:var(--solid);border-color:rgba(239,123,69,.32);box-shadow:0 0 0 3px rgba(239,123,69,.07)}
 .today-panel.ops-panel.expanded{width:min(640px,calc(100% - 44px))}.today-panel.ops-panel.expanded .ops-secondary-metrics{gap:7px}.today-panel.ops-panel.expanded .ops-secondary-metrics .today-metric{min-height:62px}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(4,1fr);gap:7px}.today-panel.ops-panel.expanded .ops-stage-health>div{padding:10px}.today-panel.ops-panel.expanded .ops-stage-health b{font-size:17px}.today-panel.ops-panel.expanded .ops-alerts{gap:7px}.today-panel.ops-panel.expanded .ops-alert{padding:9px}.today-panel.ops-panel.expanded .ops-alert span{font-size:10px}.today-panel.ops-panel.expanded .ops-alert b{font-size:15px}.today-panel.ops-panel.expanded .ops-staff-load button{grid-template-columns:32px minmax(0,1fr) auto;padding:8px}.today-panel.ops-panel.expanded .ops-load-avatar{width:32px;height:32px}.today-panel.ops-panel.expanded .ops-staff-load b{font-size:10px}.today-panel.ops-panel.expanded .ops-staff-load small{font-size:10px}
-@media(max-width:650px){.ops-sync-strip{gap:5px}.ops-sync-actions{display:grid;justify-items:end}.ops-data-age{font-size:10px}.ops-mapping-btn{font-size:10px;padding:3px 5px}.ops-secondary-metrics{grid-template-columns:repeat(2,1fr)}.ops-alerts{grid-template-columns:repeat(2,1fr)}.ops-stage-health{grid-template-columns:1fr 1fr}.stage-mapping-grid{grid-template-columns:1fr}.stage-map-field textarea{min-height:70px}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.ops-sync-strip{gap:5px}.ops-sync-actions{display:grid;justify-items:end}.ops-data-age{font-size:10px}.ops-secondary-metrics{grid-template-columns:repeat(2,1fr)}.ops-alerts{grid-template-columns:repeat(2,1fr)}.ops-stage-health{grid-template-columns:1fr 1fr}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(2,1fr)}}
 .ops-primary-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.ops-primary-metrics .today-metric{min-height:48px;padding:7px 5px;text-align:center}.ops-primary-metrics .today-number{font-size:16px}.ops-primary-metrics .today-label{font-size:10px}.ops-mini-head{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid var(--line)}.ops-mini-head span{font-size:10px;font-weight:850}.ops-mini-head small{font-size:10px;color:var(--muted)}.today-panel.ops-panel.expanded .ops-primary-metrics{gap:7px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-metric{min-height:72px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-number{font-size:23px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-label{font-size:10px}@media(max-width:650px){.ops-primary-metrics{grid-template-columns:repeat(2,1fr)}}
 
 </style>
@@ -989,7 +988,7 @@ body{overscroll-behavior:none;}
 @media(max-width:920px){.character-emoji-picker{min-width:184px;max-width:208px;padding:9px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
 @media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
 </style>
-<link rel="stylesheet" href="suite-header-v61.css?v=61.0">
+<link rel="stylesheet" href="suite-header-v61.css?v=66.0">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1078,7 +1077,7 @@ body{overscroll-behavior:none;}
   <div class="ops-view active" data-ops-view="pulse">
     <div class="ops-sync-strip">
       <div class="ops-sync-main"><span id="opsSyncHealth" data-mode="empty">EMPTY</span><b id="opsLastSync">Waiting for Job Management</b></div>
-      <div class="ops-sync-actions"><small id="opsDataAge" class="ops-data-age">No live data</small><button id="opsMappingBtn" class="ops-mapping-btn" type="button" title="Edit shared status-to-stage mapping">Mapping</button></div>
+      <div class="ops-sync-actions"><small id="opsDataAge" class="ops-data-age">No live data</small></div>
     </div>
     <div class="today-grid ops-primary-metrics">
       <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
@@ -1161,20 +1160,6 @@ body{overscroll-behavior:none;}
     <input id="jobLinkInput" class="job-link-input" type="url" inputmode="url" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=...">
     <div class="job-link-help" id="jobLinkHelp">This link is shared through Supabase and will load for everyone.</div>
     <div class="job-link-actions"><button class="job-link-secondary" id="jobLinkReset">Use default</button><button class="job-link-primary" id="jobLinkSave">Save shared link</button></div>
-  </div>
-</div>
-
-<div class="job-link-modal" id="stageMappingModal" aria-hidden="true" data-sync-ignore>
-  <div class="job-link-dialog stage-mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="stageMappingTitle">
-    <div class="job-link-head"><div><span>Shared Job Management setting</span><strong id="stageMappingTitle">Status → Pipeline Mapping</strong></div><button id="stageMappingClose" aria-label="Close">×</button></div>
-    <div class="stage-mapping-grid">
-      <label class="stage-map-field"><span>ORDERS keywords</span><textarea id="stageOrdersInput" rows="5"></textarea></label>
-      <label class="stage-map-field"><span>ARTWORK keywords</span><textarea id="stageArtworkInput" rows="5"></textarea></label>
-      <label class="stage-map-field"><span>PRODUCTION keywords</span><textarea id="stageProductionInput" rows="5"></textarea></label>
-      <label class="stage-map-field"><span>COMPLETED keywords</span><textarea id="stageCompletedInput" rows="5"></textarea></label>
-    </div>
-    <div class="job-link-help" id="stageMappingHelp">Unknown statuses are flagged as Unmapped so the tally cannot silently drift.</div>
-    <div class="job-link-actions"><button class="job-link-secondary" id="stageMappingReset" type="button">Use defaults</button><button class="job-link-primary" id="stageMappingSave" type="button">Save shared mapping</button></div>
   </div>
 </div>
 
@@ -1281,16 +1266,6 @@ body{overscroll-behavior:none;}
   const opsAlerts = $('#opsAlerts');
   const opsStageHealth = $('#opsStageHealth');
   const opsStaffLoad = $('#opsStaffLoad');
-  const opsMappingBtn = $('#opsMappingBtn');
-  const stageMappingModal = $('#stageMappingModal');
-  const stageMappingClose = $('#stageMappingClose');
-  const stageMappingSave = $('#stageMappingSave');
-  const stageMappingReset = $('#stageMappingReset');
-  const stageOrdersInput = $('#stageOrdersInput');
-  const stageArtworkInput = $('#stageArtworkInput');
-  const stageProductionInput = $('#stageProductionInput');
-  const stageCompletedInput = $('#stageCompletedInput');
-  const stageMappingHelp = $('#stageMappingHelp');
   const liveLabel = $('#liveLabel');
   const staffDirectoryList = $('#staffDirectoryList');
   const addStaffBtn = $('#addStaffBtn');
@@ -1538,7 +1513,6 @@ body{overscroll-behavior:none;}
     else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});}}
     else if(type==='mood_cleared'&&empId){loadStaffDirectory({seedIfMissing:false});if(emp)clearMoodBubble(emp.id);}
     else if(type==='job_management_updated'){refreshJobsFromSharedCache();}
-    else if(type==='job_stage_mapping_updated'){initSharedJobManagement();}
     else if(type==='chat_message'){if(!chatOpen)pullChat();}
   }
   async function postOfficeEvent({eventType,title,message='',employeeId=null,metadata={},dedupeKey=''},options={}){
@@ -1602,11 +1576,8 @@ body{overscroll-behavior:none;}
     jobDataSource=cfg.jobDataSource||'html';
     applyJobManagementUrl(cfg.jobManagementUrl||DEFAULT_JOB_SHEET_URL);
     applyGoogleDriveUrl(cfg.googleDriveUrl||DEFAULT_GOOGLE_DRIVE_URL);
-    stageMapping=normalizeStageMapping(cfg.jobStageMapping||DEFAULT_STAGE_MAPPING);renderOps();return cfg;
+    stageMapping=normalizeStageMapping(DEFAULT_STAGE_MAPPING);renderOps();return cfg;
   }
-  function openStageMappingEditor(){if(!stageMappingModal)return;stageOrdersInput.value=mappingText('orders');stageArtworkInput.value=mappingText('artwork');stageProductionInput.value=mappingText('production');stageCompletedInput.value=mappingText('completed');stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Shared mapping. Unknown Job Management statuses will be flagged as Unmapped instead of silently counted.';stageMappingModal.classList.add('open');stageMappingModal.setAttribute('aria-hidden','false');setTimeout(()=>stageOrdersInput?.focus(),40)}
-  function closeStageMappingEditor(){stageMappingModal?.classList.remove('open');stageMappingModal?.setAttribute('aria-hidden','true')}
-  async function saveStageMapping(){const next=normalizeStageMapping({orders:parseMappingText(stageOrdersInput.value),artwork:parseMappingText(stageArtworkInput.value),production:parseMappingText(stageProductionInput.value),completed:parseMappingText(stageCompletedInput.value)});if(!Object.values(next).every(v=>v.length)){stageMappingHelp.className='job-link-help error';stageMappingHelp.textContent='Each stage needs at least one status keyword.';return}stageMappingSave.disabled=true;stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Saving shared stage mapping…';try{const current=await readGlobalConfig(),payload={...current,jobStageMapping:next,jobStageMappingUpdatedAt:Date.now()};const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:GLOBAL_CONFIG_SCOPE,payload,clientId:'dashboard-stage-mapping'})});if(!res.ok)throw new Error(`Save failed (${res.status})`);stageMapping=next;renderOps();stageMappingHelp.className='job-link-help ok';stageMappingHelp.textContent='Saved. Office Pulse reclassified all Job Management rows.';await postOfficeEvent({eventType:'job_stage_mapping_updated',title:'Pipeline mapping updated',message:'Job Management status mapping was changed',dedupeKey:`stage-map:${hashString(JSON.stringify(next))}:${Date.now()}`});setTimeout(closeStageMappingEditor,650)}catch(err){stageMappingHelp.className='job-link-help error';stageMappingHelp.textContent=err.message||'Could not save mapping.'}finally{stageMappingSave.disabled=false}}
   async function saveJobManagementUrl(value){
     const parsed=parseJobManagementUrl(value);if(!parsed.ok)throw new Error(parsed.error);
     const current=await readGlobalConfig();
@@ -1722,8 +1693,6 @@ body{overscroll-behavior:none;}
     }
     return out;
   }
-  function mappingText(key){return (stageMapping[key]||[]).join(', ')}
-  function parseMappingText(value){return [...new Set(String(value||'').split(/[,\n]+/).map(normalizeKey).filter(Boolean))].slice(0,80)}
   function stageMatch(text=''){
     const hay=normalizeKey(text);if(!hay)return null;
     for(const stage of ['completed','artwork','production','orders']){
@@ -2592,11 +2561,6 @@ body{overscroll-behavior:none;}
   if(driveLinkClose)driveLinkClose.onclick=closeDriveLinkEditor;
   if(driveLinkModal)driveLinkModal.onclick=e=>{if(e.target===driveLinkModal)closeDriveLinkEditor()};
   if(driveLinkReset)driveLinkReset.onclick=()=>{driveLinkInput.value=DEFAULT_GOOGLE_DRIVE_URL;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Default Kidzstudios Google Drive folder loaded. Click Save shared link to apply it for everyone.'};
-  if(opsMappingBtn)opsMappingBtn.onclick=e=>{e.stopPropagation();openStageMappingEditor()};
-  if(stageMappingClose)stageMappingClose.onclick=closeStageMappingEditor;
-  if(stageMappingModal)stageMappingModal.onclick=e=>{if(e.target===stageMappingModal)closeStageMappingEditor()};
-  if(stageMappingSave)stageMappingSave.onclick=saveStageMapping;
-  if(stageMappingReset)stageMappingReset.onclick=()=>{stageOrdersInput.value=DEFAULT_STAGE_MAPPING.orders.join(', ');stageArtworkInput.value=DEFAULT_STAGE_MAPPING.artwork.join(', ');stageProductionInput.value=DEFAULT_STAGE_MAPPING.production.join(', ');stageCompletedInput.value=DEFAULT_STAGE_MAPPING.completed.join(', ');stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Default mapping loaded. Save to share it with everyone.'};
   if(driveLinkSave)driveLinkSave.onclick=async()=>{const parsed=parseHttpUrl(driveLinkInput.value,'Google Drive link');if(!parsed.ok){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=parsed.error;return}driveLinkSave.disabled=true;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Saving to shared database…';try{await saveGoogleDriveUrl(driveLinkInput.value);driveLinkHelp.className='job-link-help ok';driveLinkHelp.textContent='Saved. Everyone will now open the same Google Drive folder.';setTimeout(closeDriveLinkEditor,520)}catch(err){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=err.message||'Could not save link.'}finally{driveLinkSave.disabled=false}};
   if(jobLinkClose)jobLinkClose.onclick=closeJobLinkEditor;
   if(jobLinkModal)jobLinkModal.onclick=e=>{if(e.target===jobLinkModal)closeJobLinkEditor()};
@@ -2661,6 +2625,113 @@ body{overscroll-behavior:none;}
   };
   function zoneOfEmployee(e){return e.visualRoomId||e.roomId||e.homeRoom||'staff'}
   function randomDifferent(list,current){const pool=list.filter(v=>v!==current);return(pool.length?pool:list)[Math.floor(Math.random()*(pool.length||list.length))]}
+  // V66 collision geometry uses the actual 3D furniture footprint mapped into
+  // this page's logical office coordinates. Do not navigate through worktops.
+  // These are rectangles in floor coordinates, NOT positions of staff/chairs.
+  const navigationObstacles=[
+    // Large shared worktable (3D x=.85 z=-10.7, 2.85 x 7.25 units).
+    {x:10.35,y:6.35,w:5.7,h:14.5},
+    // Long front workbench, x=1.1 z=-16.25, size 8 x 1.25.
+    {x:5.7,y:1.25,w:16,h:2.5},
+    // Showroom tables and display units.
+    {x:11.5,y:26.4,w:5.3,h:3.4},
+    {x:14.31,y:34.2,w:7.46,h:2.0},
+    {x:19.9,y:31.8,w:2.4,h:8.9},
+    // Management desks and counters.
+    {x:13.55,y:39.45,w:6.3,h:2.5},
+    {x:3.4,y:40.15,w:2.4,h:3.3},
+    // Tall pantry counter, storage rack, and island.
+    {x:.16,y:34.5,w:2.08,h:16.6},
+    {x:5.7,y:51.0,w:2.4,h:3.2}
+  ];
+  const navStep=.5,navCols=47,navRows=141,navPadding=.3;
+  function navBlocked(x,y){
+    if(!Number.isFinite(x)||!Number.isFinite(y)||x<.5||x>22.5||y<.5||y>69.5)return true;
+    return navigationObstacles.some(b=>x>=b.x-navPadding&&x<=b.x+b.w+navPadding&&y>=b.y-navPadding&&y<=b.y+b.h+navPadding);
+  }
+  function navClearLine(a,b){
+    if(navBlocked(a.x,a.y)||navBlocked(b.x,b.y))return false;
+    const dist=Math.hypot(b.x-a.x,b.y-a.y),samples=Math.max(1,Math.ceil(dist/.12));
+    for(let i=1;i<samples;i++){
+      const t=i/samples;
+      if(navBlocked(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t))return false;
+    }
+    return true;
+  }
+  // Choose a walkable point that has a visible exit for free starting positions.
+  function navSnap(p){
+    const cx=Math.round(Math.min(22.5,Math.max(.5,p.x))/navStep);
+    const cy=Math.round(Math.min(69.5,Math.max(.5,p.y))/navStep);
+    const inside=navBlocked(p.x,p.y);
+    let nearest=null,best=Infinity;
+    for(let dy=-20;dy<=20;dy++)for(let dx=-20;dx<=20;dx++){
+      const gx=cx+dx,gy=cy+dy,x=gx*navStep,y=gy*navStep;
+      if(gx<1||gx>=navCols-1||gy<1||gy>=navRows-1||navBlocked(x,y))continue;
+      if(!inside&&!navClearLine(p,{x,y}))continue;
+      const dist=(x-p.x)**2+(y-p.y)**2;
+      if(dist<best){nearest={gx,gy,x,y};best=dist}
+    }
+    return nearest;
+  }
+  function navLeg(from,to){
+    // Navigation legs never begin/end inside tables. Desk docking is handled
+    // separately after walking finishes, so it cannot create a visible crossing.
+    if(navBlocked(from.x,from.y)||navBlocked(to.x,to.y))return null;
+    if(navClearLine(from,to))return[to];
+    const start=navSnap(from),end=navSnap(to);
+    if(!start||!end)return null;
+    const encode=(x,y)=>y*navCols+x,origin=encode(start.gx,start.gy),destination=encode(end.gx,end.gy);
+    const frontier=[],gScore=new Map([[origin,0]]),cameFrom=new Map(),visited=new Set();
+    const heuristic=(x,y)=>Math.hypot(end.gx-x,end.gy-y);
+    const push=node=>{frontier.push(node);let n=frontier.length-1;while(n){const parent=(n-1)>>1;if(frontier[parent].f<=node.f)break;frontier[n]=frontier[parent];n=parent}frontier[n]=node};
+    const pop=()=>{const result=frontier[0],last=frontier.pop();if(frontier.length){let n=0;while(n*2+1<frontier.length){let child=n*2+1;if(child+1<frontier.length&&frontier[child+1].f<frontier[child].f)child++;if(frontier[child].f>=last.f)break;frontier[n]=frontier[child];n=child}frontier[n]=last}return result};
+    push({id:origin,x:start.gx,y:start.gy,g:0,f:heuristic(start.gx,start.gy)});
+    const directions=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+    let solved=false;
+    for(let iterations=0;frontier.length&&iterations<10000;iterations++){
+      const node=pop();if(visited.has(node.id)||node.g>gScore.get(node.id)+.00001)continue;
+      if(node.id===destination){solved=true;break}visited.add(node.id);
+      for(const [dx,dy] of directions){
+        const x=node.x+dx,y=node.y+dy;
+        if(x<1||x>=navCols-1||y<1||y>=navRows-1||navBlocked(x*navStep,y*navStep))continue;
+        if(dx&&dy&&(navBlocked(x*navStep,node.y*navStep)||navBlocked(node.x*navStep,y*navStep)))continue;
+        const id=encode(x,y);if(visited.has(id))continue;
+        const cost=node.g+Math.hypot(dx,dy),prev=gScore.get(id);
+        if(prev!==undefined&&cost>=prev)continue;
+        gScore.set(id,cost);cameFrom.set(id,node.id);
+        push({id,x,y,g:cost,f:cost+heuristic(x,y)});
+      }
+    }
+    if(!solved)return null;
+    const trace=[];let current=destination;
+    while(current!==origin){trace.push({x:(current%navCols)*navStep,y:Math.floor(current/navCols)*navStep});current=cameFrom.get(current);if(current===undefined)return null}
+    trace.push({x:start.x,y:start.y});trace.reverse();
+    // String-pulling: only skip intermediate points when the direct segment is clear.
+    const points=[...trace,to],result=[];let prev=from,index=0;
+    while(index<points.length){
+      let last=-1;
+      for(let i=index;i<points.length;i++){if(navClearLine(prev,points[i]))last=i}
+      if(last<index)return null;
+      const next=points[last];
+      if(Math.hypot(next.x-prev.x,next.y-prev.y)>.02)result.push({x:next.x,y:next.y});
+      prev=next;index=last+1;
+    }
+    return result;
+  }
+  function safeWalkingRoute(start,roughPoints){
+    if(navBlocked(start.x,start.y))return null;
+    const path=[];let previous={x:start.x,y:start.y};
+    for(const next of roughPoints){
+      const segment=navLeg(previous,next);
+      if(!segment)return null;
+      for(const p of segment){
+        if(!navClearLine(previous,p))return null;
+        if(Math.hypot(p.x-previous.x,p.y-previous.y)>.08)path.push({x:p.x,y:p.y});
+        previous={x:p.x,y:p.y};
+      }
+    }
+    return path;
+  }
   function pathBetweenZones(from,to,target){
     const pts=[];
     if(from===to)return[target];
@@ -2688,12 +2759,30 @@ body{overscroll-behavior:none;}
     const target=roamZones[targetZone].point(e);
     if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8){
       e.motionAction=targetZone==='staff'||targetZone==='boss'?'typing':'meeting';
-      e.roam={phase:'idle',nextAt:now+13000+Math.random()*18000};return;
+      e.roam={phase:'idle',nextAt:now+13000+Math.random()*18000};return false;
     }
-    const route=pathBetweenZones(current,targetZone,target);
+    // Dock seated characters at their chair while they work. On departure,
+    // switch from chair to its nearest aisle before walking begins. This is a
+    // stand-up transition, not a route across the tabletop.
+    const seatedOrigin={x:e.visualX??e.x,y:e.visualY??e.y};
+    const exit=navSnap(seatedOrigin);
+    if(!exit){e.roam={phase:'idle',nextAt:now+10000};return false}
+    const departure=navBlocked(seatedOrigin.x,seatedOrigin.y)?{x:exit.x,y:exit.y}:seatedOrigin;
+    const ownDesk=targetZone===home&&Math.hypot(target.x-(e.deskX??e.x),target.y-(e.deskY??e.y))<.5;
+    // Never snap into a showroom table or pantry counter at the end of a trip.
+    // Only the character's own assigned seat may use the optional desk docking.
+    const seatGoal=ownDesk&&navBlocked(target.x,target.y)?{...target}:null;
+    const arrival=navBlocked(target.x,target.y)?navSnap(target):target;
+    if(!arrival){e.roam={phase:'idle',nextAt:now+10000};return false}
+    const route=safeWalkingRoute(departure,pathBetweenZones(current,targetZone,arrival));
+    if(!route?.length){e.roam={phase:'idle',nextAt:now+10000};return false}
+    e.visualX=departure.x;e.visualY=departure.y;
+    const node=employeeNodes.get(e.id);
+    if(node){const p=iso(departure.x,departure.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}
     e.motionAction='walking';
-    e.roam={phase:'walk',route,index:0,startAt:now,startX:e.visualX??e.x,startY:e.visualY??e.y,targetZone};
+    e.roam={phase:'walk',route,index:0,startAt:now,startX:departure.x,startY:departure.y,targetZone,seatGoal};
     prepareRoamSegment(e,now);
+    return true;
   }
   function prepareRoamSegment(e,now){
     const r=e.roam,pt=r.route[r.index];if(!pt){finishRoam(e,now);return}
@@ -2701,8 +2790,11 @@ body{overscroll-behavior:none;}
     const dist=Math.hypot(r.endX-r.startX,r.endY-r.startY);r.duration=Math.max(850,dist*470);
   }
   function finishRoam(e,now){
-    const node=employeeNodes.get(e.id);e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
-    e.motionAction=e.visualRoomId==='pantry'?'coffee':e.visualRoomId==='showroom'?'meeting':e.visualRoomId==='corridor'?'chat':'typing';e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node)setMotionClass(e,node,false);
+    const node=employeeNodes.get(e.id),seat=e.roam?.seatGoal;
+    // Seat docking is instantaneous; never animate the feet through the table mesh.
+    if(seat){e.visualX=seat.x;e.visualY=seat.y;if(node){const p=iso(seat.x,seat.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}}
+    e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
+    e.motionAction=e.visualRoomId==='pantry'?'coffee':e.visualRoomId==='showroom'?'meeting':e.visualRoomId==='corridor'?'chat':'typing';e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node){setMotionClass(e,node,false);updateEmployeeBubbles(e)}
   }
   function activeWalkers(){return employees.reduce((n,e)=>n+(e.roam?.phase==='walk'?1:0),0)}
   function randomRoamFrame(now){
@@ -2711,7 +2803,7 @@ body{overscroll-behavior:none;}
     for(const e of employees){
       const node=employeeNodes.get(e.id);if(!node)continue;
       if(!e.roam)e.roam={phase:'idle',nextAt:now+8000+e.id*1200+Math.random()*11000};
-      if(e.roam.phase==='idle'&&now>=e.roam.nextAt&&walkers<2){beginRoam(e,now);walkers++}
+      if(e.roam.phase==='idle'&&now>=e.roam.nextAt&&walkers<2){if(beginRoam(e,now))walkers++}
       if(e.roam.phase==='walk'){
         const r=e.roam,t=Math.min(1,(now-r.startAt)/r.duration),q=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
         const x=r.startX+(r.endX-r.startX)*t,y=r.startY+(r.endY-r.startY)*t;e.visualX=x;e.visualY=y;
