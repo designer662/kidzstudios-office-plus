@@ -1,7 +1,7 @@
 {
-  "release": "86.11",
+  "release": "86.12",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.11 Interactive Staff Animations — PC, Pantry Drink/Eat, Store Stocking, Surau Rest",
+  "package": "V86.12 Visual Upgrade — workstation details, pantry/store/surau ambience and refined staff micro-animation",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
