@@ -1,3 +1,15 @@
+# Office Plus V59: Clean Controls Update
+
+This release removes the floating Motion / Mood / Scene control panel and the bottom-right 3D / Top View toggle buttons requested in the screenshots. The default 3D office remains on screen. The existing 3D engine is still self-contained and does not use any external CDN.
+
+The old button/event handlers are removed from both the TypeScript source and committed 3D bundle so no missing-element crashes occur.
+
+**Preserved:** zoom in/out, reset, fullscreen, room/staff interactions, automatic office movement, randomly displayed workload bubbles, staff and chat management, Live Activity, and GitHub Pages + Supabase backend integration.
+
+**Deploy:** Upload the entire repo contents to the existing GitHub repository, including `.github/workflows`. Supabase credentials stay in GitHub Actions variables. No database migration is required for this UI update. The browser will fetch `office-3d.js?v=59.0` and `office-v59-clean.css?v=59.0` to avoid stale caches.
+
+---
+
 # KIDZSTUDIOS Office Plus V58 · GitHub Pages + Supabase
 
 **GitHub-ready source repository**, based on the V57 **V53 head + smooth body** character bundle. This edition replaces the Netlify API routes with a browser-side Supabase adapter, retaining the existing dashboard, 3D office, Male/Female staff selection, Live Chat, Live Activity, and utility pages.

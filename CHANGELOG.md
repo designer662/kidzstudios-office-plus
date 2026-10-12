@@ -42,3 +42,12 @@
 - `files-compress.html` uses the Tailwind Play CDN, which is meant for development only.
 - On phones the Chat launcher and the "Shared" status chip sit close together at the bottom-left.
 - Live Supabase behaviour is still untested end to end; I only verified against mocks and a mocked-browser render.
+
+## V59 — Clean 3D controls (2026-10-12)
+- Removed the Motion, Mood, and Scene toolbar from the office canvas.
+- Removed the 3D Office / Top View toggle controls next to zoom.
+- Removed the associated event handlers from the dashboard and standalone 3D bundle.
+- Kept the 3D office as the default view; retained zoom, reset, fullscreen, live activity, staff, and chat features.
+- Reclaimed the unused space above the 3D scene.
+- Preserved automatic staff movement and random workload notifications; removed automatic reaction emote bubbles from the V58 UI addition.
+- No database migration needed.

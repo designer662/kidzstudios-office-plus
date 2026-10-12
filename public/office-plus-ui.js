@@ -165,10 +165,6 @@
       removeEventListener('wheel', onUser, true);
       removeEventListener('keydown', onUser, true);
       reveal();
-      if (!userAborted) {
-        const btn = $('#studioRotate');
-        if (btn && btn.getAttribute('aria-pressed') !== 'true' && !btn.disabled) btn.click();
-      }
     };
     const onUser = e => {
       if (e.target?.closest?.('#ks-auth-gate')) return;

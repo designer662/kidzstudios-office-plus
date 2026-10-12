@@ -172,7 +172,7 @@
   #ksDock .ks-shared-status{position:static!important;transform:none!important;opacity:.95}
   #ksDock .studio-note,#ksDock .ks-version-footer{display:none!important}
 
-  /* toolbar: scrollable single rows, emotes tucked away */
+  /* The floating toolbar was removed in V59. */
   .studio-toolbar{left:8px!important;right:8px!important;top:8px!important;width:auto!important;max-width:none!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important}
   .studio-toolbar>*{max-width:100%}
   #deptNav{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}

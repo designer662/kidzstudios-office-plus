@@ -970,34 +970,15 @@ body{overscroll-behavior:none;}
 @media(max-width:650px){.ks-master-header{padding:8px 8px 4px}.ks-master-header .topbar{border-radius:18px}.ks-master-header .tool-nav-btn{height:36px;font-size:10px;padding:0 9px}.ks-master-header .nav-tool-icon{width:18px;height:18px;border-radius:6px}.ks-master-header .notification-panel{position:fixed;left:8px;right:8px;top:66px;width:auto;max-height:60vh}}
 @media print{.ks-master-header,.ks-header-mobile-sheet{display:none!important}}
 </style>
-<style id="ks-v59-scene-toolbar-upgrade">
-#deptNav{display:none!important}
-.studio-toolbar{position:absolute;left:18px;top:18px;z-index:18;display:flex;justify-content:flex-start;max-width:min(760px,calc(100% - 380px));pointer-events:none}
-.scene-command-panel{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1.1fr) auto;gap:10px;align-items:stretch;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.84);border:1px solid rgba(29,32,34,.08);box-shadow:0 16px 38px rgba(30,33,35,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);pointer-events:auto}
-.scene-command-group{display:grid;gap:7px;min-width:0}.scene-command-title{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#93989d}.scene-command-row{display:flex;flex-wrap:wrap;gap:7px}
-.scene-command-btn{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border-radius:13px;border:1px solid rgba(29,32,34,.08);background:rgba(255,255,255,.96);color:#5f646a;font-size:10px;font-weight:800;letter-spacing:-.01em;cursor:pointer;transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s ease,background .18s ease,border-color .18s ease,color .18s ease}
-.scene-command-btn i{font-style:normal;font-size:14px;line-height:1}.scene-command-btn:hover,.scene-command-btn.playing,.scene-command-btn.active{background:#fff0e8;border-color:rgba(239,123,69,.22);color:#e7662c;box-shadow:0 9px 18px rgba(239,123,69,.14);transform:translateY(-1px)}
-.scene-command-btn.motion-btn{background:linear-gradient(180deg,#fff7f3,#fff)}
-.scene-command-btn.mood-btn i{font-size:15px}
-.scene-toggle-btn{min-width:96px;justify-content:center}.scene-toggle-btn[aria-pressed="true"]{background:#fff0e8;border-color:rgba(239,123,69,.24);color:#e7662c}
-.scene-view-dock{gap:4px;align-items:center}.tool-mode-btn{font-size:15px}.tool-mode-btn.active,.tool-mode-btn[aria-pressed="true"]{background:#fff0e8;color:#e7662c;box-shadow:0 8px 18px rgba(239,123,69,.12)}
-.tool-mode-icon{display:block;font-size:15px;line-height:1}.tool-divider{width:1px;height:20px;background:rgba(29,32,34,.08);margin:0 2px}
-.bubble-emoji .activity-bubble{min-width:54px;max-width:72px!important;padding:10px 10px!important;text-align:center!important;font-size:22px!important;line-height:1!important;border-color:rgba(239,123,69,.20)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}
-.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
-.bubble-chat .activity-bubble:before{content:'CHAT';display:block;margin-bottom:4px;color:#6482ad;font-size:6.8px;font-weight:850;letter-spacing:.08em}
-.bubble-workload .activity-bubble:before{content:'WORKLOAD';display:block;margin-bottom:4px;color:#d06736;font-size:6.8px;font-weight:850;letter-spacing:.08em}
-@media(max-width:1180px){.studio-toolbar{max-width:min(620px,calc(100% - 270px))}}
-@media(max-width:920px){.studio-toolbar{left:12px;top:12px;right:12px;max-width:none}.scene-command-panel{grid-template-columns:1fr;gap:8px;padding:10px}.scene-command-btn{height:36px;padding:0 11px}.scene-toggle-btn{min-width:0}.scene-view-dock{order:1}}
-@media(max-width:650px){.studio-toolbar{top:8px;left:8px;right:8px}.scene-command-panel{padding:8px 9px;border-radius:15px}.scene-command-title{font-size:8px}.scene-command-btn{height:34px;font-size:9px;padding:0 10px;border-radius:11px}.scene-command-btn span{display:none}.scene-command-btn i{font-size:15px}.scene-toggle-btn span{display:inline}.map-tools{gap:6px}}
-</style>
 <link rel="stylesheet" href="office-v51.css?v=57.0">
 <link rel="stylesheet" href="office-v52.css?v=57.0">
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
-<script src="ks-motion.js?v=58.1" defer></script>
-<script src="office-plus-ui.js?v=58.1" defer></script>
+<script src="ks-motion.js?v=59.0" defer></script>
+<script src="office-plus-ui.js?v=59.0" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="office-plus.css?v=58.1">
+<link rel="stylesheet" href="office-v59-clean.css?v=59.0">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1027,13 +1008,6 @@ body{overscroll-behavior:none;}
 </div>
 </div></header>
 <main class="map-shell" id="mapShell">
-<div class="studio-toolbar" data-sync-ignore>
- <div class="scene-command-panel" role="group" aria-label="Character motion and emote controls">
-  <div class="scene-command-group motion-group"><span class="scene-command-title">Motion</span><div class="scene-command-row"><button type="button" class="scene-command-btn motion-btn" data-scene-motion="move" title="Move selected staff"><i>➜</i><span>Move</span></button><button type="button" class="scene-command-btn" data-scene-emote="wave" title="Wave"><i>👋</i><span>Wave</span></button><button type="button" class="scene-command-btn" data-scene-emote="dance" title="Dance"><i>♫</i><span>Dance</span></button><button type="button" class="scene-command-btn" data-scene-emote="celebrate" title="Cheer"><i>✦</i><span>Cheer</span></button><button type="button" class="scene-command-btn" data-scene-emote="stretch" title="Stretch"><i>↟</i><span>Stretch</span></button></div></div>
-  <div class="scene-command-group mood-group"><span class="scene-command-title">Mood</span><div class="scene-command-row"><button type="button" class="scene-command-btn mood-btn" data-scene-mood="smile" title="Smile"><i>😊</i><span>Smile</span></button><button type="button" class="scene-command-btn mood-btn" data-scene-mood="angry" title="Angry"><i>😠</i><span>Angry</span></button><button type="button" class="scene-command-btn mood-btn" data-scene-mood="sad" title="Sad"><i>😔</i><span>Sad</span></button></div></div>
-  <div class="scene-command-group scene-state-group"><span class="scene-command-title">Scene</span><div class="scene-command-row"><button type="button" id="studioPause" class="scene-command-btn scene-toggle-btn" aria-label="Pause people animation" aria-pressed="false"><i>⏯</i><span>Pause</span></button><button type="button" id="studioRotate" class="scene-command-btn scene-toggle-btn" aria-label="Auto rotate office" aria-pressed="false"><i>⟳</i><span>Rotate</span></button></div></div>
- </div>
-</div>
 <div id="office3dHost" role="region" aria-label="Interactive 3D office floor. Drag to rotate, scroll to zoom, or select a staff name."></div>
 <div id="office3dLoading" role="status">Opening your studio…</div>
 <div class="studio-note">People movement is illustrative · Jobs and workload use shared records</div>
@@ -1150,10 +1124,7 @@ body{overscroll-behavior:none;}
     <button class="rotation-readout rotation-reset" id="rotationReadout" title="Reset rotation" aria-label="Reset rotation">0°</button>
     <button class="tool-btn rotate-btn" id="rotateRight" title="Rotate right" aria-label="Rotate right">↷</button>
   </div>
-  <div class="tool-group scene-view-dock" aria-label="View and zoom controls">
-    <button class="tool-btn tool-mode-btn active" id="studio3d" title="3D office" aria-label="3D office" aria-pressed="true"><span class="tool-mode-icon">◧</span></button>
-    <button class="tool-btn tool-mode-btn" id="studioPlan" title="Top view" aria-label="Top view" aria-pressed="false"><span class="tool-mode-icon">▥</span></button>
-    <span class="tool-divider" aria-hidden="true"></span>
+  <div class="tool-group" aria-label="Zoom and view controls">
     <button class="tool-btn" id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button><button class="tool-btn" id="resetView" title="Reset view and rotation" aria-label="Reset view and rotation">⌂</button><button class="tool-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Fullscreen">⛶</button><button class="tool-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
   </div>
 </div>
@@ -2260,17 +2231,9 @@ body{overscroll-behavior:none;}
   function renderFeed(){if(!activityList)return;const feed=groupedActivityFeed(),count=livePanel&&livePanel.classList.contains('expanded')?feed.length:4;if(!feed.length){activityList.innerHTML='<div class="ops-note clean-empty">No office activity yet.</div>';return}activityList.innerHTML=feed.slice(0,count).map(a=>{const at=a.createdAt||Date.now(),kind=activityTypeLabel(a.type||a.eventType||'office'),system=String(a.type||'').includes('sync');return `<div class="feed-item${a.employeeId?' feed-clickable':''}${a.realtime?' realtime':''}${system?' feed-system':''}" ${a.employeeId?`data-employee-id="${a.employeeId}" role="button" tabindex="0"`:''} title="${esc(new Date(at).toLocaleString('en-MY'))}"><div class="feed-avatar feed-glyph">${activityFeedGlyph(a.type)}</div><div class="feed-copy"><div class="feed-title-row"><b>${esc(a.title)}${a.groupCount>1?` <small>×${a.groupCount}</small>`:''}</b><em>${esc(kind)}</em></div><span>${esc(a.text)}</span></div><span class="feed-time"><b>${esc(clockTime(at))}</b><small>${esc(relativeEventTime(at))}</small></span></div>`}).join('')}
   function positionBubbleForEmployee(fo,emp){if(!fo||!emp)return;const p=iso(emp.visualX??emp.x,emp.visualY??emp.y);const w=Number(fo.getAttribute('width'))||190;fo.setAttribute('x',p.x-w/2);fo.setAttribute('y',p.y-96)}
   function showBubble(emp,text,{kind='activity',duration=6800}={}){if(!emp||!text)return null;window.office3d?.showBubble(emp.id,String(text),duration);const existing=bubblesLayer.querySelector(`.activity-bubble-wrap[data-employee-id="${emp.id}"][data-bubble-kind="${kind}"]`);if(existing)existing.remove();const fo=el('foreignObject',{x:0,y:0,width:210,height:86,class:`activity-bubble-wrap bubble-${kind}`,'data-employee-id':emp.id,'data-bubble-kind':kind}),div=document.createElement('div');div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');div.className='activity-bubble';div.textContent=String(text).slice(0,220);fo.append(div);positionBubbleForEmployee(fo,emp);bubblesLayer.append(fo);if(duration>0)setTimeout(()=>fo.isConnected&&fo.remove(),duration);return fo}
-function currentSceneEmployee(){const active=document.querySelector('.employee.active');return(followEmployeeId&&employeeById[followEmployeeId])||(active&&employeeById[Number(active.dataset.id)])||employees[0]||null}
-  function pulseSceneButton(button){if(!button)return;button.classList.add('playing');setTimeout(()=>button.classList.remove('playing'),1800)}
-  const moodEmoji={smile:'😊',angry:'😠',sad:'😔'};
-  function moodBubble(emp,mood,duration=2600){const emoji=moodEmoji[mood]||'😊';return showBubble(emp,emoji,{kind:'emoji',duration})}
-  function randomMood(){return ['smile','angry','sad'][Math.floor(Math.random()*3)]}
-  function chatBubbleText(emp){if(!emp)return '';const backlog=workloadLines(emp.workload)[0]||activeJobsForEmployee(emp).slice(0,1).map(job=>job.ref||job.title||job.customer||'').join('');const list=[];if(emp.currentJob)list.push(`Working on ${emp.currentJob}`);if(backlog)list.push(`Next up: ${backlog}`);if(effectiveStatus(emp)==='In a meeting')list.push('Quick sync in progress');if(effectiveStatus(emp)==='On break')list.push('Taking a quick recharge ☕');if(effectiveStatus(emp)==='Walking')list.push('On the move');return list[Math.floor(Math.random()*list.length)]||''}
-  function triggerSceneMood(mood,emp=currentSceneEmployee()){if(!emp)return null;clearWorkloadNotice(emp.id);if(!followEmployeeId)openEmployee(emp);moodBubble(emp,mood);return emp}
-  function triggerSceneMove(emp=currentSceneEmployee()){if(!emp)return null;const now=performance.now(),current=zoneOfEmployee(emp),choices=(roamChoices[emp.id]||['showroom','corridor','pantry','staff']).filter(Boolean);const targetZone=randomDifferent(choices,current)||choices[0]||'showroom';const target=roamZones[targetZone].point(emp);const route=pathBetweenZones(current,targetZone,target);emp.motionAction='walking';emp.roam={phase:'walk',route,index:0,startAt:now,startX:emp.visualX??emp.x,startY:emp.visualY??emp.y,targetZone};prepareRoamSegment(emp,now);showBubble(emp,`Moving to ${roomById[roamZones[targetZone]?.roomId]?.name||targetZone}`,{kind:'activity',duration:3200});openEmployee(emp);focusEmployee(emp);return emp}
   function updateEmployeeBubbles(emp){bubblesLayer.querySelectorAll(`.activity-bubble-wrap[data-employee-id="${emp.id}"]`).forEach(fo=>positionBubbleForEmployee(fo,emp))}
   function workloadBubbleText(emp){const lines=workloadLines(emp?.workload);if(lines.length)return `Workload: ${lines[0]}${lines.length>1?` +${lines.length-1} more`:''}`;const active=activeJobsForEmployee(emp||{})[0];if(active)return `Workload: ${active.ref||'Job'} · ${active.title||active.customer||'Active job'}`;return emp?.currentJob?`Workload: ${emp.currentJob}`:''}
-  function scheduleRandomWorkloadBubble(){if(workloadBubbleTimer)clearTimeout(workloadBubbleTimer);const delay=12000+Math.random()*11000;workloadBubbleTimer=setTimeout(()=>{workloadBubbleTimer=null;if(!document.hidden){const workloadCandidates=employees.filter(emp=>workloadBubbleText(emp));const chatCandidates=employees.filter(emp=>chatBubbleText(emp));const everyone=employees.filter(Boolean);const roll=Math.random();if(roll<.22&&everyone.length){const emp=everyone[Math.floor(Math.random()*everyone.length)];moodBubble(emp,randomMood(),2400)}else if(roll<.58&&chatCandidates.length){const emp=chatCandidates[Math.floor(Math.random()*chatCandidates.length)];showBubble(emp,chatBubbleText(emp),{kind:'chat',duration:6200})}else if(workloadCandidates.length){const emp=workloadCandidates[Math.floor(Math.random()*workloadCandidates.length)];showBubble(emp,workloadBubbleText(emp),{kind:'workload',duration:7600})}}scheduleRandomWorkloadBubble()},delay)}
+  function scheduleRandomWorkloadBubble(){if(workloadBubbleTimer)clearTimeout(workloadBubbleTimer);const delay=13000+Math.random()*12000;workloadBubbleTimer=setTimeout(()=>{workloadBubbleTimer=null;if(!document.hidden){const candidates=employees.filter(emp=>workloadBubbleText(emp));if(candidates.length){const emp=candidates[Math.floor(Math.random()*candidates.length)];showBubble(emp,workloadBubbleText(emp),{kind:'workload',duration:7600})}}scheduleRandomWorkloadBubble()},delay)}
   function pushActivity(a,emp=null){activityFeed.unshift({...a,createdAt:a.createdAt||Date.now(),type:a.type||a.eventType||'office',employeeId:a.employeeId||emp?.id||null});if(activityFeed.length>18)activityFeed.length=18;renderFeed();if(emp)showBubble(emp,a.text||a.title)}
 
   // The temp user profile is shared across the suite on this browser origin.
@@ -2455,8 +2418,6 @@ function currentSceneEmployee(){const active=document.querySelector('.employee.a
   furnitureLayer.onclick=e=>{if(performance.now()<suppressClickUntil)return;const hit=e.target.closest('.desk-hit');if(!hit)return;e.stopPropagation();const emp=employeeById[Number(hit.dataset.employeeId)]||null;if(emp){openEmployee(emp);focusEmployee(emp)}else{pushActivity({title:`${hit.dataset.deskId||'Workstation'} · Available`,text:'No staff assigned',avatar:'DS'})}};
   activityList.onclick=e=>{const row=e.target.closest('[data-employee-id]');if(!row)return;const emp=employeeById[Number(row.dataset.employeeId)];if(emp){openEmployee(emp);focusEmployee(emp);showBubble(emp,emp.currentJob)}};
   activityList.onkeydown=e=>{if(e.key!=='Enter'&&e.key!==' ')return;const row=e.target.closest('[data-employee-id]');if(!row)return;e.preventDefault();const emp=employeeById[Number(row.dataset.employeeId)];if(emp){openEmployee(emp);focusEmployee(emp)}};
-  document.querySelectorAll('[data-scene-mood]').forEach(btn=>btn.addEventListener('click',()=>{const emp=triggerSceneMood(btn.dataset.sceneMood);if(emp)pulseSceneButton(btn)}));
-  document.querySelectorAll('[data-scene-motion]').forEach(btn=>btn.addEventListener('click',()=>{const emp=triggerSceneMove();if(emp)pulseSceneButton(btn)}));
   if(opsExpandBtn)opsExpandBtn.onclick=e=>{e.stopPropagation();const expanding=!todayPanel.classList.contains('expanded');if(expanding){clearEmployeeSelection();contextCard.classList.remove('open')}const expanded=todayPanel.classList.toggle('expanded');opsExpandBtn.textContent=expanded?'⤡':'⤢';opsExpandBtn.setAttribute('aria-expanded',String(expanded));opsExpandBtn.setAttribute('title',expanded?'Collapse Office Pulse':'Expand Office Pulse')};
   if(chatLauncher)chatLauncher.onclick=()=>setChatOpen(!chatOpen);
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
@@ -2868,8 +2829,8 @@ function currentSceneEmployee(){const active=document.querySelector('.employee.a
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version">v58 · 3D</footer>
+<footer class="ks-version-footer no-print" aria-label="Build version">v59 · 3D</footer>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=57.0" defer></script>
+<script src="office-3d.js?v=59.0" defer></script>
 </body>
 </html>
