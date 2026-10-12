@@ -1,0 +1,21 @@
+{
+  "release": "86.9",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.8 Male Character Studio: supplied male 3D model; 5 hairstyles; hair colours; glasses; outfit colours",
+  "modules": [
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-movement-sync.js",
+    "office-3d.js",
+    "office-command-data.js",
+    "office-command.css",
+    "job-command-board.js",
+    "office-quality.js",
+    "office-v86-3-polish.css",
+    "office-pulse-integrated.css",
+    "office-character-studio.js",
+    "office-character-studio.css"
+  ],
+  "check": "Bundled model updated; regression tests and browser WebGL verification reported separately."
+}
