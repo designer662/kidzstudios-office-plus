@@ -23,7 +23,7 @@ button,input{font:inherit}.top-shell{padding:16px 20px 9px;z-index:30}.topbar{ma
 .employee{cursor:pointer;transition:opacity .28s var(--ease),filter .22s var(--ease)}.employee.dim{opacity:.19}.employee.search-hit{filter:url(#employeeGlow)}.avatar-shell{transform-box:fill-box;transform-origin:center;transition:transform .22s var(--ease)}.employee:hover .avatar-shell,.employee.active .avatar-shell{transform:scale(1.13);filter:url(#employeeGlow)}.employee-shadow{fill:rgba(40,43,45,.13)}.head{fill:#d7aa8f}.hair{fill:#4d4b49}.accent-ring{fill:none;stroke:transparent;stroke-width:1.1}.employee:hover .accent-ring,.employee.active .accent-ring{stroke:var(--orange)}.employee-name-bg{fill:rgba(255,255,255,.94);stroke:rgba(31,35,38,.09);stroke-width:.7}.employee-name{font:700 10px/1 var(--ui);fill:#4d5155;text-anchor:middle;letter-spacing:-.01em}.employee.idle .avatar-shell{animation:idle 3.5s ease-in-out infinite alternate}.employee.busy .head{animation:nod 1.2s ease-in-out infinite alternate}.employee.walking .avatar-shell{animation:walk .55s ease-in-out infinite alternate}
 .activity-bubble-wrap{pointer-events:none}.activity-bubble{display:inline-block;max-width:155px;background:rgba(255,255,255,.96);color:#45494d;border:1px solid rgba(31,35,38,.075);border-radius:12px 12px 12px 4px;padding:7px 9px;box-shadow:0 7px 22px rgba(25,28,30,.08);font:600 10px/1.25 var(--ui);animation:bubble 5.4s var(--ease) forwards}
 .panel{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:20px;backdrop-filter:blur(16px) saturate(125%)}.live-panel{position:absolute;left:50%;bottom:22px;translate:-50% 0;width:390px;z-index:14;padding:13px}.panel-kicker{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.panel-title{font-size:11.5px;font-weight:750}.live-state{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2.4s infinite}.activity-list{display:grid;gap:2px}.feed-item{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px;border-radius:11px;animation:feed .32s var(--ease);transition:.2s var(--ease)}.feed-item:hover{background:var(--bg);transform:translateX(2px)}.feed-avatar{width:28px;height:28px;border-radius:9px;background:var(--orangeSoft);display:grid;place-items:center;color:var(--orange2);font-size:10px;font-weight:800}.feed-copy{min-width:0}.feed-copy b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-copy span{display:block;color:var(--muted);font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-time{font-size:10px;color:var(--muted)}.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}.stat{padding:6px;border-radius:10px}.stat:hover{background:var(--bg)}.stat-num{display:block;font-size:17px;font-weight:780;letter-spacing:-.05em}.stat-label{display:block;font-size:10px;color:var(--muted);line-height:1.2;margin-top:4px}
-.context-card,.profile-card{position:absolute;right:22px;top:22px;width:296px;z-index:18;padding:15px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.25s var(--ease)}.context-card.open,.profile-card.open{opacity:1;transform:none;pointer-events:auto}.context-head{display:flex;justify-content:space-between;gap:10px}.context-title{font-size:15px;font-weight:780;letter-spacing:-.035em}.context-sub{font-size:10px;color:var(--muted);margin-top:3px}.close-mini{border:0;background:transparent;color:var(--muted);font-size:19px;cursor:pointer}.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px}.metric{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px}.metric b{display:block;font-size:15px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.profile-top{display:flex;align-items:center;gap:11px;padding-right:22px}.profile-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--orangeSoft),rgba(239,123,69,.18));display:grid;place-items:center;color:var(--orange2);font-weight:800;font-size:12px}.profile-name{font-size:15px;font-weight:780}.profile-role{font-size:10px;color:var(--muted);margin-top:2px}.profile-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 7px;border-radius:999px;background:rgba(67,162,118,.09);color:var(--green);font-size:10px;font-weight:700}.profile-badge i{width:5px;height:5px;border-radius:50%;background:currentColor}.profile-details{display:grid;gap:7px;margin-top:13px}.detail-row{display:flex;justify-content:space-between;gap:11px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.detail-row span:first-child{color:var(--muted)}.detail-row span:last-child{text-align:right;font-weight:650}
+.context-card,.profile-card{position:absolute;right:18px;top:86px;width:min(296px,calc(100vw - 28px));z-index:18;padding:15px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.25s var(--ease)}.context-card.open,.profile-card.open{opacity:1;transform:none;pointer-events:auto}.context-head{display:flex;justify-content:space-between;gap:10px}.context-title{font-size:15px;font-weight:780;letter-spacing:-.035em}.context-sub{font-size:10px;color:var(--muted);margin-top:3px}.close-mini{border:0;background:transparent;color:var(--muted);font-size:19px;cursor:pointer}.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px}.metric{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px}.metric b{display:block;font-size:15px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.profile-top{display:flex;align-items:center;gap:11px;padding-right:22px}.profile-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--orangeSoft),rgba(239,123,69,.18));display:grid;place-items:center;color:var(--orange2);font-weight:800;font-size:12px}.profile-name{font-size:15px;font-weight:780}.profile-role{font-size:10px;color:var(--muted);margin-top:2px}.profile-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 7px;border-radius:999px;background:rgba(67,162,118,.09);color:var(--green);font-size:10px;font-weight:700}.profile-badge i{width:5px;height:5px;border-radius:50%;background:currentColor}.profile-details{display:grid;gap:7px;margin-top:13px}.detail-row{display:flex;justify-content:space-between;gap:11px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.detail-row span:first-child{color:var(--muted)}.detail-row span:last-child{text-align:right;font-weight:650}
 .side-tools{position:absolute;top:50%;translate:0 -50%;z-index:13;display:grid;gap:10px}.side-tools.left{left:22px}.side-tools.right{right:22px}.side-tool-card{width:168px;height:42px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:var(--soft);backdrop-filter:blur(14px);text-decoration:none;color:var(--text);font-size:10.5px;font-weight:700;letter-spacing:-.01em;transition:transform .24s var(--ease),border-color .24s var(--ease),background .24s var(--ease),box-shadow .24s var(--ease)}.side-tool-card:hover{transform:translateY(-2px);border-color:rgba(239,123,69,.28);background:var(--orangeSoft);box-shadow:0 12px 28px rgba(239,123,69,.11)}.side-tool-icon{width:23px;height:23px;border-radius:8px;background:var(--orangeSoft);color:var(--orange2);display:grid;place-items:center;font-size:11px;flex:0 0 auto}.side-tools.right .side-tool-card{flex-direction:row-reverse;justify-content:flex-end}.side-tools.right .side-tool-icon{margin-left:auto}
 .map-tools{position:absolute;right:22px;bottom:22px;z-index:16;display:flex;align-items:center;gap:8px}.tool-group{display:flex;padding:4px;border-radius:15px;background:var(--card);border:1px solid var(--line);box-shadow:var(--soft);backdrop-filter:blur(14px)}.tool-btn{width:36px;height:36px;border:0;background:transparent;border-radius:10px;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.2s var(--ease)}.tool-btn:hover{background:var(--bg);color:var(--text);transform:scale(1.04)}.map-hint{position:absolute;left:50%;top:18px;bottom:auto;translate:-50% 0;z-index:10;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid var(--line);font-size:10px;color:var(--muted);backdrop-filter:blur(12px)}.tooltip{position:fixed;z-index:1000;pointer-events:none;opacity:0;transform:translateY(5px) scale(.98);transition:.17s ease;background:rgba(28,30,32,.95);color:white;padding:9px 10px;border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.18);max-width:220px}.tooltip.show{opacity:1;transform:none}.tooltip b{display:block;font-size:10.5px}.tooltip span{display:block;font-size:10px;color:rgba(255,255,255,.68);margin-top:3px;line-height:1.3}
 .mobile-search-button{display:none}.mobile-sheet{display:none}
@@ -627,7 +627,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* Clearer map guidance and an explicit camera-follow state. */
 .map-hint{font-size:10px;padding:8px 12px;box-shadow:0 5px 18px rgba(31,35,38,.05)}
-.follow-chip{position:absolute;left:50%;top:50px;translate:-50% -6px;z-index:19;display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 6px 5px 10px;border:1px solid rgba(239,123,69,.18);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 10px 28px rgba(31,35,38,.10);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.2s var(--ease)}
+.follow-chip{position:absolute;left:50%;top:76px;translate:-50% -6px;z-index:19;display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 6px 5px 10px;border:1px solid rgba(239,123,69,.18);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 10px 28px rgba(31,35,38,.10);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.2s var(--ease)}
 .follow-chip.show{opacity:1;translate:-50% 0;pointer-events:auto}
 .follow-chip span{color:var(--muted);font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}
 .follow-chip b{font-size:10px;color:var(--text)}
@@ -690,7 +690,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .today-panel.ops-panel{width:230px}
   .ops-tab{font-size:10px}
   .live-panel{width:min(340px,calc(100% - 84px));max-width:min(340px,calc(100% - 84px))}
-  .follow-chip{top:42px}
+  .follow-chip{top:64px}
   .office-chat{width:min(390px,calc(100% - 24px))}
   .today-panel.ops-panel.expanded{left:10px;right:10px;top:10px;width:auto;height:calc(100% - 20px);max-height:calc(100% - 20px)}
 }
@@ -702,7 +702,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .today-metric{min-height:49px;padding:8px 7px}.today-number{font-size:18px}.today-label{font-size:10px}
   .staff-directory-list,.workload-list,.recent-jobs{max-height:165px}.staff-directory-row,.workload-row{padding:6px}.job-row{padding:7px}
   .live-panel{left:8px;right:8px;width:auto;max-width:none}
-  .follow-chip{top:46px;max-width:calc(100% - 16px)}
+  .follow-chip{top:68px;max-width:calc(100% - 16px)}
   .follow-chip span{display:none}
   .profile-card,.context-card{width:auto;padding:15px}
   .notification-panel{left:8px;right:8px;width:auto}
@@ -711,8 +711,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* V26 collision prevention: detail cards sit beside Office Pulse instead of over it. */
-@media(min-width:1181px){.profile-card,.context-card{right:320px;top:18px}}
-@media(min-width:921px) and (max-width:1180px){.profile-card,.context-card{right:278px;top:14px}}
+@media(min-width:1181px){.profile-card,.context-card{right:320px;top:92px}}
+@media(min-width:921px) and (max-width:1180px){.profile-card,.context-card{right:278px;top:90px}}
 
 /* V26 department/chat polish */
 .office-chat-head-actions{display:flex;align-items:center;gap:6px}
@@ -980,12 +980,13 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-plus.css?v=58.1">
 <link rel="stylesheet" href="office-v59-clean.css?v=61.0">
 <style id="ks-v60-emoji-picker">
-.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:7px;min-width:188px;max-width:min(90vw,212px);padding:9px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(31,35,38,.07);box-shadow:0 14px 30px rgba(31,35,38,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
+.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:8px;min-width:194px;max-width:min(92vw,220px);padding:10px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(31,35,38,.08);box-shadow:0 16px 34px rgba(31,35,38,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
 .character-emoji-picker.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.character-emoji-picker[hidden]{display:none!important}
-.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:1px 1px 3px}.character-emoji-head strong{font-size:11px;line-height:1.1;color:#31363c;max-width:138px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.character-emoji-head span{display:block;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid rgba(31,35,38,.07);background:#fff;color:#727a80;cursor:pointer;font:700 14px/1 var(--ui)}
+.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:1px 1px 2px}.character-emoji-head strong{font-size:11px;line-height:1.1;color:#31363c;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.character-emoji-head span{display:block;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid rgba(31,35,38,.07);background:#fff;color:#727a80;cursor:pointer;font:700 14px/1 var(--ui)}
 .character-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.emoji-choice-btn{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid rgba(31,35,38,.08);border-radius:12px;background:#fff;color:#4d535a;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease,background .16s ease}.emoji-choice-btn:hover,.emoji-choice-btn:focus-visible,.emoji-choice-btn.active{transform:translateY(-1px);border-color:rgba(239,123,69,.26);box-shadow:0 6px 13px rgba(239,123,69,.12);color:#dc6b33;outline:none;background:#fff8f3}.emoji-choice-btn .emoji-icon{font-size:17px;line-height:1}.emoji-choice-btn .emoji-copy{display:grid;gap:1px;text-align:left}.emoji-choice-btn .emoji-copy b{font-size:10.5px;line-height:1.05}.emoji-choice-btn .emoji-copy small{display:none}
+.character-emoji-actions{display:grid;grid-template-columns:1fr;gap:6px}.emoji-clear-btn{height:34px;border-radius:11px;border:1px solid rgba(31,35,38,.08);background:#faf8f6;color:#6c747b;font:700 10.5px/1 var(--ui);letter-spacing:.02em;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease}.emoji-clear-btn:hover,.emoji-clear-btn:focus-visible{background:#fff0ea;border-color:rgba(239,123,69,.24);color:#d46a34;outline:none}
 .bubble-emoji .activity-bubble{min-width:52px;max-width:70px!important;padding:8px 9px!important;text-align:center!important;font-size:21px!important;line-height:1!important;border-color:rgba(239,123,69,.18)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
-@media(max-width:920px){.character-emoji-picker{min-width:178px;max-width:200px;padding:8px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
+@media(max-width:920px){.character-emoji-picker{min-width:184px;max-width:208px;padding:9px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
 @media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
 </style>
 <link rel="stylesheet" href="suite-header-v61.css?v=61.0">
@@ -1148,6 +1149,7 @@ body{overscroll-behavior:none;}
     <button type="button" class="emoji-choice-btn" data-emoji-mood="angry" data-emoji="😠"><span class="emoji-icon">😠</span><span class="emoji-copy"><b>Angry</b><small>Urgent pressure</small></span></button>
     <button type="button" class="emoji-choice-btn" data-emoji-mood="badmood" data-emoji="😒"><span class="emoji-icon">😒</span><span class="emoji-copy"><b>Bad mood</b><small>Not feeling it</small></span></button>
   </div>
+  <div class="character-emoji-actions"><button type="button" class="emoji-clear-btn" id="characterEmojiClear">Clear / reset mood</button></div>
 </div>
 </main>
 <div class="tooltip" id="tooltip"></div>
@@ -1261,7 +1263,7 @@ body{overscroll-behavior:none;}
   const workloadList = $('#workloadList');
   const workloadTotal = $('#workloadTotal');
   const followChip=$('#followChip'),followChipName=$('#followChipName'),followChipStop=$('#followChipStop');
-  const characterEmojiPicker=$('#characterEmojiPicker'),characterEmojiName=$('#characterEmojiName'),characterEmojiClose=$('#characterEmojiClose');
+  const characterEmojiPicker=$('#characterEmojiPicker'),characterEmojiName=$('#characterEmojiName'),characterEmojiClose=$('#characterEmojiClose'),characterEmojiClear=$('#characterEmojiClear');
   const recentJobs = $('#recentJobs');
   const jobsFilterLabel = $('#jobsFilterLabel');
   const opsNote = $('#opsNote');
@@ -1533,7 +1535,8 @@ body{overscroll-behavior:none;}
     addNotification(event,{initial,local});
     if(type==='workload_updated'&&empId){if(!initial){markWorkloadNotice(empId);if(emp)showBubble(emp,event.message||workloadBubbleText(emp)||'Workload updated',{kind:'workload',duration:8200})}loadStaffDirectory({seedIfMissing:false});}
     else if(type==='staff_added'||type==='staff_removed'||type==='staff_updated'){loadStaffDirectory({seedIfMissing:false});}
-    else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:2400});}}
+    else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});}}
+    else if(type==='mood_cleared'&&empId){loadStaffDirectory({seedIfMissing:false});if(emp)clearMoodBubble(emp.id);}
     else if(type==='job_management_updated'){refreshJobsFromSharedCache();}
     else if(type==='job_stage_mapping_updated'){initSharedJobManagement();}
     else if(type==='chat_message'){if(!chatOpen)pullChat();}
@@ -1929,7 +1932,7 @@ body{overscroll-behavior:none;}
     const old=Object.fromEntries(employees.map(e=>[e.id,e]));
     const next=payload.staff.map((record,index)=>employeeFromStaffRecord(record,index,old[Number(record.id)])).filter(e=>Number.isFinite(e.id));
     employees.splice(0,employees.length,...next);staffDirectoryVersion=Math.max(staffDirectoryVersion,Number(version||0));rebuildEmployeeIndex();
-    clearEmployeeSelection();contextCard.classList.remove('open');drawRooms();drawEmployees();renderNav();renderOps();updateStats();renderFeed();
+    clearEmployeeSelection();contextCard.classList.remove('open');drawRooms();drawEmployees();syncAllMoodBubbles();renderNav();renderOps();updateStats();renderFeed();
     return true;
   }
   async function saveStaffDirectory(records){
@@ -2327,6 +2330,19 @@ body{overscroll-behavior:none;}
     profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
   }
   const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'}};
+  function clearMoodBubble(employeeId){
+    if(employeeId==null)return;
+    const selector=`.activity-bubble-wrap[data-employee-id="${employeeId}"][data-bubble-kind="emoji"]`;
+    bubblesLayer?.querySelectorAll(selector).forEach(n=>n.remove());
+    if(window.office3d?.clearBubble)window.office3d.clearBubble(employeeId);
+  }
+  function syncMoodBubble(emp){
+    if(!emp)return;
+    clearMoodBubble(emp.id);
+    const preset=characterEmojiPresets[String(emp.mood||'')];
+    if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});
+  }
+  function syncAllMoodBubbles(){employees.forEach(syncMoodBubble)}
   function closeCharacterEmojiPicker(){
     if(!characterEmojiPicker)return;
     characterEmojiPicker.classList.remove('show');
@@ -2338,9 +2354,17 @@ body{overscroll-behavior:none;}
     if(!characterEmojiPicker||!mapShell)return;
     const shellRect=mapShell.getBoundingClientRect();
     const pickerRect=characterEmojiPicker.getBoundingClientRect();
-    const pickerWidth=Math.max(188,pickerRect.width||188),pickerHeight=Math.max(112,pickerRect.height||112);
-    let left=shellRect.width-pickerWidth-18,top=18;
-    if(ev&&Number.isFinite(ev.clientX)&&Number.isFinite(ev.clientY)){
+    const pickerWidth=Math.max(194,pickerRect.width||194),pickerHeight=Math.max(140,pickerRect.height||140);
+    let left=shellRect.width-pickerWidth-18,top=92;
+    const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
+    if(profileRect){
+      left=profileRect.left-shellRect.left-pickerWidth-14;
+      top=profileRect.top-shellRect.top+10;
+      if(left<10){left=profileRect.right-shellRect.left+14;top=profileRect.top-shellRect.top+10}
+    }else if(document.documentElement.classList.contains('studio3d-ready')&&office3dHost){
+      const hostRect=office3dHost.getBoundingClientRect();
+      left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;
+    }else if(ev&&Number.isFinite(ev.clientX)&&Number.isFinite(ev.clientY)){
       left=ev.clientX-shellRect.left-pickerWidth/2;
       top=ev.clientY-shellRect.top-pickerHeight-18;
     }else if(emp){
@@ -2348,10 +2372,6 @@ body{overscroll-behavior:none;}
       const viewX=((p.x*cam.scale)+cam.tx)/1240*svgRect.width+svgRect.left-shellRect.left;
       const viewY=((p.y*cam.scale)+cam.ty)/760*svgRect.height+svgRect.top-shellRect.top;
       left=viewX-pickerWidth/2;top=viewY-pickerHeight-16;
-    }else if(document.documentElement.classList.contains('studio3d-ready')){
-      const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
-      if(profileRect){left=profileRect.left-shellRect.left-pickerWidth-16;top=profileRect.top-shellRect.top+10;}
-      else if(office3dHost){const hostRect=office3dHost.getBoundingClientRect();left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;}
     }
     left=Math.max(10,Math.min(shellRect.width-pickerWidth-10,left));
     top=Math.max(10,Math.min(shellRect.height-pickerHeight-10,top));
@@ -2371,15 +2391,27 @@ body{overscroll-behavior:none;}
     const records=serializeStaffDirectory();
     const at=records.findIndex(r=>Number(r.id)===Number(emp.id));
     if(at<0)throw new Error('Staff not found');
-    records[at]={...records[at],mood};
+    records[at]={...records[at],mood:String(mood||'')};
     await saveStaffDirectory(records);
+  }
+  async function clearCharacterMood(emp){
+    if(!emp)return;
+    emp.mood='';
+    clearMoodBubble(emp.id);
+    drawEmployees();
+    try{
+      await saveCharacterMood(emp,'');
+      await postOfficeEvent({eventType:'mood_cleared',title:`${emp.name} · Mood cleared`,message:'Mood reset',employeeId:emp.id,metadata:{mood:''},dedupeKey:`mood-clear:${emp.id}:${Date.now()}`});
+    }catch(err){console.warn('Could not clear mood',err)}
+    closeCharacterEmojiPicker();
   }
   async function triggerCharacterEmoji(emp,mood){
     const preset=characterEmojiPresets[mood];
     if(!emp||!preset)return;
     emp.mood=mood;
     characterEmojiPicker?.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===mood));
-    showBubble(emp,preset.emoji,{kind:'emoji',duration:2400});
+    drawEmployees();
+    syncMoodBubble(emp);
     pushActivity({title:`${emp.name} reaction`,text:`${preset.label} ${preset.emoji}`,avatar:initials(emp.name),type:'mood_reaction',employeeId:emp.id});
     try{
       await saveCharacterMood(emp,mood);
@@ -2508,6 +2540,7 @@ body{overscroll-behavior:none;}
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;
   if(characterEmojiClose)characterEmojiClose.onclick=closeCharacterEmojiPicker;
+  if(characterEmojiClear)characterEmojiClear.onclick=async()=>{const emp=employeeById[Number(characterEmojiPicker?.dataset.employeeId)]||employeeById[followEmployeeId];if(emp)await clearCharacterMood(emp)};
   if(characterEmojiPicker)characterEmojiPicker.onclick=async e=>{
     const btn=e.target.closest('[data-emoji-mood]');
     if(!btn)return;
