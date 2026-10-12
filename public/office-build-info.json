@@ -1,7 +1,7 @@
 {
-  "release": "86.6",
+  "release": "86.7",
   "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.6: user refined hijab face contours, seam normals and continuous scarf folds",
+  "package": "V86.7: character studio; semi-casual hijab, colour customization and glasses",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -13,7 +13,9 @@
     "job-command-board.js",
     "office-quality.js",
     "office-v86-3-polish.css",
-    "office-pulse-integrated.css"
+    "office-pulse-integrated.css",
+    "office-character-studio.js",
+    "office-character-studio.css"
   ],
   "check": "Bundled model updated; regression tests and browser WebGL verification reported separately."
 }

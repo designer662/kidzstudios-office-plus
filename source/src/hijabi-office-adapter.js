@@ -1,14 +1,50 @@
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {createHijabiCharacter} from './hijabi-character.js';
+import {createHijabiCasualCharacter} from './hijabi-character-semi-casual.js';
+
+// Lightweight glasses for the classic outfit: the uploaded casual outfit retains its own geometry.
+function attachClassicGlasses(model,enabled){
+  const parent=model.head.children.find(child=>child.name==='Head')||model.head;
+  const frames=new THREE.Group();frames.name='Optional classic glasses';frames.visible=Boolean(enabled);parent.add(frames);
+  const mat=new THREE.MeshStandardMaterial({color:'#344149',roughness:.5,metalness:0});
+  const lens=new THREE.MeshStandardMaterial({color:'#c5e0e4',transparent:true,opacity:.075,depthWrite:false,roughness:.15,side:THREE.DoubleSide});
+  for(const side of [-1,1]){
+    const points=Array.from({length:33},(_,i)=>{const angle=i*Math.PI*2/32;return new THREE.Vector3(side*.248+Math.cos(angle)*.176,5.38+Math.sin(angle)*.126,.693)});
+    const rim=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),48,.015,6,true),mat);frames.add(rim);
+    const pane=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),lens);pane.position.set(side*.248,5.38,.690);pane.scale.set(.169,.122,.008);frames.add(pane);
+  }
+  const bridge=new THREE.Mesh(new THREE.RoundedBoxGeometry(.154,.022,.025,2,.01),mat);bridge.position.set(0,5.394,.698);frames.add(bridge);
+  frames.traverse(mesh=>{if(mesh.isMesh){mesh.castShadow=false;mesh.receiveShadow=false}});
+  model.glasses=frames;
+}
 
 // Bridges the supplied character model to Office Plus without changing male models or live staff state.
 export function createOfficeHijabiRig(person) {
-  const model=createHijabiCharacter({...THREE,RoundedBoxGeometry});
+  const appearance=person.appearance||{};
+  const model=appearance.model==='semi-casual'
+    ?createHijabiCasualCharacter({...THREE,RoundedBoxGeometry})
+    :createHijabiCharacter({...THREE,RoundedBoxGeometry});
+  // Apply only allow-listed colours; never use style data as code or resource URLs.
+  const safeHex=value=>typeof value==='string'&&/^#[0-9a-fA-F]{6}$/.test(value)?value:null;
+  const scarf=safeHex(appearance.scarfColor),shirt=safeHex(appearance.shirtColor),pants=safeHex(appearance.pantsColor);
+  if(scarf)model.setScarfColor?.(scarf);
+  if(shirt){
+    if(model.setShirtColor)model.setShirtColor(shirt);
+    else model.materials['Plain ivory long shirt']?.color.set(shirt);
+  }
+  if(pants){
+    if(model.setPantsColor)model.setPantsColor(pants);
+    else {model.materials['Charcoal twill']?.color.set(pants);model.materials['Knees']?.color.set(pants).multiplyScalar(1.08)}
+  }
+  if(model.setGlasses)model.setGlasses(appearance.glasses===true);
+  else attachClassicGlasses(model,appearance.glasses===true);
   const root=model.root;
   root.name=`character:${person.name}`;
   root.userData.officeHijabi=true;
-  root.userData.characterVersion=11;
+  root.userData.characterVersion=12;
+  root.userData.characterModel=appearance.model==='semi-casual'?'semi-casual':'classic';
+  root.userData.glasses=appearance.glasses===true;
   root.userData.gender='female';
   root.scale.setScalar(.42);
   const eyes=[];

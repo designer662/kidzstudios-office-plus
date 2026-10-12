@@ -264,3 +264,11 @@
 - Replaced V86.5 female character geometry with the newly uploaded model and updated the offline Three.js bundle.
 - Improvements include smoother face and chin, seam/pole normal blending, face-depth aligned details, and contiguous scarf fabric.
 - Preserved existing gender selection, movement adapter and Office Plus modules.
+
+## V86.7 — Character Studio / Semi-casual Hijabi
+- Added uploaded semi-casual hijabi model as a selectable female outfit alongside existing classic long shirt.
+- Added Edit Staff controls for hijab, shirt, pants colours and glasses on/off, including accessible swatches and an approximate preview.
+- Saved appearance preferences inside existing shared `office:staff` record schema; no new Supabase migration required.
+- Propagated appearance into Three.js roster/build signature. Supports live refresh in other browsers.
+- Added male shirt/pants/glasses customization while preserving the original male model.
+- Updated bundled offline 3D runtime without external loading.

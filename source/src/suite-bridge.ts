@@ -1,6 +1,6 @@
 import {createOffice,type OfficeController} from './office-scene';
 import {people,type Person} from './office-data';
-type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;motionFaceTo?:number|null;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
+type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';appearance?:Person['appearance'];status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;motionFaceTo?:number|null;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
 type Suite={getStaff:()=>Staff[];selectPerson:(id:number)=>void;selectDepartment:(id:string)=>void;selectRoom:(id:string)=>void;stopFollow:()=>void;reset:()=>void;pause:(paused:boolean)=>void};
 declare global{interface Window{OfficeSuite?:Suite;office3d?:OfficeController}}
 const host=document.querySelector<HTMLDivElement>('#office3dHost')!;
@@ -12,7 +12,7 @@ let controller:OfficeController|undefined,signature='',paused=matchMedia('(prefe
 function status(e:Staff):Person['status']{const room=e.visualRoomId||e.roomId;return e.motionWalking?'walking':['pantry','prayer','toilet-a','toilet-b'].includes(room)?'break':room==='showroom'?'showroom':room==='store'?'desk':e.motionStatus==='On break'?'break':e.motionStatus==='In a meeting'?'showroom':'desk'}
 function isSeated(e:Staff){return status(e)==='desk'&&Math.hypot((e.visualX??e.x)-(e.deskX??e.x),(e.visualY??e.y)-(e.deskY??e.y))<.5}
 function position(e:Staff):[number,number]{return [(e.visualX??e.x)/2-5.75,(e.visualY??e.y)/2-17.5]}
-function roster(staff:Staff[]):Person[]{return staff.map((e,i)=>{const base=people[baseIds[e.id]??i%people.length];return {...base,id:e.id,name:e.name,role:e.position,department:e.department,gender:e.gender||base.gender||'male',status:status(e),position:position(e),rotation:e.id===4?Math.PI/2:base.rotation,seated:isSeated(e),action:e.motionAction}})}
+function roster(staff:Staff[]):Person[]{return staff.map((e,i)=>{const base=people[baseIds[e.id]??i%people.length];return {...base,id:e.id,name:e.name,role:e.position,department:e.department,gender:e.gender||base.gender||'male',appearance:e.appearance,status:status(e),position:position(e),rotation:e.id===4?Math.PI/2:base.rotation,seated:isSeated(e),action:e.motionAction}})}
 function build(staff:Staff[]){
  controller?.dispose();host.replaceChildren();
  controller=createOffice(host,{onPerson:id=>api?.selectPerson(id),onDepartment:id=>api?.selectDepartment(id),onRoom:id=>api?.selectRoom(id),onExplore:()=>api?.stopFollow(),onZoom:z=>{$('rotationReadout').textContent=`${Math.round(z*100)}%`}},{roster:roster(staff),externalMotion:true});
@@ -25,7 +25,7 @@ function build(staff:Staff[]){
 function tick(){
  if(failed)return;
  if(!document.hidden&&api){
-  const staff=api.getStaff();const next=JSON.stringify(staff.map(e=>[e.id,e.name,e.position,e.department,e.gender||'']));
+  const staff=api.getStaff();const next=JSON.stringify(staff.map(e=>[e.id,e.name,e.position,e.department,e.gender||'',e.appearance||null]));
   try{if(next!==signature){build(staff);signature=next}}
   catch(error){failed=true;console.error('Office 3D initialization failed',error);controller?.dispose();host.replaceChildren();document.documentElement.classList.remove('studio3d-ready');$('officeSvg').removeAttribute('aria-hidden');$('officeSvg').querySelectorAll('.employee').forEach(el=>el.setAttribute('tabindex','0'));window.office3d=undefined;loading.textContent='3D unavailable in this browser. The office map and tools are still available.';loading.hidden=false;return}
   controller?.updatePeople(staff.map(e=>{const partner=e.motionFaceTo?staff.find(p=>p.id===e.motionFaceTo):null;const a=position(e),b=partner?position(partner):null;return {id:e.id,position:a,status:status(e),seated:isSeated(e),action:e.motionAction,rotation:b?Math.atan2(b[0]-a[0],b[1]-a[1]):e.id===4?Math.PI/2:people[baseIds[e.id]??0].rotation,note:e.currentJob||e.workload?.[0]||'',alert:e.hasAlert,mood:e.mood||''}}));

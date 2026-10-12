@@ -1,6 +1,8 @@
 export type Status = 'desk' | 'showroom' | 'break' | 'walking';
 export type Gender = 'male' | 'female';
-export type Person = { id:number; name:string; department:string; role:string; gender:Gender; status:Status; location:string; color:string; tint:string; skin:string; hair:string; position:[number,number]; rotation:number; seated:boolean; action?:string };
+export type CharacterAppearance={model?:'classic'|'semi-casual';scarfColor?:string;shirtColor?:string;pantsColor?:string;glasses?:boolean};
+
+export type Person = { id:number; name:string; department:string; role:string; gender:Gender; appearance?:CharacterAppearance; status:Status; location:string; color:string; tint:string; skin:string; hair:string; position:[number,number]; rotation:number; seated:boolean; action?:string };
 export const statusLabels:Record<Status,string> = {desk:'At desks',showroom:'In showroom',break:'On a break',walking:'Walking'};
 export const departments = [
  {id:'management',name:'Management',fullName:'Management',count:2},

@@ -1020,6 +1020,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-command.css?v=86.1">
 <link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
+<link rel="stylesheet" href="office-character-studio.css?v=86.7">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1217,6 +1218,22 @@ body{overscroll-behavior:none;}
       <label class="staff-form-field"><span>Department</span><select id="staffDepartmentInput"><option>Creative Department</option><option>Sales and Marketing</option><option>Management</option><option>Production Management</option><option>Finance Department</option></select></label>
       <label class="staff-form-field"><span>Character</span><select id="staffGenderInput"><option value="male">Male</option><option value="female">Female</option></select></label>
     </div>
+    <section id="staffCharacterStudio" class="ks-character-studio" aria-labelledby="ksCharHeading">
+      <div class="ks-char-heading"><strong id="ksCharHeading">Character customization</strong><small id="ksCharModelLabel">Classic hijab</small></div>
+      <div class="ks-char-layout">
+        <div id="ksCharPreview" class="ks-char-preview" role="img" aria-label="Character colour preview. Appearance changes are applied after saving.">
+          <div class="ks-char-figure"><div class="ks-char-legs"></div><div class="ks-char-shirt"></div><div class="ks-char-hijab"></div><div class="ks-char-face"></div><div class="ks-char-eyes"></div><div class="ks-char-glasses"></div><div class="ks-char-scarf-tail"></div></div>
+        </div>
+        <div class="ks-char-controls">
+          <label id="ksCharModelRow" class="ks-char-field"><span>Female outfit</span><select id="ksCharModel"><option value="classic">Classic Long Shirt</option><option value="semi-casual">Semi-Casual Shirt</option></select></label>
+          <label class="ks-char-field"><span>Glasses</span><span class="ks-char-glasses-label"><input type="checkbox" id="ksCharGlasses"> Wear glasses</span></label>
+          <label id="ksCharScarfRow" class="ks-char-field"><span>Hijab colour</span><input id="ksCharScarfColor" type="color" value="#d9796d" aria-label="Hijab colour"><div class="ks-char-swatches" id="ksCharScarfSwatches" aria-label="Hijab colour presets"></div></label>
+          <label class="ks-char-field"><span>Shirt colour</span><input id="ksCharShirtColor" type="color" value="#dcd3bf" aria-label="Shirt colour"><div class="ks-char-swatches" id="ksCharShirtSwatches" aria-label="Shirt colour presets"></div></label>
+          <label class="ks-char-field"><span>Pants colour</span><input id="ksCharPantsColor" type="color" value="#42474b" aria-label="Pants colour"><div class="ks-char-swatches" id="ksCharPantsSwatches" aria-label="Pants colour presets"></div></label>
+        </div>
+      </div>
+      <p class="ks-char-note">Preview colours are approximate. Save staff to update the shared 3D office for everyone.</p>
+    </section>
     <div class="staff-editor-status" id="staffEditorStatus">Staff details are saved to the shared Supabase. Workload is edited from the Workload tab.</div>
     <div class="job-link-actions staff-editor-actions"><button class="staff-remove-btn" id="staffRemoveBtn">Remove staff</button><span></span><button class="job-link-primary" id="staffSaveBtn">Save staff</button></div>
   </div>
@@ -1233,6 +1250,7 @@ body{overscroll-behavior:none;}
 
 <div class="notification-toast" id="notificationToast" aria-live="polite" aria-atomic="true"></div>
 </div>
+<script src="office-character-studio.js?v=86.7"></script>
 <script id="ks-main-js">
 (() => {
   'use strict';
@@ -1926,7 +1944,7 @@ body{overscroll-behavior:none;}
     return source.map(v=>String(v||'').trim()).filter(Boolean).slice(0,30);
   }
   function staffRecord(emp){
-    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),mood:String(emp.mood||'').trim().slice(0,32),workload:workloadLines(emp.workload||[])};
+    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),appearance:window.KSCharacterStudio.normalize(emp.appearance,emp.gender,emp.name),mood:String(emp.mood||'').trim().slice(0,32),workload:workloadLines(emp.workload||[])};
   }
   function dynamicStaffBase(id,index=0,department='Production Management',gender='male'){
     const isHead=department==='Management',roomId=isHead?'boss':'staff';
@@ -1938,7 +1956,7 @@ body{overscroll-behavior:none;}
     const gender=normalizeGender(record.gender||existing?.gender||defaultBase?.gender||'male');
     const base=defaultBase?{...defaultBase}:dynamicStaffBase(id,index,department,gender);
     const runtime=existing?{visualX:existing.visualX,visualY:existing.visualY,visualRoomId:existing.visualRoomId,roam:existing.roam,motionWalking:existing.motionWalking,motionAction:existing.motionAction,moving:existing.moving}:{};
-    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood??existing?.mood??base.mood??'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
+    return {...base,...runtime,id,gender,appearance:window.KSCharacterStudio.normalize(record.appearance??existing?.appearance,gender,record.name||base.name),name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood??existing?.mood??base.mood??'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
   }
   function serializeStaffDirectory(){return employees.map(staffRecord)}
   function applyStaffDirectory(payload,version=0){
@@ -1970,12 +1988,12 @@ body{overscroll-behavior:none;}
     staffDirectoryList.innerHTML=employees.map(emp=>{const lines=workloadLines(emp.workload),preview=lines.slice(0,2).map(line=>`<i>${esc(line)}</i>`).join('');return `<div class="staff-directory-row" data-edit-staff="${emp.id}" role="button" tabindex="0"><div class="staff-directory-avatar">${initials(emp.name)}</div><div class="staff-directory-copy"><b>${esc(emp.name)}</b><span>${esc(emp.position)} · ${esc(emp.department)}</span>${preview?`<div class="staff-workload-lines">${preview}</div>`:''}</div><span class="staff-directory-action">✎</span></div>`}).join('');
   }
   function openStaffEditor(emp=null){
-    if(!staffEditorModal)return;editingStaffId=emp?Number(emp.id):null;staffEditorTitle.textContent=emp?'Edit Staff':'Add Staff';staffNameInput.value=emp?.name||'';staffRoleInput.value=emp?.position||'';staffDepartmentInput.value=normalizeDepartment(emp?.department,emp?.position);staffGenderInput.value=normalizeGender(emp?.gender,emp?.id?DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender:'male');staffRemoveBtn.hidden=!emp;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Staff details sync to everyone. Workload is updated separately from the Workload tab.';staffEditorModal.classList.add('open');staffEditorModal.setAttribute('aria-hidden','false');setTimeout(()=>staffNameInput.focus(),40);
+    if(!staffEditorModal)return;editingStaffId=emp?Number(emp.id):null;staffEditorTitle.textContent=emp?'Edit Staff':'Add Staff';staffNameInput.value=emp?.name||'';staffRoleInput.value=emp?.position||'';staffDepartmentInput.value=normalizeDepartment(emp?.department,emp?.position);staffGenderInput.value=normalizeGender(emp?.gender,emp?.id?DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender:'male');window.KSCharacterStudio.load(emp?.appearance,staffGenderInput.value,emp?.name||'');staffRemoveBtn.hidden=!emp;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Staff details sync to everyone. Workload is updated separately from the Workload tab.';staffEditorModal.classList.add('open');staffEditorModal.setAttribute('aria-hidden','false');setTimeout(()=>staffNameInput.focus(),40);
   }
   function closeStaffEditor(){if(!staffEditorModal)return;staffEditorModal.classList.remove('open');staffEditorModal.setAttribute('aria-hidden','true');editingStaffId=null}
   async function saveStaffEditor(){
     const name=staffNameInput.value.trim(),position=staffRoleInput.value.trim(),department=staffDepartmentInput.value,gender=normalizeGender(staffGenderInput.value);if(!name){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Staff name is required.';staffNameInput.focus();return}if(!position){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Position / role is required.';staffRoleInput.focus();return}
-    const records=serializeStaffDirectory(),existing=editingStaffId?employeeById[Number(editingStaffId)]:null,isNew=!existing;const record={id:editingStaffId||Math.max(0,...records.map(r=>Number(r.id)||0))+1,name,position,department,gender,workload:workloadLines(existing?.workload||[])};const at=records.findIndex(r=>Number(r.id)===Number(editingStaffId));if(at>=0)records[at]=record;else records.push(record);
+    const records=serializeStaffDirectory(),existing=editingStaffId?employeeById[Number(editingStaffId)]:null,isNew=!existing;const record={id:editingStaffId||Math.max(0,...records.map(r=>Number(r.id)||0))+1,name,position,department,gender,appearance:window.KSCharacterStudio.read(),mood:existing?.mood||'',workload:workloadLines(existing?.workload||[])};const at=records.findIndex(r=>Number(r.id)===Number(editingStaffId));if(at>=0)records[at]=record;else records.push(record);
     staffSaveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Saving to server…';try{await saveStaffDirectory(records);await postOfficeEvent({eventType:isNew?'staff_added':'staff_updated',title:isNew?`${name} · Staff added`:`${name} · Staff updated`,message:isNew?`${position} added to the shared office`:`Staff details updated · ${position}`,employeeId:record.id,metadata:{name,position,department,gender},dedupeKey:`staff:${isNew?'add':'edit'}:${record.id}:${hashString(`${name}|${position}|${department}|${gender}|${Date.now()}`)}`});staffEditorStatus.className='staff-editor-status ok';staffEditorStatus.textContent='Saved. Live Activity and everyone online will receive this update.';setTimeout(closeStaffEditor,520)}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not save staff.'}finally{staffSaveBtn.disabled=false}
   }
   async function removeStaffEditor(){
@@ -3190,7 +3208,7 @@ body{overscroll-behavior:none;}
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.6" defer></script>
+<script src="office-3d.js?v=86.7" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.4" defer></script>

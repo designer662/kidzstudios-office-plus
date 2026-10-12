@@ -22,7 +22,7 @@ assert.match(bundle,/function scarfPoint\(profile,u,v,inset=0\)/);
 assert.match(bundle,/Continuous scarf fabric/);
 assert.match(bundle,/if\(_\.gender==="female"\)return createOfficeHijabiRig\(_\)/);
 assert.match(bridge,/animateOfficeHijabi/);
-assert.match(html,/office-3d\.js\?v=86\.6/);
+assert.match(html,/office-3d\.js\?v=86\.7/);
 assert.doesNotMatch(html,/ksRoomJump|office-room-nav\.js/);
 assert.doesNotMatch(read('public/office-ambience-audio.js'),/ventLow|ventWhisper|fan\.start\(\)|harmonic\.start\(\)/);
 for(const room of ['store','surau','toilet']) assert.ok(html.toLowerCase().includes(room),'Room feature lost '+room);

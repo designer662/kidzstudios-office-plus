@@ -51,8 +51,8 @@ export function characterFactory(){
   if(p.gender==='female')return createOfficeHijabiRig(p) as CharacterRig;
   const isFemale=p.gender==='female';
   const look=looks[p.name.trim().toLowerCase()]??{hair:isFemale?'bob':'crop',outfit:/boss|manager/i.test(p.role)?'blazer':/designer/i.test(p.role)?'tee':'polo',watch:true};
-  const shirt=p.color,skin=p.skin,hair=p.hair,light='#faf6eb',dark='#374448';
-  const pant=look.outfit==='tee'?'#56666e':'#515a60';
+  const shirt=p.appearance?.shirtColor||p.color,skin=p.skin,hair=p.hair,light='#faf6eb',dark='#374448';
+  const pant=p.appearance?.pantsColor||(look.outfit==='tee'?'#56666e':'#515a60');
   const root=new THREE.Group();root.name=`character:${p.name}`; // outer root remains independent of body animation
   root.userData.characterVersion=9;root.userData.gender=isFemale?'female':'male';root.scale.setScalar(1.2);
   const body=group(root,'body');const chest=group(body,'chest',0,1.12,0);
@@ -209,7 +209,7 @@ export function characterFactory(){
    flat(head,'#c8a981',.043,-.080,-.402,.106,.022,.015);
   }
   }
-  if(look.glasses){
+  if(p.appearance?.glasses??look.glasses){
    for(const s of [-1,1]){
     const rim=ring(head,'#46535a',s*.095,.011,.265,.064,.008);
     rim.scale.y=.84;
