@@ -1,4 +1,4 @@
-/* Office Plus V79: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
+/* Office Plus V84: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
@@ -25,7 +25,9 @@
   }
   function validStaff(a){
     return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
-      typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from
+      typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from&&
+      (!s.scene.dialogue||(Array.isArray(s.scene.dialogue)&&s.scene.dialogue.length>=2&&s.scene.dialogue.length<=8&&s.scene.dialogue.every(line=>typeof line==='string'&&line.length<=80)&&
+        Number.isInteger(Number(s.scene.speakerId))&&Number.isInteger(Number(s.scene.partnerId))&&s.scene.speakerId!==s.scene.partnerId&&Number(s.scene.turnMs)>=1800&&Number(s.scene.turnMs)<=6000))
     ))&&(!s.walk||(
       Number.isFinite(Number(s.walk.startedAt))&&Number.isFinite(Number(s.walk.endAt))&&
       point(s.walk.from)&&Array.isArray(s.walk.route)&&s.walk.route.length<=250&&s.walk.route.every(point)&&
@@ -89,27 +91,54 @@
     s.action='walking';s.faceTo=null;s.nextAt=now+duration+14000;
     return true;
   }
+  // A friendly conversational distance: 4.2 plan units = 2.1 world units.
+  // Two characters share a corridor lane and face one another from a safe gap.
+  // Avoid placing two avatars nose-to-nose in the 3D model.
+  const SOCIAL_SPACING=3.8;
+  const SOCIAL_LOCATIONS=[
+    [{x:9.15,y:39.8},{x:9.15,y:44.1}],
+    [{x:9.15,y:49.0},{x:9.15,y:53.3}],
+  ];
+  function socialDestination(plan){
+    return plan?.seatGoal||plan?.route?.[plan.route.length-1]||null;
+  }
   function pairConversation(snapshot,subject,now){
     if(!living||subject.room==='corridor'||subject.room==='pantry'||(subject.socialAt&&now-subject.socialAt<120000)||subject.scene?.kind==='job')return false;
     const others=snapshot.staff.filter(s=>s!==subject&&!s.walk&&s.room!=='pantry'&&s.room!=='corridor'&&s.nextAt<now+15000&&(!s.socialAt||now-s.socialAt>120000)&&s.scene?.kind!=='job');
     if(!others.length)return false;
     const partner=others[Math.floor(Math.random()*others.length)];
-    // Rotate between two verified corridor pairs to avoid a stationary crowd.
-    const locations=[[{x:8.6,y:40.3},{x:9.8,y:40.3}],[{x:8.6,y:50.2},{x:9.8,y:50.2}]];
-    const targets=locations[Math.floor(Math.random()*locations.length)];
-    const p1=motion.plan(Number(subject.id),'corridor',targets[0]),p2=motion.plan(Number(partner.id),'corridor',targets[1]);
-    if(!p1||!p2)return false;
-    const complete=(p)=>now+p.segmentMs.reduce((a,b)=>a+Math.round(clamp(Number(b),850,40000)),0);
-    const meetAt=Math.max(complete(p1),complete(p2))+700;
+    // Either corridor slot is allowed, but refuse paths that place the characters too close.
+    const order=Math.floor(Math.random()*SOCIAL_LOCATIONS.length);
+    let pairing=null;
+    for(let slot=0;slot<SOCIAL_LOCATIONS.length;slot++){
+      const targets=SOCIAL_LOCATIONS[(order+slot)%SOCIAL_LOCATIONS.length];
+      const p1=motion.plan(Number(subject.id),'corridor',targets[0]),p2=motion.plan(Number(partner.id),'corridor',targets[1]);
+      const at1=socialDestination(p1),at2=socialDestination(p2);
+      if(!p1||!p2||!at1||!at2)continue;
+      if(Math.hypot(at1.x-at2.x,at1.y-at2.y)<SOCIAL_SPACING)continue;
+      // Do not silently use a snapped location far from the chosen safe meeting position.
+      if(Math.hypot(at1.x-targets[0].x,at1.y-targets[0].y)>.65||Math.hypot(at2.x-targets[1].x,at2.y-targets[1].y)>.65)continue;
+      pairing=[p1,p2];break;
+    }
+    if(!pairing)return false;
+    const [p1,p2]=pairing;
+    const complete=p=>now+p.segmentMs.reduce((a,b)=>a+Math.round(clamp(Number(b),850,40000)),0);
+    const meetAt=Math.max(complete(p1),complete(p2))+900;
     const huddle=Math.random()<.42;
-    const words=huddle?(living.huddles||['🗓 Project huddle'])[Math.floor(Math.random()*(living.huddles?.length||1))]:living.greetings[Math.floor(Math.random()*living.greetings.length)]||'💬 Team check-in';
+    const dialogueSets=living.dialogues?.[huddle?'huddle':'conversation'];
+    const dialogue=Array.isArray(dialogueSets)&&dialogueSets.length?dialogueSets[Math.floor(Math.random()*dialogueSets.length)]:[
+      '💬 Quick team check-in?','Sure, what’s up?','Let’s compare our notes.','Sounds good!','Thanks for the chat.','Anytime!'
+    ];
+    const turns=dialogue.slice(0,8).map(t=>String(t).slice(0,80));
+    const turnMs=2800;
     const kind=huddle?'huddle':'conversation';
     for(const [person,plan]of [[subject,p1],[partner,p2]]){
       attachWalk(person,plan,{action:huddle?'meeting':'chat'},now);
       person.faceTo=person===subject?Number(partner.id):Number(subject.id);
-      person.scene={kind,text:words,from:meetAt,until:meetAt+12000};
+      // A single shared script produces alternating speech bubbles on all PCs.
+      person.scene={kind,text:turns[0],dialogue:turns,speakerId:Number(subject.id),partnerId:Number(partner.id),turnMs,from:meetAt,until:meetAt+turns.length*turnMs};
       person.socialAt=now;
-      person.nextAt=meetAt+15500;
+      person.nextAt=person.scene.until+3500;
     }
     return true;
   }

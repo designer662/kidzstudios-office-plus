@@ -25,3 +25,23 @@
 .ks-living-sound-status[data-state="off"]{display:none}
 @media(max-width:920px){.ks-living-preview{font-size:9px;min-height:27px;padding:6px 8px}.ks-living-sound-status{display:none}}
 @media(max-width:650px){.ks-living-preview{font-size:9px;padding:6px 8px}}
+
+/* V84: readable simulated dialogue. Smart-label collision manager handles the placement. */
+#office3dHost .scene-bubble[data-bubble-kind="conversation"]{
+  max-width:170px;padding:9px 12px;border-radius:15px;
+  font-size:11px;font-weight:650;line-height:1.4;
+  color:#405a56;background:rgba(247,255,253,.98);
+  border:1px solid rgba(97,166,151,.32);
+  box-shadow:0 9px 23px rgba(39,74,64,.13);
+  animation:ks-conversation-enter .23s ease-out both;
+}
+#office3dHost .scene-bubble[data-bubble-kind="conversation"]:after{
+  content:"";position:absolute;bottom:-5px;left:calc(50% - 5px);
+  height:9px;width:9px;transform:rotate(45deg);
+  background:rgba(247,255,253,.98);
+  border-right:1px solid rgba(97,166,151,.32);
+  border-bottom:1px solid rgba(97,166,151,.32);
+}
+@keyframes ks-conversation-enter{from{opacity:0;scale:.95}to{opacity:1;scale:1}}
+@media(max-width:650px){#office3dHost .scene-bubble[data-bubble-kind="conversation"]{max-width:138px;font-size:10px;padding:7px 9px}}
+@media(prefers-reduced-motion:reduce){#office3dHost .scene-bubble[data-bubble-kind="conversation"]{animation:none}}

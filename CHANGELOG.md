@@ -1,3 +1,9 @@
+## V84 · Natural paired conversations (2026-10-12)
+- Widened paired interaction spacing and verified route endpoints before starting a conversation.
+- Added six-turn synced scripted chats/huddles with one speech bubble visible at a time.
+- Improved bubble styling and collision priority without changing the chat database.
+- Added social simulation regression test and updated footer version.
+
 ## V83 · Orderform native PNG download hotfix
 - Fixed the delayed synthetic download click by preparing Blob URLs in Preview and using native download anchors in Orderform 1 and 2.
 - Kept V82 shared-live notifications and all other existing features.

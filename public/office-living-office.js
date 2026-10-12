@@ -1,4 +1,4 @@
-/* V81 Living Office: shared behavior helpers, local atmosphere, opt-in ambience.
+/* V84 Living Office: shared behavior helpers, local atmosphere, opt-in ambience.
  * Illustrative simulated staff actions, never employee-presence monitoring.
  */
 (()=>{
@@ -9,6 +9,20 @@
  const greetings=['💬 Quick team catch-up','💬 Project check-in','💬 Sharing an idea','💬 Office catch-up'];
  const huddles=['🗓 Reviewing a project together','🗓 Team planning session','🗓 Project progress huddle'];
  const coffeeLines=['☕ Coffee break','☕ Taking a quick break','☕ Back in a moment'];
+ // Fictional, short office-small-talk scripts. Each turn alternates between two speakers.
+ // Chosen by the elected planner and replayed from the shared timeline on every PC.
+ const dialogues={
+  conversation:[
+   ['💬 Got a minute?','Sure, what’s up?','Let’s compare our notes.','Good idea!','Thanks for checking in.','Anytime!'],
+   ['💬 How’s your day?','Going well, thanks!','Ready for a quick sync?','Yes, let’s do it.','Great, talk soon.','See you!'],
+   ['💬 Quick question?','Of course.','Shall we check the plan?','Sounds good.','Thanks for your help!','No problem!']
+  ],
+  huddle:[
+   ['🗓 Quick team huddle?','Sure, let’s review.','What’s our next step?','Let’s check the task list.','Good plan, thanks.','Thanks, team!'],
+   ['🗓 Time for a quick sync?','I’m ready.','Let’s compare priorities.','We can check together.','Perfect, thank you!','You’re welcome!']
+  ]
+ };
+
  const weightedPick=(pairs,r=Math.random())=>{const total=pairs.reduce((n,[,w])=>n+w,0);let pos=Math.min(.999999,Math.max(0,r))*total;for(const [value,weight] of pairs){pos-=weight;if(pos<0)return value}return pairs[pairs.length-1][0]};
  const taskPalette=(person,hasWork=false)=>{
   const primary=workFor(person),busy=hasWork?6:3;
@@ -105,17 +119,33 @@
   for(const p of positions){
    const s=p.scene;
    if(!s||!Number.isFinite(Number(s.from))||!Number.isFinite(Number(s.until)))continue;
-   if(Date.now()<s.from||Date.now()>=s.until)continue;
-   const id=Number(p.id),text=String(s.text||'').slice(0,65),tag=`${s.from}:${text}`;
-   if(!text)continue;inUse.add(id);
-   if(sceneCache.get(id)===tag)continue;
-   sceneCache.set(id,tag);
-   living?.showBubble?.(id,text,0,'living');
+   if(now<s.from||now>=s.until)continue;
+   const id=Number(p.id);
+   const isSocial=['conversation','huddle'].includes(s.kind)&&Array.isArray(s.dialogue)&&s.dialogue.length>=2;
+   let text=String(s.text||'').slice(0,65),turn=-1,kind='living';
+   if(isSocial){
+    const interval=Math.max(1800,Number(s.turnMs)||2800);
+    turn=Math.floor((now-s.from)/interval);
+    if(turn<0||turn>=s.dialogue.length)continue;
+    const speaker=turn%2===0?Number(s.speakerId):Number(s.partnerId);
+    if(id!==speaker)continue; // The listener does not talk over the speaker.
+    text=String(s.dialogue[turn]||'').slice(0,65);
+    kind='conversation'; // Higher priority than workload in Smart Floating Labels.
+   }
+   if(!text)continue;
+   inUse.add(id);
+   const tag=`${s.from}:${turn}:${text}`;
+   const before=sceneCache.get(id);
+   if(before?.tag===tag&&before.kind===kind)continue;
+   if(before)living?.clearBubble?.(id,before.kind);
+   sceneCache.set(id,{tag,kind});
+   living?.showBubble?.(id,text,0,kind);
    if(s.kind==='job')living?.playEmote?.('wave',id);
   }
-  for(const [id] of sceneCache)if(!inUse.has(id)){
-   living?.clearBubble?.(id,'living');sceneCache.delete(id);
+  for(const [id,previous] of sceneCache)if(!inUse.has(id)){
+   living?.clearBubble?.(id,previous.kind);sceneCache.delete(id);
   }
+
  }
  let enabled=false,btn=null,badge=null,volumeControl=null,activityLabel=null,lastSummary=0,previewBtn=null,soundStatus=null;
  let volume=.55;
@@ -181,6 +211,6 @@
   if(ev.key===STORAGE){try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}ambienceEngine?.setEnabled(enabled,{gesture:false});syncButton()}
   else if(ev.key===VOLUME_STORAGE){try{const v=Number(localStorage.getItem(VOLUME_STORAGE));if(Number.isFinite(v)&&v>=0&&v<=1)setVolume(v)}catch(_){}}
  });
- window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume,getAmbientAudioState:()=>ambienceEngine?.state()||"unsupported",previewAmbientAudio:()=>ambienceEngine?.preview(),ambientSoundEngine:ambienceEngine};
+ window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,dialogues,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume,getAmbientAudioState:()=>ambienceEngine?.state()||"unsupported",previewAmbientAudio:()=>ambienceEngine?.preview(),ambientSoundEngine:ambienceEngine};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();

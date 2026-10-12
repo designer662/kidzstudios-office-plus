@@ -7,7 +7,7 @@ const livingSource=readFileSync('public/office-living-office.js','utf8');
 const notificationSource=readFileSync('public/office-notification-sound.js','utf8');
 const html=readFileSync('public/index.html','utf8');
 const enginePath=html.indexOf('<script src="office-ambience-audio.js?v=81.0" defer></script>');
-const livingPath=html.indexOf('<script src="office-living-office.js?v=81.0" defer></script>');
+const livingPath=html.indexOf('<script src="office-living-office.js?v=84.0" defer></script>');
 assert.ok(enginePath>0&&livingPath>enginePath,'Audio engine must load before Living Office');
 assert.ok(html.includes('office-notification-sound.js'),'Separate notification sounds preserved');
 

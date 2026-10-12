@@ -1,7 +1,7 @@
 {
-  "release": 83,
-  "edition": "Orderform Download Hotfix",
-  "package": "V83 native user-click PNG download for Orderform 1 and 2",
+  "release": 84,
+  "edition": "Natural staff conversations",
+  "package": "V84 staff conversation distance and alternating visible speech bubbles",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -9,5 +9,5 @@
     "office-movement-sync.js",
     "office-3d.js"
   ],
-  "check": "Preview prepares a PNG Blob URL and a native download link before the Download PNG click. V82 shared notifications unchanged."
+  "check": "Social interactions use spaced corridor destinations and shared alternating dialogue cues with screen-space collision management."
 }
