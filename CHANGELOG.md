@@ -259,3 +259,8 @@
 - Preserved Office Pulse, store/surau/toilet simulation, compact controls and no air-conditioner drone.
 - Bounded mesh tessellation for practical isometric rendering performance; offline JavaScript bundle is patched alongside maintainable source.
 - IMPORTANT: live WebGL rendering and Supabase multi-user flows require browser/deployment verification.
+
+## V86.6 — Updated user-supplied hijabi model
+- Replaced V86.5 female character geometry with the newly uploaded model and updated the offline Three.js bundle.
+- Improvements include smoother face and chin, seam/pole normal blending, face-depth aligned details, and contiguous scarf fabric.
+- Preserved existing gender selection, movement adapter and Office Plus modules.

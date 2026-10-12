@@ -28,6 +28,11 @@ jobs:
         run: node scripts/check-repo.mjs
       - name: Test Supabase API compatibility
         run: node scripts/test-bridge-mock.mjs
+      - name: Run Office Plus regression tests
+        run: |
+          for file in scripts/test-*.mjs scripts/test-*.cjs; do
+            node "$file"
+          done
       - name: Disable Jekyll transformations
         run: touch public/.nojekyll
       - name: Configure Pages
