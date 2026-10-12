@@ -2344,7 +2344,7 @@ body{overscroll-behavior:none;}
       top=ev.clientY-shellRect.top-pickerHeight-16;
     }else if(document.documentElement.classList.contains('studio3d-ready')){
       const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
-      if(profileRect){left=profileRect.left-shellRect.left+16;top=profileRect.top-shellRect.top+16;}
+      if(profileRect){left=profileRect.left-shellRect.left-pickerWidth-16;top=profileRect.top-shellRect.top+10;}
       else if(office3dHost){const hostRect=office3dHost.getBoundingClientRect();left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;}
     }else if(emp){
       const p=employeeCameraPoint(emp),svgRect=svg.getBoundingClientRect();
