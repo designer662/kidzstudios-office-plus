@@ -5,6 +5,8 @@ const code=readFileSync('public/office-movement-sync.js','utf8');
 let now=Date.parse('2026-10-12T02:00:00Z');
 let store=null,writeCount=0;
 const clone=value=>JSON.parse(JSON.stringify(value));
+// Deterministic random choices: test shared meeting behavior, not optional social roll.
+const stableMath=Object.create(Math);stableMath.random=()=>.9;
 const staff=[
  {id:1,name:'A',department:'Creative Department',x:10,y:10,roomId:'staff',homeRoom:'staff',currentJob:'',workload:[]},
  {id:2,name:'B',department:'Sales and Marketing',x:11,y:13,roomId:'staff',homeRoom:'staff',currentJob:'',workload:[]}
@@ -29,7 +31,7 @@ function browser(name){
  };
  const context={window:{OfficeSuite:{sharedMovement:movement},OfficeLiving:living,addEventListener(){}},
   document:{hidden:false,documentElement:{dataset:{ksAuth:'ok'}},addEventListener(){}},
-  Date:Clock,Math,JSON,Number,String,Object,Array,Set,Map,Promise,console,Intl,fetch:fetchMock,
+  Date:Clock,Math:stableMath,JSON,Number,String,Object,Array,Set,Map,Promise,console,Intl,fetch:fetchMock,
   globalThis:{crypto:{randomUUID:()=>name}},
   setTimeout(fn,delay=0){const v={fn,at:now+delay};timeouts.push(v);return v},clearTimeout(v){timeouts=timeouts.filter(t=>t!==v)},
   setInterval(fn,delay){const v={fn,at:now+delay,delay};intervals.push(v);return v},clearInterval(v){intervals=intervals.filter(t=>t!==v)},

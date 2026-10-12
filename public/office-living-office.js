@@ -1,4 +1,4 @@
-/* V79 Living Office: shared behavior helpers, local atmosphere, opt-in ambience.
+/* V81 Living Office: shared behavior helpers, local atmosphere, opt-in ambience.
  * Illustrative simulated staff actions, never employee-presence monitoring.
  */
 (()=>{
@@ -90,6 +90,7 @@
   if(!Array.isArray(positions))return;
   // Calm compact activity overview; count illustrative simulation states only.
   const now=Date.now();
+  ambienceEngine?.setActivity(positions);
   if(activityLabel&&now-lastSummary>2800){
    lastSummary=now;
    const walking=positions.filter(p=>p.walking).length;
@@ -116,59 +117,70 @@
    living?.clearBubble?.(id,'living');sceneCache.delete(id);
   }
  }
- let enabled=false,audio=null,ambience=null,btn=null,badge=null,volumeControl=null,activityLabel=null,lastSummary=0;
+ let enabled=false,btn=null,badge=null,volumeControl=null,activityLabel=null,lastSummary=0,previewBtn=null,soundStatus=null;
  let volume=.55;
  try{const savedText=localStorage.getItem(VOLUME_STORAGE);if(savedText!==null){const saved=Number(savedText);if(Number.isFinite(saved)&&saved>=0&&saved<=1)volume=saved}}catch(_){}
  try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}
- function stopAudio(){
-  if(ambience){try{ambience.noise.stop();ambience.hum.stop();ambience.noise.disconnect();ambience.hum.disconnect();ambience.master.disconnect()}catch(_){}ambience=null}
+ const ambienceEngine=window.KSOfficeAmbienceAudio?.create?.({onStatus:updateSoundStatus})||null;
+ ambienceEngine?.setVolume(volume);
+ if(enabled)ambienceEngine?.setEnabled(true,{gesture:false});
+ function updateSoundStatus(state){
+  if(soundStatus){
+   const messages={'playing':'Office audio is playing','tap-to-start':'Click Ambience On or Preview to allow sound','paused':'Paused while tab is hidden','unsupported':'Audio is not supported in this browser','off':'Ambience muted'};
+   soundStatus.textContent=messages[state]||'Office ambience ready';
+   soundStatus.dataset.state=state;
+  }
+  syncButton();
  }
- function beginAudio(){
-  if(!enabled||document.hidden)return;
-  try{
-   const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
-   if(!audio||audio.state==='closed')audio=new Ctx();
-   if(audio.state==='suspended'){audio.resume().then(()=>{if(enabled&&!document.hidden)beginAudio()}).catch(()=>{});return}
-   if(ambience)return;
-   const master=audio.createGain();master.gain.value=.32*volume;master.connect(audio.destination);
-   const noiseBuffer=audio.createBuffer(1,audio.sampleRate*2,audio.sampleRate),samples=noiseBuffer.getChannelData(0);
-   let prev=0;for(let i=0;i<samples.length;i++){const white=Math.random()*2-1;prev=(prev+.035*white)/1.035;samples[i]=prev*.24}
-   const noise=audio.createBufferSource();noise.buffer=noiseBuffer;noise.loop=true;
-   const lowpass=audio.createBiquadFilter();lowpass.type='lowpass';lowpass.frequency.value=430;
-   const ng=audio.createGain();ng.gain.value=.026;noise.connect(lowpass);lowpass.connect(ng);ng.connect(master);
-   const hum=audio.createOscillator();hum.type='sine';hum.frequency.value=95;const hg=audio.createGain();hg.gain.value=.003;hum.connect(hg);hg.connect(master);
-   // A second quiet filtered layer adds distant ventilation instead of a loud loop.
-   const air=audio.createBiquadFilter();air.type='bandpass';air.frequency.value=780;air.Q.value=.45;
-   const airGain=audio.createGain();airGain.gain.value=.011;
-   noise.connect(air);air.connect(airGain);airGain.connect(master);
-   noise.start();hum.start();ambience={noise,hum,master,air,airGain};
-  }catch(_){stopAudio()}
+ function beginAudio(gesture=false){if(!enabled||document.hidden)return;return ambienceEngine?.start({gesture});}
+ function stopAudio(temporary=false){ambienceEngine?.stop({temporary});}
+ function setEnabled(value){
+  enabled=!!value;
+  try{localStorage.setItem(STORAGE,enabled?'on':'off')}catch(_){}
+  ambienceEngine?.setEnabled(enabled,{gesture:true});
+  syncButton();
  }
- function setEnabled(value){enabled=!!value;try{localStorage.setItem(STORAGE,enabled?'on':'off')}catch(_){};if(enabled)beginAudio();else stopAudio();syncButton()}
- function setVolume(value){volume=Math.max(0,Math.min(1,Number(value)||0));try{localStorage.setItem(VOLUME_STORAGE,String(volume))}catch(_){};
-  if(ambience?.master)ambience.master.gain.setTargetAtTime(.32*volume,audio.currentTime,.1);
+ function setVolume(value){
+  volume=Math.max(0,Math.min(1,Number(value)||0));
+  try{localStorage.setItem(VOLUME_STORAGE,String(volume))}catch(_){}
+  ambienceEngine?.setVolume(volume);
   if(volumeControl)volumeControl.value=String(Math.round(volume*100));
  }
- function syncButton(){if(!btn)return;btn.textContent=enabled?'♫ Ambience on':'♫ Ambience off';btn.setAttribute('aria-pressed',String(enabled));btn.title=enabled?'Mute simulated office ambience':'Enable low-volume simulated office ambience'}
+ function syncButton(){
+  if(!btn)return;
+  btn.textContent=enabled?'♫ Ambience on':'♫ Ambience off';
+  btn.setAttribute('aria-pressed',String(enabled));
+  btn.title=enabled?'Mute simulated office ambience':'Enable simulated office ambience';
+  if(previewBtn)previewBtn.hidden=!enabled;
+ }
  function attach(){
   if(document.getElementById('ksLivingControls'))return;
   const host=document.getElementById('office3dHost');if(!host)return;
   const controls=document.createElement('div');controls.id='ksLivingControls';controls.className='ks-living-controls';
   badge=document.createElement('span');badge.className='ks-living-daylight';
-  btn=document.createElement('button');btn.type='button';btn.className='ks-living-audio';btn.setAttribute('aria-label','Toggle simulated office ambience');btn.addEventListener('click',e=>{e.stopPropagation();setEnabled(!enabled)});
+  btn=document.createElement('button');btn.type='button';btn.className='ks-living-audio';btn.setAttribute('aria-label','Toggle office ambience');
+  btn.addEventListener('click',e=>{e.stopPropagation();setEnabled(!enabled)});
+  previewBtn=document.createElement('button');previewBtn.type='button';previewBtn.className='ks-living-preview';previewBtn.textContent='▶ Preview';previewBtn.setAttribute('aria-label','Play a short office ambience sound preview');
+  previewBtn.addEventListener('click',async e=>{e.stopPropagation();if(!enabled)setEnabled(true);await ambienceEngine?.preview();syncButton()});
   const volumeWrap=document.createElement('label');volumeWrap.className='ks-living-volume';volumeWrap.title='Office ambience volume';volumeWrap.setAttribute('aria-label','Office ambience volume');
   const small=document.createElement('span');small.textContent='Volume';
   volumeControl=document.createElement('input');volumeControl.type='range';volumeControl.min='0';volumeControl.max='100';volumeControl.step='5';volumeControl.value=String(Math.round(volume*100));volumeControl.setAttribute('aria-label','Ambient volume');
   volumeControl.addEventListener('input',e=>{e.stopPropagation();setVolume(Number(volumeControl.value)/100)});
   volumeControl.addEventListener('pointerdown',e=>e.stopPropagation());volumeWrap.append(small,volumeControl);
   activityLabel=document.createElement('span');activityLabel.className='ks-living-activity';activityLabel.textContent='Office warming up';activityLabel.setAttribute('aria-live','off');
-  controls.append(badge,activityLabel,btn,volumeWrap);host.parentElement.appendChild(controls);
-  syncButton();applyLighting(null,null,null,null,null);
-  if(enabled)document.addEventListener('pointerdown',function unlock(){beginAudio();document.removeEventListener('pointerdown',unlock)},{capture:true});
+  soundStatus=document.createElement('span');soundStatus.className='ks-living-sound-status';soundStatus.setAttribute('role','status');soundStatus.setAttribute('aria-live','polite');
+  controls.append(badge,activityLabel,btn,previewBtn,volumeWrap,soundStatus);host.parentElement.appendChild(controls);
+  syncButton();updateSoundStatus(enabled?'tap-to-start':'off');applyLighting(null,null,null,null,null);
  }
- document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAudio();else if(enabled&&audio?.state==='running')beginAudio()});
- window.addEventListener('pagehide',()=>{stopAudio();audio?.close?.().catch(()=>{})},{once:true});
- window.addEventListener('storage',ev=>{if(ev.key===STORAGE){try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}enabled?beginAudio():stopAudio();syncButton()}});
- window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume};
+ // Unlock on the next genuine user gesture, including after a browser restores a tab.
+ document.addEventListener('pointerdown',()=>{if(enabled)beginAudio(true)},{capture:true});
+ document.addEventListener('keydown',()=>{if(enabled)beginAudio(true)},{capture:true});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAudio(true);else if(enabled)beginAudio(false)});
+ window.addEventListener('pagehide',()=>ambienceEngine?.dispose(),{once:true});
+ window.addEventListener('storage',ev=>{
+  if(ev.key===STORAGE){try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}ambienceEngine?.setEnabled(enabled,{gesture:false});syncButton()}
+  else if(ev.key===VOLUME_STORAGE){try{const v=Number(localStorage.getItem(VOLUME_STORAGE));if(Number.isFinite(v)&&v>=0&&v<=1)setVolume(v)}catch(_){}}
+ });
+ window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume,getAmbientAudioState:()=>ambienceEngine?.state()||"unsupported",previewAmbientAudio:()=>ambienceEngine?.preview(),ambientSoundEngine:ambienceEngine};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();

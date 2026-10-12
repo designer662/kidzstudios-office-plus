@@ -1,6 +1,10 @@
-> **Current release: V80 Smart Floating Labels.** Compact name + persistent mood, label collision avoidance, one prioritized notification per character, temporary workload bubbles, zoom-aware clutter reduction, and screen-boundary protection. GitHub Pages + Supabase and the V79 Living Office remain unchanged. See [README-V80.md](README-V80.md).
+# **Current release: V81 · Realistic Office Ambience**
 
-> **V79 Living Office+ (current):** Richer department routines, varied paired interactions, smoother activity poses and daylight, job acknowledgment and individual ambience volume. See [README-V79.md](README-V79.md).
+V81 adds reliable browser audio unlock, locally synthesized ventilation, typing, footsteps and quiet conversation, a Preview button, independent volume/mute, and background-tab pause. All V80 Smart Floating Labels and Supabase features are preserved. See [README-V81.md](README-V81.md) and [DEPLOY-AND-VERIFY-V81.md](DEPLOY-AND-VERIFY-V81.md).
+
+> **Previous release: V80 Smart Floating Labels.** Compact name + persistent mood, label collision avoidance, one prioritized notification per character, temporary workload bubbles, zoom-aware clutter reduction, and screen-boundary protection. GitHub Pages + Supabase and the V79 Living Office remain unchanged. See [README-V80.md](README-V80.md).
+
+> **V79 Living Office+ (previous):** Richer department routines, varied paired interactions, smoother activity poses and daylight, job acknowledgment and individual ambience volume. See [README-V79.md](README-V79.md).
 
 > **V78 Living Office:** Shared department-based 3D activities, paired conversations, timed breaks, daylight, job reactions and opt-in ambient sound. See [README-V78.md](README-V78.md).
 

@@ -1,3 +1,11 @@
+## V81 · Realistic Living Office Ambience (2026-10-12)
+- Fixed extremely quiet legacy audio graph and made unlock/restart respect browser autoplay policies.
+- Added `public/office-ambience-audio.js` with local procedural air-conditioning, keyboard/mouse, footstep and quiet nonverbal office-murmur layers.
+- Sound effects respond to V79/V80's **locally rendered Supabase-shared behavior timeline**, with no extra database writes or audio uploads.
+- Added a direct **Preview** button, playback status, independent per-device volume and mute, and background-tab lifecycle handling.
+- Preserved V80 labels, synchronized character movement, Job Management, Excel, and the separate notification chime controls.
+- Added V81 audio mock regression tests to GitHub Actions. No database migration.
+
 ## V80 · Smart Floating Labels (2026-10-12)
 - Replaced independent 3D label placement with a frame-by-frame, screen-space collision manager so names, mood icons and temporary notifications do not cover one another.
 - Combined mood emoji with each clickable character name tag; the separate permanent mood bubble was removed in the 3D view.

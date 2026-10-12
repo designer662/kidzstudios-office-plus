@@ -14,3 +14,14 @@
 .ks-living-volume input[type="range"]{accent-color:#dc8b5a;width:65px;height:13px;cursor:pointer}
 @media(max-width:920px){.ks-living-activity,.ks-living-volume{font-size:9px;min-height:27px;padding:5px 7px}.ks-living-activity{display:none}}
 @media(max-width:650px){.ks-living-volume{gap:4px}.ks-living-volume span{display:none}.ks-living-volume input[type="range"]{width:55px}}
+
+/* V81 sound preview, verified playback state and compact responsive controls */
+.ks-living-preview{min-height:29px;border:1px solid rgba(229,162,111,.26);border-radius:999px;background:#fff9f0;color:#a4613c;font:750 10px/1.2 Inter,Arial,sans-serif;padding:7px 11px;cursor:pointer;pointer-events:auto}
+.ks-living-preview:hover,.ks-living-preview:focus-visible{background:#ffefe0;outline:2px solid rgba(235,149,86,.25);outline-offset:1px}
+.ks-living-preview[hidden]{display:none!important}
+.ks-living-sound-status{font:700 9px/1.2 Inter,Arial,sans-serif;color:#84908a;min-height:12px;pointer-events:none}
+.ks-living-sound-status[data-state="playing"]{color:#4c8662}
+.ks-living-sound-status[data-state="tap-to-start"],.ks-living-sound-status[data-state="unsupported"]{color:#bd724e}
+.ks-living-sound-status[data-state="off"]{display:none}
+@media(max-width:920px){.ks-living-preview{font-size:9px;min-height:27px;padding:6px 8px}.ks-living-sound-status{display:none}}
+@media(max-width:650px){.ks-living-preview{font-size:9px;padding:6px 8px}}

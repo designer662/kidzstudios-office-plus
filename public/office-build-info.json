@@ -1,7 +1,7 @@
 {
-  "release": "v80",
-  "edition": "Smart Floating Labels",
-  "package": "v80 collision-aware 3D labels",
-  "modules": ["office-smart-labels.js", "office-3d.js", "office-living-office.js", "office-movement-sync.js"],
-  "check": "V80 merges name and mood, prioritizes one temporary bubble per character, and avoids screen-space label collisions."
+  "release": "v81",
+  "edition": "Living Office Realistic Ambience",
+  "package": "V81 audio unlock and procedural office sound layers",
+  "modules": ["office-ambience-audio.js", "office-living-office.js", "office-notification-sound.js", "office-movement-sync.js", "office-3d.js"],
+  "check": "Opt-in ambient audio: ventilation, typing, footsteps, soft synthetic conversation, independent notification chimes."
 }
