@@ -70,3 +70,9 @@
 - Centered navigation within header and added safe scrolling on small screens.
 - Rebuilt 3D furniture clearance map and path planner with verified line-of-sight path smoothing.
 - Safer chair transitions and walking concurrency handling.
+
+## V67 — Cleaner Pulse Sync UI + Default Auto Rotation (2026-10-12)
+- Removed the visible Live/Stale, Data Age, and obsolete Mapping status row from Office Pulse+.
+- Displayed the last successful Job Management sync time immediately beside the dashboard build version at the footer, keeping Supabase updates active.
+- Fixed the 3D camera startup sequence so auto-rotation begins automatically on load and refresh (unless reduced-motion is requested by the operating system); adjusted its speed and preserved the intended default zoom.
+- No database schema changes; GitHub Pages + Supabase deployment remains unchanged.

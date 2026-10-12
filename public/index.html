@@ -974,9 +974,9 @@ body{overscroll-behavior:none;}
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
 <script src="ks-motion.js?v=59.0" defer></script>
-<script src="office-plus-ui.js?v=59.0" defer></script>
+<script src="office-plus-ui.js?v=67.0" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
-<link rel="stylesheet" href="office-plus.css?v=58.1">
+<link rel="stylesheet" href="office-plus.css?v=67.0">
 <link rel="stylesheet" href="office-v59-clean.css?v=61.0">
 <style id="ks-v60-emoji-picker">
 .character-emoji-picker{position:absolute;z-index:52;display:grid;gap:8px;min-width:194px;max-width:min(92vw,220px);padding:10px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(31,35,38,.08);box-shadow:0 16px 34px rgba(31,35,38,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
@@ -989,6 +989,30 @@ body{overscroll-behavior:none;}
 @media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
 </style>
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
+<style id="ks-v67-footer-cleanup">
+  #todayPanel .ops-sync-strip{display:none!important}
+  #ksDock{gap:12px!important}
+  #ksDock .ks-version-footer,.ks-version-footer{
+    display:inline-flex!important;align-items:center!important;gap:10px!important;
+    max-width:min(95vw,530px)!important;width:max-content!important;
+    font:700 10px/1.2 Inter,system-ui,sans-serif!important;
+    letter-spacing:.01em!important;color:#727a80!important;white-space:nowrap!important;
+  }
+  #ksDock .ks-version-footer{flex:0 0 auto!important;margin:0!important}
+  .ks-version-footer .ks-build-label{color:#535d66;font-weight:850}
+  .ks-version-footer .ks-footer-divider{display:block;flex:0 0 1px;height:13px;background:rgba(110,120,128,.23)}
+  .ks-version-footer .ks-footer-last-sync{color:#737c83;font-weight:650;font-variant-numeric:tabular-nums}
+  @media(max-width:920px){
+    #ksDock .ks-version-footer{display:inline-flex!important;opacity:1!important;position:static!important;inset:auto!important;max-width:calc(100vw - 40px)!important}
+    #ksDock{gap:8px!important}
+    #ksDock .ks-version-footer{font-size:9px!important}
+  }
+  @media(max-width:650px){
+    #ksDock .ks-version-footer{display:inline-flex!important;gap:6px!important}
+    #ksDock .ks-footer-last-sync{max-width:190px;overflow:hidden;text-overflow:ellipsis}
+  }
+  @media print{.ks-version-footer,#ksDock .ks-version-footer{display:none!important}}
+</style>
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1075,10 +1099,6 @@ body{overscroll-behavior:none;}
     <button class="ops-tab" data-ops-tab="jobs" role="tab" aria-selected="false">Jobs</button>
   </div>
   <div class="ops-view active" data-ops-view="pulse">
-    <div class="ops-sync-strip">
-      <div class="ops-sync-main"><span id="opsSyncHealth" data-mode="empty">EMPTY</span><b id="opsLastSync">Waiting for Job Management</b></div>
-      <div class="ops-sync-actions"><small id="opsDataAge" class="ops-data-age">No live data</small></div>
-    </div>
     <div class="today-grid ops-primary-metrics">
       <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
       <button class="today-metric" data-ops-metric="artwork"><span class="today-number">0</span><span class="today-label">Artwork</span></button>
@@ -1253,13 +1273,11 @@ body{overscroll-behavior:none;}
   const jobsFilterLabel = $('#jobsFilterLabel');
   const opsNote = $('#opsNote');
   const opsLastSync = $('#opsLastSync');
-  const opsSyncHealth = $('#opsSyncHealth');
   const opsTotalJobs = $('#opsTotalJobs');
   const opsActiveJobs = $('#opsActiveJobs');
   const opsCompletedToday = $('#opsCompletedToday');
   const opsDueToday = $('#opsDueToday');
   const opsPipelineBar = $('#opsPipelineBar');
-  const opsDataAge = $('#opsDataAge');
   const opsReconcile = $('#opsReconcile');
   const opsUnmappedBtn = $('#opsUnmappedBtn');
   const opsDailySummary = $('#opsDailySummary');
@@ -1745,10 +1763,10 @@ body{overscroll-behavior:none;}
     return d.getFullYear()===base.getFullYear()&&d.getMonth()===base.getMonth()&&d.getDate()===base.getDate();
   }
   function renderOpsSyncMeta(){
-    const ageMs=opsLastSyncAt?Math.max(0,Date.now()-opsLastSyncAt):null,ageMin=ageMs==null?null:Math.floor(ageMs/60000);
-    if(opsLastSync)opsLastSync.textContent=opsLastSyncAt?`Last sync ${fullClockTime(opsLastSyncAt)} · ${relativeEventTime(opsLastSyncAt)}`:'Waiting for Job Management';
-    if(opsDataAge){opsDataAge.textContent=ageMin==null?'No live data':ageMin<1?'Data age now':`Data age ${ageMin}m`;opsDataAge.classList.toggle('stale',ageMin!=null&&ageMin>=5)}
-    if(opsSyncHealth){const stale=ageMin!=null&&ageMin>=5,liveLabel=jobDataSource==='html'?'LIVE DATABASE':'LIVE SHEET',label=opsDataMode==='live'?(stale?'LIVE · STALE':liveLabel):opsDataMode==='cached'?'SERVER CACHE':'EMPTY';opsSyncHealth.textContent=label;opsSyncHealth.dataset.mode=stale?'stale':opsDataMode}
+    if(!opsLastSync)return;
+    if(!opsLastSyncAt){opsLastSync.textContent='Last sync: waiting';opsLastSync.title='Waiting for Job Management synchronization';return}
+    opsLastSync.textContent=`Last sync: ${fullClockTime(opsLastSyncAt)}`;
+    opsLastSync.title=`Last Job Management sync: ${new Date(opsLastSyncAt).toLocaleString('en-MY')} (${relativeEventTime(opsLastSyncAt)})`;
   }
   function setOpsSource(mode,label,note='',timestamp=null){
     opsDataMode=mode;opsLastSyncSource=label||mode;
@@ -3056,8 +3074,8 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version">v61 · 3D</footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v67 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=61.0" defer></script>
+<script src="office-3d.js?v=67.0" defer></script>
 </body>
 </html>
