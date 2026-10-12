@@ -1,3 +1,9 @@
+## V85 — Expanded Office Space
+
+- Expanded 3D office horizontally by 25% while preserving the existing plan and layout.
+- Synchronized camera bounds, 3D character paths and labels with the expanded environment.
+- Kept Supabase plan coordinates and character scale unchanged; versioned the 3D bundle for cache refresh.
+
 ## V84 · Natural paired conversations (2026-10-12)
 - Widened paired interaction spacing and verified route endpoints before starting a conversation.
 - Added six-turn synced scripted chats/huddles with one speech bubble visible at a time.

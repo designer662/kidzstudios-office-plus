@@ -5,7 +5,7 @@ const require=createRequire(import.meta.url);
 const {layout,overlaps,moodEmoji,rank}=require('../public/office-smart-labels.js');
 const bundle=readFileSync('public/office-3d.js','utf8');
 const html=readFileSync('public/index.html','utf8');
-assert.ok(html.indexOf('office-smart-labels.js?v=80')<html.indexOf('office-3d.js?v=80'),'Label manager loads before Three.js');
+assert.ok(html.indexOf('office-smart-labels.js?v=80')<html.indexOf('office-3d.js?v='),'Label manager loads before Three.js');
 assert.ok(html.includes('office-smart-labels.css?v=80'));
 assert.ok(bundle.includes('KSLabelLayout?.layout'),'Bundled 3D renderer must use collision-aware manager');
 assert.ok(bundle.includes('function setMood('),'Mood is integrated into the character name label');
