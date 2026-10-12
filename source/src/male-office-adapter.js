@@ -25,7 +25,7 @@ export function createOfficeMaleRig(person){
   root.userData.gender='male';
   root.scale.setScalar(.42);
   const eyes=[];
-  model.head.traverse(obj=>{if(obj.name==='Glossy oval eye')eyes.push(obj)});
+  model.head.traverse(obj=>{if(obj.name==='Glossy oval eye'){obj.userData.baseScaleY=obj.scale.y;eyes.push(obj)}});
   const limb=joint=>({joint,lower:new THREE.Group(),end:new THREE.Group()});
   const cup=new THREE.Group();cup.visible=false;
   return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,

@@ -280,3 +280,8 @@
 - Preserved female Classic/Semi-Casual outfits, hijab colours, glasses and clothes controls.
 - Male appearance customizations are saved through the existing office:staff payload; no new database migration required.
 - Updated 3D selection collider to fit custom male model scale.
+
+
+## V86.9
+- Fixed male and female eye stretching in 3D characters.
+- Blink animation now respects each model's original eye scale instead of forcing full-size eye height.

@@ -297,7 +297,7 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
  r.chest.rotation.y=stride*.028*walk;
  const blinkCycle=(t%(3.45+(r.phase%2)*.3));
  const blink=1-.94*Math.max(0,1-Math.abs(blinkCycle-.15)/.11);
- r.eyes.forEach(eye=>eye.scale.y=blink);
+ r.eyes.forEach(eye=>{const base=(eye.userData&&typeof eye.userData.baseScaleY==='number')?eye.userData.baseScaleY:(eye.scale.y||1);eye.scale.y=base*blink});
  r.head.rotation.y=Math.sin(t*.59)*.11*(1-walk*.7)+(['meeting','chat'].includes(p.action||'')?Math.sin(t*.7)*.075:0);
  r.head.rotation.x=-.04*sit+Math.sin(t*.93)*.019;
  r.head.rotation.z=Math.sin(t*.4)*.02*(1-walk);

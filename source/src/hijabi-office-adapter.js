@@ -48,7 +48,7 @@ export function createOfficeHijabiRig(person) {
   root.userData.gender='female';
   root.scale.setScalar(.42);
   const eyes=[];
-  model.head.traverse(obj=>{if(obj.name==='Glossy oval eye')eyes.push(obj)});
+  model.head.traverse(obj=>{if(obj.name==='Glossy oval eye'){obj.userData.baseScaleY=obj.scale.y;eyes.push(obj)}});
   const limb=joint=>({joint,lower:new THREE.Group(),end:new THREE.Group()});
   const cup=new THREE.Group();cup.visible=false;
   return {emote:'',emoteStart:-100,root,body:model.body,chest:model.chest,head:model.head,eyes,
@@ -76,7 +76,7 @@ export function animateOfficeHijabi(r,p,time,dt,distance){
   r.head.rotation.x=Math.sin(t*.9)*.018-.02*sit;
   r.head.rotation.y=Math.sin(t*.55)*.10*(1-walk*.65);
   r.head.rotation.z=Math.sin(t*.4)*.018*(1-walk);
-  r.eyes.forEach(eye=>{const bl=t%(3.45+(r.phase%2)*.3);eye.scale.y=1-.90*Math.max(0,1-Math.abs(bl-.15)/.10)});
+  r.eyes.forEach(eye=>{const bl=t%(3.45+(r.phase%2)*.3);const blink=1-.90*Math.max(0,1-Math.abs(bl-.15)/.10);const base=(eye.userData&&typeof eye.userData.baseScaleY==='number')?eye.userData.baseScaleY:(eye.scale.y||1);eye.scale.y=base*blink});
   // The supplied whole-leg meshes now pivot at the hips, allowing chair sitting and walking.
   r.leftLeg.joint.rotation.x=interp(stride*.35*walk,-1.15,sit);
   r.rightLeg.joint.rotation.x=interp(opposite*.35*walk,-1.15,sit);
