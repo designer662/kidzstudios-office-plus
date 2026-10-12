@@ -1,3 +1,9 @@
+## V68 — Cinematic Auto-Rotation (2026-10-12)
+
+- Reduced Three.js OrbitControls autoRotateSpeed to 0.24 from 0.8.
+- Preserved automatic startup, zoom, and Supabase features.
+- Updated footer and 3D asset cache-busting version.
+
 ## V61 · Responsive headers + Excel import/export
 
 - Responsive two-row header fixes overlap throughout all 10 pages.
