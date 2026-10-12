@@ -47,3 +47,11 @@ Based on audited V86.3. To use: deploy the **entire `public/` folder** in place 
 ### Validation and release caution
 
 `node scripts/check-repo.mjs` and all 25 `scripts/test-*` tests passed on the packaged build. TypeScript syntax/transpilation also passes. The supplied 3D character was integrated into the existing self-contained offline bundle directly because the Three.js/esbuild source dependencies were not available in this build environment. When dependencies become available, rebuild and compare the resulting bundle before publishing another 3D model update. This environment's Chromium cannot initialize WebGL, so final 3D visual inspection and live Supabase multi-user verification remain deployment tasks.
+
+
+## V86.5 — User-supplied hijabi-character.js model
+- Female 3D staff now use the new sculpted model: continuous tailored ivory tunic, layered scarf and detailed sneakers; male character rigs remain unchanged.
+- Integrated a custom movement adapter for walking, desk sitting, face turning, blinking and staff emotes.
+- Preserved Office Pulse, store/surau/toilet simulation, compact controls and no air-conditioner drone.
+- Bounded mesh tessellation for practical isometric rendering performance; offline JavaScript bundle is patched alongside maintainable source.
+- IMPORTANT: live WebGL rendering and Supabase multi-user flows require browser/deployment verification.

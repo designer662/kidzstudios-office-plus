@@ -251,3 +251,11 @@
 - Removed generated air-conditioning broadband noise, fan oscillators and harmonic loops, keeping intermittent activity-triggered sound effects and independent notification sounds.
 - Updated cache keys for changed offline assets; added comprehensive V86.4 tests and updated earlier regression assertions to the intentionally changed UI and audio behavior.
 - Verification: 25/25 regression scripts pass; 10 HTML pages, shipped JS and inline JS syntax, SQL sections and TypeScript transpilation check have 0 errors. Full live WebGL browser rendering not verified: Chromium in this environment cannot create a WebGL2 context.
+
+
+## V86.5 — User-supplied hijabi-character.js model
+- Female 3D staff now use the new sculpted model: continuous tailored ivory tunic, layered scarf and detailed sneakers; male character rigs remain unchanged.
+- Integrated a custom movement adapter for walking, desk sitting, face turning, blinking and staff emotes.
+- Preserved Office Pulse, store/surau/toilet simulation, compact controls and no air-conditioner drone.
+- Bounded mesh tessellation for practical isometric rendering performance; offline JavaScript bundle is patched alongside maintainable source.
+- IMPORTANT: live WebGL rendering and Supabase multi-user flows require browser/deployment verification.
