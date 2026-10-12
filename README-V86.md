@@ -33,3 +33,17 @@ Graphics default to Eco only on small or reduced-motion screens without a prior 
 The stored CSS, scripts, bundled Three.js renderer and TypeScript source were updated together.
 Run `node scripts/check-repo.mjs` then all files matching `scripts/test-*`.
 Production Supabase authentication, deployment, and real multi-user changes must be tested against your own environment.
+
+## V86.4 — Simplified controls + uploaded female character
+
+Based on audited V86.3. To use: deploy the **entire `public/` folder** in place of the previous build so the new 3D bundle, styles, and audio engine load together. The deployment workflow still runs all `scripts/test-*` tests before publishing. No database migration is required.
+
+- **Female model:** `source/src/office-character.ts` is derived from the supplied `office-character-hijab(2).ts`. The published `public/office-3d.js` includes the same rose hijab shapes: hood, throat, shoulder drape and front tail. Female staff definitions remain controlled by the Office Plus staff directory. The coffee-specific animation guard is intentionally preserved from V86.3.
+- **Room navigation:** the standalone Jump to Room selector is removed. Clickable rooms, room focus APIs, and walking simulations for Store/Surau/Toilets still exist.
+- **Sound bar:** shows only a short Day/Night indicator and a single `Sound on/off` toggle. It no longer shows activity counts, volume slider, preview button, or playback-state text. The accessible labels and saved on/off preference remain.
+- **Air conditioning:** the continuous fan/air-conditioning track has been eliminated. Optional keyboard/footstep/social office audio events and separate notification chimes remain.
+- **Cache refresh:** changed assets use the `v=86.4` browser cache key. Keep filenames and relative paths intact.
+
+### Validation and release caution
+
+`node scripts/check-repo.mjs` and all 25 `scripts/test-*` tests passed on the packaged build. TypeScript syntax/transpilation also passes. The supplied 3D character was integrated into the existing self-contained offline bundle directly because the Three.js/esbuild source dependencies were not available in this build environment. When dependencies become available, rebuild and compare the resulting bundle before publishing another 3D model update. This environment's Chromium cannot initialize WebGL, so final 3D visual inspection and live Supabase multi-user verification remain deployment tasks.

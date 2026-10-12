@@ -242,3 +242,12 @@
 - Kept female hijab meshes in TypeScript source as well as the prebuilt 3D bundle.
 - Updated affected legacy regression assertions and added a V86.3 feature regression test.
 - Fixed persisted graphics quality being lost when the 3D scene rebuilds after staff changes.
+
+## V86.4 — Clean controls, silent AC, uploaded hijab character
+- Replaced the previous female 3D character styling with the user-supplied `office-character-hijab(2).ts` rose-pink open-front hood, covered neck, shoulder drape and front scarf tail, in both source and the shipped offline bundle.
+- Preserved the existing walking, sitting, blink, waves, emotes and individual accessories; retained V86.3's `coffee`-only cup animation guard for surau/toilet visits.
+- Removed the Jump to Room selector and its dedicated JavaScript/CSS while keeping existing map/3D room selection interactions and zone simulations intact.
+- Reduced the office atmospheric control strip to a Day/Night indicator and a two-state `Sound on/off` button. Legacy per-browser volume preference and sound API remain compatible even without a visible slider.
+- Removed generated air-conditioning broadband noise, fan oscillators and harmonic loops, keeping intermittent activity-triggered sound effects and independent notification sounds.
+- Updated cache keys for changed offline assets; added comprehensive V86.4 tests and updated earlier regression assertions to the intentionally changed UI and audio behavior.
+- Verification: 25/25 regression scripts pass; 10 HTML pages, shipped JS and inline JS syntax, SQL sections and TypeScript transpilation check have 0 errors. Full live WebGL browser rendering not verified: Chromium in this environment cannot create a WebGL2 context.
