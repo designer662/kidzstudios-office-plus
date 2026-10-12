@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f7f5">
-<title>Kidzstudios Office · Job Management · V72 · Bulk Delete</title>
+<title>Kidzstudios Office · Job Management · V73</title>
 <style>
 :root{--bg:#f7f7f5;--card:#fff;--text:#1d2022;--muted:#777c81;--line:rgba(29,32,34,.09);--orange:#ef7b45;--orange2:#e7662c;--orangeSoft:#fff0e8;--green:#43a276;--blue:#5687c6;--amber:#d99a38;--red:#c95a50;--shadow:0 18px 55px rgba(32,35,38,.09),0 2px 8px rgba(32,35,38,.045);--ui:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:radial-gradient(circle at 50% 0,#fff 0,transparent 28%),linear-gradient(180deg,#fbfbfa,#f5f5f2);color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}
@@ -172,7 +172,7 @@
   <div class="syncbar" id="syncbar" data-state="loading"><div class="sync-left"><i class="dot"></i><b id="syncLabel">Connecting to shared Job Management…</b><span id="syncDetail"></span></div><div class="sync-right" id="syncTime">Waiting for server</div></div>
   <section class="period-panel v44-period" aria-label="Job period">
     <div class="period-compact">
-      <div class="period-title"><span>Period</span><b id="periodLabel">All Months</b></div>
+      <div class="period-title"><span>Period</span><b id="periodLabel">Current month</b></div>
       <select class="period-year" id="yearFilter" aria-label="Job year"></select>
       <select class="period-year month-select" id="monthFilter" aria-label="Job month"></select>
       <div class="period-note"><span id="periodSummary">0 jobs in selected period</span><span id="undatedSummary">0 undated</span></div>
@@ -321,7 +321,7 @@
     </section>
   </div>
 </div></div>
-<div class="toast" id="toast"></div><footer class="ks-version-footer">v70</footer>
+<div class="toast" id="toast"></div><footer class="ks-version-footer">v73</footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-workbook.js?v=70.0"></script>
@@ -366,7 +366,8 @@ const DEFAULT_DROPDOWN_OPTIONS={
 };
 
 const selectedJobIndices=new Set();
-let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear='all',selectedMonth='all',dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0;
+const initialJobPeriod=new Date();
+let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear=String(initialJobPeriod.getFullYear()),selectedMonth=String(initialJobPeriod.getMonth()),dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0;
 let jobsLoaded=false,pullRequest=0,loadPending=null;
 const clientId=window.KSTempUser?.get?.().browserId||crypto.randomUUID?.()||`jm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function currentActor(){const p=window.KSTempUser?.get?.();return p?{name:String(p.name||p.browserId||'This PC'),browserId:String(p.browserId||clientId)}:{name:'This PC',browserId:clientId}}

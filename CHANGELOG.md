@@ -1,3 +1,8 @@
+## V73 · Current month and synchronized build footers
+- Job Management opens with local current month/year selected, while other periods remain accessible.
+- Unified footer version across all 10 pages; GitHub Actions stamps a unique build number with every deployment.
+- Release number stored in `office-release.json`; no database migration.
+
 ## V72 — Bulk delete and row trash controls (2026-10-12)
 
 - Added row checkboxes and filtered select-all in Job Management.
