@@ -1,4 +1,4 @@
-/* Office Plus V82: reliable PNG export for both Job Sheets.
+/* Office Plus V83: reliable PNG export for both Job Sheets.
    Primary: html2canvas (if loaded). Fallback: native SVG foreignObject rasterization.
    No server upload, no external capture dependency required for the fallback. */
 (() => {
@@ -164,19 +164,44 @@
     }
     return nativeCapture(sheet,scale);
   }
-  async function download(canvas, filename) {
-    if (!canvas) throw new Error('Preview the Job Sheet before downloading.');
-    const safeName=String(filename||'JobSheet.png').replace(/[\\/:*?"<>|]/g,'_').slice(0,120);
-    const blob=await new Promise((resolve,reject)=>{
-      try{canvas.toBlob(result=>result?resolve(result):reject(new Error('PNG encoding failed.')),'image/png');}
-      catch(error){reject(error);}
-    });
-    const url=URL.createObjectURL(blob);
+  // V83: prepare the PNG URL BEFORE the user clicks Save. The Download link
+  // remains a normal <a download> click, avoiding lost browser user activation.
+  // Canvas -> Blob is deliberately synchronous here; no toBlob Promise is used
+  // between the trusted click and the browser's native download navigation.
+  function prepareDownload(canvas) {
+    if (!canvas) throw new Error('The Job Sheet has not been captured.');
+    const dataURL=canvas.toDataURL('image/png');
+    if(!dataURL.startsWith('data:image/png;base64,'))throw new Error('PNG encoding is unsupported.');
+    let url=dataURL, revoke=()=>{};
     try {
-      const a=document.createElement('a');a.href=url;a.download=safeName.endsWith('.png')?safeName:`${safeName}.png`;
-      a.style.display='none';document.body.appendChild(a);a.click();a.remove();
-    } finally {setTimeout(()=>URL.revokeObjectURL(url),30000);}
-    return blob.size;
+      const binary=atob(dataURL.slice(dataURL.indexOf(',')+1));
+      const bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      const blob=new Blob([bytes],{type:'image/png'});
+      url=URL.createObjectURL(blob);
+      let revoked=false;
+      revoke=()=>{if(!revoked){revoked=true;URL.revokeObjectURL(url)}};
+    }catch(error){console.warn('Blob URL unavailable, using PNG data URL:',error)}
+    return {url,dataURL,revoke};
   }
-  window.KSOrderformExporter={capture,download,nativeCapture};
+  function safeFilename(filename) {
+    const clean=String(filename||'JobSheet.png').replace(/[\\/:*?"<>|]/g,'_').slice(0,120);
+    return /\.png$/i.test(clean)?clean:`${clean}.png`;
+  }
+  function downloadReady(url, filename) {
+    if(!url||!(/^(blob:|data:image\/png(?:;base64)?,)/.test(url)))throw new Error('PNG is not ready. Open Preview first.');
+    const anchor=document.createElement('a');
+    anchor.href=url;
+    anchor.download=safeFilename(filename);
+    anchor.style.display='none';
+    document.body.appendChild(anchor);
+    try{anchor.click()}finally{anchor.remove()}
+  }
+  // Kept for older integrations; it is now synchronous and never awaits toBlob.
+  function download(canvas,filename){
+    const prepared=prepareDownload(canvas);
+    downloadReady(prepared.url,filename);
+    setTimeout(prepared.revoke,30000);
+  }
+  window.KSOrderformExporter={capture,download,downloadReady,prepareDownload,safeFilename,nativeCapture};
 })();

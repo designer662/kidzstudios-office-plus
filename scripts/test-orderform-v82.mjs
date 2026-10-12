@@ -7,18 +7,18 @@ vm.runInNewContext(helper,globals,{filename:'orderform-export.js'});
 assert.equal(typeof globals.window.KSOrderformExporter.capture,'function');
 assert.equal(typeof globals.window.KSOrderformExporter.nativeCapture,'function');
 assert.equal(typeof globals.window.KSOrderformExporter.download,'function');
-assert.match(helper,/canvas\.toBlob\(/);
+assert.match(helper,/prepareDownload\(/);
 assert.match(helper,/URL\.createObjectURL\(/);
 assert.match(helper,/html2canvas/);
 assert.doesNotMatch(helper,/<foreignObject\b/); // No SVG document export.
 for(const n of [1,2]){
   const html=readFileSync(`public/orderform${n}.html`,'utf8');
-  assert.match(html,/orderform-export\.js\?v=82\.0/);
+  assert.match(html,/orderform-export\.js\?v=83\.0/);
   assert.match(html,/KSOrderformExporter\.capture\(sheet/);
-  assert.match(html,/KSOrderformExporter\.download\(currentPreviewCanvas/);
+  assert.match(html,/KSOrderformExporter\.prepareDownload\(canvas/);
   assert.match(html,/currentPreviewCanvas\s*=\s*canvas/);
   assert.match(html,/currentPreviewCanvas\s*=\s*null/);
-  assert.match(html,/onclick="downloadImage\(\)"/);
+  assert.match(html,/onclick="return downloadImage\(event\)"/);
 }
 const header=readFileSync('public/suite-header.js','utf8');
 assert.match(header,/ks:supabase-change/);

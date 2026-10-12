@@ -1,4 +1,10 @@
-# **Current release: V81 · Realistic Office Ambience**
+# **Current release: V83 · Orderform PNG Download Hotfix**
+
+## V83: Orderform PNG download repair
+
+- V82 used an asynchronous Blob conversion in the Download PNG click handler. On some browsers the delayed save loses its trusted user activation and is blocked.
+- V83 prepares the PNG and Blob URL *before* the user clicks Download, and uses a native `<a download>` link for both Orderforms.
+- All other V82 features are retained. See [README-V83.md](README-V83.md).
 
 ## V82: Orderform PNG downloads and shared live tool notifications
 

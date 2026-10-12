@@ -1,7 +1,7 @@
 {
-  "release": 82,
-  "edition": "Living Office Realistic Ambience",
-  "package": "V81 audio unlock and procedural office sound layers",
+  "release": 83,
+  "edition": "Orderform Download Hotfix",
+  "package": "V83 native user-click PNG download for Orderform 1 and 2",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -9,5 +9,5 @@
     "office-movement-sync.js",
     "office-3d.js"
   ],
-  "check": "Opt-in ambient audio: ventilation, typing, footsteps, soft synthetic conversation, independent notification chimes."
+  "check": "Preview prepares a PNG Blob URL and a native download link before the Download PNG click. V82 shared notifications unchanged."
 }

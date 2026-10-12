@@ -1,3 +1,7 @@
+## V83 · Orderform native PNG download hotfix
+- Fixed the delayed synthetic download click by preparing Blob URLs in Preview and using native download anchors in Orderform 1 and 2.
+- Kept V82 shared-live notifications and all other existing features.
+
 ## V81 · Realistic Living Office Ambience (2026-10-12)
 - Fixed extremely quiet legacy audio graph and made unlock/restart respect browser autoplay policies.
 - Added `public/office-ambience-audio.js` with local procedural air-conditioning, keyboard/mouse, footstep and quiet nonverbal office-murmur layers.

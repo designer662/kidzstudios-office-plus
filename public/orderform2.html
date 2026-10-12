@@ -8,7 +8,7 @@
     <title>Kidz Studios Job Sheet (Mockup & Details)</title>
 
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="orderform-export.js?v=82.0"></script>
+    <script src="orderform-export.js?v=83.0"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1542,10 +1542,10 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
             <img id="previewImage" src="" alt="Form Preview">
             <div class="modal-actions">
                 <button class="action-btn reset" style="width: auto;" onclick="closePreview()">Cancel</button>
-                <button class="action-btn preview" style="width: auto;" onclick="downloadImage()">
+                <a id="downloadPngLink" class="action-btn preview" style="width: auto; text-decoration: none;" href="" download="JobSheet.png" onclick="return downloadImage(event)" aria-label="Download job sheet as PNG">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Download PNG
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -1903,6 +1903,22 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
             // --- PREVIEW / EXPORT ---
             let currentPreviewDataURL = '';
             let currentPreviewCanvas = null;
+            let currentDownloadHref = '';
+            let currentDownloadRevoke = null;
+            const downloadPngLink = document.getElementById('downloadPngLink');
+            function clearPreparedDownload() {
+                if (currentDownloadRevoke) {
+                    const revoke=currentDownloadRevoke;
+                    setTimeout(revoke, 30000); // download navigation may still be reading this Blob
+                }
+                currentDownloadRevoke = null;
+                currentDownloadHref = '';
+                if (downloadPngLink) { downloadPngLink.removeAttribute('href'); downloadPngLink.setAttribute('aria-disabled','true'); }
+            }
+            function getPngFilename() {
+                const field = document.getElementById("jobSheetNumber");
+                return window.KSOrderformExporter.safeFilename((field?.value || '').trim().replace(/[^a-zA-Z0-9_-]/g,'_') || 'JobSheet');
+            }
 
             function syncInputAttributes() {
                 document.querySelectorAll('#jobSheetForm input').forEach(inp => {
@@ -1933,9 +1949,18 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     });
 
                     const canvas = await captureSheet(2);
+                    clearPreparedDownload();
+                    const prepared = window.KSOrderformExporter.prepareDownload(canvas);
                     currentPreviewCanvas = canvas;
-                    currentPreviewDataURL = canvas.toDataURL('image/png');
+                    currentPreviewDataURL = prepared.dataURL;
+                    currentDownloadHref = prepared.url;
+                    currentDownloadRevoke = prepared.revoke;
                     previewImage.src = currentPreviewDataURL;
+                    if (downloadPngLink) {
+                        downloadPngLink.href = currentDownloadHref;
+                        downloadPngLink.download = getPngFilename();
+                        downloadPngLink.removeAttribute('aria-disabled');
+                    }
                     previewModal.style.display = 'block';
                 } catch (err) {
                     showToast('Preview failed: ' + err.message, 'error');
@@ -1958,20 +1983,27 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 previewImage.src = '';
                 currentPreviewDataURL = '';
                 currentPreviewCanvas = null;
+                clearPreparedDownload();
             };
 
             // --- DOWNLOAD with ONLY the JOB SHEET detail as filename ---
-            window.downloadImage = async function() {
-                if (!currentPreviewCanvas) {
-                    showToast('No preview available. Preview first.', 'error');
-                    return;
+            // A real anchor is clicked directly by the user. No asynchronous
+            // PNG conversion or synthetic click can make the browser lose the gesture.
+            window.downloadImage = function(event) {
+                if (!currentDownloadHref || !currentPreviewDataURL) {
+                    event?.preventDefault();
+                    showToast('PNG not ready. Click Preview & Export, then Download PNG.', 'error');
+                    return false;
                 }
-                const value = document.getElementById('jobSheetNumber')?.value?.trim() || '';
-                const filename = (value.replace(/[^a-zA-Z0-9_-]/g, '_') || 'JobSheet') + '.png';
-                try {
-                    await window.KSOrderformExporter.download(currentPreviewCanvas, filename);
-                    showToast('PNG downloaded successfully.');
-                } catch (error) { showToast('Download failed: ' + error.message, 'error'); }
+                const filename=getPngFilename();
+                if (downloadPngLink) {
+                    downloadPngLink.download=filename;
+                    downloadPngLink.href=currentDownloadHref;
+                }
+                // For code calling downloadImage() without clicking the real link.
+                if (!event) window.KSOrderformExporter.downloadReady(currentDownloadHref,filename);
+                showToast('PNG download started. Check your Downloads folder.');
+                return true;
             };
 
             // --- INIT ---
@@ -2070,7 +2102,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 
 <script src="shared-sync.js" defer></script>
 
-<footer class="ks-version-footer no-print" aria-label="Build version">v82</footer>
+<footer class="ks-version-footer no-print" aria-label="Build version">v83</footer>
 <script src="office-notification-sound.js?v=69.0" defer></script>
 <script src="suite-header.js" defer></script>
 <script src="office-outside-close.js?v=75.0" defer></script>
