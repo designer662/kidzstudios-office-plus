@@ -1,3 +1,9 @@
+## V69 · Notification Chime
+- Added browser notification sound for new office updates, with a soft chat-specific variant
+- Added per-PC Sound on / Muted control inside the notifications panel
+- No noise for historical events, local dashboard events, hidden tabs, or repeated update bursts
+- Applied audio controls and update detection across dashboard and tool pages
+
 ## V68 — Cinematic Auto-Rotation (2026-10-12)
 
 - Reduced Three.js OrbitControls autoRotateSpeed to 0.24 from 0.8.

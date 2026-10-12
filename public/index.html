@@ -1412,7 +1412,6 @@ body{overscroll-behavior:none;}
   let eventPollTimer=null,eventInitialized=false,lastEventId=0,notificationOpen=false,notificationUnreadCount=0,notificationToastTimer=null,editingWorkloadId=null,jobAutoTimer=null,jobSyncInFlight=false;
   let notifications=[];
   const workloadNoticeIds=new Set();
-  let audioContext=null,audioArmed=false;
   let jobSheetUrl=DEFAULT_JOB_SHEET_URL;
   let jobDataSource='html';
   let jobSheetBase='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo';
@@ -1502,13 +1501,6 @@ body{overscroll-behavior:none;}
   function showNotificationToast(event){
     if(!notificationToast)return;notificationToast.textContent=`${clockTime(event.createdAt)} · ${event.title||'Office update'} · ${event.message||'Updated'}`;notificationToast.classList.add('show');clearTimeout(notificationToastTimer);notificationToastTimer=setTimeout(()=>notificationToast.classList.remove('show'),3200);
   }
-  function armNotificationAudio(){
-    if(audioArmed)return;try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;audioContext=new Ctx();audioContext.resume?.();audioArmed=true}catch(_){}
-  }
-  function playNotificationBeep(){
-    if(!audioContext||audioContext.state!=='running')return;
-    try{const now=audioContext.currentTime,osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(880,now);osc.frequency.exponentialRampToValueAtTime(660,now+.12);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.055,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+.16);osc.connect(gain);gain.connect(audioContext.destination);osc.start(now);osc.stop(now+.18)}catch(_){}
-  }
   function markWorkloadNotice(employeeId){
     const id=Number(employeeId);if(!Number.isFinite(id))return;workloadNoticeIds.add(id);employeeNodes.get(id)?.classList.add('workload-alert');
   }
@@ -1520,7 +1512,7 @@ body{overscroll-behavior:none;}
   }
   function addNotification(event,{initial=false,local=false}={}){
     notifications.unshift(event);if(notifications.length>40)notifications.length=40;renderNotifications();
-    if(!initial&&!local){if(!notificationOpen)setNotificationUnread(notificationUnreadCount+1);showNotificationToast(event);playNotificationBeep();}
+    if(!initial&&!local){if(!notificationOpen)setNotificationUnread(notificationUnreadCount+1);showNotificationToast(event);window.KSNotificationSound?.play(event.eventType||'update');}
   }
   function handleOfficeEvent(event,{initial=false,local=false}={}){
     if(!event||!event.id)return;const type=String(event.eventType||'office_update'),empId=Number(event.employeeId)||null,emp=empId?employeeById[empId]:null;
@@ -2616,8 +2608,7 @@ body{overscroll-behavior:none;}
   $('#zoomIn').onclick=()=>window.office3d?window.office3d.zoomBy(1.16):setScale(cam.scale*1.16);$('#zoomOut').onclick=()=>window.office3d?window.office3d.zoomBy(1/1.16):setScale(cam.scale/1.16);$('#resetView').onclick=resetScene;$('#fullscreenBtn').onclick=()=>document.fullscreenElement?document.exitFullscreen?.():app.requestFullscreen?.();
   document.onkeydown=e=>{if(!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){if(e.key.toLowerCase()==='q')rotateModel(-15);if(e.key.toLowerCase()==='e')rotateModel(15);if(e.key==='0')resetScene()}if(e.key==='Escape'){if(livePanel.classList.contains('maximized')){livePanel.classList.remove('maximized');maximizeLiveBtn?.setAttribute('aria-pressed','false');if(maximizeLiveBtn)maximizeLiveBtn.textContent='□'}clearEmployeeSelection();contextCard.classList.remove('open');setChatOpen(false);setNotificationOpen(false);closeWorkloadEditor();if(todayPanel?.classList.contains('expanded')){todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false')}}}};
   document.addEventListener('click',e=>{if(notificationOpen&&!e.target.closest('.notification-wrap'))setNotificationOpen(false)});
-  document.addEventListener('pointerdown',armNotificationAudio,{once:true,capture:true});
-  document.addEventListener('keydown',armNotificationAudio,{once:true,capture:true});
+  // V69 notification audio is unlocked and controlled by the shared sound module.
   svg.onwheel=e=>{e.preventDefault();setScale(cam.scale*(e.deltaY>0?.92:1.085),svgPoint(e.clientX,e.clientY))};
   svg.onpointerdown=e=>{if(e.button!==0)return;const interactive=e.target.closest?.('.employee,.desk-hit');if(interactive)return;stopCameraFollow();dragging=!e.shiftKey;rotateDragging=e.shiftKey;dragMoved=false;lastPointer={x:e.clientX,y:e.clientY};svg.setPointerCapture(e.pointerId);svg.classList.add(rotateDragging?'rotating':'dragging')};
   svg.onpointermove=e=>{if(!dragging&&!rotateDragging)return;stopCameraFollow();const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;if(Math.abs(dx)+Math.abs(dy)>2)dragMoved=true;if(rotateDragging){viewMode='custom';modelAngle=Math.max(-45,Math.min(45,modelAngle+dx*.18));applyModelRotation()}else{const r=svg.getBoundingClientRect();viewMode='custom';cam.tx+=dx*1240/r.width;cam.ty+=dy*760/r.height;clampCamera();scheduleCameraApply()}lastPointer={x:e.clientX,y:e.clientY}};
@@ -3074,8 +3065,9 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v68 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v69 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=68.0" defer></script>
+<script src="office-3d.js?v=69.0" defer></script>
 </body>
 </html>

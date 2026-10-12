@@ -1,3 +1,5 @@
+> **Latest update: V69 Notification Sound.** See [README-V69.md](README-V69.md) for deployment notes.
+
 # KIDZSTUDIOS Office Plus V61 · Header & Excel Upgrade
 
 This GitHub Pages + Supabase release is built on V60. It keeps the local 3D engine, auto-rotate, click-character emoji picker, office chat and staff directory. No new Supabase migration required.

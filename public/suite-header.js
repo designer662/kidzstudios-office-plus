@@ -82,11 +82,28 @@
   // Tool pages get a lightweight view of the shared event feed. The dashboard keeps its richer native notification controller.
   if(!document.getElementById('officeSvg')){
     const btn=header.querySelector('#notificationBtn'),panel=header.querySelector('#notificationPanel'),nlist=header.querySelector('#notificationList'),badge=header.querySelector('#notificationUnread'),clear=header.querySelector('#notificationClearBtn');
-    let events=[];let seen=0;try{seen=Number(localStorage.getItem('ksHeaderSeenEvent')||0)||0}catch(_){}
+    let events=[];let seen=0;let lastSoundEventId=null;
+    try{seen=Number(localStorage.getItem('ksHeaderSeenEvent')||0)||0}catch(_){}
     const timeAgo=value=>{const t=new Date(value).getTime();if(!Number.isFinite(t))return'';const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return'now';if(s<3600)return`${Math.floor(s/60)}m`;if(s<86400)return`${Math.floor(s/3600)}h`;return`${Math.floor(s/86400)}d`};const clock=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'--:--':d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})};
     const actorFor=e=>String(e?.metadata?.actor?.name||'').trim();
     const draw=()=>{if(!nlist)return;nlist.innerHTML=events.length?[...events].reverse().slice(0,10).map(e=>{const actor=actorFor(e);return `<div class="notification-item"><b>${esc(e.title||'Office update')}</b><span>${esc(e.message||'')}${actor?` · by ${esc(actor)}`:''}</span><time>${esc(clock(e.createdAt))} · ${esc(timeAgo(e.createdAt))}</time></div>`}).join(''):'<div class="notification-empty">No new updates yet.</div>';const unread=events.filter(e=>Number(e.id)>seen).length;if(badge){badge.textContent=String(Math.min(99,unread));badge.hidden=!unread}btn?.classList.toggle('has-unread',unread>0)};
-    async function pull(){try{const res=await fetch('/api/events?limit=20',{cache:'no-store',headers:{accept:'application/json'}});if(!res.ok)return;const data=await res.json();events=Array.isArray(data.events)?data.events:[];draw()}catch(_){}}
+    async function pull(){
+      try{
+        const res=await fetch('/api/events?limit=20',{cache:'no-store',headers:{accept:'application/json'}});
+        if(!res.ok)return;
+        const data=await res.json();
+        const next=Array.isArray(data.events)?data.events:[];
+        const maxId=next.reduce((max,event)=>Math.max(max,Number(event.id)||0),0);
+        // First load is only a baseline: never ring for old notifications.
+        if(lastSoundEventId!==null && maxId>lastSoundEventId && !document.hidden){
+          const fresh=next.filter(event=>(Number(event.id)||0)>lastSoundEventId && Date.now()-new Date(event.createdAt||0).getTime()<120000);
+          if(fresh.length)window.KSNotificationSound?.play(fresh.some(e=>e.eventType==='chat_message')?'chat_message':'update');
+        }
+        lastSoundEventId=Math.max(lastSoundEventId||0,maxId);
+        events=next;
+        draw();
+      }catch(_){}
+    }
     btn?.addEventListener('click',e=>{e.stopPropagation();const open=!panel.classList.contains('open');panel.classList.toggle('open',open);panel.setAttribute('aria-hidden',String(!open));btn.setAttribute('aria-expanded',String(open));if(open&&events.length){seen=Math.max(seen,...events.map(e=>Number(e.id)||0));try{localStorage.setItem('ksHeaderSeenEvent',String(seen))}catch(_){}draw()}});
     clear?.addEventListener('click',()=>{events=[];draw()});document.addEventListener('pointerdown',e=>{if(panel?.classList.contains('open')&&!header.querySelector('.notification-wrap')?.contains(e.target)){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');btn?.setAttribute('aria-expanded','false')}});pull();setInterval(pull,15000);
   }
