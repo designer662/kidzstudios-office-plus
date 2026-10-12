@@ -1,3 +1,12 @@
+## V72 — Bulk delete and row trash controls (2026-10-12)
+
+- Added row checkboxes and filtered select-all in Job Management.
+- Added live selection count, clear selection, and multi-delete confirmation.
+- Added single-job trash icon immediately after Duplicate in each row.
+- Reuses foreground confirmation modal; protects against stale Supabase records and unexpected deletes.
+- Preserved Excel, 3D office, moods, notifications and shared state.
+- Added dedicated regression test and GitHub Actions workflow check.
+
 ## V71 — Delete confirmation display fix (2026-10-12)
 
 - Fixed Job Management Delete confirmation appearing behind its Edit Job modal. The previous CSS assigned a lower stacking level to `#confirmModal` than the editor overlay.

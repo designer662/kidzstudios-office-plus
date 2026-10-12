@@ -1,3 +1,5 @@
+> **Current build: v72.** Job Management now supports selecting and deleting multiple jobs, plus row-level trash buttons next to Duplicate. See [README-V72.md](README-V72.md). No database migration required.
+
 > **Current build: v71.** The Job Management Delete confirmation now appears in front of the editor. No database migration required. See [README-V70.md](README-V70.md) for other features.
 
 > **Latest update: V69 Notification Sound.** See [README-V69.md](README-V69.md) for deployment notes.

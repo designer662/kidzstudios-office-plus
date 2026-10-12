@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f7f5">
-<title>Kidzstudios Office · Job Management · V47 · Shared Dropdowns</title>
+<title>Kidzstudios Office · Job Management · V72 · Bulk Delete</title>
 <style>
 :root{--bg:#f7f7f5;--card:#fff;--text:#1d2022;--muted:#777c81;--line:rgba(29,32,34,.09);--orange:#ef7b45;--orange2:#e7662c;--orangeSoft:#fff0e8;--green:#43a276;--blue:#5687c6;--amber:#d99a38;--red:#c95a50;--shadow:0 18px 55px rgba(32,35,38,.09),0 2px 8px rgba(32,35,38,.045);--ui:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:radial-gradient(circle at 50% 0,#fff 0,transparent 28%),linear-gradient(180deg,#fbfbfa,#f5f5f2);color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}
@@ -114,6 +114,25 @@
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
 <style>.period-compact{grid-template-columns:auto 115px 145px 1fr}@media(max-width:1000px){.period-compact{grid-template-columns:auto 115px 145px}}@media(max-width:600px){.period-compact{grid-template-columns:1fr 1fr}.period-title{grid-column:1/-1}}.modal.open{overflow-y:auto}.dialog{max-height:92vh;overflow-y:auto}#confirmModal{z-index:20050!important;isolation:isolate}#confirmModal.open{display:flex!important}#confirmModal>.dialog{position:relative;z-index:1}#sheetImportModal{z-index:1001}#excelImportModal{z-index:1002}</style>
+<style id="v72-bulk-delete-styles">
+/* Job Management V72: selection + safe destructive row actions */
+.job-selection-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 13px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fdfcfb)}
+.job-selection-count{font-size:11px;font-weight:850;color:#58616a;margin-right:auto}
+.job-selection-count strong{color:#e7662c}
+.job-selection-help{font-size:10px;font-weight:600;color:#92999e}
+.job-selection-bar .btn{height:34px;font-size:10px;padding:0 12px;border-radius:10px}
+.job-selection-bar .btn.danger{background:#fff1ef;border-color:rgba(201,90,80,.28);color:#b9443e}
+.job-selection-bar .btn.danger:not(:disabled):hover{background:#ffe5e0;border-color:rgba(201,90,80,.44)}
+.job-checkbox-cell{width:39px!important;min-width:39px;text-align:center!important;padding:8px 9px!important}
+.job-row-check,.job-select-all{width:17px;height:17px;accent-color:#ed7942;cursor:pointer;vertical-align:middle;display:inline-block}
+.job-row-check:focus-visible,.job-select-all:focus-visible{outline:2px solid #ef7b45;outline-offset:3px}
+.jobs-table tr.job-row-selected td{background:#fff9f4!important}
+.actions{align-items:center}.mini.trash{color:#b95a54;border-color:rgba(201,90,80,.18);background:#fffafa}
+.mini.trash:hover,.mini.trash:focus-visible{background:#fff0ed;border-color:rgba(201,90,80,.36);color:#a63c34}
+.mini.trash svg{width:15px;height:15px;display:block;margin:auto}
+#confirmModal .danger-confirm{background:#bb5149!important;border-color:#bb5149!important;color:white!important}
+@media(max-width:700px){.job-selection-bar{padding:9px 10px;gap:7px}.job-selection-help{flex-basis:100%;order:5}.job-selection-bar .btn{padding:0 10px}}
+</style>
 </head>
 <body data-ks-page="job-management">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -179,9 +198,15 @@
       </div></details>
       <div class="toolbar-meta"><span id="resultCount">0 jobs</span><button class="mini" id="refreshBtn" title="Refresh shared data">↻</button></div>
     </div>
+    <div class="job-selection-bar" id="jobSelectionBar" role="group" aria-label="Bulk job actions">
+      <span class="job-selection-count" id="jobSelectionCount" aria-live="polite">0 selected</span>
+      <span class="job-selection-help">Tick job checkboxes to select multiple records</span>
+      <button type="button" class="btn" id="jobSelectionClear" disabled>Clear selection</button>
+      <button type="button" class="btn danger" id="bulkDeleteBtn" disabled>🗑 Delete selected</button>
+    </div>
     <div class="reconcile"><span id="reconcileText"><b>0</b> rows · 0 classified · 0 unmapped</span><span id="mappingNote">Stage tally uses CURRENT DEPARTMENT from the Excel schema.</span></div>
     <div class="table-wrap"><table class="jobs-table v44-table"><thead><tr>
-      <th>Job</th><th>Customer</th><th>Item</th><th>Priority</th><th>Department</th><th>Artwork</th><th>Sales</th><th>Designer</th><th>Order</th><th>Due</th><th>Balance</th><th>Updated</th><th></th>
+      <th class="job-checkbox-cell"><input type="checkbox" class="job-select-all" id="jobSelectAll" aria-label="Select all jobs in the current filtered view" title="Select all visible jobs"></th><th>Job</th><th>Customer</th><th>Item</th><th>Priority</th><th>Department</th><th>Artwork</th><th>Sales</th><th>Designer</th><th>Order</th><th>Due</th><th>Balance</th><th>Updated</th><th></th>
     </tr></thead><tbody id="tbody"></tbody></table><div class="empty" id="empty" hidden>No jobs match this view.</div></div>
   </section>
 </main>
@@ -340,6 +365,7 @@ const DEFAULT_DROPDOWN_OPTIONS={
  qcStatus:['PENDING','PASS'], currentDepartment:['SALES','DESIGN','PRODUCTION','CLOSED']
 };
 
+const selectedJobIndices=new Set();
 let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear='all',selectedMonth='all',dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0;
 let jobsLoaded=false,pullRequest=0,loadPending=null;
 const clientId=window.KSTempUser?.get?.().browserId||crypto.randomUUID?.()||`jm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -392,6 +418,7 @@ async function pull({quiet=false}={}){
   const raw=row?.payload?.jobs;
   if(row&& !Array.isArray(raw))throw Error('The saved job data is invalid. Export a backup before replacing it.');
   if(!quiet||!jobsLoaded||Number(row?.version||0)!==version){
+   if(jobsLoaded&&Number(row?.version||0)!==version)selectedJobIndices.clear();
    jobs=(raw||[]).map(normalizeJob);version=Number(row?.version||0);
    savedAt=Number(row?.payload?.savedAt)|| (row?.updatedAt?new Date(row.updatedAt).getTime():0);
    jobsLoaded=true;render();
@@ -414,11 +441,11 @@ async function saveAll(reason='updated',candidate=jobs){
   const r=await fetch(API,{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:JOBS_SCOPE,payload,clientId,expectedVersion:version})});
   if(!r.ok){const details=await r.json().catch(()=>({}));throw Error(r.status===409?'Jobs changed on another PC. Refresh, review the latest jobs and try again.':details.error||`Save failed (${r.status})`)}
   const row=await r.json();jobs=next;version=Number(row.version||version+1);savedAt=payload.savedAt;
-  render();setSync('live','Shared · Saved',`${jobs.length} jobs · by ${actor.name} · Office Pulse synced`);
+  selectedJobIndices.clear();render();setSync('live','Shared · Saved',`${jobs.length} jobs · by ${actor.name} · Office Pulse synced`);
   void postEvent('job_management_updated','Job Management updated',`${jobs.length} shared jobs · ${reason}`,{count:jobs.length,source:'html-v70',signature:payload.signature,tally:counts(jobs)});
   return true;
  }catch(e){setSync('offline','Save not completed',e.message);toast(e.message);return false}
- finally{saving=false}
+ finally{saving=false;updateJobSelectionBar()}
 }
 function counts(list=jobs){const c={orders:0,artwork:0,production:0,completed:0,overdue:0,unmapped:0,urgent:0};for(const j of list){const st=stage(j);c[st]=(c[st]||0)+1;if(overdue(j))c.overdue++;if(normalize(j.priority)==='urgent')c.urgent++}return c}
 function unique(key){return[...new Set(jobs.map(j=>String(j[key]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
@@ -557,7 +584,90 @@ function closeOptionManager(){
 }
 function deptClass(j){if(overdue(j))return'overdue';const s=stage(j);return s==='artwork'?'design':s==='production'?'production':s==='completed'?'closed':s==='orders'?'orders':''}
 function cellValue(j,key){if(['orderDate','deliveryTime','actualComplete1','actualComplete2','lastUpdate'].includes(key))return displayDate(j[key]);if(['invoiceAmount','paid','balance'].includes(key))return moneyText(j[key]);return j[key]||'—'}
-function render(){renderPeriod();const base=periodJobs(),c=counts(base);$('#sTotal').textContent=base.length;$('#sOrders').textContent=c.orders;$('#sArtwork').textContent=c.artwork;$('#sProduction').textContent=c.production;$('#sCompleted').textContent=c.completed;$('#sUrgent').textContent=c.urgent;$('#sOverdue').textContent=c.overdue;renderFilters();renderSmartOptions();const list=filtered();$('#resultCount').textContent=`${list.length} job${list.length===1?'':'s'} · ${periodLabel()}`;$('#reconcileText').innerHTML=`<b>${base.length}</b> period rows · ${base.length-c.unmapped} classified by CURRENT DEPARTMENT · ${c.unmapped} unmapped · ${jobs.length} shared total`;const tb=$('#tbody'),empty=$('#empty');empty.textContent=jobs.length?'No jobs match this view.':'No jobs yet. Add or import a job to begin.';empty.hidden=list.length>0;tb.innerHTML=list.map(({j,i})=>`<tr data-index="${i}"><td><b class="ref">${esc(j.jobsheetFiles||'—')}</b><small class="subcell">${esc(j.invoice||'No invoice')}</small></td><td class="customer">${esc(j.customer||'—')}</td><td>${esc(j.item||'—')}<small class="subcell">${esc(j.typeOfPrinting||'')}</small></td><td>${j.priority?`<span class="pill ${normalize(j.priority)==='urgent'?'urgent-pill':''}">${esc(j.priority)}</span>`:'—'}</td><td><span class="dept-pill ${deptClass(j)}">${esc(overdue(j)?'OVERDUE':j.currentDepartment||'SALES / OPEN')}</span></td><td>${esc(j.artworkStatus||'—')}</td><td>${esc(j.sales||'—')}</td><td>${esc(j.designer||'—')}</td><td>${esc(cellValue(j,'orderDate')||'—')}</td><td>${esc(cellValue(j,'deliveryTime')||'—')}${j.deliveryTime?`<small class="days-chip ${stage(j)==='completed'?'done':Number(j.daysLeft)<0?'overdue':Number(j.daysLeft)===0?'due':''}">${esc(stage(j)==='completed'?'Completed':daysLeftLabel(j.daysLeft))}</small>`:''}</td><td>${esc(cellValue(j,'balance')||'—')}</td><td>${esc(cellValue(j,'lastUpdate')||'—')}</td><td><div class="actions"><button class="mini edit" data-index="${i}" title="Edit full job">✎</button><button class="mini copy" data-index="${i}" title="Duplicate">⧉</button></div></td></tr>`).join('')}
+function updateJobSelectionBar(list=filtered()){
+ const visibleIndices=list.map(({i})=>i);
+ const selectedVisible=visibleIndices.filter(i=>selectedJobIndices.has(i)).length;
+ const header=$('#jobSelectAll');
+ header.checked=visibleIndices.length>0&&selectedVisible===visibleIndices.length;
+ header.indeterminate=selectedVisible>0&&selectedVisible<visibleIndices.length;
+ header.disabled=visibleIndices.length===0||saving||!jobsLoaded;
+ const count=selectedJobIndices.size;
+ $('#jobSelectionCount').textContent=`${count} selected${count&&selectedVisible<count?` · ${selectedVisible} in current view`:''}`;
+ $('#jobSelectionClear').disabled=count===0||saving;
+ $('#bulkDeleteBtn').disabled=count===0||saving||!jobsLoaded;
+ $('#bulkDeleteBtn').textContent=count?`🗑 Delete selected (${count})`:'🗑 Delete selected';
+}
+function render(){
+ renderPeriod();
+ const base=periodJobs(),c=counts(base);
+ $('#sTotal').textContent=base.length;$('#sOrders').textContent=c.orders;
+ $('#sArtwork').textContent=c.artwork;$('#sProduction').textContent=c.production;
+ $('#sCompleted').textContent=c.completed;$('#sUrgent').textContent=c.urgent;
+ $('#sOverdue').textContent=c.overdue;
+ renderFilters();renderSmartOptions();
+ const list=filtered();
+ $('#resultCount').textContent=`${list.length} job${list.length===1?'':'s'} · ${periodLabel()}`;
+ $('#reconcileText').innerHTML=`<b>${base.length}</b> period rows · ${base.length-c.unmapped} classified by CURRENT DEPARTMENT · ${c.unmapped} unmapped · ${jobs.length} shared total`;
+ const tb=$('#tbody'),empty=$('#empty');
+ empty.textContent=jobs.length?'No jobs match this view.':'No jobs yet. Add or import a job to begin.';
+ empty.hidden=list.length>0;
+ const trashIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg>';
+ tb.innerHTML=list.map(({j,i})=>`<tr data-index="${i}" class="${selectedJobIndices.has(i)?'job-row-selected':''}">
+  <td class="job-checkbox-cell"><input type="checkbox" class="job-row-check" data-index="${i}" aria-label="Select job ${esc(j.jobsheetFiles||j.customer||i+1)}" ${selectedJobIndices.has(i)?'checked':''}></td>
+  <td><b class="ref">${esc(j.jobsheetFiles||'—')}</b><small class="subcell">${esc(j.invoice||'No invoice')}</small></td>
+  <td class="customer">${esc(j.customer||'—')}</td>
+  <td>${esc(j.item||'—')}<small class="subcell">${esc(j.typeOfPrinting||'')}</small></td>
+  <td>${j.priority?`<span class="pill ${normalize(j.priority)==='urgent'?'urgent-pill':''}">${esc(j.priority)}</span>`:'—'}</td>
+  <td><span class="dept-pill ${deptClass(j)}">${esc(overdue(j)?'OVERDUE':j.currentDepartment||'SALES / OPEN')}</span></td>
+  <td>${esc(j.artworkStatus||'—')}</td>
+  <td>${esc(j.sales||'—')}</td>
+  <td>${esc(j.designer||'—')}</td>
+  <td>${esc(cellValue(j,'orderDate')||'—')}</td>
+  <td>${esc(cellValue(j,'deliveryTime')||'—')}${j.deliveryTime?`<small class="days-chip ${stage(j)==='completed'?'done':Number(j.daysLeft)<0?'overdue':Number(j.daysLeft)===0?'due':''}">${esc(stage(j)==='completed'?'Completed':daysLeftLabel(j.daysLeft))}</small>`:''}</td>
+  <td>${esc(cellValue(j,'balance')||'—')}</td>
+  <td>${esc(cellValue(j,'lastUpdate')||'—')}</td>
+  <td><div class="actions">
+   <button type="button" class="mini edit" data-index="${i}" title="Edit full job" aria-label="Edit ${esc(j.jobsheetFiles||'job')}">✎</button>
+   <button type="button" class="mini copy" data-index="${i}" title="Duplicate" aria-label="Duplicate ${esc(j.jobsheetFiles||'job')}">⧉</button>
+   <button type="button" class="mini trash" data-index="${i}" title="Delete job" aria-label="Delete ${esc(j.jobsheetFiles||'job')}">${trashIcon}</button>
+  </div></td></tr>`).join('');
+ updateJobSelectionBar(list);
+}
+function toggleJobSelection(index,checked){
+ if(!jobsLoaded||saving||!Number.isInteger(index)||index<0||index>=jobs.length)return;
+ if(checked)selectedJobIndices.add(index);else selectedJobIndices.delete(index);
+ render();
+}
+function selectAllVisibleJobs(checked){
+ if(!jobsLoaded||saving)return;
+ filtered().forEach(({i})=>{if(checked)selectedJobIndices.add(i);else selectedJobIndices.delete(i)});
+ render();
+}
+function requestDeleteJobs(indices){
+ if(!jobsLoaded||saving)return;
+ const uniqueIndices=[...new Set(indices)].sort((a,b)=>a-b).filter(i=>Number.isInteger(i)&&i>=0&&i<jobs.length);
+ if(!uniqueIndices.length)return;
+ const capturedVersion=version;
+ const recordSnapshots=uniqueIndices.map(i=>[i,JSON.stringify(jobs[i])]);
+ const count=uniqueIndices.length;
+ const refs=uniqueIndices.slice(0,3).map(i=>jobs[i].jobsheetFiles||jobs[i].customer||`Job ${i+1}`).join(' · ');
+ const extra=count>3?` · +${count-3} more`:'';
+ const title=count===1?'Delete job?':`Delete ${count} selected jobs?`;
+ const copy=`${refs}${extra}. ${count===1?'This job':'These jobs'} will be permanently removed from shared Job Management and Office Pulse. This action cannot be undone.`;
+ ask(title,copy,async()=>{
+   if(saving||!jobsLoaded)return;
+   if(version!==capturedVersion||recordSnapshots.some(([i,snapshot])=>JSON.stringify(jobs[i])!==snapshot)){
+     toast('Jobs changed on another PC. Refresh and review your selection before deleting.');
+     return;
+   }
+   const removeIndices=new Set(uniqueIndices);
+   const candidate=jobs.filter((_,i)=>!removeIndices.has(i));
+   if(await saveAll(`deleted ${count} job${count!==1?'s':''}`,candidate)){
+     if($('#editor').classList.contains('open'))closeEditor();
+     toast(`${count} job${count===1?'':'s'} deleted from shared records`);
+   }
+ },count===1?'Delete job':`Delete ${count} jobs`);
+}
 function syncEditorDaysLeft(){const auto=calculateDaysLeft(F.deliveryTime.value,{completedDate:F.actualComplete2.value||F.actualComplete1.value,department:F.currentDepartment.value});F.daysLeft1.value=auto;F.daysLeft2.value=auto;}
 function openEditor(index=-1,duplicate=false){editingIndex=index;const j=index>=0?jobs[index]:normalizeJob({});$('#editorTitle').textContent=duplicate?'Duplicate Job':index>=0?'Edit Job':'Add Job';for(const [key,el] of Object.entries(F)){let v=j[key]??'';if(['orderDate','deliveryTime','actualComplete1','actualComplete2','lastUpdate'].includes(key))v=dateInput(v);el.value=v}if(index<0&&!duplicate){F.orderDate.value=dateInput(new Date());F.priority.value='NORMAL';F.designCharge.value='NO';F.qcStatus.value='PENDING';F.lastUpdate.value=dateInput(new Date())}if(duplicate){F.jobsheetFiles.value='';F.invoice.value='';F.actualComplete1.value='';F.actualComplete2.value='';F.lastUpdate.value=dateInput(new Date());editingIndex=-1}syncEditorDaysLeft();$('#deleteBtn').hidden=index<0||duplicate;$('#duplicateBtn').hidden=index<0||duplicate;$('#editor').classList.add('open');$('#editor').setAttribute('aria-hidden','false');renderSmartOptions();setTimeout(()=>F.jobsheetFiles.focus(),40)}
 function closeEditor(){$('#editor').classList.remove('open');$('#editor').setAttribute('aria-hidden','true');editingIndex=-1}
@@ -578,6 +688,7 @@ function ask(title,copy,fn,label='Continue'){
  $('#confirmTitle').textContent=title;
  $('#confirmCopy').textContent=copy;
  $('#confirmYes').textContent=label;
+ $('#confirmYes').classList.toggle('danger-confirm',label.startsWith('Delete'));
  const modal=$('#confirmModal');
  modal.classList.add('open');
  modal.setAttribute('aria-hidden','false');
@@ -689,8 +800,19 @@ $('#resetOptionsBtn').onclick=()=>{optionDraft[optionActiveField]=cleanOptionLis
 $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'').trim();if(!v)return;collectOptionRows();optionDraft[optionActiveField]=cleanOptionList([...(optionDraft[optionActiveField]||[]),v]);markOptionsDirty(`Added “${v}”`);renderOptionManagerField()};
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
-$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const j=jobs[editingIndex];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{const next=jobs.filter((_,i)=>i!==editingIndex);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=openSheetImport;$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=e.target.value;selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportExcelCurrent').onclick=()=>{exportExcelCurrent();closeExport()};$('#exportExcelAll').onclick=()=>{exportExcelAll();closeExport()};$('#exportExcelTemplate').onclick=()=>{exportExcelTemplate();closeExport()};$('#exportCurrent').onclick=()=>{exportCurrent();closeExport()};$('#exportPeriod').onclick=()=>{exportPeriod();closeExport()};$('#exportYear').onclick=()=>{exportYear();closeExport()};$('#exportSummary').onclick=()=>{exportSummary();closeExport()};$('#exportBackup').onclick=()=>{exportBackup();closeExport()};
-$('#tbody').addEventListener('click',e=>{const edit=e.target.closest('.edit'),copy=e.target.closest('.copy');if(edit){e.stopPropagation();openEditor(+edit.dataset.index);return}if(copy){e.stopPropagation();openEditor(+copy.dataset.index,true);return}const tr=e.target.closest('tr[data-index]');if(tr)openEditor(+tr.dataset.index)});$('#confirmClose').onclick=$('#confirmCancel').onclick=closeConfirm;$('#confirmYes').onclick=async()=>{const fn=confirmAction;closeConfirm();if(fn)await fn()};document.addEventListener('click',e=>{if(!e.target.closest('.combo-shell'))closeComboMenus()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#confirmModal').classList.contains('open')){e.preventDefault();closeConfirm();return}closeComboMenus();closeEditor();closeExport();closeExcelImport();closeSheetImport();if($('#optionsModal').classList.contains('open')&&!optionDirty)closeOptionManager()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();openEditor()}});
+$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex>=0)requestDeleteJobs([editingIndex])};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=openSheetImport;$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=e.target.value;selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportExcelCurrent').onclick=()=>{exportExcelCurrent();closeExport()};$('#exportExcelAll').onclick=()=>{exportExcelAll();closeExport()};$('#exportExcelTemplate').onclick=()=>{exportExcelTemplate();closeExport()};$('#exportCurrent').onclick=()=>{exportCurrent();closeExport()};$('#exportPeriod').onclick=()=>{exportPeriod();closeExport()};$('#exportYear').onclick=()=>{exportYear();closeExport()};$('#exportSummary').onclick=()=>{exportSummary();closeExport()};$('#exportBackup').onclick=()=>{exportBackup();closeExport()};
+$('#jobSelectAll').addEventListener('change',e=>selectAllVisibleJobs(e.target.checked));
+$('#jobSelectionClear').onclick=()=>{selectedJobIndices.clear();render()};
+$('#bulkDeleteBtn').onclick=()=>requestDeleteJobs([...selectedJobIndices]);
+$('#tbody').addEventListener('click',e=>{
+ const checkbox=e.target.closest('.job-row-check');if(checkbox){e.stopPropagation();return}
+ const edit=e.target.closest('.edit'),copy=e.target.closest('.copy'),trash=e.target.closest('.trash');
+ if(edit){e.stopPropagation();openEditor(+edit.dataset.index);return}
+ if(copy){e.stopPropagation();openEditor(+copy.dataset.index,true);return}
+ if(trash){e.stopPropagation();requestDeleteJobs([+trash.dataset.index]);return}
+ const tr=e.target.closest('tr[data-index]');if(tr)openEditor(+tr.dataset.index);
+});
+$('#tbody').addEventListener('change',e=>{const checkbox=e.target.closest('.job-row-check');if(checkbox)toggleJobSelection(Number(checkbox.dataset.index),checkbox.checked)});$('#confirmClose').onclick=$('#confirmCancel').onclick=closeConfirm;$('#confirmYes').onclick=async()=>{const fn=confirmAction;closeConfirm();if(fn)await fn()};document.addEventListener('click',e=>{if(!e.target.closest('.combo-shell'))closeComboMenus()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#confirmModal').classList.contains('open')){e.preventDefault();closeConfirm();return}closeComboMenus();closeEditor();closeExport();closeExcelImport();closeSheetImport();if($('#optionsModal').classList.contains('open')&&!optionDirty)closeOptionManager()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();openEditor()}});
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
 setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);
