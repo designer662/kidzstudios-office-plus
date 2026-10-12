@@ -25,3 +25,11 @@ Deploy `public/` with the existing GitHub Pages workflow. Back up your existing 
 
 ## V86.2 update
 This revision extends the office simulation so staff can actively use the Store, Prayer Room, and Toilets. It also adds persistent gender fields in the staff directory and renders female staff with a hijab-style look in the 3D office bundle.
+
+## V86.3 — Verified developer audit
+The complete `public/` folder remains deployable as before. There are no database schema changes.
+The new Room picker beside the camera tools navigates to Store, Surau, Toilets, Showroom, Pantry and Workspace.
+Graphics default to Eco only on small or reduced-motion screens without a prior saved selection.
+The stored CSS, scripts, bundled Three.js renderer and TypeScript source were updated together.
+Run `node scripts/check-repo.mjs` then all files matching `scripts/test-*`.
+Production Supabase authentication, deployment, and real multi-user changes must be tested against your own environment.

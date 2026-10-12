@@ -1,0 +1,29 @@
+/* V86.3 — compact, keyboard/touch accessible room navigation and mobile clarity */
+#mapShell .ks-room-jump{display:flex;align-items:center;gap:7px;min-width:0;padding:5px 7px 5px 10px;
+ border:1px solid rgba(45,50,54,.11);border-radius:12px;background:rgba(255,255,255,.97);
+ color:#566068;box-shadow:0 6px 18px rgba(25,31,35,.07);font:700 11px/1.15 Inter,system-ui,sans-serif}
+#mapShell .ks-room-jump select{min-width:0;max-width:145px;min-height:32px;padding:5px 7px;border-radius:8px;
+ border:1px solid #ebe7e0;background:#fff;color:#303a41;font:700 11px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
+#mapShell .ks-room-jump select:focus-visible,#todayPanel button:focus-visible,#mapShell .map-tools button:focus-visible{outline:3px solid #ef7b45;outline-offset:2px}
+#todayPanel .ops-view.active{scrollbar-gutter:stable;overscroll-behavior:contain}
+#todayPanel .ops-tab{touch-action:manipulation}
+#mapShell .map-tools button{touch-action:manipulation}
+@media (max-width:920px){
+ #mapShell .ks-room-jump{gap:4px;padding:4px 6px}
+ #mapShell .ks-room-jump span{display:none}
+ #mapShell .ks-room-jump select{max-width:135px;min-height:38px;font-size:12px}
+ #todayPanel .ops-tab{min-height:40px;height:40px}
+ #todayPanel .ops-view.active{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:650px){
+ #mapShell .ks-room-jump select{width:124px;max-width:124px}
+ #mapShell .ks-room-jump{max-width:140px}
+ #todayPanel .ops-head{padding-left:12px;padding-right:12px}
+ #todayPanel .ops-tabs{margin-left:10px;margin-right:10px}
+ #todayPanel .ops-view.active{padding-left:12px;padding-right:12px}
+ #mapShell .map-tools{max-height:calc(100dvh - 190px);overflow-y:auto;scrollbar-width:none}
+ #todayPanel .ops-staff-load button,#todayPanel .staff-directory-row,#todayPanel .workload-row{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+ #todayPanel .ops-view.active,#todayPanel .staff-directory-row,#todayPanel .workload-row,#todayPanel .ops-staff-load>*{animation:none!important;transition:none!important}
+}

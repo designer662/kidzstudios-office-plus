@@ -190,8 +190,7 @@
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
         s.nextAt=s.walk.endAt+15000;
       }else if(intent.kind==='break'){
-        const lines=living?.coffeeLines||['☕ Coffee break'];
-        s.scene={kind:'break',text:lines[Math.floor(Math.random()*lines.length)],from:s.walk.endAt,until:s.walk.endAt+17000};
+        s.scene={kind:'break',text:living?.breakMessage?.(intent.zone)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
         s.nextAt=s.walk.endAt+19000;
       }
       walkers++;changed=true;

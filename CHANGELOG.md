@@ -231,3 +231,14 @@
 - Integrated special room use into the shared movement planner and SVG office movement.
 - Added gender persistence in staff records and default roster.
 - Updated female 3D staff characters to use a hijab-style head covering.
+
+## V86.3 — Jarvis developer audit
+- Fixed new-room travel regression uncovered by the walking-route test harness; extended coverage to Store, Surau and both toilets (432 paths).
+- Corrected shared movement room-state mapping in Three.js. Coffee cup animation now appears for actual coffee breaks only.
+- Added room-sensitive simulated break labels instead of describing every break as coffee.
+- Added a compact keyboard-accessible Room picker; focuses selected rooms in 2D fallback and 3D view.
+- Set Eco graphics as a first-load default on small or reduced-motion devices, without overriding saved choices.
+- Added mobile touch-target, scrolling and focus-visibility refinements.
+- Kept female hijab meshes in TypeScript source as well as the prebuilt 3D bundle.
+- Updated affected legacy regression assertions and added a V86.3 feature regression test.
+- Fixed persisted graphics quality being lost when the 3D scene rebuilds after staff changes.

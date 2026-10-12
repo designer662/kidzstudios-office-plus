@@ -1019,6 +1019,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-smart-labels.css?v=80.0">
 <link rel="stylesheet" href="office-command.css?v=86.1">
 <link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
+<link rel="stylesheet" href="office-v86-3-polish.css?v=86.3">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1162,6 +1163,13 @@ body{overscroll-behavior:none;}
 </section>
 <button class="office-chat-launcher" id="chatLauncher" aria-label="Open office chat" aria-expanded="false"><span>⌁</span><b>Chat</b><i id="chatUnread" hidden>0</i></button>
 <div class="map-tools">
+  <label class="ks-room-jump" for="ksRoomJump"><span>Room</span>
+    <select id="ksRoomJump" aria-label="Jump to office room">
+      <option value="">Jump to room…</option><option value="showroom">Showroom</option>
+      <option value="store">Store</option><option value="surau">Surau</option>
+      <option value="toilets">Toilets</option><option value="pantry">Pantry</option><option value="workspace">Workspace</option>
+    </select>
+  </label>
   <label class="ks-quality-mini" for="ksVisualQuality" title="3D graphics quality for this device"><span>3D</span><select id="ksVisualQuality" aria-label="3D graphics quality"><option value="eco">Eco</option><option value="balanced">Balanced</option><option value="high">High</option></select></label>
   <div class="rotation-control" aria-label="Rotate office model">
     <button class="tool-btn rotate-btn" id="rotateLeft" title="Rotate left" aria-label="Rotate left">↶</button>
@@ -2955,7 +2963,7 @@ body{overscroll-behavior:none;}
     selectDepartment:setDept,
     stopFollow:stopCameraFollow,
     reset:resetScene,
-    selectRoom:id=>{const mapping={workspace:'staff',office:'boss',surau:'prayer',toilets:'toilet-a'};const room=roomById[mapping[id]||id];if(room)openRoom(room)},
+    selectRoom:id=>{const mapping={workspace:'staff',office:'boss',surau:'prayer',toilets:'toilet-a'};const room=roomById[mapping[id]||id];if(room){openRoom(room);focusRoom(room)}},
     pause:paused=>{visualPaused=paused;app.classList.toggle('animations-paused',paused);if(paused)stopRandomRoam();else if(!sharedMovementEnabled){const now=performance.now();for(const e of employees){if(e.roam?.phase==='walk')prepareRoamSegment(e,now)}startRandomRoam()}}
   };
   window.dispatchEvent(new CustomEvent('ks:suite-ready'));
@@ -3184,13 +3192,14 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.1 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.3 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
 <script src="office-3d.js?v=86.1" defer></script>
-<script src="office-quality.js?v=86.1" defer></script>
+<script src="office-quality.js?v=86.3" defer></script>
+<script src="office-room-nav.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=81.0" defer></script>
 <script src="office-living-office.js?v=84.0" defer></script>
 <script src="office-movement-sync.js?v=84.0" defer></script>

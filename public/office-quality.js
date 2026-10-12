@@ -4,7 +4,7 @@
   const select = document.getElementById('ksVisualQuality');
   if (!select) return;
   const KEY = 'ks-3d-quality-v86';
-  try { const stored = localStorage.getItem(KEY); if (['eco','balanced','high'].includes(stored)) select.value=stored; } catch (_) {}
+  try { const stored = localStorage.getItem(KEY); if (['eco','balanced','high'].includes(stored)) select.value=stored; else if (matchMedia('(max-width: 650px), (prefers-reduced-motion: reduce)').matches) select.value='eco'; } catch (_) { if (matchMedia('(max-width: 650px)').matches) select.value='eco'; }
   let controller = null;
   function apply(){
     if (window.office3d?.setQuality) { window.office3d.setQuality(select.value); controller=window.office3d; return true; }
@@ -17,5 +17,5 @@
     const timer=setInterval(()=>{ attempts++; if(apply()||attempts>=60)clearInterval(timer); },500);
     window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
   }
-  window.addEventListener('ks:suite-ready',()=>{ if(window.office3d&&window.office3d!==controller)apply(); });
+  window.addEventListener('ks:3d-ready',()=>{ if(window.office3d&&window.office3d!==controller)apply(); });
 })();

@@ -95,13 +95,19 @@
   if(h>=12&&h<14&&roll<.26)return {zone:'prayer',action:'reading',kind:'break'};
   if(h>=15&&h<17&&roll<.12)return {zone:'prayer',action:'reading',kind:'break'};
   if(h>=12&&h<14&&roll<.49)return {zone:'pantry',action:'coffee',kind:'break'};
-  if(h>=9&&h<18&&roll<.09)return {zone:person?.gender==='female'?'toilet-b':'toilet-a',action:'coffee',kind:'break'};
+  if(h>=9&&h<18&&roll<.09)return {zone:person?.gender==='female'?'toilet-b':'toilet-a',action:'idle',kind:'break'};
   if(h>=9&&h<18&&/admin|production|finance|boss|assistant/.test(roleText)&&roll<.16)return {zone:'store',action:'production',kind:'work'};
   if(h>=9&&h<18&&roll<.11)return {zone:'pantry',action:'coffee',kind:'break'};
   if(h>=9&&h<18&&roll<.18)return {zone:'showroom',action:'meeting',kind:'meeting'};
   if(h>=9&&h<18&&!active&&roll<.24)return {zone:'corridor',action:'chat',kind:'social'};
   // A weighted task rotation produces variety but real assigned work stays first.
   return {zone:home,action:weightedPick(taskPalette(person,active)),kind:'work'};
+ }
+ function breakMessage(zone,random=Math.random()){
+  if(zone==='prayer')return 'Quiet personal break';
+  if(zone==='toilet-a'||zone==='toilet-b')return 'Back shortly';
+  const lines=coffeeLines.length?coffeeLines:['Taking a short break'];
+  return String(lines[Math.min(lines.length-1,Math.floor(random*lines.length))]);
  }
  const sceneCache=new Map();
  let lastLivingController=null;
@@ -216,6 +222,6 @@
   if(ev.key===STORAGE){try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}ambienceEngine?.setEnabled(enabled,{gesture:false});syncButton()}
   else if(ev.key===VOLUME_STORAGE){try{const v=Number(localStorage.getItem(VOLUME_STORAGE));if(Number.isFinite(v)&&v>=0&&v<=1)setVolume(v)}catch(_){}}
  });
- window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,dialogues,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume,getAmbientAudioState:()=>ambienceEngine?.state()||"unsupported",previewAmbientAudio:()=>ambienceEngine?.preview(),ambientSoundEngine:ambienceEngine};
+ window.OfficeLiving={ACTIONS,workFor,jobKey,jobReaction,hour,daylight,applyLighting,screenGlow,chooseIntent,taskPalette,weightedPick,greetings,huddles,coffeeLines,breakMessage,dialogues,update,attach,isAmbientEnabled:()=>enabled,setAmbientEnabled:setEnabled,setAmbientVolume:setVolume,getAmbientVolume:()=>volume,getAmbientAudioState:()=>ambienceEngine?.state()||"unsupported",previewAmbientAudio:()=>ambienceEngine?.preview(),ambientSoundEngine:ambienceEngine};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();
