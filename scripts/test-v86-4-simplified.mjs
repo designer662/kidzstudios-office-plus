@@ -5,7 +5,7 @@ const read=p=>readFileSync(p,'utf8');
 const html=read('public/index.html'),living=read('public/office-living-office.js'),audio=read('public/office-ambience-audio.js'),character=read('source/src/office-character.ts'),bundle=read('public/office-3d.js');
 assert.match(html,/office-living-office\.css\?v=86\.4/,'Sound bar CSS cache is refreshed');
 assert.match(html,/office-living-office\.js\?v=86\.4/,'Sound bar code cache is refreshed');
-assert.match(html,/office-3d\.js\?v=86\.4/,'Hijab 3D code cache is refreshed');
+assert.match(html,/office-3d\.js\?v=86\.5/,'Hijab 3D code cache is refreshed');
 assert.doesNotMatch(html,/ksRoomJump|office-room-nav\.js/,'No redundant room picker');
 for(const selector of ['ks-living-preview','ks-living-volume','ks-living-activity','ks-living-sound-status'])assert.ok(!living.includes(selector),'Removed legacy control '+selector);
 assert.doesNotMatch(audio,/ventLow|ventWhisper|fan\.start\(\)|harmonic\.start\(\)/,'No continuous AC sound');

@@ -100,7 +100,10 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  for(const p of staff){
   const rig=makeCharacter(p);rig.root.position.set(p.position[0]*FLOOR_SPACE_SCALE,.08,p.position[1]*FLOOR_SPACE_SCALE);rig.root.rotation.y=p.rotation;rig.lastPosition.copy(rig.root.position);scene.add(rig.root);
   const ring=mesh(geo(new THREE.RingGeometry(.42,.49,32)),new THREE.MeshBasicMaterial({color:'#d89551',side:THREE.DoubleSide,transparent:true,opacity:.85}),rig.root,0,-.01,0);ring.rotation.x=-Math.PI/2;ring.visible=false;ring.castShadow=false;
-  const hit=mesh(geo(new THREE.CylinderGeometry(.39,.42,2.25,10)),new THREE.MeshBasicMaterial({visible:false}),rig.root,0,1.02,0);hit.userData.personId=p.id;pickables.push(hit);
+  const hit=mesh(geo(new THREE.CylinderGeometry(.39,.42,2.25,10)),new THREE.MeshBasicMaterial({visible:false}),rig.root,0,1.02,0);
+  // The new uploaded female model uses a smaller root scale; keep the selection collider and ring usable.
+  if(p.gender==='female'){const selectionFactor=1.2/rig.root.scale.x;hit.scale.setScalar(selectionFactor);ring.scale.setScalar(selectionFactor)}
+  hit.userData.personId=p.id;pickables.push(hit);
   humans.push({...rig,ring,person:p,targetRotation:p.rotation,targetPosition:rig.root.position.clone()});
  }
  const labelLayer=document.createElement('div');labelLayer.className='scene-label-layer';host.appendChild(labelLayer);

@@ -1,7 +1,7 @@
 {
-  "release": "86.4",
-  "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.4 simplified ambience + user-provided hijab character",
+  "release": "86.5",
+  "edition": "Office Plus · Unified Pulse",
+  "package": "V86.5: uploaded sculpted hijabi model integrated with office rig",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -15,5 +15,5 @@
     "office-v86-3-polish.css",
     "office-pulse-integrated.css"
   ],
-  "check": "No room picker, no continuous AC audio; hijab source and shipped bundle updated; Supabase unchanged."
+  "check": "26 automated regression tests pass; bundled 3D model and interaction adapter included; live WebGL/Supabase not verified."
 }

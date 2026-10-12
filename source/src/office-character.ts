@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { Person } from './office-data';
+import {createOfficeHijabiRig,animateOfficeHijabi} from './hijabi-office-adapter.js';
 
 // Office Plus V70: smoother silhouettes and frame-independent motion; original character style retained.
 // Deliberately stylised, not portraits of employees or third-party assets.
@@ -47,6 +48,7 @@ export function characterFactory(){
   for(const [m,meshes] of buckets){if(meshes.length<2)continue;const gs=meshes.map(mesh=>{mesh.updateMatrix();let a=mesh.geometry.clone();if(a.index){const b=a.toNonIndexed();a.dispose();a=b}return a.applyMatrix4(mesh.matrix)});const merged=mergeGeometries(gs);gs.forEach(g=>g.dispose());if(!merged)continue;meshes.forEach(v=>p.remove(v));const part=new THREE.Mesh(merged,m);part.castShadow=true;part.receiveShadow=true;p.add(part)}
  }
  return(p:Person):CharacterRig=>{
+  if(p.gender==='female')return createOfficeHijabiRig(p) as CharacterRig;
   const isFemale=p.gender==='female';
   const look=looks[p.name.trim().toLowerCase()]??{hair:isFemale?'bob':'crop',outfit:/boss|manager/i.test(p.role)?'blazer':/designer/i.test(p.role)?'tee':'polo',watch:true};
   const shirt=p.color,skin=p.skin,hair=p.hair,light='#faf6eb',dark='#374448';
@@ -275,6 +277,7 @@ export function characterFactory(){
 }
 
 export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,distance:number){
+ if(r.root.userData.officeHijabi){animateOfficeHijabi(r,p,time,dt,distance);return}
  const t=time+r.phase;
  const desiredWalk=p.status==='walking'?1:0;
  const emoteIsActive=r.emote!==''&&r.emote!=='wave'&&time-r.emoteStart>=0&&time-r.emoteStart<3.6;
