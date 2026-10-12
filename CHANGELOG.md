@@ -1,3 +1,13 @@
+## V80 · Smart Floating Labels (2026-10-12)
+- Replaced independent 3D label placement with a frame-by-frame, screen-space collision manager so names, mood icons and temporary notifications do not cover one another.
+- Combined mood emoji with each clickable character name tag; the separate permanent mood bubble was removed in the 3D view.
+- Only one temporary bubble per character appears at a time; conversations and messages take priority over workload and follow cues.
+- Temporary workload bubbles auto-expire within 6.5 seconds; follow cues last 4.8 seconds.
+- At low zoom or on narrow screens, low-priority notifications hide while names and moods remain available.
+- All floating tags stay within the visible office viewport; room labels yield to staff and active conversation overlays.
+- Preserved V79 shared movement/behavior timeline, job-driven reactions, click-character selection, mouse zoom, audio controls, and all office tools.
+- Introduced `public/office-smart-labels.js` and `.css` as local assets, plus 250 deterministic layout stress scenarios and GitHub Actions checks. No database migration.
+
 ## V79 · Living Office+ (2026-10-12)
 - More varied department task palettes and calmer after-hours routines, always illustrative rather than real employee tracking.
 - Shared leader plans paired conversations and huddles, using alternating checked corridor points and social cooldowns.

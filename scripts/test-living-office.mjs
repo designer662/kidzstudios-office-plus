@@ -45,7 +45,7 @@ current+=2000;o.update({},[{id:1,scene:null}]);assert.equal(calls[1][0],'clear',
 assert.equal(o.isAmbientEnabled(),false,'Ambient sound starts opt-in, never autoplays');
 assert.equal(o.setAmbientEnabled(false),undefined);
 assert.ok(index.includes('office-living-office.js?v=79.1'),'Living Office must load before timeline');
-assert.ok(index.indexOf('office-living-office.js?v=79.1')<index.indexOf('office-movement-sync.js?v=79.0'));
+assert.ok(index.indexOf('office-living-office.js?v=79.1')<index.indexOf('office-movement-sync.js?v=79.1'));
 assert.match(index,/function planSharedRoam\(e,requestedZone=null,requestedPoint=null\)/);
 assert.match(timeline,/pairConversation\(/);
 assert.match(timeline,/fingerprint=living\?\.jobKey/);

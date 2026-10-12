@@ -1,11 +1,7 @@
 {
-  "release": "v79",
-  "edition": "Living Office+",
-  "package": "v79 deploy-ready root ZIP",
-  "modules": [
-    "office-3d.js",
-    "office-living-office.js",
-    "office-movement-sync.js"
-  ],
-  "check": "If this file loads from your GitHub Pages URL, your live site has received this package."
+  "release": "v80",
+  "edition": "Smart Floating Labels",
+  "package": "v80 collision-aware 3D labels",
+  "modules": ["office-smart-labels.js", "office-3d.js", "office-living-office.js", "office-movement-sync.js"],
+  "check": "V80 merges name and mood, prioritizes one temporary bubble per character, and avoids screen-space label collisions."
 }
