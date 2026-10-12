@@ -1,3 +1,12 @@
+# V86.1 — Unified, simplified Office Plus
+
+- Removed duplicate Command Center overlay/nav and its separate jobs polling.
+- Unified four KPIs, priority deadlines, pipeline and staff workload in the existing Office Pulse sidebar.
+- Condensed extra breakdowns and alerts into an optional details disclosure.
+- Moved 3D quality selection beside the original camera controls.
+- Retained V86 Kanban/Insights and existing job editor and 3D scene.
+- Updated regression expectations and frontend cache versions.
+
 ## V86 — Operations Command Center + Job Board + Analytics + 3D Quality (2026-10-12)
 
 - Added an interactive read-only Operations Command Center alongside the existing 3D office: job deadlines, department totals, recorded invoices/payment amounts, staff assignments, recent order/completion volume, real sync feedback, and 3D staff focus.
@@ -215,3 +224,10 @@
 - Made the external `html2canvas` script non-blocking and retained it as the primary high-fidelity renderer where available.
 - Tool-page notification bells use shared Supabase office events only, refresh on Realtime changes, silently baseline old events, and support browser-local clear/read state.
 - Kept the dashboard's notification system and all prior data, 3D, and sound features unchanged.
+
+
+## V86.2
+- Added active simulation routes for Store, Prayer Room, and Toilets in the office workflow.
+- Integrated special room use into the shared movement planner and SVG office movement.
+- Added gender persistence in staff records and default roster.
+- Updated female 3D staff characters to use a hijab-style head covering.
