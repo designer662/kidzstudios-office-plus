@@ -1017,7 +1017,8 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-profile-layout.css?v=75.0">
 <link rel="stylesheet" href="office-living-office.css?v=81.0">
 <link rel="stylesheet" href="office-smart-labels.css?v=80.0">
-<link rel="stylesheet" href="office-command.css?v=86.0">
+<link rel="stylesheet" href="office-command.css?v=86.1">
+<link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1094,7 +1095,7 @@ body{overscroll-behavior:none;}
 <button class="live-reopen-tab" id="liveReopenBtn" aria-label="Open live activity"><i class="pulse-dot"></i><span>Live Activity</span></button>
 <aside class="today-panel panel ops-panel" id="todayPanel" aria-label="Operations command panel">
   <div class="ops-head">
-    <div><span class="today-kicker">Operations</span><strong>Office Pulse+</strong></div>
+    <div><span class="today-kicker">Office Plus</span><strong>Office Pulse</strong></div>
     <div class="ops-source"><i id="opsSourceDot"></i><span id="opsSource">Waiting</span><button id="opsExpandBtn" title="Expand Office Pulse" aria-label="Expand Office Pulse" aria-expanded="false">⤢</button><button id="jobLinkSettingsBtn" title="Edit Job Management link" aria-label="Edit Job Management link">✎</button><button id="opsRefresh" title="Refresh Job Management data" aria-label="Refresh Job Management data">↻</button></div>
   </div>
   <div class="ops-tabs" role="tablist" aria-label="Operations views">
@@ -1104,30 +1105,37 @@ body{overscroll-behavior:none;}
     <button class="ops-tab" data-ops-tab="jobs" role="tab" aria-selected="false">Jobs</button>
   </div>
   <div class="ops-view active" data-ops-view="pulse">
-    <div class="today-grid ops-primary-metrics">
-      <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
-      <button class="today-metric" data-ops-metric="artwork"><span class="today-number">0</span><span class="today-label">Artwork</span></button>
-      <button class="today-metric" data-ops-metric="production"><span class="today-number">0</span><span class="today-label">Production</span></button>
-      <button class="today-metric completed" data-ops-metric="completed"><span class="today-number">0</span><span class="today-label">Completed</span></button>
-    </div>
-    <div class="ops-secondary-metrics">
+    <div class="ops-secondary-metrics ks-pulse-main-metrics" aria-label="Job summary">
       <button class="today-metric" data-ops-quick="active"><span class="today-number">0</span><span class="today-label">Active</span></button>
-      <button class="today-metric" data-ops-quick="dueToday"><span class="today-number">0</span><span class="today-label">Due Today</span></button>
+      <button class="today-metric" data-ops-quick="dueToday"><span class="today-number">0</span><span class="today-label">Due today</span></button>
       <button class="today-metric danger" data-ops-quick="overdue"><span class="today-number">0</span><span class="today-label">Overdue</span></button>
-      <button class="today-metric good" data-ops-quick="completedToday"><span class="today-number">0</span><span class="today-label">Done Today</span></button>
+      <button class="today-metric good" data-ops-quick="completedToday"><span class="today-number">0</span><span class="today-label">Done today</span></button>
     </div>
+    <div class="ks-pulse-section-line"><span>Pipeline</span><a href="job-management.html" title="Open Job Management">Manage jobs ↗</a></div>
     <div class="ops-pipeline" aria-label="Job Management pipeline"><div id="opsPipelineBar" class="ops-pipeline-bar"></div></div>
-    <div class="ops-reconcile"><span id="opsReconcile">0 Sheet rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
-    <div id="opsDailySummary" class="ops-daily-summary"><b>Today</b><span>Waiting for Job Management data.</span></div>
-    <div id="opsStageHealth" class="ops-stage-health"></div>
-    <div id="opsAlerts" class="ops-alerts"></div>
-    <div class="ops-mini-head"><span>Team workload</span><small>PIC + Designer</small></div>
+    <div class="ks-pulse-stage-labels" aria-label="Pipeline stages"><span>Orders</span><span>Artwork</span><span>Production</span><span>Completed</span></div>
+    <div class="ks-pulse-section-line"><span>Needs attention</span><small>Next 3 days</small></div>
+    <div id="ksPulsePriority" class="ks-pulse-priority" aria-live="polite"><span class="ks-pulse-empty">Waiting for jobs…</span></div>
+    <div class="ops-mini-head"><span>Team workload</span><button type="button" id="ksPulseAllStaff" class="ks-pulse-text-btn">All workloads ↗</button></div>
     <div id="opsStaffLoad" class="ops-staff-load"></div>
-    <div class="ops-note" id="opsNote">Waiting for shared Job Management data.</div>
-    <div class="ops-resources">
-      <a id="jobManagementResource" class="ops-resource" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer"><span>▦</span><b>Job Management</b><em>↗</em></a>
-      <div class="ops-resource-wrap"><a id="googleDriveResource" class="ops-resource" href="https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B" target="_blank" rel="noopener noreferrer"><span>◫</span><b>Google Drive</b><em>↗</em></a><button id="driveLinkSettingsBtn" class="ops-resource-edit" title="Edit shared Google Drive link" aria-label="Edit shared Google Drive link">✎</button></div>
-    </div>
+    <details class="ks-pulse-extra" id="ksPulseExtra">
+      <summary>More details <span>Stages, alerts & links</span></summary>
+      <div class="today-grid ops-primary-metrics">
+        <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
+        <button class="today-metric" data-ops-metric="artwork"><span class="today-number">0</span><span class="today-label">Artwork</span></button>
+        <button class="today-metric" data-ops-metric="production"><span class="today-number">0</span><span class="today-label">Production</span></button>
+        <button class="today-metric completed" data-ops-metric="completed"><span class="today-number">0</span><span class="today-label">Completed</span></button>
+      </div>
+      <div class="ops-reconcile"><span id="opsReconcile">0 Sheet rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
+      <div id="opsDailySummary" class="ops-daily-summary"><b>Today</b><span>Waiting for Job Management data.</span></div>
+      <div id="opsStageHealth" class="ops-stage-health"></div>
+      <div id="opsAlerts" class="ops-alerts"></div>
+      <div class="ops-note" id="opsNote">Waiting for shared Job Management data.</div>
+      <div class="ops-resources">
+        <a id="jobManagementResource" class="ops-resource" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer"><span>▦</span><b>Job Management</b><em>↗</em></a>
+        <div class="ops-resource-wrap"><a id="googleDriveResource" class="ops-resource" href="https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B" target="_blank" rel="noopener noreferrer"><span>◫</span><b>Google Drive</b><em>↗</em></a><button id="driveLinkSettingsBtn" class="ops-resource-edit" title="Edit shared Google Drive link" aria-label="Edit shared Google Drive link">✎</button></div>
+      </div>
+    </details>
   </div>
   <div class="ops-view" data-ops-view="staff">
     <div class="ops-section-title staff-section-title"><span>Staff directory</span><button id="addStaffBtn" class="ops-add-staff">+ Add staff</button></div>
@@ -1154,6 +1162,7 @@ body{overscroll-behavior:none;}
 </section>
 <button class="office-chat-launcher" id="chatLauncher" aria-label="Open office chat" aria-expanded="false"><span>⌁</span><b>Chat</b><i id="chatUnread" hidden>0</i></button>
 <div class="map-tools">
+  <label class="ks-quality-mini" for="ksVisualQuality" title="3D graphics quality for this device"><span>3D</span><select id="ksVisualQuality" aria-label="3D graphics quality"><option value="eco">Eco</option><option value="balanced">Balanced</option><option value="high">High</option></select></label>
   <div class="rotation-control" aria-label="Rotate office model">
     <button class="tool-btn rotate-btn" id="rotateLeft" title="Rotate left" aria-label="Rotate left">↶</button>
     <button class="rotation-readout rotation-reset" id="rotationReadout" title="Reset rotation" aria-label="Reset rotation">0°</button>
@@ -1790,6 +1799,23 @@ body{overscroll-behavior:none;}
   function filterLabel(filter){return({all:'All',active:'Active',orders:'Orders',artwork:'Artwork',production:'Production',completed:'Completed',overdue:'Overdue',dueToday:'Due today',completedToday:'Completed today',unmapped:'Unmapped',noPic:'No PIC',noDesigner:'No Designer',stuckArtwork:'Artwork >2d',stuckProduction:'Production >3d',waitingApproval:'Waiting approval'})[filter]||filter}
   function filteredJobs(){let list=jobs.filter(j=>matchesOpsFilter(j,opsFilter));return list.sort((a,b)=>{const ad=parseLooseDate(a.orderDate)?.getTime()||0,bd=parseLooseDate(b.orderDate)?.getTime()||0;return bd-ad||((a._index??0)-(b._index??0))})}
   function employeeJobStats(emp){const list=activeJobsForEmployee(emp),artwork=list.filter(j=>categoryForJob(j)==='artwork').length,production=list.filter(j=>categoryForJob(j)==='production').length,overdue=list.filter(isOverdueJob).length,level=list.length>=5||overdue>=2?'Busy':list.length>=2?'Normal':'Light';return{list,active:list.length,artwork,production,overdue,level}}
+  function renderPulsePriority(){
+    const root=$('#ksPulsePriority');if(!root)return;
+    const today=new Date();today.setHours(0,0,0,0);
+    const priority=jobs.filter(job=>!isCompletedJob(job)).map(job=>{
+      const date=parseLooseDate(job.due);if(!date)return null;
+      const due=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+      const days=Math.round((due-today)/86400000);
+      return days<=3?{job,days}:null;
+    }).filter(Boolean).sort((a,b)=>a.days-b.days).slice(0,3);
+    if(!priority.length){root.innerHTML='<p class="ks-pulse-empty">No urgent deadlines right now.</p>';return;}
+    root.innerHTML=priority.map(({job,days})=>{
+      const when=days<0?`${-days}d late`:days===0?'Today':`In ${days}d`;
+      const tag=days<0?'late':days===0?'today':'soon';
+      const index=jobs.indexOf(job);
+      return `<button type="button" class="ks-priority-row" data-job-index="${index}"><span class="ks-priority-copy"><b>${esc(job.ref||'Job')}</b><small>${esc(job.customer||job.title||'Job')} · ${esc(job.pic||job.designer||'Unassigned')}</small></span><span class="ks-priority-due ${tag}">${when}</span></button>`;
+    }).join('');
+  }
   function renderOps(){
     if(!todayPanel)return;const counts={orders:0,artwork:0,production:0,completed:0,unmapped:0,overdue:0};jobs.forEach(job=>{const stage=categoryForJob(job);counts[stage]=(counts[stage]||0)+1;if(isOverdueJob(job))counts.overdue++});
     const now=new Date(),activeCount=counts.orders+counts.artwork+counts.production,completedToday=jobs.filter(j=>isCompletedJob(j)&&isSameLocalDay(j.completedDate||j.deliveryDate,now)).length,dueToday=jobs.filter(j=>!isCompletedJob(j)&&isSameLocalDay(j.due,now)).length,waitingApproval=jobs.filter(j=>!isCompletedJob(j)&&isWaitingApproval(j)).length,noPic=jobs.filter(j=>!isCompletedJob(j)&&!String(j.pic||'').trim()).length,noDesigner=jobs.filter(j=>!isCompletedJob(j)&&!String(j.designer||'').trim()).length,stuckArtwork=jobs.filter(isStuckArtwork).length,stuckProduction=jobs.filter(isStuckProduction).length;
@@ -1801,6 +1827,7 @@ body{overscroll-behavior:none;}
     if(opsStageHealth){const fmt=v=>Number.isFinite(v)?`${v.toFixed(v>=10?0:1)}d`:'—';opsStageHealth.innerHTML=[['orders','Orders'],['artwork','Artwork'],['production','Production']].map(([key,label])=>`<div><span>${label}</span><b>${counts[key]}</b><small>avg job age ${fmt(avgAgeForStage(key))}</small></div>`).join('')+`<div><span>Waiting approval</span><b>${waitingApproval}</b><small>artwork/client hold</small></div>`}
     const alerts=[['dueToday','Due today',dueToday,'due'],['overdue','Overdue',counts.overdue,'danger'],['noPic','No PIC',noPic,'warn'],['noDesigner','No Designer',noDesigner,'warn'],['stuckArtwork','Artwork >2d',stuckArtwork,'warn'],['stuckProduction','Production >3d',stuckProduction,'warn'],['completedToday','Completed today',completedToday,'good'],['waitingApproval','Waiting approval',waitingApproval,'']];if(opsAlerts)opsAlerts.innerHTML=alerts.map(([key,label,value,tone])=>`<button class="ops-alert ${tone}" data-ops-alert-filter="${key}"><span>${esc(label)}</span><b>${value}</b></button>`).join('');
     if(opsStaffLoad){const stats=employees.map(emp=>({emp,...employeeJobStats(emp)})).sort((a,b)=>b.active-a.active||b.overdue-a.overdue).slice(0,4);opsStaffLoad.innerHTML=stats.map(s=>`<button data-pulse-staff="${s.emp.id}"><span class="ops-load-avatar">${initials(s.emp.name)}</span><span><b>${esc(s.emp.name)}</b><small>${s.active} active · ${s.artwork} artwork · ${s.production} production${s.overdue?` · ${s.overdue} overdue`:''}</small></span><em class="load-${s.level.toLowerCase()}">${s.level}</em></button>`).join('')}
+    renderPulsePriority();
     renderOpsSyncMeta();syncEmployeeJobsFromOps();const workloadOrder=[...employees].sort((a,b)=>a.id-b.id),totalActive=jobs.filter(j=>!isCompletedJob(j)&&categoryForJob(j)!=='unmapped').length;if(workloadTotal)workloadTotal.textContent=`${totalActive} active`;
     if(workloadList)workloadList.innerHTML=workloadOrder.map(emp=>{const st=employeeJobStats(emp),manual=workloadLines(emp.workload),manualHtml=manual.slice(0,3).map(line=>`<i>${esc(line)}</i>`).join('');return `<div class="workload-row workload-smart" data-workload-employee="${emp.id}" role="button" tabindex="0"><div class="workload-avatar">${initials(emp.name)}</div><div class="workload-copy"><b>${esc(emp.name)}</b><span>${esc(emp.position)} · ${st.active} active</span><div class="workload-mini"><i>${st.artwork} artwork</i><i>${st.production} production</i>${st.overdue?`<i class="danger">${st.overdue} overdue</i>`:''}</div>${manualHtml?`<div class="manual-workload">${manualHtml}</div>`:''}</div><div class="workload-level level-${st.level.toLowerCase()}">${st.level}</div></div>`}).join('');
     renderStaffDirectory();const list=filteredJobs().slice(0,8);if(jobsFilterLabel)jobsFilterLabel.textContent=filterLabel(opsFilter);if(recentJobs)recentJobs.innerHTML=list.length?list.map(job=>{const stage=categoryForJob(job),cat=isOverdueJob(job)?'overdue':stage,emp=employeeForPic(job.pic),age=jobAgeDays(job);return `<div class="job-row" data-job-index="${jobs.indexOf(job)}" role="button" tabindex="0"><div class="job-main"><div class="job-top"><span class="job-ref">${esc(job.ref)}</span><span class="job-title">${esc(job.title)}</span></div><div class="job-sub">Customer ${esc(job.customer||'Client')} · ${esc(emp?.name||job.pic||'Unassigned')} · ${esc(job.status||stage)}${job.daysLeft!==''&&job.daysLeft!=null&&Number.isFinite(Number(job.daysLeft))?` · ${Number(job.daysLeft)<0?`${Math.abs(Number(job.daysLeft))}d overdue`:Number(job.daysLeft)===0?'due today':`${Number(job.daysLeft)}d left`}`:''}${Number.isFinite(age)?` · ${age.toFixed(age>=10?0:1)}d old`:''}</div></div><span class="job-status ${cat}">${esc(stage==='unmapped'?'Unmapped':isOverdueJob(job)?'Overdue':job.status||stage)}</span></div>`}).join(''):`<div class="ops-note">No jobs match this filter.</div>`;
@@ -2568,6 +2595,7 @@ body{overscroll-behavior:none;}
   if(workloadEditorModal)workloadEditorModal.onclick=e=>{if(e.target===workloadEditorModal)closeWorkloadEditor()};
   if(workloadEditorSave)workloadEditorSave.onclick=saveWorkloadOnly;
   if(todayPanel)todayPanel.onclick=e=>{
+    if(e.target.closest('#ksPulseAllStaff')){setOpsTab('workload');return}
     const tab=e.target.closest('.ops-tab');if(tab){setOpsTab(tab.dataset.opsTab);return}
     const metric=e.target.closest('[data-ops-metric]');if(metric){opsFilter=metric.dataset.opsMetric;setOpsTab('jobs');renderOps();return}
     const quick=e.target.closest('[data-ops-quick]');if(quick){opsFilter=quick.dataset.opsQuick;setOpsTab('jobs');renderOps();return}
@@ -2643,17 +2671,40 @@ body{overscroll-behavior:none;}
     showroom:{roomId:'showroom',point:()=>({x:11+Math.random()*2.2,y:30+Math.random()*2.1})},
     corridor:{roomId:'corridor',point:()=>({x:9.4,y:38+Math.random()*9})},
     pantry:{roomId:'pantry',point:()=>({x:5.5,y:45+Math.random()*3})},
-    boss:{roomId:'boss',point:e=>({x:e.deskX??17.9,y:e.deskY??43.1})}
+    boss:{roomId:'boss',point:e=>({x:e.deskX??17.9,y:e.deskY??43.1})},
+    store:{roomId:'store',point:()=>({x:13.5+Math.random()*5.8,y:50.0+Math.random()*6.6})},
+    prayer:{roomId:'prayer',point:()=>({x:10.2+Math.random()*10.4,y:61.2+Math.random()*5.8})},
+    'toilet-a':{roomId:'toilet-a',point:()=>({x:.8+Math.random()*2.2,y:60.4+Math.random()*3.7})},
+    'toilet-b':{roomId:'toilet-b',point:()=>({x:4.3+Math.random()*2.2,y:60.4+Math.random()*3.7})}
   };
-  const zoneGate={staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6}};
+  const zoneGate={
+    staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6},
+    store:{x:12.1,y:50.2},prayer:{x:11.2,y:59.7},'toilet-a':{x:7.1,y:61.2},'toilet-b':{x:7.3,y:61.2}
+  };
   const roamChoices={
-    1:['boss','corridor','showroom','pantry'],2:['boss','corridor','showroom','pantry'],
-    3:['staff','showroom','corridor','pantry'],4:['staff','showroom','corridor','pantry'],
-    5:['showroom','staff','corridor','pantry'],6:['staff','showroom','corridor','pantry'],
-    7:['staff','showroom','corridor','pantry'],8:['staff','showroom','corridor','pantry']
+    1:['boss','corridor','showroom','pantry','store','prayer','toilet-a'],2:['boss','corridor','showroom','pantry','store','prayer','toilet-b'],
+    3:['staff','showroom','corridor','pantry','prayer','toilet-a'],4:['staff','showroom','corridor','pantry','store','prayer','toilet-a'],
+    5:['showroom','staff','corridor','pantry','prayer','toilet-b'],6:['staff','showroom','corridor','pantry','store','prayer','toilet-b'],
+    7:['staff','showroom','corridor','pantry','prayer','toilet-a'],8:['staff','showroom','corridor','pantry','prayer','toilet-b']
   };
+  const corridorLinkedZones=new Set(['boss','pantry','store','prayer','toilet-a','toilet-b','corridor']);
   function zoneOfEmployee(e){return e.visualRoomId||e.roomId||e.homeRoom||'staff'}
   function randomDifferent(list,current){const pool=list.filter(v=>v!==current);return(pool.length?pool:list)[Math.floor(Math.random()*(pool.length||list.length))]}
+  function chooseScheduledZone(e,current,home){
+    const choices=roamChoices[e.id]||['staff','showroom','corridor','pantry','store','prayer','toilet-a'];
+    const hour=new Date().getHours();
+    const ownHome=home||(['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff');
+    if(['store','prayer','toilet-a','toilet-b'].includes(current))return ownHome;
+    const roleText=`${e.position||''} ${e.department||''}`.toLowerCase();
+    if(hour>=12&&hour<14&&choices.includes('prayer')&&Math.random()<.34)return 'prayer';
+    if(hour>=15&&hour<17&&choices.includes('prayer')&&Math.random()<.16)return 'prayer';
+    if(Math.random()<.11)return e.gender==='female'&&choices.includes('toilet-b')?'toilet-b':'toilet-a';
+    if(/admin|production|finance|boss|assistant/.test(roleText)&&choices.includes('store')&&Math.random()<.20)return 'store';
+    if(choices.includes('showroom')&&Math.random()<.18)return 'showroom';
+    if(choices.includes('pantry')&&Math.random()<.18)return 'pantry';
+    if(choices.includes('corridor')&&Math.random()<.10)return 'corridor';
+    return randomDifferent(choices,current);
+  }
   // V66 collision geometry uses the actual 3D furniture footprint mapped into
   // this page's logical office coordinates. Do not navigate through worktops.
   // These are rectangles in floor coordinates, NOT positions of staff/chairs.
@@ -2765,11 +2816,31 @@ body{overscroll-behavior:none;}
     const pts=[];
     if(from===to)return[target];
     const push=p=>{if(p)pts.push({...p})};
-    const leave=z=>{if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}else if(z==='staff'){push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}};
-    const enter=z=>{if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}else if(z==='corridor'){push(zoneGate.corridor)}};
+    const leave=z=>{
+      if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}
+      else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}
+      else if(z==='store'){push(zoneGate.store);push(zoneGate.corridor)}
+      else if(z==='prayer'){push(zoneGate.prayer);push(zoneGate.corridor)}
+      else if(z==='toilet-a'){push(zoneGate['toilet-a']);push(zoneGate.corridor)}
+      else if(z==='toilet-b'){push(zoneGate['toilet-b']);push(zoneGate.corridor)}
+      else if(z==='staff'){push(zoneGate.staff)}
+      else if(z==='showroom'){push(zoneGate.showroom)}
+    };
+    const enter=z=>{
+      if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}
+      else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}
+      else if(z==='store'){push(zoneGate.corridor);push(zoneGate.store)}
+      else if(z==='prayer'){push(zoneGate.corridor);push(zoneGate.prayer)}
+      else if(z==='toilet-a'){push(zoneGate.corridor);push(zoneGate['toilet-a'])}
+      else if(z==='toilet-b'){push(zoneGate.corridor);push(zoneGate['toilet-b'])}
+      else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}
+      else if(z==='showroom'){push(zoneGate.showroom)}
+      else if(z==='corridor'){push(zoneGate.corridor)}
+    };
     leave(from);
     if((from==='staff'&&to!=='showroom')||(to==='staff'&&from!=='showroom'))push(zoneGate.showroom);
-    if((from==='showroom'&&['boss','pantry','corridor'].includes(to))||(to==='showroom'&&['boss','pantry','corridor'].includes(from)))push(zoneGate.corridor);
+    if((from==='showroom'&&corridorLinkedZones.has(to))||(to==='showroom'&&corridorLinkedZones.has(from)))push(zoneGate.corridor);
+    if(corridorLinkedZones.has(from)&&corridorLinkedZones.has(to)&&from!==to)push(zoneGate.corridor);
     enter(to);push(target);
     return pts.filter((p,i,a)=>i===0||Math.hypot(p.x-a[i-1].x,p.y-a[i-1].y)>.35);
   }
@@ -2782,8 +2853,8 @@ body{overscroll-behavior:none;}
   }
   function planSharedRoam(e,requestedZone=null,requestedPoint=null){
     const current=zoneOfEmployee(e),home=['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff';
-    const away=current!==home,roll=Math.random();
-    const targetZone=requestedZone&&roamZones[requestedZone]?requestedZone:(away?home:roll<.12?'pantry':roll<.27?'showroom':roll<.32?'corridor':home);
+    const away=current!==home;
+    const targetZone=requestedZone&&roamZones[requestedZone]?requestedZone:(away?home:chooseScheduledZone(e,current,home));
     const target=requestedPoint&&Number.isFinite(requestedPoint.x)&&Number.isFinite(requestedPoint.y)?{x:requestedPoint.x,y:requestedPoint.y}:targetZone===home?{x:e.deskX??e.x,y:e.deskY??e.y}:roamZones[targetZone].point(e);
     if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8)return null;
     const origin={x:e.visualX??e.x,y:e.visualY??e.y};
@@ -2821,7 +2892,14 @@ body{overscroll-behavior:none;}
     // Seat docking is instantaneous; never animate the feet through the table mesh.
     if(seat){e.visualX=seat.x;e.visualY=seat.y;if(node){const p=iso(seat.x,seat.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}}
     e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
-    e.motionAction=e.visualRoomId==='pantry'?'coffee':e.visualRoomId==='showroom'?'meeting':e.visualRoomId==='corridor'?'chat':'typing';e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node){setMotionClass(e,node,false);updateEmployeeBubbles(e)}
+    if(e.visualRoomId==='showroom'){e.status='In a meeting';e.motionAction='meeting';e.activity='Showroom discussion';}
+    else if(e.visualRoomId==='store'){e.status='At desk';e.motionAction='production';e.activity='Store check';}
+    else if(e.visualRoomId==='prayer'){e.status='On break';e.motionAction='reading';e.activity='Prayer break';}
+    else if(e.visualRoomId==='toilet-a'||e.visualRoomId==='toilet-b'){e.status='On break';e.motionAction='coffee';e.activity='Quick break';}
+    else if(e.visualRoomId==='pantry'){e.status='On break';e.motionAction='coffee';e.activity='Pantry break';}
+    else if(e.visualRoomId==='corridor'){e.status='At desk';e.motionAction='chat';e.activity='Corridor chat';}
+    else{e.status='At desk';e.motionAction='typing';e.activity='Desk work';}
+    e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node){setMotionClass(e,node,false);updateEmployeeBubbles(e)}
   }
   function activeWalkers(){return employees.reduce((n,e)=>n+(e.roam?.phase==='walk'?1:0),0)}
   function randomRoamFrame(now){
@@ -3106,13 +3184,13 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.1 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
-<script src="office-command-data.js?v=86.0" defer></script>
-<script src="office-3d.js?v=86.0" defer></script>
-<script src="office-command-center.js?v=86.0" defer></script>
+<script src="office-command-data.js?v=86.1" defer></script>
+<script src="office-3d.js?v=86.1" defer></script>
+<script src="office-quality.js?v=86.1" defer></script>
 <script src="office-ambience-audio.js?v=81.0" defer></script>
 <script src="office-living-office.js?v=84.0" defer></script>
 <script src="office-movement-sync.js?v=84.0" defer></script>

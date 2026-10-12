@@ -1,7 +1,7 @@
 {
-  "release": 86,
-  "edition": "Operations Command Center",
-  "package": "V86 interactive office operations + Kanban + analytics + adaptive 3D quality",
+  "release": "86.1",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.1 simplified Office Pulse + Kanban + Insights + integrated 3D quality",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -9,9 +9,10 @@
     "office-movement-sync.js",
     "office-3d.js",
     "office-command-data.js",
-    "office-command-center.js",
     "office-command.css",
-    "job-command-board.js"
+    "job-command-board.js",
+    "office-quality.js",
+    "office-pulse-integrated.css"
   ],
-  "check": "Uses existing Supabase job scope, CAS updates through Job Management, live team data, optional 3D quality presets."
+  "check": "The existing Office Pulse owns synchronized job records; deadline queue is read-only and quality is device-local. Kanban edits use original CAS save."
 }

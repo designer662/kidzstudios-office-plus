@@ -86,12 +86,17 @@
  }
  function chooseIntent(person,currentZone,now=Date.now()){
   const h=hour(now),home=['boss','staff','showroom'].includes(person?.homeRoom)?person.homeRoom:'staff';
-  const active=!!jobKey(person),work=workFor(person),roll=Math.random();
+  const active=!!jobKey(person),work=workFor(person),roll=Math.random(),roleText=`${person?.role||''} ${person?.department||''}`.toLowerCase();
   // Work is favored when real job data exists; break windows follow MY local time.
+  if(currentZone!==home&&['prayer','store','toilet-a','toilet-b'].includes(currentZone)){return {zone:home,action:work,kind:'return'}}
   if(currentZone!==home){return {zone:home,action:work,kind:'return'}}
   if(h<8||h>=21)return {zone:home,action:weightedPick(taskPalette(person,active)),kind:'work'};
   // Small break windows, never treating simulations as real attendance data.
+  if(h>=12&&h<14&&roll<.26)return {zone:'prayer',action:'reading',kind:'break'};
+  if(h>=15&&h<17&&roll<.12)return {zone:'prayer',action:'reading',kind:'break'};
   if(h>=12&&h<14&&roll<.49)return {zone:'pantry',action:'coffee',kind:'break'};
+  if(h>=9&&h<18&&roll<.09)return {zone:person?.gender==='female'?'toilet-b':'toilet-a',action:'coffee',kind:'break'};
+  if(h>=9&&h<18&&/admin|production|finance|boss|assistant/.test(roleText)&&roll<.16)return {zone:'store',action:'production',kind:'work'};
   if(h>=9&&h<18&&roll<.11)return {zone:'pantry',action:'coffee',kind:'break'};
   if(h>=9&&h<18&&roll<.18)return {zone:'showroom',action:'meeting',kind:'meeting'};
   if(h>=9&&h<18&&!active&&roll<.24)return {zone:'corridor',action:'chat',kind:'social'};

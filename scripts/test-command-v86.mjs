@@ -24,8 +24,13 @@ assert.equal(report.total,3);assert.equal(report.active,2);assert.equal(report.o
 assert.equal(report.weekly.length,7);assert.equal(report.weekly.at(-1).ordered,1);
 assert.equal(d.peopleLoad(jobs,[{name:'Afiq'},{name:'Nisa'}])[0].name,'Afiq');
 const index=read('public/index.html'),job=read('public/job-management.html'),scene=read('source/src/office-scene.ts'),bundle=read('public/office-3d.js');
-for(const item of ['office-command-data.js','office-command-center.js','office-command.css'])assert.ok(index.includes(item),`dashboard asset ${item} wired`);
-assert.ok(index.includes('office-3d.js?v=86.0'),'changed 3D bundle cache-busted');
+for(const item of ['office-command-data.js','office-quality.js','office-pulse-integrated.css','office-command.css'])assert.ok(index.includes(item),`dashboard asset ${item} wired`);
+assert.ok(index.includes('office-3d.js?v=86.1'),'changed 3D bundle cache-busted');
+assert.ok(!index.includes('office-command-center.js'),'duplicate command drawer removed');
+assert.match(index,/id="ksPulsePriority"/);
+assert.match(index,/id="ksVisualQuality"/);
+assert.match(index,/function renderPulsePriority\(\)/);
+assert.match(index,/<details class="ks-pulse-extra"/);
 for(const item of ['job-command-board.js','office-command-data.js','office-command.css','KSJobEnhanced?.connect'])assert.ok(job.includes(item),`job module ${item} wired`);
 assert.ok(job.includes('return saveAll('),'board stage changes reuse versioned saves');
 assert.match(scene,/function setQuality\(mode:OfficeQuality\)/);

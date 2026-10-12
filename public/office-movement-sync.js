@@ -103,8 +103,8 @@
     return plan?.seatGoal||plan?.route?.[plan.route.length-1]||null;
   }
   function pairConversation(snapshot,subject,now){
-    if(!living||subject.room==='corridor'||subject.room==='pantry'||(subject.socialAt&&now-subject.socialAt<120000)||subject.scene?.kind==='job')return false;
-    const others=snapshot.staff.filter(s=>s!==subject&&!s.walk&&s.room!=='pantry'&&s.room!=='corridor'&&s.nextAt<now+15000&&(!s.socialAt||now-s.socialAt>120000)&&s.scene?.kind!=='job');
+    if(!living||subject.room==='corridor'||subject.room==='pantry'||subject.room==='prayer'||subject.room==='store'||subject.room==='toilet-a'||subject.room==='toilet-b'||(subject.socialAt&&now-subject.socialAt<120000)||subject.scene?.kind==='job')return false;
+    const others=snapshot.staff.filter(s=>s!==subject&&!s.walk&&!['pantry','corridor','prayer','store','toilet-a','toilet-b'].includes(s.room)&&s.nextAt<now+15000&&(!s.socialAt||now-s.socialAt>120000)&&s.scene?.kind!=='job');
     if(!others.length)return false;
     const partner=others[Math.floor(Math.random()*others.length)];
     // Either corridor slot is allowed, but refuse paths that place the characters too close.
@@ -162,7 +162,7 @@
         s.walk=null;
         s.nextAt=['conversation','huddle'].includes(s.scene?.kind)?Math.max(now+3000,s.scene.until+2600):
           s.scene?.kind==='break'?Math.max(now+3500,s.scene.until+1000):
-          s.scene?.kind==='meeting'?Math.max(now+3500,s.scene.until+1200):now+(s.room==='pantry'?17000:19000)+Math.random()*15000;
+          s.scene?.kind==='meeting'?Math.max(now+3500,s.scene.until+1200):now+(['pantry','prayer','toilet-a','toilet-b'].includes(s.room)?17000:19000)+Math.random()*15000;
         changed=true;
       }
     }
