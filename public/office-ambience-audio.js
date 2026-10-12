@@ -7,7 +7,7 @@
  const clamp=(n,min,max)=>Math.min(max,Math.max(min,Number(n)||0));
  const AudioCtor=()=>window.AudioContext||window.webkitAudioContext;
  function create({onStatus=()=>{}}={}){
-  let context=null,master=null,ventilation=null,sources=[],tickTimer=null,enabled=false,disposed=false;
+  let context=null,master=null,sources=[],tickTimer=null,enabled=false,disposed=false;
   let volume=.55,activity={walking:0,working:0,chatting:0,meeting:0,coffee:0},lastTickAt=0;
   let status='off',generation=0;
   const notify=(value)=>{if(status!==value){status=value;onStatus(value)}};
@@ -16,7 +16,6 @@
    for(const node of sources){try{node.stop()}catch(_){}try{node.disconnect()}catch(_){}}
    sources=[];
    if(master){try{master.disconnect()}catch(_){}master=null}
-   ventilation=null;
   }
   function state(){return status}
   function getContext(){return context}
@@ -29,19 +28,9 @@
   function gain(level){const g=context.createGain();g.gain.value=level;return g}
   function filter(type,freq,q=.7){const f=context.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;return f}
   function track(source){sources.push(source);return source}
+  // No air-conditioning or fan loop: only sparse activity-triggered effects.
   function startBackground(){
    master=gain(.36*volume);master.connect(context.destination);
-   const buffer=makeBuffer(1.7),air=track(context.createBufferSource());air.buffer=buffer;air.loop=true;
-   const ventLow=filter('lowpass',550),ventGain=gain(.085);
-   air.connect(ventLow);ventLow.connect(ventGain);ventGain.connect(master);
-   const ventWhisper=filter('bandpass',1150,.42),whisperGain=gain(.014);
-   air.connect(ventWhisper);ventWhisper.connect(whisperGain);whisperGain.connect(master);
-   const fan=track(context.createOscillator());fan.type='sine';fan.frequency.value=67;
-   const fanGain=gain(.012);fan.connect(fanGain);fanGain.connect(master);
-   const harmonic=track(context.createOscillator());harmonic.type='sine';harmonic.frequency.value=134;
-   const hg=gain(.0038);harmonic.connect(hg);hg.connect(master);
-   air.start();fan.start();harmonic.start();
-   ventilation={air,fan};
    tickTimer=setInterval(schedule,720);
   }
   // Most modern browsers require a fresh pointer/key gesture before context.resume().
@@ -140,7 +129,7 @@
   }
   function schedule(){
    if(!enabled||document.hidden||!master||context?.state!=='running')return;
-   // Activity-aware effects are sparse; air-conditioning remains the steady base.
+   // Activity-aware effects are sparse, with no continuous air-conditioning or fan noise.
    const a=activity,r=Math.random(),time=context.currentTime+.025;
    if((a.chatting||a.meeting)&&r<.14)murmur(time);
    else if(a.walking&&r<.36)step(time);

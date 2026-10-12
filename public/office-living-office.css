@@ -1,31 +1,16 @@
-/* V79 unobtrusive local cinematic ambience control */
-.ks-living-controls{position:absolute;z-index:7;left:22px;top:56px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;pointer-events:none;max-width:calc(100% - 340px)}
-.ks-living-daylight,.ks-living-audio{min-height:29px;border-radius:999px;border:1px solid rgba(196,200,196,.75);background:rgba(255,255,255,.93);color:#606762;font:750 10px/1.2 Inter,Arial,sans-serif;padding:7px 11px;box-shadow:0 3px 14px rgba(35,44,37,.06);backdrop-filter:blur(8px)}
-.ks-living-audio{pointer-events:auto;cursor:pointer;border-color:rgba(222,150,95,.28);color:#aa6a42}
+/* V86.4 Minimal controls: one light indicator and one sound toggle. */
+.ks-living-controls{position:absolute;z-index:7;left:22px;top:56px;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;pointer-events:none;max-width:calc(100% - 50px)}
+.ks-living-daylight,.ks-living-audio{min-height:30px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:999px;border:1px solid rgba(192,196,192,.75);background:rgba(255,255,255,.95);color:#5e6863;font:750 11px/1.2 Inter,Arial,sans-serif;padding:6px 11px;box-shadow:0 3px 14px rgba(35,44,37,.06);backdrop-filter:blur(8px)}
+.ks-living-audio{pointer-events:auto;cursor:pointer;border-color:rgba(222,150,95,.28);color:#986541;touch-action:manipulation}
 .ks-living-audio:hover,.ks-living-audio:focus-visible{background:#fff2e8;outline:2px solid rgba(235,149,86,.36);outline-offset:1px}
 .ks-living-audio[aria-pressed="true"]{background:#f0faed;border-color:#a5c59f;color:#597550}
+@media(max-width:920px){.ks-living-controls{left:12px;top:109px;gap:5px}.ks-living-daylight,.ks-living-audio{min-height:32px;font-size:10px;padding:6px 9px}}
+@media(max-width:650px){.ks-living-controls{left:12px;top:109px}.ks-living-daylight,.ks-living-audio{min-height:32px;font-size:10px}}
+@media print{.ks-living-controls{display:none!important}}
 #office3dHost .scene-bubble[data-bubble-kind="living"]{max-width:145px;padding:7px 9px;font-size:10px;text-align:center;color:#6f6252;border:1px solid rgba(224,178,121,.28);background:rgba(255,252,244,.97);box-shadow:0 6px 15px rgba(80,62,42,.09)}
 @media(max-width:920px){.ks-living-controls{left:12px;top:109px;gap:5px;max-width:calc(100% - 24px)}.ks-living-daylight,.ks-living-audio{font-size:9px;padding:6px 8px}}
 @media(max-width:650px){.ks-living-controls{left:12px;top:109px}.ks-living-daylight{display:none}.ks-living-audio{min-height:27px}}
 @media print{.ks-living-controls{display:none!important}}
-/* V79 compact activity overview and accessible per-device sound level. */
-.ks-living-activity,.ks-living-volume{min-height:29px;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid rgba(196,200,196,.70);background:rgba(255,255,255,.93);font:700 10px/1.2 Inter,Arial,sans-serif;color:#65726d;backdrop-filter:blur(8px)}
-.ks-living-volume{pointer-events:auto;cursor:default;gap:6px;color:#aa6a42;border-color:rgba(222,150,95,.22)}
-.ks-living-volume input[type="range"]{accent-color:#dc8b5a;width:65px;height:13px;cursor:pointer}
-@media(max-width:920px){.ks-living-activity,.ks-living-volume{font-size:9px;min-height:27px;padding:5px 7px}.ks-living-activity{display:none}}
-@media(max-width:650px){.ks-living-volume{gap:4px}.ks-living-volume span{display:none}.ks-living-volume input[type="range"]{width:55px}}
-
-/* V81 sound preview, verified playback state and compact responsive controls */
-.ks-living-preview{min-height:29px;border:1px solid rgba(229,162,111,.26);border-radius:999px;background:#fff9f0;color:#a4613c;font:750 10px/1.2 Inter,Arial,sans-serif;padding:7px 11px;cursor:pointer;pointer-events:auto}
-.ks-living-preview:hover,.ks-living-preview:focus-visible{background:#ffefe0;outline:2px solid rgba(235,149,86,.25);outline-offset:1px}
-.ks-living-preview[hidden]{display:none!important}
-.ks-living-sound-status{font:700 9px/1.2 Inter,Arial,sans-serif;color:#84908a;min-height:12px;pointer-events:none}
-.ks-living-sound-status[data-state="playing"]{color:#4c8662}
-.ks-living-sound-status[data-state="tap-to-start"],.ks-living-sound-status[data-state="unsupported"]{color:#bd724e}
-.ks-living-sound-status[data-state="off"]{display:none}
-@media(max-width:920px){.ks-living-preview{font-size:9px;min-height:27px;padding:6px 8px}.ks-living-sound-status{display:none}}
-@media(max-width:650px){.ks-living-preview{font-size:9px;padding:6px 8px}}
-
 /* V84: readable simulated dialogue. Smart-label collision manager handles the placement. */
 #office3dHost .scene-bubble[data-bubble-kind="conversation"]{
   max-width:170px;padding:9px 12px;border-radius:15px;

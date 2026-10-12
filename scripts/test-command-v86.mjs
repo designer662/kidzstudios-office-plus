@@ -25,7 +25,7 @@ assert.equal(report.weekly.length,7);assert.equal(report.weekly.at(-1).ordered,1
 assert.equal(d.peopleLoad(jobs,[{name:'Afiq'},{name:'Nisa'}])[0].name,'Afiq');
 const index=read('public/index.html'),job=read('public/job-management.html'),scene=read('source/src/office-scene.ts'),bundle=read('public/office-3d.js');
 for(const item of ['office-command-data.js','office-quality.js','office-pulse-integrated.css','office-command.css'])assert.ok(index.includes(item),`dashboard asset ${item} wired`);
-assert.ok(index.includes('office-3d.js?v=86.1'),'changed 3D bundle cache-busted');
+assert.ok(index.includes('office-3d.js?v=86.4'),'changed 3D bundle cache-busted');
 assert.ok(!index.includes('office-command-center.js'),'duplicate command drawer removed');
 assert.match(index,/id="ksPulsePriority"/);
 assert.match(index,/id="ksVisualQuality"/);

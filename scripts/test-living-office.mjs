@@ -48,8 +48,8 @@ o.update({},staff);assert.equal(calls.length,1,'The same cue should not create a
 current+=2000;o.update({},[{id:1,scene:null}]);assert.equal(calls[1][0],'clear','Expired cue should be cleared');
 assert.equal(o.isAmbientEnabled(),false,'Ambient sound starts opt-in, never autoplays');
 assert.equal(o.setAmbientEnabled(false),undefined);
-assert.ok(index.includes('office-living-office.js?v=84.0'),'Living Office must load before timeline');
-assert.ok(index.indexOf('office-living-office.js?v=84.0')<index.indexOf('office-movement-sync.js?v=84.0'));
+assert.ok(index.includes('office-living-office.js?v=86.4'),'Living Office must load before timeline');
+assert.ok(index.indexOf('office-living-office.js?v=86.4')<index.indexOf('office-movement-sync.js?v=84.0'));
 assert.match(index,/function planSharedRoam\(e,requestedZone=null,requestedPoint=null\)/);
 assert.match(timeline,/pairConversation\(/);
 assert.match(timeline,/fingerprint=living\?\.jobKey/);

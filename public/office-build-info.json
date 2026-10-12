@@ -1,7 +1,19 @@
 {
-  "release": "86.3",
-  "edition": "Office Plus · Unified Pulse",
-  "package": "V86.3 developer audit: verified zone routing, scene actions, mobile polishing and hijab rebuild parity",
-  "modules": ["office-ambience-audio.js", "office-living-office.js", "office-notification-sound.js", "office-movement-sync.js", "office-3d.js", "office-command-data.js", "office-command.css", "job-command-board.js", "office-quality.js", "office-room-nav.js", "office-v86-3-polish.css", "office-pulse-integrated.css"],
-  "check": "No new API endpoints. Existing authenticated Supabase state and CAS saves preserved; mobile Eco is only a first-load default."
+  "release": "86.4",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.4 simplified ambience + user-provided hijab character",
+  "modules": [
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-movement-sync.js",
+    "office-3d.js",
+    "office-command-data.js",
+    "office-command.css",
+    "job-command-board.js",
+    "office-quality.js",
+    "office-v86-3-polish.css",
+    "office-pulse-integrated.css"
+  ],
+  "check": "No room picker, no continuous AC audio; hijab source and shipped bundle updated; Supabase unchanged."
 }

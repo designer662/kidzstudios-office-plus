@@ -82,7 +82,7 @@
   if(renderer)lerp(renderer,'toneMappingExposure',tone.exposure);
   if(scene?.background?.lerp)scene.background.lerp(new scene.background.constructor(tone.background),blend);
   else if(scene?.background?.set)scene.background.set(tone.background);
-  if(badge&&tone.label!==lastTone){lastTone=tone.label;badge.textContent=`☀ ${tone.label}`;badge.title=`Simulated lighting · ${tone.label} (Malaysia time)`}
+  if(badge&&tone.label!==lastTone){lastTone=tone.label;badge.textContent=tone.label.startsWith('Night')?'☾ Night':tone.label==='Evening'?'☼ Evening':'☀ Day';badge.title=`Simulated lighting · ${tone.label} (Malaysia time)`}
  }
  function chooseIntent(person,currentZone,now=Date.now()){
   const h=hour(now),home=['boss','staff','showroom'].includes(person?.homeRoom)?person.homeRoom:'staff';
@@ -116,13 +116,6 @@
   // Calm compact activity overview; count illustrative simulation states only.
   const now=Date.now();
   ambienceEngine?.setActivity(positions);
-  if(activityLabel&&now-lastSummary>2800){
-   lastSummary=now;
-   const walking=positions.filter(p=>p.walking).length;
-   const chatting=positions.filter(p=>p.scene?.kind==='conversation'||p.scene?.kind==='huddle').length;
-   const resting=positions.filter(p=>p.action==='coffee'&&!p.walking).length;
-   activityLabel.textContent=`${walking} walking · ${chatting} social · ${resting} on break`;
-  }
   const living=window.office3d;
   if(!living)return;
   if(living!==lastLivingController){sceneCache.clear();lastLivingController=living}
@@ -158,7 +151,7 @@
   }
 
  }
- let enabled=false,btn=null,badge=null,volumeControl=null,activityLabel=null,lastSummary=0,previewBtn=null,soundStatus=null;
+ let enabled=false,btn=null,badge=null,lastSummary=0;
  let volume=.55;
  try{const savedText=localStorage.getItem(VOLUME_STORAGE);if(savedText!==null){const saved=Number(savedText);if(Number.isFinite(saved)&&saved>=0&&saved<=1)volume=saved}}catch(_){}
  try{enabled=localStorage.getItem(STORAGE)==='on'}catch(_){}
@@ -166,11 +159,7 @@
  ambienceEngine?.setVolume(volume);
  if(enabled)ambienceEngine?.setEnabled(true,{gesture:false});
  function updateSoundStatus(state){
-  if(soundStatus){
-   const messages={'playing':'Office audio is playing','tap-to-start':'Click Ambience On or Preview to allow sound','paused':'Paused while tab is hidden','unsupported':'Audio is not supported in this browser','off':'Ambience muted'};
-   soundStatus.textContent=messages[state]||'Office ambience ready';
-   soundStatus.dataset.state=state;
-  }
+  if(btn)btn.title=({playing:'Mute office sounds','tap-to-start':'Tap to enable office sounds',paused:'Sound paused',unsupported:'Audio unavailable',off:'Enable office sounds'})[state]||'Office sounds';
   syncButton();
  }
  function beginAudio(gesture=false){if(!enabled||document.hidden)return;return ambienceEngine?.start({gesture});}
@@ -185,14 +174,14 @@
   volume=Math.max(0,Math.min(1,Number(value)||0));
   try{localStorage.setItem(VOLUME_STORAGE,String(volume))}catch(_){}
   ambienceEngine?.setVolume(volume);
-  if(volumeControl)volumeControl.value=String(Math.round(volume*100));
+
  }
  function syncButton(){
   if(!btn)return;
-  btn.textContent=enabled?'♫ Ambience on':'♫ Ambience off';
+  btn.textContent=enabled?'♫ Sound on':'♫ Sound off';
   btn.setAttribute('aria-pressed',String(enabled));
-  btn.title=enabled?'Mute simulated office ambience':'Enable simulated office ambience';
-  if(previewBtn)previewBtn.hidden=!enabled;
+  btn.setAttribute('aria-label',enabled?'Mute office sound effects':'Enable office sound effects');
+  btn.title=enabled?'Mute office sound effects':'Enable office sound effects';
  }
  function attach(){
   if(document.getElementById('ksLivingControls'))return;
@@ -201,16 +190,7 @@
   badge=document.createElement('span');badge.className='ks-living-daylight';
   btn=document.createElement('button');btn.type='button';btn.className='ks-living-audio';btn.setAttribute('aria-label','Toggle office ambience');
   btn.addEventListener('click',e=>{e.stopPropagation();setEnabled(!enabled)});
-  previewBtn=document.createElement('button');previewBtn.type='button';previewBtn.className='ks-living-preview';previewBtn.textContent='▶ Preview';previewBtn.setAttribute('aria-label','Play a short office ambience sound preview');
-  previewBtn.addEventListener('click',async e=>{e.stopPropagation();if(!enabled)setEnabled(true);await ambienceEngine?.preview();syncButton()});
-  const volumeWrap=document.createElement('label');volumeWrap.className='ks-living-volume';volumeWrap.title='Office ambience volume';volumeWrap.setAttribute('aria-label','Office ambience volume');
-  const small=document.createElement('span');small.textContent='Volume';
-  volumeControl=document.createElement('input');volumeControl.type='range';volumeControl.min='0';volumeControl.max='100';volumeControl.step='5';volumeControl.value=String(Math.round(volume*100));volumeControl.setAttribute('aria-label','Ambient volume');
-  volumeControl.addEventListener('input',e=>{e.stopPropagation();setVolume(Number(volumeControl.value)/100)});
-  volumeControl.addEventListener('pointerdown',e=>e.stopPropagation());volumeWrap.append(small,volumeControl);
-  activityLabel=document.createElement('span');activityLabel.className='ks-living-activity';activityLabel.textContent='Office warming up';activityLabel.setAttribute('aria-live','off');
-  soundStatus=document.createElement('span');soundStatus.className='ks-living-sound-status';soundStatus.setAttribute('role','status');soundStatus.setAttribute('aria-live','polite');
-  controls.append(badge,activityLabel,btn,previewBtn,volumeWrap,soundStatus);host.parentElement.appendChild(controls);
+  controls.append(badge,btn);host.parentElement.appendChild(controls);
   syncButton();updateSoundStatus(enabled?'tap-to-start':'off');applyLighting(null,null,null,null,null);
  }
  // Unlock on the next genuine user gesture, including after a browser restores a tab.

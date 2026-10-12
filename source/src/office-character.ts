@@ -71,7 +71,7 @@ export function characterFactory(){
   flat(body,shade(pant,.80),0,.932,.018,.337,.023,.284);
   flat(body,'#c6ac85',0,.941,.167,.046,.029,.014);
   // Neck rises into the restored V53 head; keep the original head pivot height.
-  pill(chest,skin,0,.410,0,.071,.181,.071);
+  pill(chest,isFemale?'#c67b70':skin,0,.410,0,.071,.181,.071);
   // Two-layer styling helps clothing read from the top-down isometric angle.
   if(look.outfit==='blazer'||look.outfit==='cardigan'){
    flat(chest,light,0,.045,.186,.193,.43,.045);
@@ -106,7 +106,7 @@ export function characterFactory(){
   });
   put(head,faceShape,skin,0,-.024,0,.291,.319,.257);
   // The ears overlap the head, so they remain connected-looking from side and 3/4 views.
-  for(const s of [-1,1]){
+  if(!isFemale)for(const s of [-1,1]){
    orb(head,skin,s*.276,-.056,-.011,.061,.076,.051);
    orb(head,shade(skin,.96),s*.324,-.057,.023,.013,.031,.021);
   }
@@ -123,6 +123,50 @@ export function characterFactory(){
   }
   orb(head,shade(skin,1.052),0,-.057,.252,.022,.026,.016);
   line(head,'#94665c',[[-.038,-.153,.243],[0,-.160,.248],[.038,-.153,.243]],.0052);
+  if(isFemale){
+   // Modest rose-pink hijab matching the reference: no exposed scalp, hair, ears or neck.
+   // Fabric is parented to the original animated head/chest joints: walking, sitting,
+   // waving, blinking, head turns and accessories continue to work unchanged.
+   const cloth='#c67b70',highlight=shade(cloth,1.055),fold=shade(cloth,.91);
+   const scarfHead=group(head,'hijab-head');
+   // Open-front hood: a continuous spherical wrap from crown down around the jaw,
+   // leaving a softly framed oval opening for the existing eyes and face.
+   put(scarfHead,geometry('hijab-hood-v1',()=>new THREE.SphereGeometry(
+    1,48,30,Math.PI/2+.78,Math.PI*2-1.56,0,Math.PI*.91
+   )),cloth,0,-.016,-.034,.326,.355,.307,.91);
+   // The rear fabric falls behind the neck instead of looking like a hair helmet.
+   softOrb(scarfHead,cloth,0,-.208,-.204,.280,.179,.150);
+   line(scarfHead,highlight,[[-.218,.180,.155],[-.16,.251,.178],[0,.307,.153],[.16,.251,.178],[.218,.180,.155]],.018);
+   for(const side of [-1,1]){
+    line(scarfHead,highlight,[
+     [side*.218,.18,.155],[side*.242,.075,.157],[side*.253,-.048,.140],
+     [side*.213,-.176,.149],[side*.135,-.260,.162],[side*.025,-.284,.163]
+    ],.023);
+   }
+   // Draped collar seals the neckline and folds across the throat under the chin.
+   put(scarfHead,geometry('hijab-throat-v1',()=>new THREE.LatheGeometry([
+    new THREE.Vector2(.148,-.268),new THREE.Vector2(.209,-.293),
+    new THREE.Vector2(.251,-.340),new THREE.Vector2(.273,-.398),
+    new THREE.Vector2(.269,-.452),new THREE.Vector2(.253,-.482)
+   ],48)),cloth,0,0,-.035,1,1,.80,.91);
+   line(scarfHead,fold,[[-.205,-.306,.102],[-.120,-.350,.161],[0,-.375,.180],[.120,-.350,.161],[.205,-.306,.102]],.011);
+   // Shoulder scarf is attached to the chest, so head rotation won't stretch it.
+   const scarfDrape=group(chest,'hijab-drape');
+   put(scarfDrape,geometry('hijab-shoulders-v1',()=>new THREE.LatheGeometry([
+    new THREE.Vector2(.145,.427),new THREE.Vector2(.198,.392),
+    new THREE.Vector2(.257,.327),new THREE.Vector2(.316,.246),
+    new THREE.Vector2(.325,.174),new THREE.Vector2(.309,.118),
+    new THREE.Vector2(.266,.103)
+   ],48)),cloth,0,0,-.057,1,1,.81,.91);
+   // A smooth, slim oval-fabric front tail that tapers naturally at the hem.
+   put(scarfDrape,geometry('hijab-front-tail-v1',()=>new THREE.LatheGeometry([
+    new THREE.Vector2(.030,.348),new THREE.Vector2(.086,.303),
+    new THREE.Vector2(.114,.189),new THREE.Vector2(.116,.050),
+    new THREE.Vector2(.080,-.057),new THREE.Vector2(.006,-.096)
+   ],40)),highlight,-.111,0,.230,1,1,.24,.92);
+   line(scarfDrape,fold,[[-.225,.314,.239],[-.222,.234,.245],[-.214,.126,.252],[-.191,-.004,.242]],.009);
+   line(scarfDrape,highlight,[[.004,.312,.239],[-.001,.213,.244],[.018,.101,.251],[.007,-.061,.243]],.006);
+  }else{
   // V53 scalp shell: one curved mesh with a shaped hairline, instead of a blocky helmet.
   const hairShell=geometry(`v53-hair-shell-${look.hair}`,()=>{
    const g=new THREE.SphereGeometry(1,40,18,0,Math.PI*2,0,Math.PI/2),a=g.attributes.position;
@@ -162,6 +206,7 @@ export function characterFactory(){
    orb(head,hair,.074,.171,.172,.113,.053,.081);
    flat(head,'#c8a981',.043,-.080,-.402,.106,.022,.015);
   }
+  }
   if(look.glasses){
    for(const s of [-1,1]){
     const rim=ring(head,'#46535a',s*.095,.011,.265,.064,.008);
@@ -178,15 +223,7 @@ export function characterFactory(){
     orb(head,'#d7c4a9',s*.344,-.031,.008,.012,.065,.052);
    }
   }
-    // Female staff use an opaque, fitted hijab; facial details remain visible.
-  if(isFemale){
-   const cloth=shade(shirt,.92);
-   orb(head,cloth,0,.02,-.032,.304,.298,.264);
-   orb(head,cloth,0,-.162,-.118,.252,.166,.214);
-   for(const side of [-1,1]){const fold=orb(head,cloth,side*.226,-.032,-.018,.072,.205,.162);fold.rotation.z=-side*.08}
-   flat(chest,cloth,0,.158,.197,.166,.176,.03);
-  }
-function arm(s:number):Limb{
+  function arm(s:number):Limb{
    // Offset matches the V53 shoulder/torso proportions, and all moving parts overlap at the joints.
    const joint=group(chest,s<0?'shoulder-left':'shoulder-right',s*.266,.218,0);
    const long=look.outfit==='blazer'||look.outfit==='cardigan';
