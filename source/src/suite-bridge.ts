@@ -9,14 +9,14 @@ const api=window.OfficeSuite;
 const $=(id:string)=>document.getElementById(id)!;
 const baseIds:Record<number,number>={1:0,2:1,3:3,4:6,5:4,6:7,7:2,8:5};
 let controller:OfficeController|undefined,signature='',paused=matchMedia('(prefers-reduced-motion: reduce)').matches,frame=0,failed=false;
-function status(e:Staff):Person['status']{return e.motionWalking?'walking':e.motionStatus==='On break'||(e.visualRoomId||e.roomId)==='pantry'?'break':e.motionStatus==='In a meeting'||(e.visualRoomId||e.roomId)==='showroom'?'showroom':'desk'}
+function status(e:Staff):Person['status']{const room=e.visualRoomId||e.roomId;return e.motionWalking?'walking':['pantry','prayer','toilet-a','toilet-b'].includes(room)?'break':room==='showroom'?'showroom':room==='store'?'desk':e.motionStatus==='On break'?'break':e.motionStatus==='In a meeting'?'showroom':'desk'}
 function isSeated(e:Staff){return status(e)==='desk'&&Math.hypot((e.visualX??e.x)-(e.deskX??e.x),(e.visualY??e.y)-(e.deskY??e.y))<.5}
 function position(e:Staff):[number,number]{return [(e.visualX??e.x)/2-5.75,(e.visualY??e.y)/2-17.5]}
 function roster(staff:Staff[]):Person[]{return staff.map((e,i)=>{const base=people[baseIds[e.id]??i%people.length];return {...base,id:e.id,name:e.name,role:e.position,department:e.department,gender:e.gender||base.gender||'male',status:status(e),position:position(e),rotation:e.id===4?Math.PI/2:base.rotation,seated:isSeated(e),action:e.motionAction}})}
 function build(staff:Staff[]){
  controller?.dispose();host.replaceChildren();
  controller=createOffice(host,{onPerson:id=>api?.selectPerson(id),onDepartment:id=>api?.selectDepartment(id),onRoom:id=>api?.selectRoom(id),onExplore:()=>api?.stopFollow(),onZoom:z=>{$('rotationReadout').textContent=`${Math.round(z*100)}%`}},{roster:roster(staff),externalMotion:true});
- controller.setView('isometric');controller.setPaused(paused);controller.setRotating(!paused);window.office3d=controller;
+ controller.setView('isometric');controller.setPaused(paused);controller.setRotating(!paused);window.office3d=controller;window.dispatchEvent(new Event('ks:3d-ready'));
  for(const person of staff){const emoji=({happy:'😊',sad:'😔',angry:'😠',badmood:'😒',busy:'💻'} as Record<string,string>)[person.mood||''];if(emoji)controller.showBubble(person.id,emoji,0,'emoji')}
  const selectDepartment=controller.selectDepartment.bind(controller);controller.selectDepartment=id=>selectDepartment(id==='All'?'all':id);
  const reset=controller.reset.bind(controller);controller.reset=()=>{reset();controller?.setRotating(!paused)};

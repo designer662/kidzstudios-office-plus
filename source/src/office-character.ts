@@ -178,7 +178,15 @@ export function characterFactory(){
     orb(head,'#d7c4a9',s*.344,-.031,.008,.012,.065,.052);
    }
   }
-  function arm(s:number):Limb{
+    // Female staff use an opaque, fitted hijab; facial details remain visible.
+  if(isFemale){
+   const cloth=shade(shirt,.92);
+   orb(head,cloth,0,.02,-.032,.304,.298,.264);
+   orb(head,cloth,0,-.162,-.118,.252,.166,.214);
+   for(const side of [-1,1]){const fold=orb(head,cloth,side*.226,-.032,-.018,.072,.205,.162);fold.rotation.z=-side*.08}
+   flat(chest,cloth,0,.158,.197,.166,.176,.03);
+  }
+function arm(s:number):Limb{
    // Offset matches the V53 shoulder/torso proportions, and all moving parts overlap at the joints.
    const joint=group(chest,s<0?'shoulder-left':'shoulder-right',s*.266,.218,0);
    const long=look.outfit==='blazer'||look.outfit==='cardigan';
@@ -266,7 +274,7 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
   arm.end.rotation.z=0;
  }
  if(p.status==='showroom'&&!walk&&!sit){const g=.5+.5*Math.sin(t*.82);r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.6,g);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,-.43,g);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-.76,g)}
- const rest=p.status==='break'?(1-walk):0;
+ const rest=p.status==='break'&&p.action==='coffee'?(1-walk):0;
  const sip=rest*smooth(2.8,3.5,t%12)*(1-smooth(5.2,6,t%12));
  r.cup.visible=rest>.2;
  if(rest){r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.43-.4*sip,rest);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-1.08-.83*sip,rest);r.head.rotation.x-=.065*sip}
