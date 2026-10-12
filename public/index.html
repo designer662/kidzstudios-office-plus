@@ -979,6 +979,15 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="office-plus.css?v=58.1">
 <link rel="stylesheet" href="office-v59-clean.css?v=59.0">
+<style id="ks-v60-emoji-picker">
+.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:8px;min-width:228px;max-width:min(92vw,280px);padding:11px 12px;border-radius:18px;background:rgba(255,255,255,.96);border:1px solid rgba(31,35,38,.08);box-shadow:0 18px 38px rgba(31,35,38,.16);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;transform:translateY(8px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
+.character-emoji-picker.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.character-emoji-picker[hidden]{display:none!important}
+.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.character-emoji-head strong{font-size:12px;line-height:1.1;color:#343941}.character-emoji-head span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:28px;height:28px;border-radius:10px;border:1px solid rgba(31,35,38,.08);background:#fff;color:#727a80;cursor:pointer;font:700 15px/1 var(--ui)}
+.character-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.emoji-choice-btn{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid rgba(31,35,38,.08);border-radius:13px;background:#fff;color:#4d535a;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease}.emoji-choice-btn:hover,.emoji-choice-btn:focus-visible{transform:translateY(-1px);border-color:rgba(239,123,69,.28);box-shadow:0 8px 16px rgba(239,123,69,.12);color:#dc6b33;outline:none}.emoji-choice-btn .emoji-icon{font-size:18px;line-height:1}.emoji-choice-btn .emoji-copy{display:grid;gap:1px;text-align:left}.emoji-choice-btn .emoji-copy b{font-size:11px;line-height:1.1}.emoji-choice-btn .emoji-copy small{font-size:9px;line-height:1.1;color:#979da4;font-weight:700}
+.bubble-emoji .activity-bubble{min-width:54px;max-width:72px!important;padding:9px 10px!important;text-align:center!important;font-size:22px!important;line-height:1!important;border-color:rgba(239,123,69,.18)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
+@media(max-width:920px){.character-emoji-picker{min-width:208px;padding:10px 10px;border-radius:16px}.character-emoji-grid{gap:7px}.emoji-choice-btn{padding:9px 10px}}
+@media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:10px 6px}.emoji-choice-btn .emoji-copy small,.emoji-choice-btn .emoji-copy b{display:none}.emoji-choice-btn .emoji-icon{font-size:20px}}
+</style>
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1130,6 +1139,15 @@ body{overscroll-behavior:none;}
 </div>
 <div class="map-hint">Click staff to follow · drag to rotate · right-drag to move · scroll to zoom</div>
 <div class="follow-chip" id="followChip" aria-hidden="true"><span>Following</span><b id="followChipName"></b><button id="followChipStop" type="button" aria-label="Stop following staff">×</button></div>
+<div class="character-emoji-picker" id="characterEmojiPicker" hidden aria-hidden="true">
+  <div class="character-emoji-head"><div><span>Character reaction</span><strong id="characterEmojiName">Choose emoji</strong></div><button type="button" class="character-emoji-close" id="characterEmojiClose" aria-label="Close emoji picker">×</button></div>
+  <div class="character-emoji-grid">
+    <button type="button" class="emoji-choice-btn" data-emoji-mood="happy" data-emoji="😊"><span class="emoji-icon">😊</span><span class="emoji-copy"><b>Happy</b><small>Positive mood</small></span></button>
+    <button type="button" class="emoji-choice-btn" data-emoji-mood="sad" data-emoji="😔"><span class="emoji-icon">😔</span><span class="emoji-copy"><b>Sad</b><small>Low energy</small></span></button>
+    <button type="button" class="emoji-choice-btn" data-emoji-mood="angry" data-emoji="😠"><span class="emoji-icon">😠</span><span class="emoji-copy"><b>Angry</b><small>Urgent pressure</small></span></button>
+    <button type="button" class="emoji-choice-btn" data-emoji-mood="badmood" data-emoji="😒"><span class="emoji-icon">😒</span><span class="emoji-copy"><b>Bad mood</b><small>Not feeling it</small></span></button>
+  </div>
+</div>
 </main>
 <div class="tooltip" id="tooltip"></div>
 
@@ -1200,6 +1218,8 @@ body{overscroll-behavior:none;}
   const $$ = s => [...document.querySelectorAll(s)];
 
   const app = $('#app');
+  const mapShell = $('#mapShell');
+  const office3dHost = $('#office3dHost');
   const svg = $('#officeSvg');
   const camera = $('#camera');
   const modelRotator = $('#modelRotator');
@@ -1240,6 +1260,7 @@ body{overscroll-behavior:none;}
   const workloadList = $('#workloadList');
   const workloadTotal = $('#workloadTotal');
   const followChip=$('#followChip'),followChipName=$('#followChipName'),followChipStop=$('#followChipStop');
+  const characterEmojiPicker=$('#characterEmojiPicker'),characterEmojiName=$('#characterEmojiName'),characterEmojiClose=$('#characterEmojiClose');
   const recentJobs = $('#recentJobs');
   const jobsFilterLabel = $('#jobsFilterLabel');
   const opsNote = $('#opsNote');
@@ -2215,7 +2236,7 @@ body{overscroll-behavior:none;}
       const t=el('text',{x:0,y:18.6,class:'employee-name'});t.textContent=e.name;g.append(t);
       // Direct character interaction. Prevent the SVG pan layer from stealing a tap/click.
       g.addEventListener('pointerdown',ev=>ev.stopPropagation());
-      g.addEventListener('click',ev=>{ev.stopPropagation();followCharacter(e)});
+      g.addEventListener('click',ev=>{ev.stopPropagation();followCharacter(e,ev)});
       g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ev.stopPropagation();followCharacter(e)}});
       employeeNodes.set(e.id,g);frag.append(g);
     });
@@ -2290,7 +2311,7 @@ body{overscroll-behavior:none;}
   function syncFollowChip(){const emp=followEmployeeId?employeeById[followEmployeeId]:null;if(!followChip)return;followChip.classList.toggle('show',Boolean(emp));followChip.setAttribute('aria-hidden',String(!emp));if(followChipName)followChipName.textContent=emp?.name||''}
   function collapseOpsPanel(){if(!todayPanel?.classList.contains('expanded'))return;todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false');opsExpandBtn.setAttribute('title','Expand Office Pulse')}}
   function clearFollowBubble(){bubblesLayer.querySelectorAll('.activity-bubble-wrap[data-bubble-kind="follow"]').forEach(n=>n.remove())}
-  function clearEmployeeSelection(){stopCameraFollow();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active'))}
+  function clearEmployeeSelection(){stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active'))}
   function roomPeople(room){return employees.filter(e=>(e.visualRoomId||e.roomId)===room.id)}
   function openRoom(room){collapseOpsPanel();clearEmployeeSelection();const relevant=roomPeople(room),counts=countStatuses(relevant);contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(room.name)}</div><div class="context-sub">${room.dept?esc(room.dept)+' area':'Shared office area'}</div></div><button class="close-mini">×</button></div><div class="context-grid"><div class="metric"><b>${relevant.length}</b><span>people</span></div><div class="metric"><b>${counts['At desk']||0}</b><span>at desks</span></div><div class="metric"><b>${counts['In a meeting']||0}</b><span>in meeting</span></div><div class="metric"><b>${(counts['Walking']||0)+(counts['On break']||0)}</b><span>moving / break</span></div></div>`;contextCard.classList.add('open');contextCard.querySelector('.close-mini').onclick=()=>contextCard.classList.remove('open')}
   function openEmployee(e){
@@ -2303,6 +2324,53 @@ body{overscroll-behavior:none;}
     profileCard.innerHTML=`<button class="close-mini" style="position:absolute;right:14px;top:14px">×</button><div class="profile-top"><div class="profile-avatar">${initials(e.name)}</div><div><div class="profile-name">${esc(e.name)}</div><div class="profile-role">${esc(e.position)}</div><div class="profile-badge"><i></i>${esc(effectiveStatus(e))}</div></div></div><div class="profile-details"><div class="detail-row"><span>Department</span><span>${esc(e.department)}</span></div><div class="detail-row"><span>Current location</span><span>${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span></div><div class="detail-row profile-job-row"><span>Current job</span><span>${esc(e.currentJob||'No active job')}</span></div></div><div class="profile-workload"><div class="profile-workload-head"><span>Workload</span><span>${totalWorkload} item${totalWorkload===1?'':'s'}</span></div><div class="profile-workload-list">${workloadHtml}</div></div><div class="profile-job-actions"><button class="profile-job-action" data-edit-profile-workload="${e.id}">Update workload</button><button class="profile-job-action" data-edit-profile-staff="${e.id}">Edit staff</button></div>`;
     profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
   }
+  const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'}};
+  function closeCharacterEmojiPicker(){
+    if(!characterEmojiPicker)return;
+    characterEmojiPicker.classList.remove('show');
+    characterEmojiPicker.setAttribute('aria-hidden','true');
+    characterEmojiPicker.hidden=true;
+    delete characterEmojiPicker.dataset.employeeId;
+  }
+  function positionCharacterEmojiPicker(emp,ev=null){
+    if(!characterEmojiPicker||!mapShell)return;
+    const shellRect=mapShell.getBoundingClientRect();
+    const pickerRect=characterEmojiPicker.getBoundingClientRect();
+    const pickerWidth=Math.max(228,pickerRect.width||228),pickerHeight=Math.max(128,pickerRect.height||128);
+    let left=shellRect.width-pickerWidth-18,top=18;
+    if(ev&&Number.isFinite(ev.clientX)&&Number.isFinite(ev.clientY)){
+      left=ev.clientX-shellRect.left-pickerWidth/2;
+      top=ev.clientY-shellRect.top-pickerHeight-16;
+    }else if(document.documentElement.classList.contains('studio3d-ready')){
+      const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
+      if(profileRect){left=profileRect.left-shellRect.left+16;top=profileRect.top-shellRect.top+16;}
+      else if(office3dHost){const hostRect=office3dHost.getBoundingClientRect();left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;}
+    }else if(emp){
+      const p=employeeCameraPoint(emp),svgRect=svg.getBoundingClientRect();
+      const viewX=((p.x*cam.scale)+cam.tx)/1240*svgRect.width+svgRect.left-shellRect.left;
+      const viewY=((p.y*cam.scale)+cam.ty)/760*svgRect.height+svgRect.top-shellRect.top;
+      left=viewX-pickerWidth/2;top=viewY-pickerHeight-18;
+    }
+    left=Math.max(10,Math.min(shellRect.width-pickerWidth-10,left));
+    top=Math.max(10,Math.min(shellRect.height-pickerHeight-10,top));
+    characterEmojiPicker.style.left=`${left}px`;
+    characterEmojiPicker.style.top=`${top}px`;
+  }
+  function openCharacterEmojiPicker(emp,ev=null){
+    if(!characterEmojiPicker||!emp)return;
+    characterEmojiPicker.dataset.employeeId=String(emp.id);
+    if(characterEmojiName)characterEmojiName.textContent=`${emp.name} · Mood`;
+    characterEmojiPicker.hidden=false;
+    characterEmojiPicker.setAttribute('aria-hidden','false');
+    requestAnimationFrame(()=>{positionCharacterEmojiPicker(emp,ev);characterEmojiPicker.classList.add('show')});
+  }
+  function triggerCharacterEmoji(emp,mood){
+    const preset=characterEmojiPresets[mood];
+    if(!emp||!preset)return;
+    showBubble(emp,preset.emoji,{kind:'emoji',duration:2400});
+    pushActivity({title:`${emp.name} reaction`,text:`${preset.label} ${preset.emoji}`,avatar:initials(emp.name),type:'mood_reaction',employeeId:emp.id});
+    closeCharacterEmojiPicker();
+  }
   function characterFollowText(e){
     const manual=workloadLines(e?.workload),jobs=activeJobsForEmployee(e||{}).slice(0,2),parts=[];
     if(manual.length)parts.push(manual.slice(0,2).join(' · '));
@@ -2310,7 +2378,7 @@ body{overscroll-behavior:none;}
     else if(e?.currentJob)parts.push(e.currentJob);
     return `${e?.name||'Staff'}${parts.length?' · '+parts.join(' · '):''}`;
   }
-  function followCharacter(e){
+  function followCharacter(e,ev=null){
     if(!e)return;
     collapseOpsPanel();clearWorkloadNotice(e.id);contextCard.classList.remove('open');tooltip.classList.remove('show');
     // Open the profile and start camera follow in the same interaction frame.
@@ -2318,6 +2386,7 @@ body{overscroll-behavior:none;}
     focusEmployee(e);
     profileCard.classList.add('open');
     clearFollowBubble();showBubble(e,characterFollowText(e),{kind:'follow',duration:0});
+    openCharacterEmojiPicker(e,ev);
   }
   function showTip(e,ev){tooltip.innerHTML=`<div class="tt-head"><b>${esc(e.name)}</b><em><i style="background:${statusColor(effectiveStatus(e))}"></i>${esc(effectiveStatus(e))}</em></div><span class="tt-role">${esc(e.position)} · ${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span><div class="tt-job"><small>Working</small><strong>${esc(e.currentJob||'No active job')}</strong></div><span class="tt-desk">${esc(e.deskLabel||e.deskId||'No assigned desk')}</span>`;tooltip.classList.add('show');positionTip(ev)}
   function showDeskTip(emp,deskId,ev){tooltip.innerHTML=emp?`<div class="tt-head"><b>${esc(emp.name)}</b><em><i style="background:${statusColor(emp.status)}"></i>${esc(emp.status)}</em></div><span class="tt-role">${esc(emp.position)} · ${esc(emp.deskLabel||deskId)}</span><div class="tt-job"><small>Current job</small><strong>${esc(emp.currentJob||'No active job')}</strong></div>`:`<div class="tt-head"><b>${esc(deskId||'Workstation')}</b></div><span class="tt-role">Available workstation</span>`;tooltip.classList.add('show');positionTip(ev)}
@@ -2348,7 +2417,7 @@ body{overscroll-behavior:none;}
     rotationAnim=requestAnimationFrame(frame);
   }
   function rotateModel(delta){if(window.office3d){stopCameraFollow();window.office3d.rotateBy(delta*Math.PI/180);return;}stopCameraFollow();animateModelRotation(modelAngle+delta)}
-  function resetScene(){window.office3d?.reset();stopCameraFollow();profileCard.classList.remove('open');contextCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false);animateModelRotation(0)}
+  function resetScene(){window.office3d?.reset();window.office3d?.setRotating?.(true);stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');contextCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false);animateModelRotation(0)}
 
   function applyCamera(){camera.setAttribute('transform',`translate(${cam.tx.toFixed(2)} ${cam.ty.toFixed(2)}) scale(${cam.scale.toFixed(3)})`)}
   function scheduleCameraApply(){if(cameraFrame)return;cameraFrame=requestAnimationFrame(()=>{cameraFrame=null;applyCamera()})}
@@ -2356,7 +2425,7 @@ body{overscroll-behavior:none;}
   function svgPoint(x,y){const r=svg.getBoundingClientRect();return{x:(x-r.left)*1240/r.width,y:(y-r.top)*760/r.height}}
   function setScale(next,anchor={x:620,y:370}){stopCameraFollow();viewMode='custom';next=Math.max(.76,Math.min(2.25,next));const wx=(anchor.x-cam.tx)/cam.scale,wy=(anchor.y-cam.ty)/cam.scale;cam.tx=anchor.x-wx*next;cam.ty=anchor.y-wy*next;cam.scale=next;clampCamera();scheduleCameraApply()}
   function animateCamera(scale,tx,ty,markCustom=true){if(markCustom)viewMode='custom';if(camAnim)cancelAnimationFrame(camAnim);const s={...cam},t={scale,tx,ty},t0=performance.now(),dur=reduceMotion.matches?1:500;function f(now){const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,4);cam.scale=s.scale+(t.scale-s.scale)*e;cam.tx=s.tx+(t.tx-s.tx)*e;cam.ty=s.ty+(t.ty-s.ty)*e;clampCamera();applyCamera();if(p<1)camAnim=requestAnimationFrame(f);else camAnim=null}camAnim=requestAnimationFrame(f)}
-  function resetCamera(){window.office3d?.reset();stopCameraFollow();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false)}
+  function resetCamera(){window.office3d?.reset();window.office3d?.setRotating?.(true);stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false)}
   function roomCenter(room){const b=polygonBounds(room.poly);return iso(b.x+b.w/2,b.y+b.h/2)}
   function rotatePointAroundModel(p){if(!modelAngle)return p;const pivot=modelPivot(),a=modelAngle*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),dx=p.x-pivot.x,dy=p.y-pivot.y;return{x:pivot.x+dx*c-dy*sn,y:pivot.y+dx*sn+dy*c}}
   function employeeCameraPoint(e){return rotatePointAroundModel(iso(e.visualX??e.x,e.visualY??e.y))}
@@ -2380,7 +2449,7 @@ body{overscroll-behavior:none;}
     };
     followCameraFrame=requestAnimationFrame(tick);
   }
-  function stopCameraFollow(){window.office3d?.stopFollowing();stopFollowCameraLoop();followEmployeeId=null;syncFollowChip();clearFollowBubble();app.classList.remove('camera-follow-mode');if(viewMode==='follow')viewMode='custom'}
+  function stopCameraFollow(){window.office3d?.stopFollowing();window.office3d?.setRotating?.(true);stopFollowCameraLoop();followEmployeeId=null;syncFollowChip();clearFollowBubble();app.classList.remove('camera-follow-mode');if(viewMode==='follow')viewMode='custom'}
   function focusRoom(room){stopCameraFollow();viewMode='focus';const p=roomCenter(room);animateCamera(1.20,650-p.x*1.20,344-p.y*1.20,false)}
   function focusEmployee(e){
     if(!e)return;
@@ -2411,7 +2480,7 @@ body{overscroll-behavior:none;}
   roomsLayer.onclick=e=>{if(dragging||rotateDragging||performance.now()<suppressClickUntil)return;const n=e.target.closest('.room');if(!n)return;e.stopPropagation();activeDept='All';$$('.room').forEach(x=>x.classList.remove('focused','dim'));resetScene();updateStats()};
   roomsLayer.onpointerover=e=>{const n=e.target.closest('.room');if(!n)return;if(activeRoomLabel)activeRoomLabel.classList.remove('label-active');activeRoomLabel=roomLabelNodes.get(n.dataset.room)||null;activeRoomLabel?.classList.add('label-active');};
   roomsLayer.onpointerout=e=>{const n=e.target.closest('.room');if(!n)return;const to=e.relatedTarget&&e.relatedTarget.closest?e.relatedTarget.closest('.room'):null;if(to===n)return;activeRoomLabel?.classList.remove('label-active');activeRoomLabel=null;};
-  employeesLayer.onpointerover=e=>{const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)showTip(emp,e)};employeesLayer.onpointermove=e=>{if(tooltip.classList.contains('show'))positionTip(e)};employeesLayer.onpointerout=e=>{if(e.target.closest('.employee'))tooltip.classList.remove('show')};employeesLayer.onclick=e=>{e.stopPropagation();const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)followCharacter(emp)};
+  employeesLayer.onpointerover=e=>{const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)showTip(emp,e)};employeesLayer.onpointermove=e=>{if(tooltip.classList.contains('show'))positionTip(e)};employeesLayer.onpointerout=e=>{if(e.target.closest('.employee'))tooltip.classList.remove('show')};employeesLayer.onclick=e=>{e.stopPropagation();const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)followCharacter(emp,e)};
   furnitureLayer.onpointerover=e=>{const hit=e.target.closest('.desk-hit');if(!hit)return;const emp=employeeById[Number(hit.dataset.employeeId)]||null;showDeskTip(emp,hit.dataset.deskId,e)};
   furnitureLayer.onpointermove=e=>{if(e.target.closest('.desk-hit')&&tooltip.classList.contains('show'))positionTip(e)};
   furnitureLayer.onpointerout=e=>{if(e.target.closest('.desk-hit'))tooltip.classList.remove('show')};
@@ -2422,6 +2491,23 @@ body{overscroll-behavior:none;}
   if(chatLauncher)chatLauncher.onclick=()=>setChatOpen(!chatOpen);
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;
+  if(characterEmojiClose)characterEmojiClose.onclick=closeCharacterEmojiPicker;
+  if(characterEmojiPicker)characterEmojiPicker.onclick=e=>{
+    const btn=e.target.closest('[data-emoji-mood]');
+    if(!btn)return;
+    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)]||employeeById[followEmployeeId];
+    if(emp)triggerCharacterEmoji(emp,btn.dataset.emojiMood);
+  };
+  document.addEventListener('pointerdown',e=>{
+    if(!characterEmojiPicker||characterEmojiPicker.hidden)return;
+    if(e.target.closest('#characterEmojiPicker')||e.target.closest('.employee')||e.target.closest('.person-label'))return;
+    closeCharacterEmojiPicker();
+  });
+  window.addEventListener('resize',()=>{
+    if(characterEmojiPicker?.hidden)return;
+    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)]||employeeById[followEmployeeId];
+    if(emp)positionCharacterEmojiPicker(emp);
+  });
   if(chatSendBtn)chatSendBtn.onclick=sendChat;
   if(chatChangeUser)chatChangeUser.onclick=()=>document.getElementById('tempUserBtn')?.click();
   if(chatInput)chatInput.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}};
