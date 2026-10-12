@@ -1015,6 +1015,7 @@ body{overscroll-behavior:none;}
 </style>
 <link rel="stylesheet" href="office-moods.css?v=70.0">
 <link rel="stylesheet" href="office-profile-layout.css?v=75.0">
+<link rel="stylesheet" href="office-living-office.css?v=79.0">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -2777,11 +2778,11 @@ body{overscroll-behavior:none;}
     node.classList.toggle('busy',!walking&&e.status==='At desk'&&e.id%2===0);
     const dot=node.querySelector('.status-dot');if(dot)dot.setAttribute('fill',statusColor(effectiveStatus(e)));
   }
-  function planSharedRoam(e){
-    const current=zoneOfEmployee(e),home=e.homeRoom==='boss'?'boss':'staff';
+  function planSharedRoam(e,requestedZone=null,requestedPoint=null){
+    const current=zoneOfEmployee(e),home=['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff';
     const away=current!==home,roll=Math.random();
-    const targetZone=away?home:roll<.12?'pantry':roll<.27?'showroom':roll<.32?'corridor':home;
-    const target=roamZones[targetZone].point(e);
+    const targetZone=requestedZone&&roamZones[requestedZone]?requestedZone:(away?home:roll<.12?'pantry':roll<.27?'showroom':roll<.32?'corridor':home);
+    const target=requestedPoint&&Number.isFinite(requestedPoint.x)&&Number.isFinite(requestedPoint.y)?{x:requestedPoint.x,y:requestedPoint.y}:targetZone===home?{x:e.deskX??e.x,y:e.deskY??e.y}:roamZones[targetZone].point(e);
     if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8)return null;
     const origin={x:e.visualX??e.x,y:e.visualY??e.y};
     const exit=navSnap(origin);
@@ -2854,7 +2855,7 @@ body{overscroll-behavior:none;}
       const e=employeeById[Number(item.id)],node=e&&employeeNodes.get(e.id);
       if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
       e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
-      e.motionAction=item.action||'typing';
+      e.motionAction=item.action||'typing';e.motionFaceTo=item.faceTo||null;
       if(Boolean(e.motionWalking)!==Boolean(item.walking)){setMotionClass(e,node,!!item.walking);statusChanged=true}
       const p=iso(item.x,item.y);
       node.setAttribute('transform',`translate(${p.x} ${p.y})`);
@@ -2866,7 +2867,7 @@ body{overscroll-behavior:none;}
     sharedMovement:{
       enable(){sharedMovementEnabled=true;stopRandomRoam()},
       getPeople:()=>employees,
-      plan:id=>{const e=employeeById[Number(id)];return e?planSharedRoam(e):null},
+      plan:(id,zone=null,target=null)=>{const e=employeeById[Number(id)];return e?planSharedRoam(e,zone,target):null},
       render:renderSharedPositions
     },
     getStaff:()=>employees.map(e=>({...e,hasAlert:workloadNoticeIds.has(e.id),motionStatus:effectiveStatus(e)})),
@@ -3103,11 +3104,12 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v77 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v79 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
-<script src="office-3d.js?v=77.0" defer></script>
-<script src="office-movement-sync.js?v=77.0" defer></script>
+<script src="office-3d.js?v=79.0" defer></script>
+<script src="office-living-office.js?v=79.0" defer></script>
+<script src="office-movement-sync.js?v=79.0" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>

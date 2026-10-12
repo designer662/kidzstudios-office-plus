@@ -1,4 +1,4 @@
-/* V78 unobtrusive local cinematic ambience control */
+/* V79 unobtrusive local cinematic ambience control */
 .ks-living-controls{position:absolute;z-index:7;left:22px;top:13px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;pointer-events:none}
 .ks-living-daylight,.ks-living-audio{min-height:29px;border-radius:999px;border:1px solid rgba(196,200,196,.75);background:rgba(255,255,255,.93);color:#606762;font:750 10px/1.2 Inter,Arial,sans-serif;padding:7px 11px;box-shadow:0 3px 14px rgba(35,44,37,.06);backdrop-filter:blur(8px)}
 .ks-living-audio{pointer-events:auto;cursor:pointer;border-color:rgba(222,150,95,.28);color:#aa6a42}
@@ -8,3 +8,9 @@
 @media(max-width:920px){.ks-living-controls{left:12px;top:59px;gap:5px}.ks-living-daylight,.ks-living-audio{font-size:9px;padding:6px 8px}}
 @media(max-width:650px){.ks-living-controls{left:12px;top:61px}.ks-living-daylight{display:none}.ks-living-audio{min-height:27px}}
 @media print{.ks-living-controls{display:none!important}}
+/* V79 compact activity overview and accessible per-device sound level. */
+.ks-living-activity,.ks-living-volume{min-height:29px;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid rgba(196,200,196,.70);background:rgba(255,255,255,.93);font:700 10px/1.2 Inter,Arial,sans-serif;color:#65726d;backdrop-filter:blur(8px)}
+.ks-living-volume{pointer-events:auto;cursor:default;gap:6px;color:#aa6a42;border-color:rgba(222,150,95,.22)}
+.ks-living-volume input[type="range"]{accent-color:#dc8b5a;width:65px;height:13px;cursor:pointer}
+@media(max-width:920px){.ks-living-activity,.ks-living-volume{font-size:9px;min-height:27px;padding:5px 7px}.ks-living-activity{display:none}}
+@media(max-width:650px){.ks-living-volume{gap:4px}.ks-living-volume span{display:none}.ks-living-volume input[type="range"]{width:55px}}

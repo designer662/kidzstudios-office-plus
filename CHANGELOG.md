@@ -1,3 +1,20 @@
+## V79 · Living Office+ (2026-10-12)
+- More varied department task palettes and calmer after-hours routines, always illustrative rather than real employee tracking.
+- Shared leader plans paired conversations and huddles, using alternating checked corridor points and social cooldowns.
+- Added timed pantry coffee-break cues, contextual job assignment cues, and a brief synchronized acknowledgment emote.
+- Improved work-related 3D arm/head poses and walking weight transfer in both shipped bundle and TypeScript.
+- Smoothed daylight changes over successive frames rather than abruptly switching light levels.
+- Added live simulated activity summary and independent per-device ambient volume slider; default sound stays muted and hidden-tab pause is preserved.
+- Retained V77 Supabase lease/CAS sync, collision-safe routing, existing notifications, job tools, and Excel.
+- Added V79 dedicated test coverage to deployment workflow. No Supabase migration.
+
+## V78 · Living Office (2026-10-12)
+- Added Supabase-timed shared behavior states for department tasks, coffee breaks, huddles, paired staff conversations and job reactions.
+- Updated Three.js character poses for simulated calls, design/desk work, conversations, reviewing, reading and stretching. Added subtle monitor-screen glow and local daylight profiles.
+- Added opt-in ambient roomtone with per-device mute and automatic background-tab pause; notification audio is unchanged.
+- Preserved V77 authority election, safe walking routes, independent cameras, moods, Job Management, Excel, and outside-click behavior.
+- Added scripted V78 behavior and two-browser timeline regression tests to the GitHub deployment workflow.
+
 ## V77: Synced 3D character movement
 - Shared Supabase movement snapshots with one version-checked lease owner.
 - Smooth follower interpolation from route, segment durations and timestamp.

@@ -1,3 +1,7 @@
+> **V79 Living Office+ (current):** Richer department routines, varied paired interactions, smoother activity poses and daylight, job acknowledgment and individual ambience volume. See [README-V79.md](README-V79.md).
+
+> **V78 Living Office:** Shared department-based 3D activities, paired conversations, timed breaks, daylight, job reactions and opt-in ambient sound. See [README-V78.md](README-V78.md).
+
 > **V77 update:** Multiple dashboard PCs now share one Supabase-backed character walking timeline. See [README-V77.md](README-V77.md).
 
 ## V76 Update
