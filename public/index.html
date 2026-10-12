@@ -980,13 +980,13 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-plus.css?v=58.1">
 <link rel="stylesheet" href="office-v59-clean.css?v=61.0">
 <style id="ks-v60-emoji-picker">
-.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:8px;min-width:228px;max-width:min(92vw,280px);padding:11px 12px;border-radius:18px;background:rgba(255,255,255,.96);border:1px solid rgba(31,35,38,.08);box-shadow:0 18px 38px rgba(31,35,38,.16);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;transform:translateY(8px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
+.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:7px;min-width:188px;max-width:min(90vw,212px);padding:9px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(31,35,38,.07);box-shadow:0 14px 30px rgba(31,35,38,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
 .character-emoji-picker.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.character-emoji-picker[hidden]{display:none!important}
-.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.character-emoji-head strong{font-size:12px;line-height:1.1;color:#343941}.character-emoji-head span{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:28px;height:28px;border-radius:10px;border:1px solid rgba(31,35,38,.08);background:#fff;color:#727a80;cursor:pointer;font:700 15px/1 var(--ui)}
-.character-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.emoji-choice-btn{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid rgba(31,35,38,.08);border-radius:13px;background:#fff;color:#4d535a;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease}.emoji-choice-btn:hover,.emoji-choice-btn:focus-visible{transform:translateY(-1px);border-color:rgba(239,123,69,.28);box-shadow:0 8px 16px rgba(239,123,69,.12);color:#dc6b33;outline:none}.emoji-choice-btn .emoji-icon{font-size:18px;line-height:1}.emoji-choice-btn .emoji-copy{display:grid;gap:1px;text-align:left}.emoji-choice-btn .emoji-copy b{font-size:11px;line-height:1.1}.emoji-choice-btn .emoji-copy small{font-size:9px;line-height:1.1;color:#979da4;font-weight:700}
-.bubble-emoji .activity-bubble{min-width:54px;max-width:72px!important;padding:9px 10px!important;text-align:center!important;font-size:22px!important;line-height:1!important;border-color:rgba(239,123,69,.18)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
-@media(max-width:920px){.character-emoji-picker{min-width:208px;padding:10px 10px;border-radius:16px}.character-emoji-grid{gap:7px}.emoji-choice-btn{padding:9px 10px}}
-@media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:10px 6px}.emoji-choice-btn .emoji-copy small,.emoji-choice-btn .emoji-copy b{display:none}.emoji-choice-btn .emoji-icon{font-size:20px}}
+.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:1px 1px 3px}.character-emoji-head strong{font-size:11px;line-height:1.1;color:#31363c;max-width:138px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.character-emoji-head span{display:block;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid rgba(31,35,38,.07);background:#fff;color:#727a80;cursor:pointer;font:700 14px/1 var(--ui)}
+.character-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.emoji-choice-btn{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid rgba(31,35,38,.08);border-radius:12px;background:#fff;color:#4d535a;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease,background .16s ease}.emoji-choice-btn:hover,.emoji-choice-btn:focus-visible,.emoji-choice-btn.active{transform:translateY(-1px);border-color:rgba(239,123,69,.26);box-shadow:0 6px 13px rgba(239,123,69,.12);color:#dc6b33;outline:none;background:#fff8f3}.emoji-choice-btn .emoji-icon{font-size:17px;line-height:1}.emoji-choice-btn .emoji-copy{display:grid;gap:1px;text-align:left}.emoji-choice-btn .emoji-copy b{font-size:10.5px;line-height:1.05}.emoji-choice-btn .emoji-copy small{display:none}
+.bubble-emoji .activity-bubble{min-width:52px;max-width:70px!important;padding:8px 9px!important;text-align:center!important;font-size:21px!important;line-height:1!important;border-color:rgba(239,123,69,.18)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
+@media(max-width:920px){.character-emoji-picker{min-width:178px;max-width:200px;padding:8px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
+@media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
 </style>
 <link rel="stylesheet" href="suite-header-v61.css?v=61.0">
 </head>
@@ -1141,7 +1141,7 @@ body{overscroll-behavior:none;}
 <div class="map-hint">Click staff to follow · drag to rotate · right-drag to move · scroll to zoom</div>
 <div class="follow-chip" id="followChip" aria-hidden="true"><span>Following</span><b id="followChipName"></b><button id="followChipStop" type="button" aria-label="Stop following staff">×</button></div>
 <div class="character-emoji-picker" id="characterEmojiPicker" hidden aria-hidden="true">
-  <div class="character-emoji-head"><div><span>Character reaction</span><strong id="characterEmojiName">Choose emoji</strong></div><button type="button" class="character-emoji-close" id="characterEmojiClose" aria-label="Close emoji picker">×</button></div>
+  <div class="character-emoji-head"><div><span>Mood</span><strong id="characterEmojiName">Choose mood</strong></div><button type="button" class="character-emoji-close" id="characterEmojiClose" aria-label="Close emoji picker">×</button></div>
   <div class="character-emoji-grid">
     <button type="button" class="emoji-choice-btn" data-emoji-mood="happy" data-emoji="😊"><span class="emoji-icon">😊</span><span class="emoji-copy"><b>Happy</b><small>Positive mood</small></span></button>
     <button type="button" class="emoji-choice-btn" data-emoji-mood="sad" data-emoji="😔"><span class="emoji-icon">😔</span><span class="emoji-copy"><b>Sad</b><small>Low energy</small></span></button>
@@ -1533,6 +1533,7 @@ body{overscroll-behavior:none;}
     addNotification(event,{initial,local});
     if(type==='workload_updated'&&empId){if(!initial){markWorkloadNotice(empId);if(emp)showBubble(emp,event.message||workloadBubbleText(emp)||'Workload updated',{kind:'workload',duration:8200})}loadStaffDirectory({seedIfMissing:false});}
     else if(type==='staff_added'||type==='staff_removed'||type==='staff_updated'){loadStaffDirectory({seedIfMissing:false});}
+    else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:2400});}}
     else if(type==='job_management_updated'){refreshJobsFromSharedCache();}
     else if(type==='job_stage_mapping_updated'){initSharedJobManagement();}
     else if(type==='chat_message'){if(!chatOpen)pullChat();}
@@ -1908,7 +1909,7 @@ body{overscroll-behavior:none;}
     return source.map(v=>String(v||'').trim()).filter(Boolean).slice(0,30);
   }
   function staffRecord(emp){
-    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),workload:workloadLines(emp.workload||[])};
+    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),mood:String(emp.mood||'').trim().slice(0,32),workload:workloadLines(emp.workload||[])};
   }
   function dynamicStaffBase(id,index=0,department='Production Management',gender='male'){
     const isHead=department==='Management',roomId=isHead?'boss':'staff';
@@ -1920,7 +1921,7 @@ body{overscroll-behavior:none;}
     const gender=normalizeGender(record.gender||existing?.gender||defaultBase?.gender||'male');
     const base=defaultBase?{...defaultBase}:dynamicStaffBase(id,index,department,gender);
     const runtime=existing?{visualX:existing.visualX,visualY:existing.visualY,visualRoomId:existing.visualRoomId,roam:existing.roam,motionWalking:existing.motionWalking,motionAction:existing.motionAction,moving:existing.moving}:{};
-    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,workload:workloadLines(record.workload||[])};
+    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood||existing?.mood||base.mood||'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
   }
   function serializeStaffDirectory(){return employees.map(staffRecord)}
   function applyStaffDirectory(payload,version=0){
@@ -2337,20 +2338,20 @@ body{overscroll-behavior:none;}
     if(!characterEmojiPicker||!mapShell)return;
     const shellRect=mapShell.getBoundingClientRect();
     const pickerRect=characterEmojiPicker.getBoundingClientRect();
-    const pickerWidth=Math.max(228,pickerRect.width||228),pickerHeight=Math.max(128,pickerRect.height||128);
+    const pickerWidth=Math.max(188,pickerRect.width||188),pickerHeight=Math.max(112,pickerRect.height||112);
     let left=shellRect.width-pickerWidth-18,top=18;
     if(ev&&Number.isFinite(ev.clientX)&&Number.isFinite(ev.clientY)){
       left=ev.clientX-shellRect.left-pickerWidth/2;
-      top=ev.clientY-shellRect.top-pickerHeight-16;
-    }else if(document.documentElement.classList.contains('studio3d-ready')){
-      const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
-      if(profileRect){left=profileRect.left-shellRect.left-pickerWidth-16;top=profileRect.top-shellRect.top+10;}
-      else if(office3dHost){const hostRect=office3dHost.getBoundingClientRect();left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;}
+      top=ev.clientY-shellRect.top-pickerHeight-18;
     }else if(emp){
       const p=employeeCameraPoint(emp),svgRect=svg.getBoundingClientRect();
       const viewX=((p.x*cam.scale)+cam.tx)/1240*svgRect.width+svgRect.left-shellRect.left;
       const viewY=((p.y*cam.scale)+cam.ty)/760*svgRect.height+svgRect.top-shellRect.top;
-      left=viewX-pickerWidth/2;top=viewY-pickerHeight-18;
+      left=viewX-pickerWidth/2;top=viewY-pickerHeight-16;
+    }else if(document.documentElement.classList.contains('studio3d-ready')){
+      const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
+      if(profileRect){left=profileRect.left-shellRect.left-pickerWidth-16;top=profileRect.top-shellRect.top+10;}
+      else if(office3dHost){const hostRect=office3dHost.getBoundingClientRect();left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;}
     }
     left=Math.max(10,Math.min(shellRect.width-pickerWidth-10,left));
     top=Math.max(10,Math.min(shellRect.height-pickerHeight-10,top));
@@ -2360,16 +2361,30 @@ body{overscroll-behavior:none;}
   function openCharacterEmojiPicker(emp,ev=null){
     if(!characterEmojiPicker||!emp)return;
     characterEmojiPicker.dataset.employeeId=String(emp.id);
-    if(characterEmojiName)characterEmojiName.textContent=`${emp.name} · Mood`;
+    if(characterEmojiName)characterEmojiName.textContent=emp.name;
+    characterEmojiPicker.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===String(emp.mood||'')));
     characterEmojiPicker.hidden=false;
     characterEmojiPicker.setAttribute('aria-hidden','false');
     requestAnimationFrame(()=>{positionCharacterEmojiPicker(emp,ev);characterEmojiPicker.classList.add('show')});
   }
-  function triggerCharacterEmoji(emp,mood){
+  async function saveCharacterMood(emp,mood){
+    const records=serializeStaffDirectory();
+    const at=records.findIndex(r=>Number(r.id)===Number(emp.id));
+    if(at<0)throw new Error('Staff not found');
+    records[at]={...records[at],mood};
+    await saveStaffDirectory(records);
+  }
+  async function triggerCharacterEmoji(emp,mood){
     const preset=characterEmojiPresets[mood];
     if(!emp||!preset)return;
+    emp.mood=mood;
+    characterEmojiPicker?.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===mood));
     showBubble(emp,preset.emoji,{kind:'emoji',duration:2400});
     pushActivity({title:`${emp.name} reaction`,text:`${preset.label} ${preset.emoji}`,avatar:initials(emp.name),type:'mood_reaction',employeeId:emp.id});
+    try{
+      await saveCharacterMood(emp,mood);
+      await postOfficeEvent({eventType:'mood_updated',title:`${emp.name} · Mood updated`,message:`${preset.label} ${preset.emoji}`,employeeId:emp.id,metadata:{mood,emoji:preset.emoji,label:preset.label},dedupeKey:`mood:${emp.id}:${mood}:${Date.now()}`});
+    }catch(err){console.warn('Could not sync mood',err)}
     closeCharacterEmojiPicker();
   }
   function characterFollowText(e){
@@ -2493,11 +2508,11 @@ body{overscroll-behavior:none;}
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;
   if(characterEmojiClose)characterEmojiClose.onclick=closeCharacterEmojiPicker;
-  if(characterEmojiPicker)characterEmojiPicker.onclick=e=>{
+  if(characterEmojiPicker)characterEmojiPicker.onclick=async e=>{
     const btn=e.target.closest('[data-emoji-mood]');
     if(!btn)return;
     const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)]||employeeById[followEmployeeId];
-    if(emp)triggerCharacterEmoji(emp,btn.dataset.emojiMood);
+    if(emp)await triggerCharacterEmoji(emp,btn.dataset.emojiMood);
   };
   document.addEventListener('pointerdown',e=>{
     if(!characterEmojiPicker||characterEmojiPicker.hidden)return;
