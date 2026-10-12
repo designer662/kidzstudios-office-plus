@@ -1,0 +1,10 @@
+/* V78 unobtrusive local cinematic ambience control */
+.ks-living-controls{position:absolute;z-index:7;left:22px;top:13px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;pointer-events:none}
+.ks-living-daylight,.ks-living-audio{min-height:29px;border-radius:999px;border:1px solid rgba(196,200,196,.75);background:rgba(255,255,255,.93);color:#606762;font:750 10px/1.2 Inter,Arial,sans-serif;padding:7px 11px;box-shadow:0 3px 14px rgba(35,44,37,.06);backdrop-filter:blur(8px)}
+.ks-living-audio{pointer-events:auto;cursor:pointer;border-color:rgba(222,150,95,.28);color:#aa6a42}
+.ks-living-audio:hover,.ks-living-audio:focus-visible{background:#fff2e8;outline:2px solid rgba(235,149,86,.36);outline-offset:1px}
+.ks-living-audio[aria-pressed="true"]{background:#f0faed;border-color:#a5c59f;color:#597550}
+#office3dHost .scene-bubble[data-bubble-kind="living"]{max-width:145px;padding:7px 9px;font-size:10px;text-align:center;color:#6f6252;border:1px solid rgba(224,178,121,.28);background:rgba(255,252,244,.97);box-shadow:0 6px 15px rgba(80,62,42,.09)}
+@media(max-width:920px){.ks-living-controls{left:12px;top:59px;gap:5px}.ks-living-daylight,.ks-living-audio{font-size:9px;padding:6px 8px}}
+@media(max-width:650px){.ks-living-controls{left:12px;top:61px}.ks-living-daylight{display:none}.ks-living-audio{min-height:27px}}
+@media print{.ks-living-controls{display:none!important}}

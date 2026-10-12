@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const src=readFileSync('public/office-living-office.js','utf8');
+const timeline=readFileSync('public/office-movement-sync.js','utf8');
+const index=readFileSync('public/index.html','utf8');
+const bundle=readFileSync('public/office-3d.js','utf8');
+let current=Date.parse('2026-10-12T04:30:00Z'); // 12:30 PM MY
+const sounds=[],listeners=new Map(),status=new Map();
+const DateMock=class extends Date{constructor(...args){super(...(args.length?args:[current]))}static now(){return current}};
+let randomValue=.15;
+const fakeMath=Object.create(Math);fakeMath.random=()=>randomValue;
+const localStorage={getItem:k=>status.get(k)||null,setItem:(k,v)=>status.set(k,v)};
+const calls=[];
+const scene={showBubble:(...a)=>calls.push(['show',...a]),clearBubble:(...a)=>calls.push(['clear',...a])};
+const context={Math:fakeMath,Date:DateMock,Intl,localStorage,console,
+ window:{addEventListener:(ev,fn)=>listeners.set('window:'+ev,fn),office3d:scene},
+ document:{readyState:'loading',hidden:false,addEventListener:(ev,fn)=>listeners.set('document:'+ev,fn)},
+};
+vm.runInNewContext(src,context,{filename:'office-living-office.js'});
+const o=context.window.OfficeLiving;
+assert.ok(o,'Living Office library must initialize');
+assert.equal(o.workFor({department:'Creative Department'}),'designing');
+assert.equal(o.workFor({department:'Sales and Marketing'}),'calling');
+assert.equal(o.workFor({department:'Management'}),'reviewing');
+assert.equal(o.workFor({department:'Production Management'}),'production');
+assert.equal(o.workFor({department:'Finance Department'}),'admin');
+assert.equal(o.jobKey({currentJob:' J002 ',workload:['Illustration']}),'J002|Illustration');
+assert.equal(o.hour(),12,'Malaysian local time must determine office routines');
+assert.equal(o.daylight().label,'Daylight');
+assert.equal(o.chooseIntent({homeRoom:'staff',department:'Creative Department'},'staff').zone,'pantry','Lunch-break window should encourage pantry visits');
+randomValue=.94;
+assert.equal(o.chooseIntent({homeRoom:'staff',department:'Creative Department',currentJob:'JOB-12'},'staff').action,'designing','Real job should prefer active department work');
+assert.equal(o.chooseIntent({homeRoom:'staff',department:'Creative Department'},'showroom').zone,'staff','Away staff should return to assigned home room');
+let sunValue='',bgValue='';
+const fakeColor=()=>({set:color=>{sunValue=color}});
+const light={intensity:0,color:fakeColor()},hemi={intensity:0,color:fakeColor()},fill={intensity:0},renderer={toneMappingExposure:0},bg={set:color=>{bgValue=color}};
+o.applyLighting(hemi,light,fill,renderer,{background:bg});
+assert.ok(hemi.intensity>0&&light.intensity>0&&fill.intensity>0&&renderer.toneMappingExposure>0&&bgValue,'3D daylight profile must affect light intensities, exposure, and background');
+const staff=[{id:1,scene:{from:current-100,until:current+1000,text:'💬 Quick team catch-up'}}];
+o.update({},staff);
+assert.equal(calls.length,1);assert.equal(calls[0][0],'show');assert.equal(calls[0][4],'living');
+o.update({},staff);assert.equal(calls.length,1,'The same cue should not create a bubble every frame');
+current+=2000;o.update({},[{id:1,scene:null}]);assert.equal(calls[1][0],'clear','Expired cue should be cleared');
+assert.equal(o.isAmbientEnabled(),false,'Ambient sound starts opt-in, never autoplays');
+assert.equal(o.setAmbientEnabled(false),undefined);
+assert.ok(index.includes('office-living-office.js?v=78.0'),'Living Office must load before timeline');
+assert.ok(index.indexOf('office-living-office.js?v=78.0')<index.indexOf('office-movement-sync.js?v=78.0'));
+assert.match(index,/function planSharedRoam\(e,requestedZone=null,requestedPoint=null\)/);
+assert.match(timeline,/pairConversation\(/);
+assert.match(timeline,/fingerprint=living\?\.jobKey/);
+assert.match(timeline,/living\?\.update\?\.\(state,positions\)/);
+assert.match(bundle,/OfficeLiving\?\.applyLighting\?\.\(/);
+assert.match(bundle,/t\.action==="chat"/);
+assert.match(bundle,/t\.action==="calling"/);
+console.log('PASS V78 Living Office: MY time lighting, department roles, job priority, lunch breaks, conversation cue replay, opt-in ambient, shared leader behavior integration');
