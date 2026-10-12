@@ -1,4 +1,4 @@
-> **Current build: v70.** See [README-V70.md](README-V70.md) for data import/export, Google Sheets links, animated Busy mood, smoother 3D, and current validation commands.
+> **Current build: v71.** The Job Management Delete confirmation now appears in front of the editor. No database migration required. See [README-V70.md](README-V70.md) for other features.
 
 > **Latest update: V69 Notification Sound.** See [README-V69.md](README-V69.md) for deployment notes.
 

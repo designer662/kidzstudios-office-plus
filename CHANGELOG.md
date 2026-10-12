@@ -1,3 +1,11 @@
+## V71 — Delete confirmation display fix (2026-10-12)
+
+- Fixed Job Management Delete confirmation appearing behind its Edit Job modal. The previous CSS assigned a lower stacking level to `#confirmModal` than the editor overlay.
+- The Delete confirmation now stays above all job dialogs, with accessible alert-dialog semantics and initial keyboard focus on Cancel.
+- Pressing Escape dismisses the foreground Delete confirmation without unexpectedly closing the Edit Job form.
+- No changes to saved jobs, Supabase tables, import/export, 3D office, or the rest of the UI.
+- Regression test: `node scripts/test-delete-modal.mjs`.
+
 ## v70 — data reliability, Google Sheets links, animated moods and smoother 3D
 
 - Added XLSX/CSV/TSV/JSON import and full CSV export, shared previews, duplicate/limit validation and safe save failure handling.

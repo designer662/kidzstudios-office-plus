@@ -113,7 +113,7 @@
 <script src="ks-motion.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
-<style>.period-compact{grid-template-columns:auto 115px 145px 1fr}@media(max-width:1000px){.period-compact{grid-template-columns:auto 115px 145px}}@media(max-width:600px){.period-compact{grid-template-columns:1fr 1fr}.period-title{grid-column:1/-1}}.modal.open{overflow-y:auto}.dialog{max-height:92vh;overflow-y:auto}#confirmModal{z-index:1005}#sheetImportModal{z-index:1001}#excelImportModal{z-index:1002}</style>
+<style>.period-compact{grid-template-columns:auto 115px 145px 1fr}@media(max-width:1000px){.period-compact{grid-template-columns:auto 115px 145px}}@media(max-width:600px){.period-compact{grid-template-columns:1fr 1fr}.period-title{grid-column:1/-1}}.modal.open{overflow-y:auto}.dialog{max-height:92vh;overflow-y:auto}#confirmModal{z-index:20050!important;isolation:isolate}#confirmModal.open{display:flex!important}#confirmModal>.dialog{position:relative;z-index:1}#sheetImportModal{z-index:1001}#excelImportModal{z-index:1002}</style>
 </head>
 <body data-ks-page="job-management">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -239,7 +239,7 @@
   <datalist id="departmentOptions"><option value="SALES"></option><option value="DESIGN"></option><option value="PRODUCTION"></option><option value="CLOSED"></option></datalist>
   <div class="dialog-foot"><div class="save-state" id="editorState">Dropdown suggestions are available, but every text field can still accept a manual custom value.</div><div class="form-actions"><button class="btn danger" id="deleteBtn" hidden>Delete</button><button class="btn" id="duplicateBtn" hidden>Duplicate</button><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="saveBtn">Save Job</button></div></div>
 </div></div>
-<div class="modal" id="confirmModal" aria-hidden="true"><div class="dialog" style="width:min(470px,100%)"><div class="dialog-head"><div><span>Confirm</span><h2 id="confirmTitle">Replace jobs?</h2></div><button class="close" id="confirmClose">×</button></div><div class="confirm-copy" id="confirmCopy"></div><div class="dialog-foot"><span></span><div class="form-actions"><button class="btn" id="confirmCancel">Cancel</button><button class="btn primary" id="confirmYes">Continue</button></div></div></div></div>
+<div class="modal" id="confirmModal" aria-hidden="true"><div class="dialog" style="width:min(470px,100%)" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmCopy"><div class="dialog-head"><div><span>Confirm</span><h2 id="confirmTitle">Replace jobs?</h2></div><button class="close" id="confirmClose">×</button></div><div class="confirm-copy" id="confirmCopy"></div><div class="dialog-foot"><span></span><div class="form-actions"><button class="btn" id="confirmCancel">Cancel</button><button class="btn primary" id="confirmYes">Continue</button></div></div></div></div>
 <div class="modal" id="sheetImportModal" aria-hidden="true"><div class="dialog" style="width:min(650px,96vw)" role="dialog" aria-modal="true" aria-labelledby="sheetImportTitle">
  <div class="dialog-head"><div><span>Google Sheets</span><h2 id="sheetImportTitle">Load a spreadsheet link</h2></div><button class="close" id="sheetImportClose" type="button" aria-label="Close">×</button></div>
  <div class="excel-import-body"><label for="sheetUrlInput" style="display:block;margin:12px 0 8px;font-weight:700">Spreadsheet link</label><input class="field" id="sheetUrlInput" type="url" style="width:100%" placeholder="https://docs.google.com/spreadsheets/d/…/edit#gid=0" autocomplete="off">
@@ -571,8 +571,27 @@ async function saveEditor(){
  try{if(await saveAll(`${previous?'updated':'added'} ${j.jobsheetFiles}`,candidate)){closeEditor();toast(`${j.jobsheetFiles} saved`)}}
  finally{$('#saveBtn').disabled=false}
 }
-function ask(title,copy,fn,label='Continue'){confirmAction=fn;$('#confirmTitle').textContent=title;$('#confirmCopy').textContent=copy;$('#confirmYes').textContent=label;$('#confirmModal').classList.add('open');$('#confirmModal').setAttribute('aria-hidden','false')}
-function closeConfirm(){confirmAction=null;$('#confirmModal').classList.remove('open');$('#confirmModal').setAttribute('aria-hidden','true')}
+let confirmPreviousFocus=null;
+function ask(title,copy,fn,label='Continue'){
+ confirmAction=fn;
+ confirmPreviousFocus=document.activeElement;
+ $('#confirmTitle').textContent=title;
+ $('#confirmCopy').textContent=copy;
+ $('#confirmYes').textContent=label;
+ const modal=$('#confirmModal');
+ modal.classList.add('open');
+ modal.setAttribute('aria-hidden','false');
+ // Move focus into the foreground confirmation, not the editor behind it.
+ $('#confirmCancel').focus();
+}
+function closeConfirm(){
+ const modal=$('#confirmModal'),wasOpen=modal.classList.contains('open');
+ confirmAction=null;
+ modal.classList.remove('open');
+ modal.setAttribute('aria-hidden','true');
+ if(wasOpen&&confirmPreviousFocus?.isConnected)confirmPreviousFocus.focus();
+ confirmPreviousFocus=null;
+}
 const isExcelHeader=headers=>window.KSJobData.hasHeader(headers,FIELDS);
 const recordsFromGrid=(headers,rows,options={})=>window.KSJobData.recordsFromGrid(headers,rows,FIELDS,options).map(raw=>({...normalizeJob(raw),_importFields:Object.keys(raw)}));
 let pendingExcelJobs=[],pendingExcelVersion=null,pendingExcelName='',sheetLoading=false,importConfirming=false;
@@ -671,7 +690,7 @@ $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
 $('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const j=jobs[editingIndex];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{const next=jobs.filter((_,i)=>i!==editingIndex);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=openSheetImport;$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=e.target.value;selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportExcelCurrent').onclick=()=>{exportExcelCurrent();closeExport()};$('#exportExcelAll').onclick=()=>{exportExcelAll();closeExport()};$('#exportExcelTemplate').onclick=()=>{exportExcelTemplate();closeExport()};$('#exportCurrent').onclick=()=>{exportCurrent();closeExport()};$('#exportPeriod').onclick=()=>{exportPeriod();closeExport()};$('#exportYear').onclick=()=>{exportYear();closeExport()};$('#exportSummary').onclick=()=>{exportSummary();closeExport()};$('#exportBackup').onclick=()=>{exportBackup();closeExport()};
-$('#tbody').addEventListener('click',e=>{const edit=e.target.closest('.edit'),copy=e.target.closest('.copy');if(edit){e.stopPropagation();openEditor(+edit.dataset.index);return}if(copy){e.stopPropagation();openEditor(+copy.dataset.index,true);return}const tr=e.target.closest('tr[data-index]');if(tr)openEditor(+tr.dataset.index)});$('#confirmClose').onclick=$('#confirmCancel').onclick=closeConfirm;$('#confirmYes').onclick=async()=>{const fn=confirmAction;closeConfirm();if(fn)await fn()};document.addEventListener('click',e=>{if(!e.target.closest('.combo-shell'))closeComboMenus()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeComboMenus();closeConfirm();closeEditor();closeExport();closeExcelImport();closeSheetImport();if($('#optionsModal').classList.contains('open')&&!optionDirty)closeOptionManager()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();openEditor()}});
+$('#tbody').addEventListener('click',e=>{const edit=e.target.closest('.edit'),copy=e.target.closest('.copy');if(edit){e.stopPropagation();openEditor(+edit.dataset.index);return}if(copy){e.stopPropagation();openEditor(+copy.dataset.index,true);return}const tr=e.target.closest('tr[data-index]');if(tr)openEditor(+tr.dataset.index)});$('#confirmClose').onclick=$('#confirmCancel').onclick=closeConfirm;$('#confirmYes').onclick=async()=>{const fn=confirmAction;closeConfirm();if(fn)await fn()};document.addEventListener('click',e=>{if(!e.target.closest('.combo-shell'))closeComboMenus()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#confirmModal').classList.contains('open')){e.preventDefault();closeConfirm();return}closeComboMenus();closeEditor();closeExport();closeExcelImport();closeSheetImport();if($('#optionsModal').classList.contains('open')&&!optionDirty)closeOptionManager()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();openEditor()}});
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
 setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);

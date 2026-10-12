@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const html = readFileSync('public/job-management.html','utf8');
+const editorZ = Number(html.match(/\.modal\{[^}]*z-index:(\d+)/)?.[1] || 0);
+const confirmZ = Number(html.match(/#confirmModal\{z-index:(\d+)!important/)?.[1] || 0);
+assert.ok(editorZ > 0, 'Editor modal must define a base stacking order');
+assert.ok(confirmZ > editorZ, `Delete confirmation (${confirmZ}) must be above the editor (${editorZ})`);
+assert.match(html, /id="confirmModal"[^>]*aria-hidden="true"/);
+assert.match(html, /role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmCopy"/);
+assert.match(html, /\$\('#confirmCancel'\)\.focus\(\)/, 'Confirmation must receive keyboard focus');
+assert.match(html, /if\(\$\('#confirmModal'\)\.classList\.contains\('open'\)\)\{e\.preventDefault\(\);closeConfirm\(\);return\}/, 'Escape must close only the foreground confirmation');
+console.log(`PASS delete-confirmation stacking: editor z=${editorZ}, confirm z=${confirmZ}, focus and Escape behavior present`);
