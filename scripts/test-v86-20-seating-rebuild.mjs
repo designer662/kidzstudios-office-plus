@@ -5,9 +5,9 @@ const bundle=readFileSync('public/office-3d.js','utf8');
 const html=readFileSync('public/index.html','utf8');
 const source=readFileSync('source/src/office-scene.ts','utf8');
 const release=JSON.parse(readFileSync('office-release.json','utf8'));
-assert.equal(release.release,'86.20');
-assert.ok(html.includes('office-seating-controller.js?v=86.20'));
-assert.ok(html.indexOf('office-seating-controller.js?v=86.20')<html.indexOf('office-3d.js?v=86.20'));
+assert.equal(release.release,'86.21');
+assert.ok(html.includes('office-seating-controller.js?v=86.21'));
+assert.ok(html.indexOf('office-seating-controller.js?v=86.21')<html.indexOf('office-3d.js?v=86.21'));
 assert.ok(bundle.includes('window.KSOfficeSeating?.installKnees(B,__KS3D)'));
 assert.ok(bundle.includes('seating.pose(Z,seatState,L)'));
 assert.ok(bundle.includes('Z.precisionSceneV8615={chair:null'));
@@ -40,7 +40,7 @@ rig.leftLeg=makeLeg('Left leg');rig.rightLeg=makeLeg('Right leg');
 const knees=seating.installKnees(rig,{Group:Node});
 assert.equal(knees.length,2);
 assert.strictEqual(seating.installKnees(rig,{Group:Node}),knees,'Knees not reparented twice');
-for(const limb of [rig.leftLeg,rig.rightLeg]){const leg=limb.joint.children[0];assert.ok(leg.children.some(v=>v.name==='Upper trouser leg'));const knee=leg.children.find(v=>v.name==='Office sitting knee');assert.ok(knee.children.some(v=>v.name==='Lower trouser leg'));assert.ok(Math.abs(knee.children.find(v=>v.name==='Sneaker upper').position.y-(.28-1.315))<1e-9);}
+for(const limb of [rig.leftLeg,rig.rightLeg]){const leg=limb.joint.children[0];assert.ok(leg.children.some(v=>v.name==='Upper trouser leg'));const knee=leg.children.find(v=>v.name==='Furniture knee pivot');assert.ok(knee.children.some(v=>v.name==='Lower trouser leg'));assert.ok(Math.abs(knee.children.find(v=>v.name==='Sneaker upper').position.y-(.28-1.315))<1e-9);}
 const unchanged={...root.position};
 for(let frame=0;frame<36000;frame++){
  // This controller must replace legacy body offsets, not accumulate on top of them.
@@ -53,8 +53,8 @@ for(let frame=0;frame<36000;frame++){
  assert.ok(Math.abs((root.position.y+(2.48+rig.body.position.y)*scale)-.726)<.001,'Pelvis at cushion height');
 }
 assert.deepEqual(root.position,unchanged,'Shared navigation root is NEVER modified');
-assert.ok(knees.every(k=>Math.abs(k.rotation.x-1.13)<1e-8));
-assert.ok([rig.leftLeg,rig.rightLeg].every(l=>Math.abs(l.joint.rotation.x+1.15)<1e-8));
+assert.ok(knees.every(k=>Math.abs(k.rotation.x-1.2)<1e-8));
+assert.ok([rig.leftLeg,rig.rightLeg].every(l=>Math.abs(l.joint.rotation.x+1.18)<1e-8));
 // On departure, the visual pose releases smoothly. Walking cannot keep a chair.
 nav.status='walking';nav.seated=false;nav.speed=.8;
 let last=state.seatMix;
