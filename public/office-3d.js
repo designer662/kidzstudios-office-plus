@@ -4316,8 +4316,12 @@ function applyOfficePrecisionV8615(r,p,time,dt,context={}){
   const dx=chair.x-r.root.position.x,dz=chair.z-r.root.position.z;
   const angle=r.root.rotation.y,c=Math.cos(angle),s=Math.sin(angle),scale=r.root.scale.x||1;
   // Correct within the chair cushion only. Never offset the authoritative root.
-  offsetX=ks15Clamp((dx*c-dz*s)/scale,-.42,.42);
-  offsetZ=ks15Clamp((dx*s+dz*c)/scale,-.42,.42);
+  // World is enlarged in XZ while avatar dimensions are unchanged. The
+  // former +/-0.42 local limit moved the hips only 0.176 world units,
+  // leaving seated avatars visibly beside the cushions. Allow a *bounded*
+  // accurate chair-center correction for stationary staff only.
+  offsetX=ks15Clamp((dx*c-dz*s)/scale,-2.3,2.3);
+  offsetZ=ks15Clamp((dx*s+dz*c)/scale,-2.3,2.3);
  }
  precision.seatOffsetX=ks15Mix(precision.seatOffsetX,offsetX,ks15Alpha(dt,6));
  precision.seatOffsetZ=ks15Mix(precision.seatOffsetZ,offsetZ,ks15Alpha(dt,6));
@@ -4357,11 +4361,14 @@ const officeChairAnchorsV8615=[
  [-1.5,-7.95,Math.PI/2],[3.2,-7.95,-Math.PI/2],
  [-.15,-14.85,Math.PI],[3.1,-14.85,Math.PI],
  [3.2,4.05,Math.PI],[-3.45,2.45,0],[-3.45,4.85,Math.PI]
-].map(([x,z,yaw])=>({x:x*1.5,z:z*1.5,yaw}));
-function officeNearestSeatV8618(x,z,maxDistance=.72){
+].map(([x,z,yaw],i)=>({x:x*1.5,z:z*1.5,yaw,staffId:[7,3,4,null,null,null,2,6,1,null,null][i]}));
+function officeNearestSeatV8618(x,z,maxDistance=.72,staffId=null){
  let best=null,closest=maxDistance;
  if(!Number.isFinite(x)||!Number.isFinite(z))return null;
+ const owned=officeChairAnchorsV8615.find(chair=>chair.staffId===staffId&&staffId!==null);
+ // Don't snap known workers to another employee's chair on a shared update.
  for(const chair of officeChairAnchorsV8615){
+  if(owned&&chair!==owned)continue;
   const distance=Math.hypot(x-chair.x,z-chair.z);
   if(distance<closest){best=chair;closest=distance;}
  }
@@ -5058,9 +5065,15 @@ const sceneWheel=L=>{if(!L.cancelable)return;L.preventDefault();L.stopImmediateP
 r.domElement.addEventListener("wheel",sceneWheel,{capture:!0,passive:!1});
 let ht=new rr,j=new D,Ct=new D,Vt=Vh.map(([L,B])=>new D(L*FLOOR_SPACE_SCALE,.08,B*FLOOR_SPACE_SCALE)),le=Vt.map((L,B)=>L.distanceTo(Vt[(B+1)%Vt.length])),re=le.reduce((L,B)=>L+B,0),tn=L=>{v=L,et=!1,F=null,nt=!1,a.autoRotate=!1,a.enableRotate=L==="isometric",a.target.copy(Lt),o.position.copy(L==="plan"?new D(0,65,.01):mt()),o.zoom=1.14,it=1.14,o.lookAt(a.target),a.update(),It(),t.onZoom(1.14)};function qe(){if(xt)return;tt=requestAnimationFrame(qe);let L=Math.min(ht.getDelta(),.05);if(document.hidden||!Bt||!Ot)return;if(P||(Q+=L),a.dampingFactor=1-Math.exp(-4*L),a.autoRotate=nt&&!P&&!c.matches&&v==="isometric",et&&dt!==null){let Z=H.find(gt=>gt.person.id===dt);Z&&(F=Z.root.position.clone(),F.y=.6)}if(F){let Z=J.copy(F).sub(a.target).multiplyScalar(1-Math.exp(-5*L));a.target.add(Z),o.position.add(Z),it=Y,o.zoom+=(it-o.zoom)*(1-Math.exp(-6*L)),o.updateProjectionMatrix(),Z.length()<.002&&Math.abs(o.zoom-Y)<.002&&(F=null)}else Math.abs(o.zoom-it)>1e-4&&(o.zoom+=(it-o.zoom)*(1-Math.exp(-10*L)),o.updateProjectionMatrix());a.update(L);adaptiveStateV8615=adaptiveOfficeQualityV8615(adaptiveStateV8615,L,activeQualityV8615,window.devicePixelRatio);
 if(!P&&!c.matches&&adaptiveStateV8615.change&&adaptiveStateV8615.ratio!==null)r.setPixelRatio(adaptiveStateV8615.ratio);
-let socialPairsV8615=pairOfficeSocialV8615(H);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P&&(Z.root.position.lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)*Math.max(L,1/120)))),Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}Z.root.position.y=.08;let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*(Mt.status==="walking"?8:4.5)))}Z.precisionSceneV8615={chair:null,partner:socialPairsV8615.get(Mt.id)};
+let socialPairsV8615=pairOfficeSocialV8615(H);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P){
+ const candidate=Z.root.position.clone().lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)*Math.max(L,1/120)));
+ const guard=window.KSOfficeGeometry;
+ if(guard){const bounded=guard.constrainWorldSegment(Z.root.position,candidate,FLOOR_SPACE_SCALE);Z.root.position.x=bounded.x;Z.root.position.z=bounded.z;}
+ else Z.root.position.copy(candidate);
+ }
+ if(Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}Z.root.position.y=.08;let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*(Mt.status==="walking"?8:4.5)))}Z.precisionSceneV8615={chair:null,partner:socialPairsV8615.get(Mt.id)};
 if(Mt.seated&&Mt.status!=="walking"){
- Z.precisionSceneV8615.chair=officeNearestSeatV8618(Z.root.position.x,Z.root.position.z,.54);
+ Z.precisionSceneV8615.chair=officeNearestSeatV8618(Z.root.position.x,Z.root.position.z,.88,Mt.id);
  // While docking, keep standing until feet have reached the real chair.
  // Once there, face the assigned desk, not an unrelated stale walking yaw.
  if(Z.precisionSceneV8615.chair&&!P)Z.targetRotation=Z.precisionSceneV8615.chair.yaw;

@@ -1,7 +1,7 @@
 {
-  "release": "86.18",
+  "release": "86.19",
   "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.18 Expanded 3D office and chair-accurate seating",
+  "package": "V86.19 Chair centre correction and solid-wall navigation",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -17,5 +17,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Tests for chair positions, seat alignment, floor scale, 3D renderer syntax, movement routes and synchronization; live WebGL check pending."
+  "check": "432 planned paths, wall segment / clearance tests, seated position and realtime 3D guard validation; deployed WebGL verification pending."
 }

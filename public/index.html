@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#f7f7f5" />
 <title>Kidzstudios · 3D Office & Operations</title>
 <link rel="stylesheet" href="office-3d.css?v=52.0">
+<script src="office-geometry-guard.js?v=86.19"></script>
 <style id="ks-main-css">
 :root{
   --bg:#f7f7f5;--bg2:#fbfbfa;--card:rgba(255,255,255,.9);--solid:#fff;--text:#1d2022;--muted:#767b80;
@@ -2700,7 +2701,7 @@ body{overscroll-behavior:none;}
   };
   const zoneGate={
     staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6},
-    store:{x:12.1,y:50.2},prayer:{x:11.2,y:59.7},'toilet-a':{x:7.1,y:61.2},'toilet-b':{x:7.3,y:61.2}
+    store:{x:13.2,y:55.1},prayer:{x:11.2,y:59.7},'toilet-a':{x:1.9,y:59.0},'toilet-b':{x:5.5,y:59.0}
   };
   const roamChoices={
     1:['boss','corridor','showroom','pantry','store','prayer','toilet-a'],2:['boss','corridor','showroom','pantry','store','prayer','toilet-b'],
@@ -2746,9 +2747,10 @@ body{overscroll-behavior:none;}
     {x:5.7,y:51.0,w:2.4,h:3.2}
   ];
   const navStep=.5,navCols=47,navRows=141,navPadding=.3;
+  if(!window.KSOfficeGeometry)console.error("Office wall geometry could not load; refresh the page before enabling shared movement.");
   function navBlocked(x,y){
     if(!Number.isFinite(x)||!Number.isFinite(y)||x<.5||x>22.5||y<.5||y>69.5)return true;
-    return navigationObstacles.some(b=>x>=b.x-navPadding&&x<=b.x+b.w+navPadding&&y>=b.y-navPadding&&y<=b.y+b.h+navPadding);
+    return (window.KSOfficeGeometry?.blocked(x,y)??true)||navigationObstacles.some(b=>x>=b.x-navPadding&&x<=b.x+b.w+navPadding&&y>=b.y-navPadding&&y<=b.y+b.h+navPadding);
   }
   function navClearLine(a,b){
     if(navBlocked(a.x,a.y)||navBlocked(b.x,b.y))return false;
@@ -3215,12 +3217,12 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.18 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.19 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.18" defer></script>
+<script src="office-3d.js?v=86.19" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
