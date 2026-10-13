@@ -146,7 +146,7 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
   const rect=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
   raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects(pickables,false)[0];let id=hit?.object.userData.personId;
   if(id===undefined){let best=38;for(const h of humans){const point=h.body.getWorldPosition(new THREE.Vector3());point.y=h.root.position.y+1.3;point.project(camera);const distance=Math.hypot((point.x*.5+.5)*rect.width-(e.clientX-rect.left),(-point.y*.5+.5)*rect.height-(e.clientY-rect.top));if(point.z<1&&point.z>-1&&distance<best){best=distance;id=h.person.id;}}}
-  if(id!==undefined){(window as any).OfficeSuite?.markCharacterSelection?.();callbacks.onPerson(id);}
+  if(id!==undefined){(window as any).KSOutsideClose?.markCharacterSelection?.();(window as any).OfficeSuite?.markCharacterSelection?.();callbacks.onPerson(id);}
  };
  const sceneWheel=(e:WheelEvent)=>{if(e.cancelable)e.preventDefault();e.stopImmediatePropagation();if(!following)flyTarget=null;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?height:1);zoomTarget=THREE.MathUtils.clamp(zoomTarget*Math.exp(-delta*.0015),.65,5);if(following)flyZoom=zoomTarget;};
  renderer.domElement.addEventListener('wheel',sceneWheel,{capture:true,passive:false});

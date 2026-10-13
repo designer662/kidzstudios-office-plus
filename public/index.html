@@ -999,6 +999,14 @@ body{overscroll-behavior:none;}
 #profileCard .ks-staff-tabs button.active,#profileCard .ks-staff-tabs button[aria-selected=true]{background:#fff0e4;color:#b65d27;box-shadow:inset 0 0 0 1px #f1cbb0}
 #profileCard .ks-staff-tabs button:focus-visible,#profileCard .ks-staff-emoji-choice:focus-visible{outline:2px solid #df783d;outline-offset:2px}
 #profileCard .ks-staff-tab-content[hidden],#profileCard .ks-staff-emoji-panel[hidden]{display:none!important}
+#profileCard .ks-staff-quick-emoji{border-top:1px solid #ebe6dd;margin-top:12px;padding-top:12px}
+#profileCard .ks-staff-quick-heading{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:8px}
+#profileCard .ks-staff-quick-heading strong{font-size:11px;color:#5d6165}
+#profileCard .ks-staff-quick-heading span{font-size:10px;color:#83878a}
+#profileCard .ks-staff-quick-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+#profileCard .ks-staff-quick-grid button{border:1px solid #ece5dc;border-radius:10px;background:#fff;cursor:pointer;min-height:38px;font-size:20px;display:grid;place-items:center;padding:2px}
+#profileCard .ks-staff-quick-grid button[aria-pressed="true"]{border-color:#df935d;background:#ffead8;box-shadow:0 0 0 1px #df935d inset}
+#profileCard .ks-staff-quick-grid button:focus-visible{outline:2px solid #df783d;outline-offset:2px}
 #profileCard .ks-staff-emoji-panel{min-height:180px;padding-bottom:8px}
 #profileCard .ks-staff-emoji-title{font-size:11px;font-weight:750;color:#5d6165;margin:4px 0 12px}
 #profileCard .ks-staff-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -1987,7 +1995,18 @@ body{overscroll-behavior:none;}
     const old=Object.fromEntries(employees.map(e=>[e.id,e]));
     const next=payload.staff.map((record,index)=>employeeFromStaffRecord(record,index,old[Number(record.id)])).filter(e=>Number.isFinite(e.id));
     employees.splice(0,employees.length,...next);staffDirectoryVersion=Math.max(staffDirectoryVersion,Number(version||0));rebuildEmployeeIndex();
-    clearEmployeeSelection();contextCard.classList.remove('open');drawRooms();drawEmployees();syncAllMoodBubbles();renderNav();renderOps();updateStats();renderFeed();
+    // Keep camera tracking and staff controls open during shared directory refresh.
+    // Earlier releases called clearEmployeeSelection() on every mood/save update,
+    // which immediately canceled follow and discarded the popup.
+    const keepStaffId=followEmployeeId;
+    const keepPanelOpen=profileCard.classList.contains('open');
+    const keepTab=profileCard.querySelector('[data-profile-tab][aria-selected="true"]')?.dataset.profileTab||'staff';
+    contextCard.classList.remove('open');drawRooms();drawEmployees();syncAllMoodBubbles();renderNav();renderOps();updateStats();renderFeed();
+    if(keepStaffId!=null&&employeeById[keepStaffId]){
+      if(keepPanelOpen){openEmployee(employeeById[keepStaffId]);if(keepTab==='emoji')profileCard.querySelector('[data-profile-tab="emoji"]')?.click();}
+      syncFollowChip();
+    }else if(keepStaffId!=null){clearEmployeeSelection();}
+
     return true;
   }
   async function saveStaffDirectory(records){
@@ -2388,6 +2407,17 @@ body{overscroll-behavior:none;}
     const details=document.createElement('section');details.className='ks-staff-tab-content';details.id='ksSelectedStaffDetails';
     while(profileCard.firstChild)details.append(profileCard.firstChild);
     const close=details.querySelector('.close-mini');if(close)profileCard.append(close);
+    // Profile information remains visible on selection, with immediate mood
+    // choices below it. The Emoji tab also provides the full chooser.
+    const quick=document.createElement('section');quick.className='ks-staff-quick-emoji';
+    quick.innerHTML='<div class="ks-staff-quick-heading"><strong>Set Mood</strong><span>Select an emoji for '+esc(e.name)+'</span></div><div class="ks-staff-quick-grid">'+Object.entries(characterEmojiPresets).map(([mood,preset])=>'<button type="button" data-quick-mood="'+mood+'" title="'+esc(preset.label)+'" aria-label="'+esc(preset.label)+'" aria-pressed="'+(e.mood===mood)+'">'+preset.emoji+'</button>').join('')+'</div>';
+    details.append(quick);
+    quick.querySelectorAll('[data-quick-mood]').forEach(button=>button.onclick=async()=>{
+      const mood=button.dataset.quickMood;
+      quick.querySelectorAll('[data-quick-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.quickMood===mood)));
+      await triggerCharacterEmoji(e,mood);
+    });
+
     const tabs=document.createElement('div');tabs.className='ks-staff-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label',e.name+' controls');
     tabs.innerHTML='<button type="button" role="tab" id="ksStaffInfoTab" aria-controls="ksSelectedStaffDetails" aria-selected="true" data-profile-tab="staff">👤 Staff</button><button type="button" role="tab" id="ksStaffEmojiTab" aria-controls="ksSelectedStaffEmoji" aria-selected="false" data-profile-tab="emoji">😊 Emoji</button>';
     details.setAttribute('role','tabpanel');details.setAttribute('aria-labelledby','ksStaffInfoTab');
@@ -2524,6 +2554,9 @@ body{overscroll-behavior:none;}
   function followCharacter(e,ev=null){
     if(!e)return;
     collapseOpsPanel();clearWorkloadNotice(e.id);contextCard.classList.remove('open');tooltip.classList.remove('show');
+    // Mark the 3D raycast selection BEFORE the browser's synthetic click-away
+    // handler runs after pointerup; otherwise the popup instantly closes.
+    window.KSOutsideClose?.markCharacterSelection?.();
     // Open the profile and start camera follow in the same interaction frame.
     openEmployee(e);
     focusEmployee(e);
@@ -3010,6 +3043,7 @@ body{overscroll-behavior:none;}
     },
     getStaff:()=>employees.map(e=>({...e,hasAlert:workloadNoticeIds.has(e.id),motionStatus:effectiveStatus(e)})),
     getSelectedStaffId:()=>followEmployeeId,
+    markCharacterSelection:()=>window.KSOutsideClose?.markCharacterSelection?.(),
     selectPerson:id=>{const e=employeeById[id];if(e)followCharacter(e)},
     selectDepartment:setDept,
     stopFollow:stopCameraFollow,
@@ -3248,7 +3282,7 @@ body{overscroll-behavior:none;}
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.23" defer></script>
+<script src="office-3d.js?v=86.23.1" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
