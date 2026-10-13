@@ -114,7 +114,7 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  // Jointed, rounded character models with individual clothing and facial details.
  const humans:Human[]=[];const pickables:THREE.Object3D[]=[];const makeCharacter=characterFactory();
  for(const p of staff){
-  const rig=makeCharacter(p);rig.root.position.set(p.position[0]*FLOOR_SPACE_SCALE,.08,p.position[1]*FLOOR_SPACE_SCALE);rig.root.rotation.y=p.rotation;rig.lastPosition.copy(rig.root.position);scene.add(rig.root);
+  const rig=makeCharacter(p);(window as any).KSOfficeSeating?.installKnees(rig,THREE);(rig as any).seatStateV8620=(window as any).KSOfficeSeating?.createState();rig.root.position.set(p.position[0]*FLOOR_SPACE_SCALE,.08,p.position[1]*FLOOR_SPACE_SCALE);rig.root.rotation.y=p.rotation;rig.lastPosition.copy(rig.root.position);scene.add(rig.root);
   const ring=mesh(geo(new THREE.RingGeometry(.42,.49,32)),new THREE.MeshBasicMaterial({color:'#d89551',side:THREE.DoubleSide,transparent:true,opacity:.85}),rig.root,0,-.01,0);ring.rotation.x=-Math.PI/2;ring.visible=false;ring.castShadow=false;
   const hit=mesh(geo(new THREE.CylinderGeometry(.39,.42,2.25,10)),new THREE.MeshBasicMaterial({visible:false}),rig.root,0,1.02,0);
   // Custom male and female models use a smaller root scale; keep selection accessible.
@@ -190,22 +190,18 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
    while(distance>segmentLengths[segment]&&segment<route.length-1){distance-=segmentLengths[segment];segment++}
    const a=route[segment],b=route[(segment+1)%route.length],f=distance/segmentLengths[segment];h.root.position.lerpVectors(a,b,f);h.targetRotation=Math.atan2(b.x-a.x,b.z-a.z);
   }
-  // Characters only sit after their root reaches a real chair. Rotate toward
-  // its own desk and correct the model pelvis, never the shared navigation root.
-  const seat=p.seated&&p.status!=='walking'?nearestChair(h.root.position.x,h.root.position.z,p.id):null;
-  if(seat&&!paused)h.targetRotation=seat.yaw;
+  // V86.20: the shared planner owns root coordinates; presentation owns the
+  // chair-docking state machine and articulated knee pose.
   const travelled=h.root.position.distanceTo(h.lastPosition);h.lastPosition.copy(h.root.position);
   if(!paused){const diff=h.targetRotation-h.root.rotation.y;h.root.rotation.y+=Math.atan2(Math.sin(diff),Math.cos(diff))*(1-Math.exp(-dt*9))}
-  animateCharacter(h,p.seated?{...p,seated:Boolean(seat)}:p,simTime,paused?0:dt,paused?0:travelled);
-  if(seat&&(h.root.userData.officeHijabi||h.root.userData.officeMale)){
-    h.body.position.y-=.04*h.sit;
-    const angle=h.root.rotation.y,c=Math.cos(angle),sn=Math.sin(angle),scale=h.root.scale.x||1;
-    const dx=seat.x-h.root.position.x,dz=seat.z-h.root.position.z;
-    // Imported avatars are not enlarged with the floor, so a local chair
-    // correction must account for each avatar's own root scale.
-    h.body.position.x+=THREE.MathUtils.clamp((dx*c-dz*sn)/scale,-2.3,2.3)*h.sit;
-    h.body.position.z+=THREE.MathUtils.clamp((dx*sn+dz*c)/scale,-2.3,2.3)*h.sit;
-  }
+  const seating=(window as any).KSOfficeSeating;
+  const seatState=seating?.step((h as any).seatStateV8620||seating.createState(),{
+   id:p.id,x:h.root.position.x,z:h.root.position.z,yaw:h.root.rotation.y,
+   seated:p.seated,status:p.status,speed:dt>0?travelled/dt:0
+  },dt);
+  if(seatState){(h as any).seatStateV8620=seatState;if(seatState.chair&&!paused)h.targetRotation=seatState.chair.yaw}
+  animateCharacter(h,seatState?{...p,seated:seatState.ready}:p,simTime,paused?0:dt,paused?0:travelled);
+  if(seatState)seating.pose(h,seatState,dt);
   h.ring.visible=focusId===p.id||(selectedDept!=='all'&&selectedDept===p.department);if(h.ring.visible)(h.ring.material as THREE.MeshBasicMaterial).opacity=.65+Math.sin(t*2)*.15;
  }
  // V80: labels share one collision-aware placement pass after projection.

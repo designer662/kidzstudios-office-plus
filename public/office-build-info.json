@@ -1,8 +1,9 @@
 {
-  "release": "86.19",
+  "release": "86.20",
   "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.19 Chair centre correction and solid-wall navigation",
+  "package": "V86.20 Articulated chair docking and seated pose rebuild",
   "modules": [
+    "office-seating-controller.js",
     "office-ambience-audio.js",
     "office-living-office.js",
     "office-notification-sound.js",
@@ -17,5 +18,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "432 planned paths, wall segment / clearance tests, seated position and realtime 3D guard validation; deployed WebGL verification pending."
+  "check": "Correct assigned chairs, turn-to-chair gating, genuine knee pivots, hips on cushion, safe standing transition; live WebGL verification pending."
 }
