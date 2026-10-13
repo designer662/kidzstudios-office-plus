@@ -97,15 +97,18 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  world.updateMatrixWorld(true);
  // V86.18: these are the actual furniture seat centres and facing directions, in
  // original plan units. Scale ONCE, the same as the batched world geometry.
+ // V86.19: visual seating uses actual chair positions and corrects the model
+ // in character-local space, not the synchronized root.
  const chairTargets=[
   [-1.5,-12.45,Math.PI/2],[3.2,-12.45,-Math.PI/2],
   [-1.5,-10.2,Math.PI/2],[3.2,-10.2,-Math.PI/2],
   [-1.5,-7.95,Math.PI/2],[3.2,-7.95,-Math.PI/2],
   [-.15,-14.85,Math.PI],[3.1,-14.85,Math.PI],[3.2,4.05,Math.PI],
   [-3.45,2.45,0],[-3.45,4.85,Math.PI]
- ].map(([x,z,yaw])=>({x:x*FLOOR_SPACE_SCALE,z:z*FLOOR_SPACE_SCALE,yaw}));
- const nearestChair=(x:number,z:number)=>{let closest=.54,target:null|{x:number;z:number;yaw:number}=null;
-  for(const chair of chairTargets){const d=Math.hypot(chair.x-x,chair.z-z);if(d<closest){closest=d;target=chair}}
+ ].map(([x,z,yaw],i)=>({x:x*FLOOR_SPACE_SCALE,z:z*FLOOR_SPACE_SCALE,yaw,staffId:[7,3,4,null,null,null,2,6,1,null,null][i]}));
+ const nearestChair=(x:number,z:number,id:number)=>{let closest=.88,target:null|{x:number;z:number;yaw:number;staffId:number|null}=null;
+  const own=chairTargets.find(c=>c.staffId===id);
+  for(const chair of chairTargets){if(own&&chair!==own)continue;const d=Math.hypot(chair.x-x,chair.z-z);if(d<closest){closest=d;target=chair}}
   return target;
  };
  // Jointed, rounded character models with individual clothing and facial details.
@@ -177,8 +180,10 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  for(const h of humans){const t=simTime+h.phase,p=h.person;
   if(options.externalMotion&&!paused){
    const gap=h.root.position.distanceTo(h.targetPosition);
-   if(gap>4)h.root.position.copy(h.targetPosition);
-   else h.root.position.lerp(h.targetPosition,1-Math.exp(-18*dt));
+   const next=h.root.position.clone().lerp(h.targetPosition,1-Math.exp(-(gap>4?8:18)*Math.max(dt,1/120)));
+   const guard=(window as any).KSOfficeGeometry;
+   if(guard){const safe=guard.constrainWorldSegment(h.root.position,next,FLOOR_SPACE_SCALE);h.root.position.x=safe.x;h.root.position.z=safe.z}
+   else h.root.position.copy(next);
   }
   if(p.status==='walking'&&!options.externalMotion){
    let distance=(simTime*.72)%routeLength,segment=0;
@@ -187,12 +192,20 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
   }
   // Characters only sit after their root reaches a real chair. Rotate toward
   // its own desk and correct the model pelvis, never the shared navigation root.
-  const seat=p.seated&&p.status!=='walking'?nearestChair(h.root.position.x,h.root.position.z):null;
+  const seat=p.seated&&p.status!=='walking'?nearestChair(h.root.position.x,h.root.position.z,p.id):null;
   if(seat&&!paused)h.targetRotation=seat.yaw;
   const travelled=h.root.position.distanceTo(h.lastPosition);h.lastPosition.copy(h.root.position);
   if(!paused){const diff=h.targetRotation-h.root.rotation.y;h.root.rotation.y+=Math.atan2(Math.sin(diff),Math.cos(diff))*(1-Math.exp(-dt*9))}
   animateCharacter(h,p.seated?{...p,seated:Boolean(seat)}:p,simTime,paused?0:dt,paused?0:travelled);
-  if(seat&&(h.root.userData.officeHijabi||h.root.userData.officeMale))h.body.position.y-=.04*h.sit;
+  if(seat&&(h.root.userData.officeHijabi||h.root.userData.officeMale)){
+    h.body.position.y-=.04*h.sit;
+    const angle=h.root.rotation.y,c=Math.cos(angle),sn=Math.sin(angle),scale=h.root.scale.x||1;
+    const dx=seat.x-h.root.position.x,dz=seat.z-h.root.position.z;
+    // Imported avatars are not enlarged with the floor, so a local chair
+    // correction must account for each avatar's own root scale.
+    h.body.position.x+=THREE.MathUtils.clamp((dx*c-dz*sn)/scale,-2.3,2.3)*h.sit;
+    h.body.position.z+=THREE.MathUtils.clamp((dx*sn+dz*c)/scale,-2.3,2.3)*h.sit;
+  }
   h.ring.visible=focusId===p.id||(selectedDept!=='all'&&selectedDept===p.department);if(h.ring.visible)(h.ring.material as THREE.MeshBasicMaterial).opacity=.65+Math.sin(t*2)*.15;
  }
  // V80: labels share one collision-aware placement pass after projection.
