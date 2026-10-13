@@ -23,8 +23,8 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  const hemi=new THREE.HemisphereLight('#fffef8','#dedbd3',2.4);scene.add(hemi);
  const sun=new THREE.DirectionalLight('#fff7e9',3.1);sun.position.set(-12,26,13);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-28;sun.shadow.camera.near=.1;sun.shadow.camera.far=70;sun.shadow.normalBias=.045;sun.shadow.bias=-.00025;sun.shadow.radius=4;scene.add(sun);
  const fill=new THREE.DirectionalLight('#edf3ff',1.3);fill.position.set(15,12,-12);scene.add(fill);
- // The physical office is 25% more spacious in X/Z; character models keep their original size.
- const FLOOR_SPACE_SCALE=1.25;
+ // V86.18: the physical office is 50% wider/longer than base; character models retain size.
+ const FLOOR_SPACE_SCALE=1.5;
  const accent=new THREE.DirectionalLight('#ffd9c2',.38);accent.position.set(-8,11,17);scene.add(accent);
  const world=new THREE.Group();scene.add(world);
  const mats=new Map<string,THREE.MeshStandardMaterial>();const geometries=new Set<THREE.BufferGeometry>();
@@ -95,6 +95,19 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  // would bake the transform and accidentally apply it twice.
  world.scale.set(FLOOR_SPACE_SCALE,1,FLOOR_SPACE_SCALE);
  world.updateMatrixWorld(true);
+ // V86.18: these are the actual furniture seat centres and facing directions, in
+ // original plan units. Scale ONCE, the same as the batched world geometry.
+ const chairTargets=[
+  [-1.5,-12.45,Math.PI/2],[3.2,-12.45,-Math.PI/2],
+  [-1.5,-10.2,Math.PI/2],[3.2,-10.2,-Math.PI/2],
+  [-1.5,-7.95,Math.PI/2],[3.2,-7.95,-Math.PI/2],
+  [-.15,-14.85,Math.PI],[3.1,-14.85,Math.PI],[3.2,4.05,Math.PI],
+  [-3.45,2.45,0],[-3.45,4.85,Math.PI]
+ ].map(([x,z,yaw])=>({x:x*FLOOR_SPACE_SCALE,z:z*FLOOR_SPACE_SCALE,yaw}));
+ const nearestChair=(x:number,z:number)=>{let closest=.54,target:null|{x:number;z:number;yaw:number}=null;
+  for(const chair of chairTargets){const d=Math.hypot(chair.x-x,chair.z-z);if(d<closest){closest=d;target=chair}}
+  return target;
+ };
  // Jointed, rounded character models with individual clothing and facial details.
  const humans:Human[]=[];const pickables:THREE.Object3D[]=[];const makeCharacter=characterFactory();
  for(const p of staff){
@@ -172,9 +185,14 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
    while(distance>segmentLengths[segment]&&segment<route.length-1){distance-=segmentLengths[segment];segment++}
    const a=route[segment],b=route[(segment+1)%route.length],f=distance/segmentLengths[segment];h.root.position.lerpVectors(a,b,f);h.targetRotation=Math.atan2(b.x-a.x,b.z-a.z);
   }
+  // Characters only sit after their root reaches a real chair. Rotate toward
+  // its own desk and correct the model pelvis, never the shared navigation root.
+  const seat=p.seated&&p.status!=='walking'?nearestChair(h.root.position.x,h.root.position.z):null;
+  if(seat&&!paused)h.targetRotation=seat.yaw;
   const travelled=h.root.position.distanceTo(h.lastPosition);h.lastPosition.copy(h.root.position);
   if(!paused){const diff=h.targetRotation-h.root.rotation.y;h.root.rotation.y+=Math.atan2(Math.sin(diff),Math.cos(diff))*(1-Math.exp(-dt*9))}
-  animateCharacter(h,p,simTime,paused?0:dt,paused?0:travelled);
+  animateCharacter(h,p.seated?{...p,seated:Boolean(seat)}:p,simTime,paused?0:dt,paused?0:travelled);
+  if(seat&&(h.root.userData.officeHijabi||h.root.userData.officeMale))h.body.position.y-=.04*h.sit;
   h.ring.visible=focusId===p.id||(selectedDept!=='all'&&selectedDept===p.department);if(h.ring.visible)(h.ring.material as THREE.MeshBasicMaterial).opacity=.65+Math.sin(t*2)*.15;
  }
  // V80: labels share one collision-aware placement pass after projection.
