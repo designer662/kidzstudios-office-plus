@@ -22,7 +22,7 @@ const expected=[
 for(const expression of expected){assert.ok(scene.includes(expression),`Source missing consistent transform: ${expression}`);assert.ok(bundle.includes(expression),`Shipped 3D bundle missing transform: ${expression}`)}
 assert.ok(scene.indexOf('world.scale.set(FLOOR_SPACE_SCALE')>scene.indexOf('world.clear()'), 'Scale batched world after geometry merge to avoid double scaling');
 assert.ok(bundle.indexOf('u.scale.set(FLOOR_SPACE_SCALE')>bundle.indexOf('u.clear()'), 'Shipped bundle must scale batched world after merge');
-assert.ok(html.includes('office-3d.js?v=86.18'), 'Updated 3D bundle must bust browser cache');
+assert.ok(html.includes('office-3d.js?v=86.19'), 'Updated 3D bundle must bust browser cache');
 assert.match(logic,/return \[\(e.visualX\?\?e.x\)\/2-5\.75,\(e.visualY\?\?e.y\)\/2-17\.5\]/,'Keep existing Supabase and floor-plan data coordinates');
 assert.ok(sync.includes("const SCOPE="),'Supabase shared timeline retained');
 assert.equal(1.5*1.5,2.25);

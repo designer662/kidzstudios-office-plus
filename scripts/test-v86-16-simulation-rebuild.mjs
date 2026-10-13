@@ -44,6 +44,7 @@ assert.ok(start>=0&&end>start);
 const preservePositions=new Function(html.slice(start,end)+'\nreturn separateWorkerPositions;')();
 const overlapping=[{id:1,x:7,y:6,walking:false},{id:2,x:7.2,y:6,walking:true}];
 assert.deepEqual(preservePositions(overlapping),overlapping,'Follower must not invent divergent client-side coordinates');
-assert.ok(modelSource.includes('Z.root.position.lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)'),'Render interpolation uses smooth network catch-up');
+assert.ok(modelSource.includes('const candidate=Z.root.position.clone().lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)'),'Render interpolation uses smooth network catch-up');
+assert.ok(modelSource.includes('guard.constrainWorldSegment(Z.root.position,candidate,FLOOR_SPACE_SCALE)'),'Network catch-up cannot cross walls');
 assert.ok(!modelSource.includes('Z.root.position.distanceTo(Z.targetPosition)>4?Z.root.position.copy(Z.targetPosition)'), 'Old frame jump removed');
 console.log('PASS V86.16: continuous aisle departure, smooth seat docking, old timeline compatibility, invariant shared positions, smooth 3D catch-up');

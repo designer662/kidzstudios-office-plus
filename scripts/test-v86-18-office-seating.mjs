@@ -7,10 +7,10 @@ const html=readFileSync('public/index.html','utf8');
 const source=readFileSync('source/src/office-scene.ts','utf8');
 const release=JSON.parse(readFileSync('office-release.json','utf8'));
 const scale=1.5;
-assert.equal(release.release,'86.18');
+assert.equal(release.release,'86.19');
 assert.match(bundle,/const FLOOR_SPACE_SCALE=1\.5;/);
 assert.match(source,/const FLOOR_SPACE_SCALE=1\.5;/);
-assert.ok(html.includes('office-3d.js?v=86.18'),'New build busts browser cache');
+assert.ok(html.includes('office-3d.js?v=86.19'),'New build busts browser cache');
 const expected=['u.scale.set(FLOOR_SPACE_SCALE,1,FLOOR_SPACE_SCALE)','L.position[0]*FLOOR_SPACE_SCALE','L.position[1]*FLOOR_SPACE_SCALE','focus[0]*FLOOR_SPACE_SCALE','6*FLOOR_SPACE_SCALE','18*FLOOR_SPACE_SCALE'];
 for(const marker of expected)assert.ok(bundle.includes(marker),`Missing shared transform: ${marker}`);
 assert.match(bundle,/\(i\.visualX\?\?i\.x\)\/2-5\.75/,'Supabase floor-plan units remain unchanged');
@@ -67,4 +67,4 @@ assert.ok(Math.abs(r.body.position.x)<1e-6&&Math.abs(r.body.position.z)<1e-6,'Se
 assert.equal(r.body.position.y,0,'Walking body reset to standing height');
 assert.match(bundle,/Wh\(Z,Mt\.seated\?\{\.\.\.Mt,seated:Boolean\(Z\.precisionSceneV8615\.chair\)\}:Mt/, 'Only enter sitting pose at a real nearby chair');
 assert.match(bundle,/Z\.targetRotation=Z\.precisionSceneV8615\.chair\.yaw/, 'Seated staff turn toward their desk');
-console.log(`PASS V86.18: +20% width/length vs V86.17, ${planChairs.length} chairs with correct yaw; 14,400 seated frames without drift, stand-up release, shared floor-plan intact.`);
+console.log(`PASS V86.18 regression on V86.19: +20% width/length vs V86.17, ${planChairs.length} chairs with correct yaw; 14,400 seated frames without drift, stand-up release, shared floor-plan intact.`);

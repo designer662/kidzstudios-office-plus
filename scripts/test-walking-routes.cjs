@@ -1,8 +1,9 @@
 const fs=require('fs'),assert=require('node:assert/strict');
+const window={KSOfficeGeometry:require('../public/office-geometry-guard.js')};
 const src=fs.readFileSync(require('node:path').join(__dirname,'..','public','index.html'),'utf8');
 const start=src.indexOf('  const navigationObstacles=['),end=src.indexOf('  function setMotionClass(',start);
-const gates={staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6},store:{x:12.1,y:50.2},prayer:{x:11.2,y:59.7},'toilet-a':{x:7.1,y:61.2},'toilet-b':{x:7.3,y:61.2}};
-const nav=new Function('staffDeskAssignments','zoneGate','const corridorLinkedZones=new Set(["boss","pantry","store","prayer","toilet-a","toilet-b","corridor"]);\n'+src.slice(start,end)+'return {navBlocked,navSnap,navClearLine,safeWalkingRoute,pathBetweenZones};')([],gates);
+const gates={staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6},store:{x:13.2,y:55.1},prayer:{x:11.2,y:59.7},'toilet-a':{x:1.9,y:59.0},'toilet-b':{x:5.5,y:59.0}};
+const nav=new Function('staffDeskAssignments','zoneGate','window','const corridorLinkedZones=new Set(["boss","pantry","store","prayer","toilet-a","toilet-b","corridor"]);\n'+src.slice(start,end)+'return {navBlocked,navSnap,navClearLine,safeWalkingRoute,pathBetweenZones};')([],gates,window);
 const staff=[{z:'staff',x:17.9,y:10.1},{z:'staff',x:8.5,y:10.1},{z:'staff',x:17.7,y:5.3},{z:'staff',x:11.2,y:5.3},{z:'showroom',x:19,y:28.8},{z:'showroom',x:16,y:32.7},{z:'boss',x:17.9,y:43.1},{z:'staff',x:8.5,y:14.6}];
 let count=0,fail=0,totalSegments=0;
 const targets=[['staff',{x:8.5,y:10.1}],['showroom',{x:11.1,y:31}],['corridor',{x:9.4,y:40}],['pantry',{x:5.5,y:46}],['boss',{x:17.9,y:43.1}],['store',{x:17,y:53}],['prayer',{x:15,y:63}],['toilet-a',{x:1.9,y:62}],['toilet-b',{x:5.5,y:62}]];
