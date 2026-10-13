@@ -107,6 +107,9 @@
 /* Excel import preview and progress */
 .excel-import-body{padding:2px 17px 13px}.excel-import-summary{padding:12px 14px;border-radius:13px;background:#f4f6f6;color:#3d4850;font:740 11px/1.5 Inter,Arial,sans-serif}.excel-import-summary b{color:#d46831}.excel-import-preview{margin:10px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;max-height:152px;overflow:auto;font-size:11px;line-height:1.65;color:#747b81}.excel-import-preview .preview-row{display:grid;grid-template-columns:1.1fr 1.2fr 1.4fr;gap:8px;border-bottom:1px solid var(--line);padding:6px 0}.excel-import-preview .preview-row:last-child{border-bottom:0}.excel-import-preview b{color:#353b40;overflow-wrap:anywhere}.excel-import-preview span{overflow-wrap:anywhere}.excel-import-modes{border:1px solid var(--line);border-radius:13px;padding:12px;display:grid;gap:8px}.excel-import-modes legend{color:#757d83;font-weight:820;font-size:11px;padding:0 5px}.excel-import-modes label{display:flex;align-items:start;gap:10px;padding:9px 10px;background:#fafaf8;border-radius:10px;cursor:pointer}.excel-import-modes label:has(input:checked){background:#fff2ea;outline:1px solid rgba(239,123,69,.25)}.excel-import-modes input{margin-top:3px;accent-color:#ef7b45}.excel-import-modes label span{display:grid;gap:3px}.excel-import-modes label b{font-size:11px}.excel-import-modes label small{font-size:10px;color:#868d92;line-height:1.4}.excel-import-help{color:#8b9196;font-size:10px;line-height:1.5;margin:12px 0 0}.excel-import-body [hidden]{display:none!important}
 @media(max-width:650px){.excel-import-body{padding:2px 11px 11px}.excel-import-preview .preview-row{grid-template-columns:1fr 1fr}.excel-import-preview .preview-row span:last-child{display:none}}
+#quickExportExcel[aria-disabled="true"],.export-card[aria-disabled="true"]{opacity:.52;cursor:not-allowed}
+.export-grid a.export-card{display:block;color:inherit;text-decoration:none}
+.export-grid a.export-card:focus-visible,#quickExportExcel:focus-visible{outline:3px solid #ef7b45;outline-offset:2px}
 </style>
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
@@ -159,6 +162,7 @@
   <section class="hero v44-hero">
     <div><div class="eyebrow">Job Management</div><h1>Jobs</h1><p>Simple daily view with shared editable dropdowns. Full 28-field record remains inside each job.</p></div>
     <div class="hero-actions v44-actions">
+      <a class="btn" id="quickExportExcel" aria-disabled="true" title="Waiting for shared jobs">⬇ Download Excel</a>
       <details class="tools-menu"><summary class="btn">Tools <span>⌄</span></summary><div class="tools-popover">
         <button class="tools-action" id="importExcelBtn" type="button"><b>▤</b><span>Import File<small>Excel, CSV or JSON · preview before saving</small></span></button>
         <input type="file" id="importExcelFile" accept=".xlsx,.csv,.tsv,.json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json" hidden>
@@ -288,15 +292,15 @@
 <div class="modal" id="exportModal" aria-hidden="true"><div class="dialog" style="width:min(620px,100%)" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
   <div class="dialog-head"><div><span>Export Job Management</span><h2 id="exportTitle">Export Data</h2></div><button class="close" id="exportClose">×</button></div>
   <div class="export-grid">
-    <button class="export-card full" id="exportExcelAll" type="button"><b>⬇ All Shared Jobs · Excel (.xlsx)</b><span>Recommended · Download all jobs across every month and year, including undated records, with 28 columns.</span></button>
-    <button class="export-card" id="exportExcelCurrent" type="button"><b>Current View · Excel (.xlsx)</b><span>Download only jobs matching the current month, year, search and filters.</span></button>
-    <button class="export-card full" id="exportExcelTemplate"><b>Download Empty Excel Template</b><span>28-field Excel sheet, ready to fill and import again.</span></button>
-    <button class="export-card" id="exportCurrent"><b>Current View · CSV</b><span>Exports the exact 28 Excel columns for the current month and filters.</span></button>
-    <button class="export-card" id="exportPeriod"><b>Selected Period · CSV</b><span>Exports all jobs in the selected month, or all 12 months for the selected year.</span></button>
-    <button class="export-card" id="exportYear"><b>Full Year · CSV</b><span>Exports all dated jobs for the selected year using the original Excel column order.</span></button>
-    <button class="export-card" id="exportSummary"><b>12-Month Summary · CSV</b><span>Month-by-month Orders, Design, Production, Closed, Urgent, Overdue and Total.</span></button>
-    <button class="export-card full" id="exportAllCsv"><b>All Shared Jobs · CSV</b><span>Every job, including undated records and all years.</span></button>
-    <button class="export-card full" id="exportBackup"><b>Full Database Backup · JSON</b><span>Exports every shared job with all 28 fields and compatibility metadata.</span></button>
+    <a class="export-card full" id="exportExcelAll" aria-disabled="true" tabindex="0"><b>⬇ All Shared Jobs · Excel (.xlsx)</b><span>Recommended · Download all jobs across every month and year, including undated records, with 28 columns.</span></a>
+    <a class="export-card" id="exportExcelCurrent" aria-disabled="true" tabindex="0"><b>Current View · Excel (.xlsx)</b><span>Download only jobs matching the current month, year, search and filters.</span></a>
+    <a class="export-card full" id="exportExcelTemplate" aria-disabled="true" tabindex="0"><b>Download Empty Excel Template</b><span>28-field Excel sheet, ready to fill and import again.</span></a>
+    <a class="export-card" id="exportCurrent" aria-disabled="true" tabindex="0"><b>Current View · CSV</b><span>Exports the exact 28 Excel columns for the current month and filters.</span></a>
+    <a class="export-card" id="exportPeriod" aria-disabled="true" tabindex="0"><b>Selected Period · CSV</b><span>Exports all jobs in the selected month, or all 12 months for the selected year.</span></a>
+    <a class="export-card" id="exportYear" aria-disabled="true" tabindex="0"><b>Full Year · CSV</b><span>Exports all dated jobs for the selected year using the original Excel column order.</span></a>
+    <a class="export-card" id="exportSummary" aria-disabled="true" tabindex="0"><b>12-Month Summary · CSV</b><span>Month-by-month Orders, Design, Production, Closed, Urgent, Overdue and Total.</span></a>
+    <a class="export-card full" id="exportAllCsv" aria-disabled="true" tabindex="0"><b>All Shared Jobs · CSV</b><span>Every job, including undated records and all years.</span></a>
+    <a class="export-card full" id="exportBackup" aria-disabled="true" tabindex="0"><b>Full Database Backup · JSON</b><span>Exports every shared job with all 28 fields and compatibility metadata.</span></a>
   </div>
   <div class="export-foot" id="exportFoot" role="status" aria-live="polite">Loading the latest shared data before export…</div>
 </div></div>
@@ -322,7 +326,7 @@
     </section>
   </div>
 </div></div>
-<div class="toast" id="toast"></div><footer class="ks-version-footer">v86.23</footer>
+<div class="toast" id="toast"></div><footer class="ks-version-footer">v86.25</footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-workbook.js?v=70.0"></script>
@@ -425,7 +429,7 @@ async function pull({quiet=false}={}){
    if(jobsLoaded&&Number(row?.version||0)!==version)selectedJobIndices.clear();
    jobs=(raw||[]).map(normalizeJob);version=Number(row?.version||0);
    savedAt=Number(row?.payload?.savedAt)|| (row?.updatedAt?new Date(row.updatedAt).getTime():0);
-   jobsLoaded=true;render();
+   jobsLoaded=true;render();prepareQuickDownload();
   }
   setSync('live','Shared · Live',`${jobs.length} jobs · Office Pulse synced`);return true;
  }catch(e){setSync('offline','Could not load jobs',`${e.message}. Existing loaded jobs are kept; use Refresh to retry.`);if(!quiet){render();toast(e.message)}return false}
@@ -449,7 +453,7 @@ async function saveAll(reason='updated',candidate=jobs){
   void postEvent('job_management_updated','Job Management updated',`${jobs.length} shared jobs · ${reason}`,{count:jobs.length,source:'html-v70',signature:payload.signature,tally:counts(jobs)});
   return true;
  }catch(e){setSync('offline','Save not completed',e.message);toast(e.message);return false}
- finally{saving=false;updateJobSelectionBar()}
+ finally{saving=false;updateJobSelectionBar();prepareQuickDownload(true);if($('#exportModal').classList.contains('open'))prepareExportLinks()}
 }
 function counts(list=jobs){const c={orders:0,artwork:0,production:0,completed:0,overdue:0,unmapped:0,urgent:0};for(const j of list){const st=stage(j);c[st]=(c[st]||0)+1;if(overdue(j))c.overdue++;if(normalize(j.priority)==='urgent')c.urgent++}return c}
 function unique(key){return[...new Set(jobs.map(j=>String(j[key]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
@@ -774,83 +778,110 @@ async function confirmExcelImport(){
   finally{importConfirming=false;$('#excelImportConfirm').disabled=false}
  },'Confirm Import');
 }
-// V86.24: Export uses one consistent, freshly loaded Supabase snapshot.
-// Generate the file and click its download anchor synchronously in the user's
-// button handler: awaiting a server request here can cause browser download blocking.
+// V86.26: Native, prepared file links. The user's real click downloads the
+// prepared Blob directly; no hidden anchor.click(), server wait or popup API.
+// All Shared Jobs means the last successfully loaded Supabase snapshot.
 const EXPORT_IDS=['exportExcelCurrent','exportExcelAll','exportExcelTemplate','exportCurrent','exportPeriod','exportYear','exportSummary','exportAllCsv','exportBackup'];
-let exportRefreshSequence=0,exportRefreshing=false,exportWarning='';
-function exportExcelJobs(list,name){
- if(!window.KSOfficeWorkbook?.makeXlsx)throw Error('Excel exporter failed to load. Reload this page and retry.');
- const headers=FIELDS.map(([label])=>label);
- const rows=list.map(job=>FIELDS.map(([,key])=>job[key]??''));
- const blob=window.KSOfficeWorkbook.makeXlsx(headers,rows,{sheetName:'Jobs'});
- downloadBlob(blob,name);
- toast(list.length?`Excel download started · ${list.length} jobs`:'Excel template downloaded · no jobs in this selection');
+const exportLinks=new Map();
+let exportRefreshSequence=0, exportRefreshing=false, exportWarning='';
+let quickExportSignature='';
+function excelFile(list,name){
+ if(!window.KSOfficeWorkbook?.makeXlsx)throw Error('Excel export module is unavailable. Please reload.');
+ const headers=FIELDS.map(([header])=>header);
+ const rows=list.map(j=>FIELDS.map(([,field])=>j[field]??''));
+ return {blob:window.KSOfficeWorkbook.makeXlsx(headers,rows,{sheetName:'Jobs'}),name,count:list.length};
 }
-function exportExcelCurrent(){exportExcelJobs(filtered().map(x=>x.j),`kidzstudios-jobs-current-${selectedYear}-${selectedMonth==='all'?'all-months':String(Number(selectedMonth)+1).padStart(2,'0')}.xlsx`)}
-function exportExcelAll(){exportExcelJobs(jobs,`kidzstudios-jobs-all-${new Date().toISOString().slice(0,10)}.xlsx`)}
-function exportExcelTemplate(){exportExcelJobs([],`kidzstudios-job-management-template-28-fields.xlsx`)}
-const csvValue=v=>window.KSJobData.csvValue(v);
-function downloadBlob(blob,name){
- if(!(blob instanceof Blob)||!blob.size)throw Error('Export could not create a valid file.');
- if(!URL.createObjectURL)throw Error('Your browser does not support file downloads. Try the latest Chrome or Edge.');
- const url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);
- try{a.click()}finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+function csvFile(headers,rows,name,count=rows.length){
+ if(!window.KSJobData?.csvValue)throw Error('CSV export module is unavailable. Please reload.');
+ const csv=[headers,...rows].map(row=>row.map(v=>window.KSJobData.csvValue(v)).join(',')).join('\r\n');
+ return {blob:new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),name,count};
 }
-function exportRowsCsv(list,name){
- const head=FIELDS.map(x=>x[0]);const csv=[head.map(csvValue).join(','),...list.map(j=>FIELDS.map(([,k])=>csvValue(j[k])).join(','))].join('\r\n');
- downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),name);
- toast(list.length?`CSV download started · ${list.length} jobs`:'CSV downloaded · no jobs in this selection');
+function jobsCsv(list,name){return csvFile(FIELDS.map(([header])=>header),list.map(j=>FIELDS.map(([,field])=>j[field]??'')),name,list.length)}
+function buildExport(id){
+ const date=new Date().toISOString().slice(0,10),month=selectedMonth==='all'?'all-months':String(Number(selectedMonth)+1).padStart(2,'0');
+ if(id==='exportExcelTemplate')return excelFile([],'kidzstudios-job-management-template-28-fields.xlsx');
+ if(!jobsLoaded)throw Error('Shared jobs have not loaded yet. Check connection and click Refresh.');
+ if(id==='exportExcelAll'||id==='quickExportExcel')return excelFile(jobs,`kidzstudios-jobs-all-${date}.xlsx`);
+ if(id==='exportExcelCurrent')return excelFile(filtered().map(x=>x.j),`kidzstudios-jobs-current-${selectedYear}-${month}.xlsx`);
+ if(id==='exportCurrent')return jobsCsv(filtered().map(x=>x.j),`kidzstudios-current-view-${selectedYear}-${month}.csv`);
+ if(id==='exportPeriod')return jobsCsv(periodJobs(),`kidzstudios-${selectedYear==='undated'?'undated':selectedMonth==='all'?'year':MONTHS[Number(selectedMonth)].toLowerCase()}-${selectedYear}.csv`);
+ if(id==='exportYear')return jobsCsv(jobsForYear(selectedYear),`kidzstudios-full-year-${selectedYear}.csv`);
+ if(id==='exportAllCsv')return jobsCsv(jobs,`kidzstudios-jobs-all-${date}.csv`);
+ if(id==='exportSummary'){
+  const rows=MONTHS.map((name,m)=>{const list=jobsForYear(selectedYear).filter(j=>jobMonth(j)===m),c=counts(list);return[name,selectedYear,list.length,c.orders,c.artwork,c.production,c.completed,c.urgent,c.overdue,c.unmapped]});
+  return csvFile(['Month','Year','Total Jobs','Orders','Design','Production','Closed','Urgent','Overdue','Unmapped'],rows,`kidzstudios-12-month-summary-${selectedYear}.csv`);
+ }
+ if(id==='exportBackup'){
+  const payload={format:'kidzstudios-job-management-backup',schemaVersion:3,schema:'JOB MANAGEMENT.xlsx · 28 columns · automatic days left',exportedAt:new Date().toISOString(),exportedBy:currentActor(),selectedYear,jobCount:jobs.length,version,savedAt,jobs};
+  return{blob:new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),name:`kidzstudios-job-management-backup-${date}.json`,count:jobs.length};
+ }
+ throw Error('Unknown export type');
 }
-function exportCurrent(){exportRowsCsv(filtered().map(x=>x.j),`kidzstudios-current-view-${selectedYear}-${selectedMonth==='all'?'all-months':String(Number(selectedMonth)+1).padStart(2,'0')}.csv`)}
-function exportPeriod(){exportRowsCsv(periodJobs(),`kidzstudios-${selectedYear==='undated'?'undated':selectedMonth==='all'?'year':MONTHS[Number(selectedMonth)].toLowerCase()}-${selectedYear}.csv`)}
-function exportYear(){exportRowsCsv(jobsForYear(selectedYear),`kidzstudios-full-year-${selectedYear}.csv`)}
-function exportSummary(){
- const rows=MONTHS.map((name,m)=>{const list=jobsForYear(selectedYear).filter(j=>jobMonth(j)===m),c=counts(list);return[name,selectedYear,list.length,c.orders,c.artwork,c.production,c.completed,c.urgent,c.overdue,c.unmapped]});
- const head=['Month','Year','Total Jobs','Orders','Design','Production','Closed','Urgent','Overdue','Unmapped'];
- const csv=[head.map(csvValue).join(','),...rows.map(r=>r.map(csvValue).join(','))].join('\r\n');
- downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),`kidzstudios-12-month-summary-${selectedYear}.csv`);toast(`12-month summary download started · ${selectedYear}`)
+function clearDownloadLink(id){
+ const a=$('#'+id);if(!a)return;
+ const old=exportLinks.get(id);if(old){exportLinks.delete(id);setTimeout(()=>URL.revokeObjectURL(old.url),120000)}
+ a.removeAttribute('href');a.removeAttribute('download');a.setAttribute('aria-disabled','true');a.removeAttribute('data-export-count');
 }
-function exportBackup(){
- const payload={format:'kidzstudios-job-management-backup',schemaVersion:3,schema:'JOB MANAGEMENT.xlsx · 28 columns · automatic days left',exportedAt:new Date().toISOString(),exportedBy:currentActor(),selectedYear,jobCount:jobs.length,version,savedAt,jobs};
- downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),`kidzstudios-job-management-backup-${new Date().toISOString().slice(0,10)}.json`);toast(`JSON backup download started · ${jobs.length} jobs`)
+function prepareDownloadLink(id){
+ const a=$('#'+id);if(!a)return false;
+ clearDownloadLink(id);
+ if((!jobsLoaded&&id!=='exportExcelTemplate')||saving){a.title=jobsLoaded?'Job data is being saved. Try again shortly.':'Waiting for shared jobs';return false}
+ if((id==='exportYear'||id==='exportSummary')&&!/^\d{4}$/.test(String(selectedYear))){a.title='Choose a specific year first';return false}
+ try{
+  const file=buildExport(id);
+  if(!(file.blob instanceof Blob)||!file.blob.size)throw Error('File generation returned no data');
+  const url=URL.createObjectURL(file.blob);
+  exportLinks.set(id,{...file,url});
+  a.href=url;a.download=file.name;a.setAttribute('aria-disabled','false');a.setAttribute('data-export-count',String(file.count));a.title=`Download ${file.name} (${file.count} jobs)`;
+  return true;
+ }catch(e){a.title=`Export unavailable: ${e?.message||e}`;exportWarning=e?.message||String(e);return false}
+}
+function prepareQuickDownload(force=false){
+ if(!$('#quickExportExcel'))return;
+ // Rebuild on new data, never on every render or keystroke.
+ const stamp=jobsLoaded?`${version}:${savedAt}:${jobs.length}:${jobs.map(j=>j.jobsheetFiles).join('|')}`:'not-loaded';
+ if(!force&&stamp===quickExportSignature)return;
+ quickExportSignature=stamp;prepareDownloadLink('quickExportExcel');
 }
 function updateExportControls(){
- const current=filtered().length,period=periodJobs().length,year=selectedYear!=='all'&&selectedYear!=='undated'&&/^\d{4}$/.test(String(selectedYear))?jobsForYear(selectedYear).length:0;
- const ready=jobsLoaded&&!exportRefreshing&&!saving;
- for(const id of EXPORT_IDS)$('#'+id).disabled=!ready&&id!=='exportExcelTemplate';
- // Empty filtered views still export valid 28-column Excel/CSV headers. Never
- // mislead users by disabling all exports just because the month is empty.
- $('#exportYear').disabled=!ready||!/^\d{4}$/.test(String(selectedYear));
- $('#exportSummary').disabled=!ready||!/^\d{4}$/.test(String(selectedYear));
- const hint=ready&&current===0&&jobs.length>0?' · No jobs match your filters: choose All Shared Jobs to export everything.':'';
- const sync=exportRefreshing?'Refreshing latest shared jobs…':exportWarning|| (jobsLoaded?'Shared data ready':'Waiting for Supabase data');
- $('#exportFoot').textContent=`${sync} · Current view: ${current} · Selected period: ${period} · Year: ${year} · All shared jobs: ${jobs.length}${hint}`;
+ const current=filtered().length,period=periodJobs().length,year=/^\d{4}$/.test(String(selectedYear))?jobsForYear(selectedYear).length:0;
+ const hint=current===0&&jobs.length>0?' · Current filter has no jobs; use All Shared Jobs for everything.':'';
+ const status=exportWarning?`Notice: ${exportWarning}`:exportRefreshing?'Refreshing in background; existing downloads remain available.':jobsLoaded?'Ready to download':'Waiting for shared jobs';
+ $('#exportFoot').textContent=`${status} · Current: ${current} · Period: ${period} · Year: ${year} · All shared: ${jobs.length}${hint} · Download links are direct. If blocked, right-click a link and choose Save link as.`;
 }
+function prepareExportLinks(){for(const id of EXPORT_IDS)prepareDownloadLink(id);updateExportControls()}
 async function openExport(){
  const modal=$('#exportModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');
- const sequence=++exportRefreshSequence;exportRefreshing=true;exportWarning='';updateExportControls();
- // Refresh on opening, before the user clicks a download option, to preserve
- // the trusted user gesture for the subsequent synchronous file download.
+ exportWarning='';prepareExportLinks();
+ const sequence=++exportRefreshSequence;exportRefreshing=true;updateExportControls();
+ // The initial links are usable immediately, even on slow / offline Supabase.
+ // A successful refresh replaces them with a fresh shared snapshot.
  let ok=false;
- try{ok=await pull({quiet:true})}catch(e){exportWarning=e?.message||'Server refresh unavailable'}
+ try{ok=await pull({quiet:true})}catch(e){exportWarning=e?.message||'Could not refresh shared jobs'}
  if(sequence!==exportRefreshSequence)return;
  exportRefreshing=false;
- if(!ok)exportWarning=jobsLoaded?'Using previously loaded jobs; could not refresh shared data':'Shared jobs could not load. Click Refresh, then Export Data again.';
- updateExportControls();
+ if(!ok)exportWarning=jobsLoaded?'Server refresh failed; these downloads use the last successfully loaded jobs.':'Shared jobs did not load. Check Supabase and click Refresh.';
+ prepareQuickDownload();prepareExportLinks();
 }
 function closeExport(){exportRefreshSequence++;exportRefreshing=false;$('#exportModal').classList.remove('open');$('#exportModal').setAttribute('aria-hidden','true')}
-function runExport(fn,{requiresJobs=true}={}){
- if((exportRefreshing&&requiresJobs)||saving){toast('Wait for the shared data refresh to finish.');return}
- if(requiresJobs&&!jobsLoaded){toast('Cannot export yet. Refresh shared jobs and try again.');return}
- try{fn();closeExport()}catch(e){toast(`Export failed: ${e?.message||e}`);$('#exportFoot').textContent=`Export failed: ${e?.message||e}. The dialog remains open so you can retry.`;console.error('Job Management export failed:',e)}
+function onPreparedDownload(event,id){
+ const a=$('#'+id),file=exportLinks.get(id);
+ if(!file||!a?.getAttribute('href')||a.getAttribute('aria-disabled')==='true'){
+  event.preventDefault();const why=a?.title||'Wait for shared jobs';toast(why);if(id!=='quickExportExcel')$('#exportFoot').textContent=why;return;
+ }
+ // Let the real user-initiated anchor navigation save the Blob natively.
+ // Keep the dialog and URL alive for repeat downloads / Save Link As.
+ toast(`${file.name} · ${file.count} job${file.count===1?'':'s'} · check your Downloads folder`);
+ if(id!=='quickExportExcel')$('#exportFoot').textContent=`Download requested: ${file.name}. If your browser blocks it, right-click this link and choose “Save link as”.`;
+}
+function installDownloadHandlers(){
+ for(const id of [...EXPORT_IDS,'quickExportExcel'])$('#'+id)?.addEventListener('click',event=>onPreparedDownload(event,id));
 }
 function recalcBalance(){if(document.activeElement===F.balance)return;const inv=money(F.invoiceAmount.value),paid=money(F.paid.value);if(F.invoiceAmount.value||F.paid.value)F.balance.value=(inv-paid).toFixed(2)}
 F.invoiceAmount.addEventListener('input',recalcBalance);F.paid.addEventListener('input',recalcBalance);[F.deliveryTime,F.actualComplete1,F.actualComplete2,F.currentDepartment].forEach(el=>{el?.addEventListener('input',syncEditorDaysLeft);el?.addEventListener('change',syncEditorDaysLeft)});
 $('#addBtn').onclick=()=>openEditor();
 $('#sheetLoadBtn').onclick=importSheet;$('#sheetImportClose').onclick=$('#sheetImportCancel').onclick=closeSheetImport;$('#sheetUrlInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();importSheet()}});
-$('#exportAllCsv').onclick=()=>runExport(()=>exportRowsCsv(jobs,`kidzstudios-jobs-all-${new Date().toISOString().slice(0,10)}.csv`));
+
 $('#importExcelBtn').onclick=openExcelImport;$('#importExcelFile').addEventListener('change',e=>handleExcelImport(e.target.files?.[0]));$('#excelImportClose').onclick=$('#excelImportCancel').onclick=closeExcelImport;$('#excelImportConfirm').onclick=confirmExcelImport;
 $('#manageOptionsBtn').onclick=()=>openOptionManager();
 $('#optionsClose').onclick=$('#optionsCancel').onclick=closeOptionManager;
@@ -862,7 +893,7 @@ $('#resetOptionsBtn').onclick=()=>{optionDraft[optionActiveField]=cleanOptionLis
 $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'').trim();if(!v)return;collectOptionRows();optionDraft[optionActiveField]=cleanOptionList([...(optionDraft[optionActiveField]||[]),v]);markOptionsDirty(`Added “${v}”`);renderOptionManagerField()};
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
-$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex>=0)requestDeleteJobs([editingIndex])};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=openSheetImport;$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=e.target.value;selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportExcelCurrent').onclick=()=>runExport(exportExcelCurrent);$('#exportExcelAll').onclick=()=>runExport(exportExcelAll);$('#exportExcelTemplate').onclick=()=>runExport(exportExcelTemplate,{requiresJobs:false});$('#exportCurrent').onclick=()=>runExport(exportCurrent);$('#exportPeriod').onclick=()=>runExport(exportPeriod);$('#exportYear').onclick=()=>runExport(exportYear);$('#exportSummary').onclick=()=>runExport(exportSummary);$('#exportBackup').onclick=()=>runExport(exportBackup);
+$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex>=0)requestDeleteJobs([editingIndex])};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=openSheetImport;$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=e.target.value;selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;
 $('#jobSelectAll').addEventListener('change',e=>selectAllVisibleJobs(e.target.checked));
 $('#jobSelectionClear').onclick=()=>{selectedJobIndices.clear();render()};
 $('#bulkDeleteBtn').onclick=()=>requestDeleteJobs([...selectedJobIndices]);
@@ -875,6 +906,7 @@ $('#tbody').addEventListener('click',e=>{
  const tr=e.target.closest('tr[data-index]');if(tr)openEditor(+tr.dataset.index);
 });
 $('#tbody').addEventListener('change',e=>{const checkbox=e.target.closest('.job-row-check');if(checkbox)toggleJobSelection(Number(checkbox.dataset.index),checkbox.checked)});$('#confirmClose').onclick=$('#confirmCancel').onclick=closeConfirm;$('#confirmYes').onclick=async()=>{const fn=confirmAction;closeConfirm();if(fn)await fn()};document.addEventListener('click',e=>{if(!e.target.closest('.combo-shell'))closeComboMenus()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#confirmModal').classList.contains('open')){e.preventDefault();closeConfirm();return}closeComboMenus();closeEditor();closeExport();closeExcelImport();closeSheetImport();if($('#optionsModal').classList.contains('open')&&!optionDirty)closeOptionManager()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();openEditor()}});
+installDownloadHandlers();
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
 setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);
