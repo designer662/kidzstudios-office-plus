@@ -1,4 +1,4 @@
-/* Office Plus V86.16: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
+/* Office Plus V86.22: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
@@ -8,8 +8,6 @@
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
   // Office floor-plan units: roughly two units per world-space metre.
   const MIN_STAFF_GAP=1.75, CHECK_MS=180, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
-  const DOCK_MIN_DISTANCE=.12, DOCK_MS=950;
-  const smoothstep=t=>t*t*(3-2*t);
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
   const living=window.OfficeLiving;
@@ -69,10 +67,9 @@
       point(s.walk.from)&&Array.isArray(s.walk.route)&&s.walk.route.length<=250&&s.walk.route.every(point)&&
       Array.isArray(s.walk.segmentMs)&&s.walk.segmentMs.length===s.walk.route.length&&
       s.walk.segmentMs.every(n=>Number.isFinite(+n)&&+n>=100&&+n<120000)&&
-      (!s.walk.seatStart||point(s.walk.seatStart))&&
-      (!s.walk.seatGoal||point(s.walk.seatGoal))&&
-      [s.walk.departMs,s.walk.dockMs].every(n=>n===undefined||(Number.isFinite(+n)&&+n>=0&&+n<=3000))&&
-      s.walk.endAt>=s.walk.startedAt+s.walk.segmentMs.reduce((sum,n)=>sum+(+n),0)
+      (!s.walk.seatStart||point(s.walk.seatStart))&&(!s.walk.seatGoal||point(s.walk.seatGoal))&&
+      ['departMs','dockMs'].every(k=>s.walk[k]===undefined||(Number.isFinite(s.walk[k])&&s.walk[k]>=0&&s.walk[k]<=5000))&&
+      Number(s.walk.endAt)>=Number(s.walk.startedAt)
     )));
   }
   function validPayload(p){return p&&p.schema===1&&typeof p.owner==='string'&&Number.isFinite(Number(p.leaseUntil))&&validStaff(p.staff)}
@@ -82,37 +79,26 @@
     const scene=s.scene&&now>=s.scene.from&&now<s.scene.until?s.scene:null;
     const faceTo=['conversation','huddle'].includes(scene?.kind)?s.faceTo||null:null;
     if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false,scene,faceTo};
-    // Represent leaving/approaching an occupied desk as a short, time-stamped
-    // dock phase, rather than teleporting at the first or last route sample.
-    const departing=Number(w.departMs)||0,docking=Number(w.dockMs)||0;
-    const entry=w.seatStart&&point(w.seatStart)?w.seatStart:w.from;
-    if(now<Number(w.startedAt))return {id:s.id,x:entry.x,y:entry.y,room:s.room,action:'waiting',walking:false,scene,faceTo:null};
-    let left=clamp(now-Number(w.startedAt),0,Number(w.endAt)-Number(w.startedAt));
-    if(departing&&left<departing){
-      const f=smoothstep(clamp(left/departing,0,1));
-      return {id:s.id,x:entry.x+(w.from.x-entry.x)*f,y:entry.y+(w.from.y-entry.y)*f,
-        room:s.room,action:'standing',walking:true,scene,faceTo:null};
-    }
-    left-=departing;
-    let previous=w.from;
+    const departMs=w.departMs||0,dockMs=w.dockMs||0,start=w.seatStart||w.from;
+    const result=(p,walking,action,room=s.room)=>({id:s.id,x:p.x,y:p.y,room,action,walking,scene,faceTo:walking?null:faceTo});
+    const blend=(a,b,t)=>{t=clamp(t,0,1);t=t*t*(3-2*t);return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}};
+    if(now<w.startedAt)return result(start,false,'waiting');
+    let left=Math.max(0,now-w.startedAt);
+    if(departMs&&left<departMs)return result(blend(start,w.from,left/departMs),true,'walking');
+    left-=departMs;let previous=w.from;
     for(let i=0;i<w.route.length;i++){
       const ms=Number(w.segmentMs[i]),end=w.route[i];
       if(left<ms){
-       const raw=clamp(left/ms,0,1);
-       const edge=.12;
-       const t=i===0&&raw<edge?edge*(2*(raw/edge)**2-(raw/edge)**3):
-         i===w.route.length-1&&raw>1-edge?1-edge*(2*((1-raw)/edge)**2-((1-raw)/edge)**3):raw;
-       return {id:s.id,x:previous.x+(end.x-previous.x)*t,y:previous.y+(end.y-previous.y)*t,room:s.room,action:'walking',walking:true,scene,faceTo:null};
+        const raw=clamp(left/ms,0,1),edge=.12;
+        const t=i===0&&raw<edge?edge*(2*(raw/edge)**2-(raw/edge)**3):
+          i===w.route.length-1&&raw>1-edge?1-edge*(2*((1-raw)/edge)**2-((1-raw)/edge)**3):raw;
+        return result({x:previous.x+(end.x-previous.x)*t,y:previous.y+(end.y-previous.y)*t},true,'walking');
       }
       left-=ms;previous=end;
     }
     const final=w.seatGoal&&point(w.seatGoal)?w.seatGoal:previous;
-    if(docking&&left<docking){
-      const f=smoothstep(clamp(left/docking,0,1));
-      return {id:s.id,x:previous.x+(final.x-previous.x)*f,y:previous.y+(final.y-previous.y)*f,
-        room:w.targetZone||s.room,action:'seating',walking:false,scene,faceTo:null};
-    }
-    return {id:s.id,x:final.x,y:final.y,room:w.targetZone||s.room,action:w.action||'typing',walking:false,scene,faceTo};
+    if(dockMs&&left<dockMs)return result(blend(previous,final,left/dockMs),true,'walking');
+    return result(final,false,w.action||'typing',w.targetZone||s.room);
   }
   function render(){
     if(stopped)return;
@@ -143,16 +129,11 @@
        !Array.isArray(plan.segmentMs)||plan.segmentMs.length!==plan.route.length)return null;
     const segmentMs=plan.segmentMs.map(ms=>Math.round(clamp(Number(ms),850,40000)));
     if(segmentMs.some(ms=>!Number.isFinite(ms)))return null;
-    const seatStart=point(plan.seatStart)?plan.seatStart:null;
-    const seatGoal=point(plan.seatGoal)?plan.seatGoal:null;
-    const last=plan.route.at(-1);
-    const departMs=seatStart&&Math.hypot(seatStart.x-plan.from.x,seatStart.y-plan.from.y)>DOCK_MIN_DISTANCE?DOCK_MS:0;
-    const dockMs=seatGoal&&Math.hypot(seatGoal.x-last.x,seatGoal.y-last.y)>DOCK_MIN_DISTANCE?DOCK_MS:0;
+    const departMs=point(plan.seatStart)?950:0,dockMs=point(plan.seatGoal)?950:0;
     const duration=segmentMs.reduce((sum,ms)=>sum+ms,0)+departMs+dockMs;
     if(!duration||duration>115000)return null;
-    return {from:plan.from,route:plan.route,segmentMs,departMs,dockMs,seatStart,
-      startedAt:now+delay,endAt:now+delay+duration,
-      targetZone:plan.targetZone,seatGoal,action:intent?.action==='typing'?'pc-work':intent?.action||'pc-work'};
+    return {from:plan.from,seatStart:point(plan.seatStart)?plan.seatStart:null,departMs,dockMs,route:plan.route,segmentMs,startedAt:now+delay,endAt:now+delay+duration,
+      targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action==='typing'?'pc-work':intent?.action||'pc-work'};
   }
   function routeHasClearance(snapshot,subject,walk,now){
     const others=snapshot?.staff?.filter(s=>Number(s.id)!==Number(subject.id))||[];

@@ -1,8 +1,9 @@
 {
-  "release": "86.21",
+  "release": "86.22",
   "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.21 furniture-aware smart seating controller",
+  "package": "V86.22 rebuilt simulation with live desk bindings",
   "modules": [
+    "office-geometry-guard.js",
     "office-seating-controller.js",
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -18,5 +19,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Actual mesh-derived chair anchors, turn-and-sit phases, adaptive cushion height, knee joints, shared timeline unchanged"
+  "check": "Source-built bundle; desk-ID ownership; grounded articulated seating; keyboard reach; swept geometry routing; strict pause and ordered departure"
 }

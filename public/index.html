@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#f7f7f5" />
 <title>Kidzstudios · 3D Office & Operations</title>
 <link rel="stylesheet" href="office-3d.css?v=52.0">
-<script src="office-geometry-guard.js?v=86.19"></script>
-<script src="office-seating-controller.js?v=86.21"></script>
+<script src="office-geometry-guard.js?v=86.22"></script>
+<script src="office-seating-controller.js?v=86.22"></script>
 <style id="ks-main-css">
 :root{
   --bg:#f7f7f5;--bg2:#fbfbfa;--card:rgba(255,255,255,.9);--solid:#fff;--text:#1d2022;--muted:#767b80;
@@ -2731,37 +2731,14 @@ body{overscroll-behavior:none;}
   // V66 collision geometry uses the actual 3D furniture footprint mapped into
   // this page's logical office coordinates. Do not navigate through worktops.
   // These are rectangles in floor coordinates, NOT positions of staff/chairs.
-  const navigationObstacles=[
-    // Large shared worktable (3D x=.85 z=-10.7, 2.85 x 7.25 units).
-    {x:10.35,y:6.35,w:5.7,h:14.5},
-    // Long front workbench, x=1.1 z=-16.25, size 8 x 1.25.
-    {x:5.7,y:1.25,w:16,h:2.5},
-    // Showroom tables and display units.
-    {x:11.5,y:26.4,w:5.3,h:3.4},
-    {x:14.31,y:34.2,w:7.46,h:2.0},
-    {x:19.9,y:31.8,w:2.4,h:8.9},
-    // Management desks and counters.
-    {x:13.55,y:39.45,w:6.3,h:2.5},
-    {x:3.4,y:40.15,w:2.4,h:3.3},
-    // Tall pantry counter, storage rack, and island.
-    {x:.16,y:34.5,w:2.08,h:16.6},
-    {x:5.7,y:51.0,w:2.4,h:3.2}
-  ];
+  const navigationObstacles=window.KSOfficeGeometry?.obstacles||[];
   const navStep=.5,navCols=47,navRows=141,navPadding=.3;
   if(!window.KSOfficeGeometry)console.error("Office wall geometry could not load; refresh the page before enabling shared movement.");
   function navBlocked(x,y){
     if(!Number.isFinite(x)||!Number.isFinite(y)||x<.5||x>22.5||y<.5||y>69.5)return true;
     return (window.KSOfficeGeometry?.blocked(x,y)??true)||navigationObstacles.some(b=>x>=b.x-navPadding&&x<=b.x+b.w+navPadding&&y>=b.y-navPadding&&y<=b.y+b.h+navPadding);
   }
-  function navClearLine(a,b){
-    if(navBlocked(a.x,a.y)||navBlocked(b.x,b.y))return false;
-    const dist=Math.hypot(b.x-a.x,b.y-a.y),samples=Math.max(1,Math.ceil(dist/.12));
-    for(let i=1;i<samples;i++){
-      const t=i/samples;
-      if(navBlocked(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t))return false;
-    }
-    return true;
-  }
+  function navClearLine(a,b){return window.KSOfficeGeometry?.navClearLine(a,b)??false;}
   // Choose a walkable point that has a visible exit for free starting positions.
   function navSnap(p){
     const cx=Math.round(Math.min(22.5,Math.max(.5,p.x))/navStep);
@@ -2886,7 +2863,8 @@ body{overscroll-behavior:none;}
     if(!exit)return null;
     const startingAtDesk=navBlocked(origin.x,origin.y);
     const departure=startingAtDesk?{x:exit.x,y:exit.y}:origin;
-    const seatStart=startingAtDesk&&Math.hypot(origin.x-departure.x,origin.y-departure.y)>.12?{...origin}:null;
+    const atOwnDesk=Number.isFinite(e.deskX)&&Math.hypot(origin.x-e.deskX,origin.y-e.deskY)<.5;
+    const seatStart=(startingAtDesk||atOwnDesk)?{...origin}:null;
     const ownDesk=targetZone===home&&Math.hypot(target.x-(e.deskX??e.x),target.y-(e.deskY??e.y))<.5;
     const seatGoal=ownDesk&&navBlocked(target.x,target.y)?{...target}:null;
     const arrival=navBlocked(target.x,target.y)?navSnap(target):target;
@@ -3218,16 +3196,16 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.21 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.22 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.21" defer></script>
+<script src="office-3d.js?v=86.22" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
-<script src="office-movement-sync.js?v=86.16" defer></script>
+<script src="office-movement-sync.js?v=86.22" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>

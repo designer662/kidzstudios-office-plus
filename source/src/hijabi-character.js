@@ -1,4 +1,4 @@
-// V86.6: Updated user model; only head/hip pivots and Office Plus API adapter fields changed.
+// Restored from the shipped V86.21 character asset.
 export function createHijabiCharacter(T, color = '#d9796d') {
   const root = new T.Group(); root.name = 'KidzStudios — Plain long shirt';
   const materials = {};

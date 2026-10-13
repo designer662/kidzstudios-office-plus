@@ -1,4 +1,4 @@
-// V86.7: User semi-casual model with only Office Plus head/hip pivot and API adaptation.
+// Restored from the shipped V86.21 character asset.
 export function createHijabiCasualCharacter(T, color = '#d9796d') {
   const root = new T.Group(); root.name = 'KidzStudios — Semi-casual';
   const materials = {};

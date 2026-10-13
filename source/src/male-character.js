@@ -1,4 +1,4 @@
-// V86.8 user-supplied male semi-casual geometry. Office Plus adaptation: animated hip pivots.
+// Restored from the shipped V86.21 character asset.
 export function createMaleCharacter(T, color = '#3b2a23') {
   const root = new T.Group(); root.name = 'KidzStudios — Male semi-casual';
   const materials = {};
