@@ -39,6 +39,7 @@ jobs:
           node scripts/test-living-timeline-sync.mjs
           node scripts/test-3d-interactions.mjs
           node scripts/test-v86-16-simulation-rebuild.mjs
+          node scripts/test-v86-18-office-seating.mjs
       - name: Stamp current build version
         env:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
