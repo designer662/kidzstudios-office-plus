@@ -1,7 +1,7 @@
 import {createOffice,type OfficeController} from './office-scene';
 import {people,type Person} from './office-data';
 type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';appearance?:Person['appearance'];status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;motionFaceTo?:number|null;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskId?:string;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
-type Suite={getStaff:()=>Staff[];selectPerson:(id:number)=>void;selectDepartment:(id:string)=>void;selectRoom:(id:string)=>void;stopFollow:()=>void;reset:()=>void;pause:(paused:boolean)=>void};
+type Suite={getSelectedStaffId?:()=>number|null;getStaff:()=>Staff[];selectPerson:(id:number)=>void;selectDepartment:(id:string)=>void;selectRoom:(id:string)=>void;stopFollow:()=>void;reset:()=>void;pause:(paused:boolean)=>void};
 declare global{interface Window{OfficeSuite?:Suite;office3d?:OfficeController}}
 const host=document.querySelector<HTMLDivElement>('#office3dHost')!;
 const loading=document.querySelector<HTMLDivElement>('#office3dLoading')!;
@@ -14,6 +14,7 @@ function isSeated(e:Staff){return status(e)==='desk'&&Math.hypot((e.visualX??e.x
 function position(e:Staff):[number,number]{return [(e.visualX??e.x)/2-5.75,(e.visualY??e.y)/2-17.5]}
 function roster(staff:Staff[]):Person[]{return staff.map((e,i)=>{const base=people[baseIds[e.id]??i%people.length];return {...base,id:e.id,seatId:e.deskId,name:e.name,role:e.position,department:e.department,gender:e.gender||base.gender||'male',appearance:e.appearance,status:status(e),position:position(e),rotation:e.id===4?Math.PI/2:base.rotation,seated:isSeated(e),action:e.motionAction}})}
 function build(staff:Staff[]){
+ const restoreSelectedId=api?.getSelectedStaffId?.();
  controller?.dispose();host.replaceChildren();
  controller=createOffice(host,{onPerson:id=>api?.selectPerson(id),onDepartment:id=>api?.selectDepartment(id),onRoom:id=>api?.selectRoom(id),onExplore:()=>api?.stopFollow(),onZoom:z=>{$('rotationReadout').textContent=`${Math.round(z*100)}%`}},{roster:roster(staff),externalMotion:true});
  controller.setView('isometric');controller.setPaused(paused);controller.setRotating(!paused);window.office3d=controller;window.dispatchEvent(new Event('ks:3d-ready'));
@@ -21,6 +22,7 @@ function build(staff:Staff[]){
  const selectDepartment=controller.selectDepartment.bind(controller);controller.selectDepartment=id=>selectDepartment(id==='All'?'all':id);
  const reset=controller.reset.bind(controller);controller.reset=()=>{reset();controller?.setRotating(!paused)};
  document.documentElement.classList.add('studio3d-ready');$('officeSvg').setAttribute('aria-hidden','true');$('officeSvg').querySelectorAll('[tabindex]').forEach(el=>el.setAttribute('tabindex','-1'));loading.hidden=true;
+ if(restoreSelectedId!=null&&staff.some(person=>person.id===restoreSelectedId))controller.focusPerson(restoreSelectedId);
 }
 function tick(){
  if(failed)return;

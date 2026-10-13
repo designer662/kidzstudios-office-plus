@@ -990,6 +990,25 @@ body{overscroll-behavior:none;}
 @media(max-width:920px){.character-emoji-picker{min-width:184px;max-width:208px;padding:9px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
 @media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
 </style>
+
+<style id="ks-v86-23-staff-interactions">
+/* Keep the selected employee controls above the WebGL scene and operations. */
+#profileCard.open{z-index:65!important;display:block!important;visibility:visible!important;pointer-events:auto!important;opacity:1!important;min-height:180px;overflow-y:auto;overscroll-behavior:contain}
+#profileCard .ks-staff-tabs{position:sticky;top:-17px;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 25px 14px 0;padding:5px;background:rgba(255,255,255,.97);border:1px solid #e8e3dc;border-radius:13px;z-index:2}
+#profileCard .ks-staff-tabs button{font:750 12px/1.2 Inter,system-ui,sans-serif;padding:10px 8px;border:0;border-radius:9px;background:transparent;color:#737778;cursor:pointer}
+#profileCard .ks-staff-tabs button.active,#profileCard .ks-staff-tabs button[aria-selected=true]{background:#fff0e4;color:#b65d27;box-shadow:inset 0 0 0 1px #f1cbb0}
+#profileCard .ks-staff-tabs button:focus-visible,#profileCard .ks-staff-emoji-choice:focus-visible{outline:2px solid #df783d;outline-offset:2px}
+#profileCard .ks-staff-tab-content[hidden],#profileCard .ks-staff-emoji-panel[hidden]{display:none!important}
+#profileCard .ks-staff-emoji-panel{min-height:180px;padding-bottom:8px}
+#profileCard .ks-staff-emoji-title{font-size:11px;font-weight:750;color:#5d6165;margin:4px 0 12px}
+#profileCard .ks-staff-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#profileCard .ks-staff-emoji-choice{display:flex;align-items:center;gap:9px;min-height:45px;padding:8px;border:1px solid #e9e3dc;border-radius:11px;background:#fff;color:#565e64;cursor:pointer;text-align:left}
+#profileCard .ks-staff-emoji-choice span{font-size:22px}#profileCard .ks-staff-emoji-choice b{font-size:11px}
+#profileCard .ks-staff-emoji-choice[aria-pressed=true]{background:#fff5ed;border-color:#ebad83;color:#b65d27}
+#profileCard .ks-staff-emoji-clear{margin-top:11px;width:100%;min-height:36px;border:1px solid #e6dfd7;border-radius:10px;background:#fbfaf8;color:#656d74;cursor:pointer;font-weight:700;font-size:11px}
+@media(max-width:920px){#profileCard.open{z-index:80!important;max-height:min(510px,65vh)!important}#profileCard .ks-staff-tabs{top:-15px}}
+@media(max-width:650px){#profileCard.open{position:absolute!important;left:10px!important;right:10px!important;top:105px!important;bottom:auto!important;width:auto!important;max-height:min(450px,58vh)!important}}
+</style>
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
 <style id="ks-v67-footer-cleanup">
   #todayPanel .ops-sync-strip{display:none!important}
@@ -2363,7 +2382,34 @@ body{overscroll-behavior:none;}
     const jobsHtml=activeJobs.map(job=>`<div class="profile-workload-item job-item"><span class="profile-workload-tag job">JM</span><span><b>${esc(job.ref||'Job')}</b> · ${esc(job.customer||job.title||'Customer')} · ${esc(job.status||'Active')}</span></div>`).join('');
     const workloadHtml=(manualHtml+jobsHtml)||'<div class="profile-workload-empty">No workload assigned yet.</div>';
     profileCard.innerHTML=`<button class="close-mini" style="position:absolute;right:14px;top:14px">×</button><div class="profile-top"><div class="profile-avatar">${initials(e.name)}</div><div><div class="profile-name">${esc(e.name)}</div><div class="profile-role">${esc(e.position)}</div><div class="profile-badge"><i></i>${esc(effectiveStatus(e))}</div></div></div><div class="profile-details"><div class="detail-row"><span>Department</span><span>${esc(e.department)}</span></div><div class="detail-row"><span>Current location</span><span>${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span></div><div class="detail-row profile-job-row"><span>Current job</span><span>${esc(e.currentJob||'No active job')}</span></div></div><div class="profile-workload"><div class="profile-workload-head"><span>Workload</span><span>${totalWorkload} item${totalWorkload===1?'':'s'}</span></div><div class="profile-workload-list">${workloadHtml}</div></div><div class="profile-job-actions"><button class="profile-job-action" data-edit-profile-workload="${e.id}">Update workload</button><button class="profile-job-action" data-edit-profile-staff="${e.id}">Edit staff</button></div>`;
-    profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
+    // V86.23: Staff and Emoji are one reliable, keyboard-accessible panel.
+    // No second floating popup can get covered by the 3D canvas or Office Pulse.
+    profileCard.dataset.employeeId=String(e.id);
+    const details=document.createElement('section');details.className='ks-staff-tab-content';details.id='ksSelectedStaffDetails';
+    while(profileCard.firstChild)details.append(profileCard.firstChild);
+    const close=details.querySelector('.close-mini');if(close)profileCard.append(close);
+    const tabs=document.createElement('div');tabs.className='ks-staff-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label',e.name+' controls');
+    tabs.innerHTML='<button type="button" role="tab" id="ksStaffInfoTab" aria-controls="ksSelectedStaffDetails" aria-selected="true" data-profile-tab="staff">👤 Staff</button><button type="button" role="tab" id="ksStaffEmojiTab" aria-controls="ksSelectedStaffEmoji" aria-selected="false" data-profile-tab="emoji">😊 Emoji</button>';
+    details.setAttribute('role','tabpanel');details.setAttribute('aria-labelledby','ksStaffInfoTab');
+    const emojiPane=document.createElement('section');emojiPane.id='ksSelectedStaffEmoji';emojiPane.className='ks-staff-emoji-panel';emojiPane.setAttribute('role','tabpanel');emojiPane.setAttribute('aria-labelledby','ksStaffEmojiTab');emojiPane.hidden=true;
+    emojiPane.innerHTML='<p class="ks-staff-emoji-title">Choose '+esc(e.name)+'’s mood</p><div class="ks-staff-emoji-grid">'+Object.entries(characterEmojiPresets).map(([mood,preset])=>'<button type="button" class="ks-staff-emoji-choice" data-profile-mood="'+mood+'" aria-pressed="'+(e.mood===mood)+'"><span aria-hidden="true">'+preset.emoji+'</span><b>'+esc(preset.label)+'</b></button>').join('')+'</div><button type="button" class="ks-staff-emoji-clear" data-profile-emoji-clear>Clear mood</button>';
+    profileCard.append(tabs,details,emojiPane);
+    const activateTab=(tab)=>{
+      const emoji=tab==='emoji';details.hidden=emoji;emojiPane.hidden=!emoji;
+      tabs.querySelectorAll('[data-profile-tab]').forEach(button=>{const active=button.dataset.profileTab===tab;button.setAttribute('aria-selected',String(active));button.classList.toggle('active',active)});
+    };
+    tabs.querySelectorAll('[data-profile-tab]').forEach(button=>button.onclick=()=>activateTab(button.dataset.profileTab));
+    emojiPane.querySelectorAll('[data-profile-mood]').forEach(button=>button.onclick=async()=>{
+      await triggerCharacterEmoji(e,button.dataset.profileMood);
+      emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.profileMood===e.mood)));
+    });
+    emojiPane.querySelector('[data-profile-emoji-clear]').onclick=async()=>{
+      await clearCharacterMood(e);emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed','false'));
+    };
+    activateTab('staff');
+    profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;
+    const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);
+    const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
   }
   const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'},busy:{emoji:'💻',label:'Busy'}};
   function clearMoodBubble(employeeId){
@@ -2483,7 +2529,7 @@ body{overscroll-behavior:none;}
     focusEmployee(e);
     profileCard.classList.add('open');
     clearFollowBubble();showBubble(e,characterFollowText(e),{kind:'follow',duration:0});
-    openCharacterEmojiPicker(e,ev);
+    closeCharacterEmojiPicker();
   }
   function showTip(e,ev){tooltip.innerHTML=`<div class="tt-head"><b>${esc(e.name)}</b><em><i style="background:${statusColor(effectiveStatus(e))}"></i>${esc(effectiveStatus(e))}</em></div><span class="tt-role">${esc(e.position)} · ${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span><div class="tt-job"><small>Working</small><strong>${esc(e.currentJob||'No active job')}</strong></div><span class="tt-desk">${esc(e.deskLabel||e.deskId||'No assigned desk')}</span>`;tooltip.classList.add('show');positionTip(ev)}
   function showDeskTip(emp,deskId,ev){tooltip.innerHTML=emp?`<div class="tt-head"><b>${esc(emp.name)}</b><em><i style="background:${statusColor(emp.status)}"></i>${esc(emp.status)}</em></div><span class="tt-role">${esc(emp.position)} · ${esc(emp.deskLabel||deskId)}</span><div class="tt-job"><small>Current job</small><strong>${esc(emp.currentJob||'No active job')}</strong></div>`:`<div class="tt-head"><b>${esc(deskId||'Workstation')}</b></div><span class="tt-role">Available workstation</span>`;tooltip.classList.add('show');positionTip(ev)}
@@ -2963,6 +3009,7 @@ body{overscroll-behavior:none;}
       render:renderSharedPositions
     },
     getStaff:()=>employees.map(e=>({...e,hasAlert:workloadNoticeIds.has(e.id),motionStatus:effectiveStatus(e)})),
+    getSelectedStaffId:()=>followEmployeeId,
     selectPerson:id=>{const e=employeeById[id];if(e)followCharacter(e)},
     selectDepartment:setDept,
     stopFollow:stopCameraFollow,
@@ -3196,12 +3243,12 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.22 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.23 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.22" defer></script>
+<script src="office-3d.js?v=86.23" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
