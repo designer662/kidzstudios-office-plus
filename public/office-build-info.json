@@ -1,7 +1,7 @@
 {
-  "release": "86.17",
-  "edition": "Office Plus · Unified Pulse",
-  "package": "V86.17 Character Grounding Fix - bounded seated body depth and steady floor-root height",
+  "release": "86.18",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.18 Expanded 3D office and chair-accurate seating",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -17,5 +17,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Automated syntax, long-running seating stability, ground-root invariant, simulation and walking routes; browser/WebGL test pending."
+  "check": "Tests for chair positions, seat alignment, floor scale, 3D renderer syntax, movement routes and synchronization; live WebGL check pending."
 }
