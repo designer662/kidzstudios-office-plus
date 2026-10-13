@@ -974,7 +974,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v51.css?v=57.0">
 <link rel="stylesheet" href="office-v52.css?v=57.0">
   <script src="supabase-config.js"></script>
-  <script src="supabase-bridge.js"></script>
+  <script src="supabase-bridge.js?v=86.25"></script>
 <script src="ks-motion.js?v=59.0" defer></script>
 <script src="office-plus-ui.js?v=67.0" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
@@ -1050,6 +1050,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
+<link rel="stylesheet" href="office-online-users.css?v=86.25">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -3027,6 +3028,7 @@ body{overscroll-behavior:none;}
       if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
       e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
       e.motionAction=item.action||'typing';e.motionFaceTo=item.faceTo||null;
+      if(item.walking&&Number.isFinite(item.heading))e.motionHeading=item.heading;
       if(Boolean(e.motionWalking)!==Boolean(item.walking)){setMotionClass(e,node,!!item.walking);statusChanged=true}
       const p=iso(item.x,item.y);
       node.setAttribute('transform',`translate(${p.x} ${p.y})`);
@@ -3277,16 +3279,17 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.23 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.25 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.23.1" defer></script>
+<script src="office-3d.js?v=86.25" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
-<script src="office-movement-sync.js?v=86.22" defer></script>
+<script src="office-movement-sync.js?v=86.25" defer></script>
+<script src="office-online-users.js?v=86.25" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>
 </body>

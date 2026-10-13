@@ -1,7 +1,7 @@
 {
-  "release": "86.23",
+  "release": "86.25",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.23 staff click controls and camera follow repair",
+  "package": "V86.25 online session presence, synchronized walking heading, fair staff activity scheduling",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
@@ -17,7 +17,9 @@
     "office-v86-3-polish.css",
     "office-pulse-integrated.css",
     "office-character-studio.js",
-    "office-character-studio.css"
+    "office-character-studio.css",
+    "office-online-users.js",
+    "office-online-users.css"
   ],
-  "check": "Staff and Emoji profile tabs; persistent staff focus across 3D rebuild; follow-zoom and click-vs-drag handling; existing wall and seating motion preserved"
+  "check": "Live viewer sessions from Supabase Presence; walking faces actual travel; 8-staff movement opportunity regression"
 }

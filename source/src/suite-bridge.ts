@@ -1,6 +1,6 @@
 import {createOffice,type OfficeController} from './office-scene';
 import {people,type Person} from './office-data';
-type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';appearance?:Person['appearance'];status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;motionFaceTo?:number|null;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskId?:string;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
+type Staff={mood?:string;id:number;name:string;position:string;department:string;gender?:'male'|'female';appearance?:Person['appearance'];status:string;motionStatus:string;motionWalking?:boolean;motionAction?:string;motionFaceTo?:number|null;motionHeading?:number;visualRoomId?:string;roomId?:string;x:number;y:number;visualX?:number;visualY?:number;deskId?:string;deskX?:number;deskY?:number;currentJob?:string;workload?:string[];hasAlert?:boolean};
 type Suite={getSelectedStaffId?:()=>number|null;getStaff:()=>Staff[];selectPerson:(id:number)=>void;selectDepartment:(id:string)=>void;selectRoom:(id:string)=>void;stopFollow:()=>void;reset:()=>void;pause:(paused:boolean)=>void};
 declare global{interface Window{OfficeSuite?:Suite;office3d?:OfficeController}}
 const host=document.querySelector<HTMLDivElement>('#office3dHost')!;
@@ -30,7 +30,7 @@ function tick(){
   const staff=api.getStaff();const next=JSON.stringify(staff.map(e=>[e.id,e.name,e.position,e.department,e.gender||'',e.appearance||null,e.deskId||'']));
   try{if(next!==signature){build(staff);signature=next}}
   catch(error){failed=true;console.error('Office 3D initialization failed',error);controller?.dispose();host.replaceChildren();document.documentElement.classList.remove('studio3d-ready');$('officeSvg').removeAttribute('aria-hidden');$('officeSvg').querySelectorAll('.employee').forEach(el=>el.setAttribute('tabindex','0'));window.office3d=undefined;loading.textContent='3D unavailable in this browser. The office map and tools are still available.';loading.hidden=false;return}
-  controller?.updatePeople(staff.map(e=>{const partner=e.motionFaceTo!=null?staff.find(p=>p.id===e.motionFaceTo):null;const a=position(e),b=partner?position(partner):null;return {id:e.id,position:a,status:status(e),seated:isSeated(e),action:e.motionAction,rotation:b?Math.atan2(b[0]-a[0],b[1]-a[1]):e.id===4?Math.PI/2:people[baseIds[e.id]??0].rotation,note:e.currentJob||e.workload?.[0]||'',alert:e.hasAlert,mood:e.mood||''}}));
+  controller?.updatePeople(staff.map(e=>{const partner=e.motionFaceTo!=null?staff.find(p=>p.id===e.motionFaceTo):null;const a=position(e),b=partner?position(partner):null;return {id:e.id,position:a,status:status(e),seated:isSeated(e),action:e.motionAction,rotation:b?Math.atan2(b[0]-a[0],b[1]-a[1]):(e.motionWalking&&Number.isFinite(e.motionHeading)?e.motionHeading:e.id===4?Math.PI/2:people[baseIds[e.id]??0].rotation),note:e.currentJob||e.workload?.[0]||'',alert:e.hasAlert,mood:e.mood||''}}));
  }
  frame=requestAnimationFrame(tick);
 }

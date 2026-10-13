@@ -24,6 +24,9 @@
   // All reservations are committed by the timeline leader and replayed by viewers.
   const ZONE_CAPACITY=Object.freeze({pantry:2,store:2,prayer:2,'toilet-a':1,'toilet-b':1,showroom:3});
   const BREAK_COOLDOWN_MS=90000, REPEAT_ZONE_MS=150000;
+  const WALK_OPPORTUNITY_MS=115000; // At least attempt a walk periodically, including after business hours.
+  const WALK_RETRY_MS=9000;
+
   const homeFor=e=>['boss','staff','showroom'].includes(e?.homeRoom)?e.homeRoom:'staff';
   const occupiedZone=s=>s.walk?.targetZone||s.room;
   function zoneHasSpace(snapshot,subject,zone){
@@ -40,6 +43,16 @@
     const home=homeFor(employee),work=living?.workFor(employee)||'typing';
     // Away staff always return to their own assigned desk; don't strand them.
     if(s.room!==home)return {zone:home,action:work,kind:'return'};
+    // Desk tasks remain varied, but no avatar should be desk-bound indefinitely.
+    // Force a visit to a usable shared area if their last successful walk was too long ago.
+    if(now-(Number(s.lastWalkAt)||now)>WALK_OPPORTUNITY_MS){
+      const destinations=home==='showroom'?['corridor','pantry','staff']:['corridor','showroom','pantry'];
+      const offset=(Number(s.id)+Math.floor(now/90000))%destinations.length;
+      for(let i=0;i<destinations.length;i++){
+        const zone=destinations[(offset+i)%destinations.length];
+        if(zone!==home&&zoneHasSpace(snapshot,s,zone))return {zone,action:zone==='pantry'?'drink':'chat',kind:'roam'};
+      }
+    }
     const proposed=living?.chooseIntent(employee,s.room,now)||{zone:home,action:work,kind:'work'};
     const intent={...proposed};
     if(!intent.zone||!['boss','staff','showroom','corridor','pantry','store','prayer','toilet-a','toilet-b'].includes(intent.zone))
@@ -55,7 +68,7 @@
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
     const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0};
   }
   function validStaff(a){
     return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
@@ -100,10 +113,23 @@
     if(dockMs&&left<dockMs)return result(blend(previous,final,left/dockMs),true,'walking');
     return result(final,false,w.action||'typing',w.targetZone||s.room);
   }
+  function headingAt(s,now){
+    if(!s.walk)return null;
+    // Sample forward direction on the committed timeline rather than deriving
+    // orientation from a late network target (which can flip 180 degrees).
+    const a=movementAt(s,Math.max(s.walk.startedAt,now-90));
+    const b=movementAt(s,Math.min(s.walk.endAt,now+90));
+    let dx=b.x-a.x,dy=b.y-a.y;
+    if(Math.hypot(dx,dy)<.0001){
+      const legs=[s.walk.from,...s.walk.route,...(s.walk.seatGoal?[s.walk.seatGoal]:[])];
+      for(let i=legs.length-1;i>0;i--){dx=legs[i].x-legs[i-1].x;dy=legs[i].y-legs[i-1].y;if(Math.hypot(dx,dy)>.01)break}
+    }
+    return Math.hypot(dx,dy)>.001?Math.atan2(dx,dy):null;
+  }
   function render(){
     if(stopped)return;
     if(state&&validPayload(state)){
-      const now=Date.now(),positions=state.staff.map(s=>movementAt(s,now));
+      const now=Date.now(),positions=state.staff.map(s=>{const p=movementAt(s,now);if(p.walking)p.heading=headingAt(s,now);return p});
       motion.render(positions);
       living?.update?.(state,positions);
     }
@@ -115,6 +141,8 @@
     const original=snapshot.staff.length;
     snapshot.staff=snapshot.staff.filter(s=>known.has(Number(s.id)));
     let changed=snapshot.staff.length!==original;
+    for(const s of snapshot.staff)if(!Number.isFinite(Number(s.lastWalkAt))||s.lastWalkAt==null){s.lastWalkAt=now-((Number(s.id)%4)*16000);changed=true}
+
     const existing=new Set(snapshot.staff.map(s=>Number(s.id)));
     for(const e of current)if(!existing.has(Number(e.id))){snapshot.staff.push(staffBase(e,now));changed=true}
     return changed;
@@ -173,7 +201,7 @@
                    movementAt(other,walk.endAt).y-(walk.seatGoal?.y??walk.route.at(-1).y))<3.5))continue;
       s.x=walk.from.x;s.y=walk.from.y;
       s.walk=walk;s.action=delay?'waiting':'walking';s.faceTo=null;
-      s.nextAt=walk.endAt+14000;
+      s.lastWalkAt=now+delay;s.nextAt=walk.endAt+14000;
       return true;
     }
     return false;
@@ -228,7 +256,7 @@
       person.faceTo=person===subject?Number(partner.id):Number(subject.id);
       // A single shared script produces alternating speech bubbles on all PCs.
       person.scene={kind,text:turns[0],dialogue:turns,speakerId:Number(subject.id),partnerId:Number(partner.id),turnMs,from:meetAt,until:meetAt+turns.length*turnMs};
-      person.socialAt=now;
+      person.socialAt=now;person.lastWalkAt=now;
       person.nextAt=person.scene.until+3500;
     }
     return true;
@@ -258,8 +286,10 @@
       }
     }
     let walkers=snapshot.staff.filter(s=>s.walk&&s.walk.endAt>now).length;
-    for(const s of snapshot.staff){
-      if(s.walk||s.nextAt>now||walkers>=2)continue;
+    const due=snapshot.staff.filter(s=>!s.walk&&s.nextAt<=now)
+      .sort((a,b)=>(Number(a.lastWalkAt)||0)-(Number(b.lastWalkAt)||0)||a.nextAt-b.nextAt);
+    for(const s of due){
+      if(walkers>=2)break;
       const employee=people.get(Number(s.id));if(!employee)continue;
       // Small synchronized social interlude; only when two movement slots exist.
       if(walkers===0&&Math.random()<.15&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
@@ -286,7 +316,7 @@
         walked=attachWalk(s,plan,intent,now,snapshot);
       }
       if(!walked){
-        s.nextAt=now+8500+Math.random()*6000;changed=true;continue;
+        s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
       }
       s.lastTripZone=intent.zone;s.lastTripAt=now;
       if(intent.kind==='break')s.lastBreakAt=now;
@@ -388,5 +418,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,validPayload};
+  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent};
 })();

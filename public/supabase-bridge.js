@@ -21,6 +21,28 @@
   let reconnectAttempts = 0;
   let msgRef = 0;
   let realtimeJoined = false;
+  let realtimeJoinRef = null;
+  // Live online count = connected browser tabs, never the simulated office avatars.
+  // Supabase Realtime Presence expires automatically when a socket disconnects.
+  const presenceKey = `viewer-${globalThis.crypto?.randomUUID?.() || Date.now()+'-'+Math.random().toString(36).slice(2)}`;
+  let presence = {}, presenceReady = false;
+  const emitPresence = () => {
+    const count = presenceReady ? Object.values(presence).reduce((n,entry) => n + (Array.isArray(entry?.metas) ? entry.metas.length : 0),0) : null;
+    window.dispatchEvent(new CustomEvent('ks:office-online',{detail:{connected:realtimeJoined,count}}));
+  };
+  const applyPresence = (event,payload) => {
+    if(event==='presence_state') { presence=payload && typeof payload==='object' ? payload : {};presenceReady=true; }
+    else if(event==='presence_diff') {
+      for(const [key,metas] of Object.entries(payload?.joins || {}))presence[key]={metas:metas?.metas || []};
+      for(const [key,leaving] of Object.entries(payload?.leaves || {})) {
+        const gone=new Set((leaving?.metas||[]).map(m=>m.phx_ref));
+        if(presence[key])presence[key].metas=(presence[key].metas||[]).filter(m=>!gone.has(m.phx_ref));
+        if(!presence[key]?.metas?.length)delete presence[key];
+      }
+      presenceReady=true;
+    }
+    emitPresence();
+  };
   let signedInOnce = false;
   let loggedOut = false;
 
@@ -221,7 +243,7 @@
   };
 
   function closeRealtime() {
-    realtimeJoined=false;clearInterval(heartbeat);clearTimeout(reconnectTimer);heartbeat=null;reconnectTimer=null;
+    realtimeJoined=false;realtimeJoinRef=null;presence={};presenceReady=false;emitPresence();clearInterval(heartbeat);clearTimeout(reconnectTimer);heartbeat=null;reconnectTimer=null;
     if (ws) {const old=ws;ws=null;old.onclose=null;try{old.close();}catch{}}
   }
   function connectRealtime() {
@@ -233,14 +255,22 @@
     const socket=ws;
     socket.onopen=()=>{
       const changes=['ks_shared_state','ks_office_chat','ks_office_events'].map(table=>({event:'*',schema:'public',table}));
-      socket.send(JSON.stringify({topic:'realtime:ks-office-plus',event:'phx_join',payload:{config:{broadcast:{self:false},presence:{key:''},postgres_changes:changes,private:false},access_token:session.access_token},ref:ref()}));
+      realtimeJoinRef=ref();
+      socket.send(JSON.stringify({topic:'realtime:ks-office-plus',event:'phx_join',payload:{config:{broadcast:{self:false},presence:{key:presenceKey},postgres_changes:changes,private:false},access_token:session.access_token},ref:realtimeJoinRef}));
       heartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:ref()}));},25000);
     };
     socket.onmessage=event=>{
       try {const message=JSON.parse(event.data);
-        if (message.event==='phx_reply' && message.topic==='realtime:ks-office-plus') {
+        if (message.event==='phx_reply' && message.topic==='realtime:ks-office-plus' && message.ref===realtimeJoinRef) {
           realtimeJoined = message.payload?.status==='ok';
-          if (realtimeJoined) reconnectAttempts = 0;
+          if (realtimeJoined) {
+            reconnectAttempts = 0;
+            socket.send(JSON.stringify({topic:'realtime:ks-office-plus',event:'presence',payload:{type:'presence',event:'track',payload:{online_at:new Date().toISOString()}},ref:ref()}));
+          }
+          emitPresence();
+        }
+        if (message.topic==='realtime:ks-office-plus' && (message.event==='presence_state'||message.event==='presence_diff')) {
+          applyPresence(message.event,message.payload);
         }
         if (message.event==='postgres_changes') {
           const payload=message.payload||{};
@@ -248,7 +278,7 @@
         }
       } catch {}
     };
-    socket.onclose=()=>{clearInterval(heartbeat);realtimeJoined=false;if(socket!==ws || loggedOut)return;reconnectAttempts++;reconnectTimer=setTimeout(connectRealtime,Math.min(30000,1500*(2**Math.min(reconnectAttempts,4))));};
+    socket.onclose=()=>{clearInterval(heartbeat);realtimeJoined=false;realtimeJoinRef=null;presence={};presenceReady=false;emitPresence();if(socket!==ws || loggedOut)return;reconnectAttempts++;reconnectTimer=setTimeout(connectRealtime,Math.min(30000,1500*(2**Math.min(reconnectAttempts,4))));};
     socket.onerror=()=>{};
   }
 
@@ -345,6 +375,6 @@
     else if(signedInOnce&&!loggedOut){loggedOut=true;closeRealtime();location.reload();}
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden)closeRealtime();else if(session)connectRealtime();});
-  window.OfficeSupabase={isConfigured:configured,realtimeConnected:()=>realtimeJoined,signOut:()=>document.querySelector('#ks-office-signout')?.click(),onChange:handler=>window.addEventListener('ks:supabase-change',handler)};
+  window.OfficeSupabase={isConfigured:configured,realtimeConnected:()=>realtimeJoined,onlineCount:()=>presenceReady ? Object.values(presence).reduce((n,v)=>n+(Array.isArray(v?.metas)?v.metas.length:0),0):null,signOut:()=>document.querySelector('#ks-office-signout')?.click(),onChange:handler=>window.addEventListener('ks:supabase-change',handler)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

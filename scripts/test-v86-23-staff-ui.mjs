@@ -5,7 +5,7 @@ const bundle=readFileSync('public/office-3d.js','utf8');
 const scene=readFileSync('source/src/office-scene.ts','utf8');
 const bridge=readFileSync('source/src/suite-bridge.ts','utf8');
 const release=JSON.parse(readFileSync('office-release.json','utf8'));
-assert.equal(release.release,'86.23');
+assert.match(String(release.release),/^86\.\d+$/,'Staff UI should keep an Office Plus V86 release');
 assert.match(html,/data-profile-tab="staff"/,'Staff tab must be rendered on each click');
 assert.match(html,/data-profile-tab="emoji"/,'Emoji tab must be rendered on each click');
 assert.match(html,/data-profile-mood/,'Emoji pane offers real mood actions');
@@ -26,5 +26,5 @@ assert.match(scene,/renderer\.domElement\.removeEventListener\('pointermove',mov
 assert.match(bundle,/removeEventListener\("pointermove",ksStaffDragV8623\)/,'Shipped drag listener must clean up');
 assert.match(scene,/selectedId:focusId,following/,'Runtime focus can be diagnosed');
 assert.match(bundle,/selectedId:D,following:Mt/,'Bundled diagnostic focus can be diagnosed');
-for(const file of ['index.html','calculator.html','commission.html','file-name-generator.html','files-compress.html','job-management.html','markup-calculator.html','orderform1.html','orderform2.html','pricelist-calculator.html'])assert.match(readFileSync('public/'+file,'utf8'),/v86\.23/,'Page '+file+' must have updated version');
+for(const file of ['index.html','calculator.html','commission.html','file-name-generator.html','files-compress.html','job-management.html','markup-calculator.html','orderform1.html','orderform2.html','pricelist-calculator.html'])assert.match(readFileSync('public/'+file,'utf8'),/v86\.\d+/,'Page '+file+' must retain its version footer');
 console.log('PASS V86.23: Staff and Emoji tabs, live staff focus restoration, click-versus-drag follow, persistent zoom, cleanup, and all page versions.');
