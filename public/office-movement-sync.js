@@ -1,4 +1,4 @@
-/* Office Plus V86.22: Shared movement + living behavior timeline, one CAS-elected planner, many local renderers.
+/* Office Plus V86.27: Shared collision-safe movement + fair activity reservations.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
@@ -7,7 +7,8 @@
   const SCOPE='office:movement:v1';
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
   // Office floor-plan units: roughly two units per world-space metre.
-  const MIN_STAFF_GAP=1.75, CHECK_MS=180, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
+  const MIN_STAFF_GAP=1.85, CHECK_MS=140, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
+  const MAX_ACTIVE_WALKERS=3, ESCAPE_GRACE_MS=3600;
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
   const living=window.OfficeLiving;
@@ -22,7 +23,7 @@
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
   // Capacity reflects usable *interaction spots*, not the full room footprint.
   // All reservations are committed by the timeline leader and replayed by viewers.
-  const ZONE_CAPACITY=Object.freeze({pantry:2,store:2,prayer:2,'toilet-a':1,'toilet-b':1,showroom:3});
+  const ZONE_CAPACITY=Object.freeze({corridor:2,pantry:2,store:2,prayer:2,'toilet-a':1,'toilet-b':1,showroom:3});
   const BREAK_COOLDOWN_MS=90000, REPEAT_ZONE_MS=150000;
   const WALK_OPPORTUNITY_MS=115000; // At least attempt a walk periodically, including after business hours.
   const WALK_RETRY_MS=9000;
@@ -167,25 +168,38 @@
     const others=snapshot?.staff?.filter(s=>Number(s.id)!==Number(subject.id))||[];
     if(!others.length)return true;
     const candidate={...subject,x:walk.from.x,y:walk.from.y,walk};
-    // Sampling at 180ms with a 1.75-unit buffer protects avatars against
-    // both direct intersections and near misses; walking pace is <2.2 units/s.
-    // Allow existing stationary actors to keep their assigned desk locations.
-    const until=walk.endAt+CHECK_MS;
-    for(let time=now;time<=until;time+=CHECK_MS){
+    const launch=movementAt(candidate,walk.startedAt);
+    // A pre-existing seating overlap must not permanently trap both employees.
+    // Grant an *outbound only* clearance grace for an idle neighbor. The moving
+    // employee may leave the overlap, but may never approach more closely.
+    // Moving neighbors, new overlaps and destination overlaps stay forbidden.
+    const baselines=others.map(other=>{
+      const beside=movementAt(other,walk.startedAt);
+      const distance=Math.hypot(launch.x-beside.x,launch.y-beside.y);
+      return {other,distance,canEscape:distance<MIN_STAFF_GAP&&(!other.walk||other.walk.endAt<=now)};
+    });
+    const isSafe=(time)=>{
       const here=movementAt(candidate,time);
-      for(const other of others){
+      for(const {other,distance,canEscape} of baselines){
         const there=movementAt(other,time);
-        const dx=here.x-there.x,dy=here.y-there.y;
-        if(dx*dx+dy*dy<(MIN_STAFF_GAP*MIN_STAFF_GAP))return false;
+        const gap=Math.hypot(here.x-there.x,here.y-there.y);
+        if(gap>=MIN_STAFF_GAP)continue;
+        const waiting=time<=walk.startedAt;
+        const elapsed=time-walk.startedAt;
+        // Only tolerate an overlap which existed before this reservation,
+        // and only while a character is demonstrably moving *out* of it.
+        if(canEscape&&(waiting||elapsed<=ESCAPE_GRACE_MS)&&
+           gap>=distance-.09&&(waiting||elapsed<2200||gap>distance+.12))continue;
+        return false;
       }
+      return true;
+    };
+    // 140 ms sampling limits tunneling at full avatar walking speed.
+    for(let time=now;time<=walk.endAt;time+=CHECK_MS){
+      if(!isSafe(time))return false;
     }
-    // Verify exact endpoints, which do not necessarily align with a sampling tick.
-    const final=movementAt(candidate,walk.endAt);
-    for(const other of others){
-      const there=movementAt(other,walk.endAt);
-      if(Math.hypot(final.x-there.x,final.y-there.y)<MIN_STAFF_GAP)return false;
-    }
-    return true;
+    // Sample the endpoint exactly, independently of the frame step.
+    return isSafe(walk.endAt);
   }
   function attachWalk(s,plan,intent,now,snapshot){
     // Don't send two people through the same doorway / workstation at once.
@@ -261,6 +275,22 @@
     }
     return true;
   }
+  function alternateIntents(employee,s,requested,snapshot){
+    const home=homeFor(employee);
+    if(s.room!==home)return [requested]; // Always bring staff back to their own desk.
+    const candidates=[requested];
+    const order=home==='showroom'?['corridor','pantry','store','prayer']:
+      home==='boss'?['showroom','corridor','pantry','store']:
+      ['showroom','corridor','pantry','store','prayer'];
+    const rotate=Number(s.id)%order.length;
+    for(let i=0;i<order.length;i++){
+      const zone=order[(i+rotate)%order.length];
+      if(zone===home||candidates.some(c=>c.zone===zone)||!zoneHasSpace(snapshot,s,zone))continue;
+      candidates.push({zone,action:zone==='pantry'?'drink':zone==='store'?'stocking':
+        zone==='prayer'?'reading':zone==='showroom'?'meeting':'chat',kind:'roam'});
+    }
+    return candidates;
+  }
   function evolve(snapshot,now){
     let changed=reconciled(snapshot,now);
     const people=new Map(livePeople().map(p=>[Number(p.id),p]));
@@ -289,10 +319,13 @@
     const due=snapshot.staff.filter(s=>!s.walk&&s.nextAt<=now)
       .sort((a,b)=>(Number(a.lastWalkAt)||0)-(Number(b.lastWalkAt)||0)||a.nextAt-b.nextAt);
     for(const s of due){
-      if(walkers>=2)break;
+      // A conversation can reserve a second employee after `due` was built.
+      // Never plan another walk over an existing reservation in the same tick.
+      if(s.walk||s.nextAt>now)continue;
+      if(walkers>=MAX_ACTIVE_WALKERS)break;
       const employee=people.get(Number(s.id));if(!employee)continue;
-      // Small synchronized social interlude; only when two movement slots exist.
-      if(walkers===0&&Math.random()<.15&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
+      // Reserve two free walking slots before planning a paired conversation.
+      if(walkers<=MAX_ACTIVE_WALKERS-2&&Math.random()<.13&&pairConversation(snapshot,s,now)){walkers+=2;changed=true;continue}
       const intent=chooseSmartIntent(employee,s,now,snapshot);
       // One reclined sleeper at a time: a second surau visitor gets a quiet seated break.
       if(intent.zone==='prayer'&&intent.action==='sleep'&&snapshot.staff.some(other=>other!==s&&
@@ -306,27 +339,31 @@
         s.nextAt=now+13000+Math.random()*19000;
         changed=true;continue;
       }
-      // The destination may be open but the initial seat/aisle approach blocked.
-      // Retry a few fresh goal points before declaring the room inaccessible.
+      // If a target is crowded or its doorway cannot be reserved, try other
+      // *real* destinations, not three near-identical retries to the same spot.
+      // Every candidate is checked against all committed shared trajectories.
       motion.render([movementAt(s,now)]);
-      let walked=false;
-      for(let attempt=0;attempt<3&&!walked;attempt++){
-        if(!zoneHasSpace(snapshot,s,intent.zone))break;
-        const plan=motion.plan(Number(s.id),intent.zone);
-        walked=attachWalk(s,plan,intent,now,snapshot);
+      let walked=false,selectedIntent=intent;
+      for(const option of alternateIntents(employee,s,intent,snapshot)){
+        if(!zoneHasSpace(snapshot,s,option.zone))continue;
+        for(let attempt=0;attempt<2&&!walked;attempt++){
+          const plan=motion.plan(Number(s.id),option.zone);
+          if(attachWalk(s,plan,option,now,snapshot)){walked=true;selectedIntent=option}
+        }
+        if(walked)break;
       }
       if(!walked){
         s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
       }
-      s.lastTripZone=intent.zone;s.lastTripAt=now;
-      if(intent.kind==='break')s.lastBreakAt=now;
-      if(intent.kind==='meeting'){
+      s.lastTripZone=selectedIntent.zone;s.lastTripAt=now;
+      if(selectedIntent.kind==='break')s.lastBreakAt=now;
+      if(selectedIntent.kind==='meeting'){
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
         s.nextAt=s.walk.endAt+15000;
-      }else if(intent.zone==='store'&&intent.action==='stocking'){
+      }else if(selectedIntent.zone==='store'&&selectedIntent.action==='stocking'){
         s.scene={kind:'activity',text:'📦 Checking and arranging stock',from:s.walk.endAt,until:s.walk.endAt+14000};
-      }else if(intent.kind==='break'){
-        s.scene={kind:'break',text:living?.breakMessage?.(intent.zone,Math.random(),intent.action)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
+      }else if(selectedIntent.kind==='break'){
+        s.scene={kind:'break',text:living?.breakMessage?.(selectedIntent.zone,Math.random(),selectedIntent.action)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
         s.nextAt=s.walk.endAt+19000;
       }
       walkers++;changed=true;
@@ -418,5 +455,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent};
+  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents};
 })();

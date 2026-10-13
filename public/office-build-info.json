@@ -1,7 +1,7 @@
 {
-  "release": "86.25",
+  "release": "86.27",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.25 online session presence, synchronized walking heading, fair staff activity scheduling",
+  "package": "V86.27 crowd-safe staff roaming, duplicated-reservation prevention, alternate activity routes",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
@@ -21,5 +21,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "Live viewer sessions from Supabase Presence; walking faces actual travel; 8-staff movement opportunity regression"
+  "check": "Existing overlap escape without new collisions, no crossing routes, fair 8-staff scheduling, job-management export preserved"
 }
