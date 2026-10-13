@@ -4322,7 +4322,10 @@ function applyOfficePrecisionV8615(r,p,time,dt,context={}){
  }
  precision.seatOffsetX=ks15Mix(precision.seatOffsetX,offsetX,ks15Alpha(dt,5.5));
  precision.seatOffsetZ=ks15Mix(precision.seatOffsetZ,offsetZ,ks15Alpha(dt,5.5));
- if(r.body){r.body.position.x+=precision.seatOffsetX;r.body.position.z+=precision.seatOffsetZ;}
+ // V86.17: use absolute body-space chair correction. An additive Z offset
+ // every animation frame accumulated forever and made seated staff drift
+ // away from their floor-root, especially near showroom seating.
+ if(r.body){r.body.position.x+=precision.seatOffsetX;r.body.position.z=precision.seatOffsetZ;}
  // Emotion/eye tracking: preserve eye Y-size and the V86.9 blink correction.
  const partner=context.partner;
  const social=stationary&&['chat','meeting'].includes(action)&&partner;
@@ -4563,6 +4566,8 @@ function animateOfficeHijabi(r,p,time,dt,distance){
  const stock=p.action==='stocking'&&!walk&&!nap;
  r.body.position.y=-.90*sit+Math.abs(stride)*.045*walk-.12*nap+Math.sin(t*1.3)*.012*nap;
  r.body.position.x=-.55*nap;
+ // Always reset the visual body's depth before each pose calculation.
+ r.body.position.z=0;
  r.body.rotation.y=0;
  r.body.rotation.z=(Math.sin(t*.6)*.008*(1-walk)+stride*.022*walk)*(1-nap)-1.33*nap;
  r.chest.rotation.z=Math.sin(r.gait+Math.PI)*.014*walk;
@@ -5032,7 +5037,7 @@ const sceneWheel=L=>{if(!L.cancelable)return;L.preventDefault();L.stopImmediateP
 r.domElement.addEventListener("wheel",sceneWheel,{capture:!0,passive:!1});
 let ht=new rr,j=new D,Ct=new D,Vt=Vh.map(([L,B])=>new D(L*FLOOR_SPACE_SCALE,.08,B*FLOOR_SPACE_SCALE)),le=Vt.map((L,B)=>L.distanceTo(Vt[(B+1)%Vt.length])),re=le.reduce((L,B)=>L+B,0),tn=L=>{v=L,et=!1,F=null,nt=!1,a.autoRotate=!1,a.enableRotate=L==="isometric",a.target.copy(Lt),o.position.copy(L==="plan"?new D(0,65,.01):mt()),o.zoom=1.14,it=1.14,o.lookAt(a.target),a.update(),It(),t.onZoom(1.14)};function qe(){if(xt)return;tt=requestAnimationFrame(qe);let L=Math.min(ht.getDelta(),.05);if(document.hidden||!Bt||!Ot)return;if(P||(Q+=L),a.dampingFactor=1-Math.exp(-4*L),a.autoRotate=nt&&!P&&!c.matches&&v==="isometric",et&&dt!==null){let Z=H.find(gt=>gt.person.id===dt);Z&&(F=Z.root.position.clone(),F.y=.6)}if(F){let Z=J.copy(F).sub(a.target).multiplyScalar(1-Math.exp(-5*L));a.target.add(Z),o.position.add(Z),it=Y,o.zoom+=(it-o.zoom)*(1-Math.exp(-6*L)),o.updateProjectionMatrix(),Z.length()<.002&&Math.abs(o.zoom-Y)<.002&&(F=null)}else Math.abs(o.zoom-it)>1e-4&&(o.zoom+=(it-o.zoom)*(1-Math.exp(-10*L)),o.updateProjectionMatrix());a.update(L);adaptiveStateV8615=adaptiveOfficeQualityV8615(adaptiveStateV8615,L,activeQualityV8615,window.devicePixelRatio);
 if(!P&&!c.matches&&adaptiveStateV8615.change&&adaptiveStateV8615.ratio!==null)r.setPixelRatio(adaptiveStateV8615.ratio);
-let socialPairsV8615=pairOfficeSocialV8615(H);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P&&(Z.root.position.lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)*Math.max(L,1/120)))),Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*(Mt.status==="walking"?8:4.5)))}Z.precisionSceneV8615={chair:null,partner:socialPairsV8615.get(Mt.id)};
+let socialPairsV8615=pairOfficeSocialV8615(H);for(let Z of H){let gt=Q+Z.phase,Mt=Z.person;if(e.externalMotion&&!P&&(Z.root.position.lerp(Z.targetPosition,1-Math.exp(-(Z.root.position.distanceTo(Z.targetPosition)>4?8:18)*Math.max(L,1/120)))),Mt.status==="walking"&&!e.externalMotion){let Pt=Q*.72%re,oe=0;for(;Pt>le[oe]&&oe<Vt.length-1;)Pt-=le[oe],oe++;let me=Vt[oe],Pe=Vt[(oe+1)%Vt.length],Ui=Pt/le[oe];Z.root.position.lerpVectors(me,Pe,Ui),Z.targetRotation=Math.atan2(Pe.x-me.x,Pe.z-me.z)}Z.root.position.y=.08;let Ft=Z.root.position.distanceTo(Z.lastPosition);if(Z.lastPosition.copy(Z.root.position),!P){let Pt=Z.targetRotation-Z.root.rotation.y;Z.root.rotation.y+=Math.atan2(Math.sin(Pt),Math.cos(Pt))*(1-Math.exp(-L*(Mt.status==="walking"?8:4.5)))}Z.precisionSceneV8615={chair:null,partner:socialPairsV8615.get(Mt.id)};
 if(Mt.seated&&Mt.status!=="walking"){
  let best=.75;
  for(let chair of officeChairAnchorsV8615){let delta=Math.hypot(Z.root.position.x-chair.x,Z.root.position.z-chair.z);if(delta<best){best=delta;Z.precisionSceneV8615.chair=chair}}

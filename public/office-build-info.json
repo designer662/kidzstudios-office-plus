@@ -1,7 +1,7 @@
 {
-  "release": "86.16",
+  "release": "86.17",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.16 Simulation Stability Rebuild - synchronized movement, smooth aisle transitions, non-jumping 3D catch-up",
+  "package": "V86.17 Character Grounding Fix - bounded seated body depth and steady floor-root height",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -17,5 +17,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Automated syntax, route, deterministic timeline, character transition and existing compatibility checks passed; browser/WebGL and live Supabase smoke test still needed."
+  "check": "Automated syntax, long-running seating stability, ground-root invariant, simulation and walking routes; browser/WebGL test pending."
 }
