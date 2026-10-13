@@ -1,7 +1,7 @@
 {
-  "release": "86.15",
+  "release": "86.16",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.15 Full Upgrade — two-bone IK, chair seating, facial tracking, social pairing and adaptive graphics",
+  "package": "V86.16 Simulation Stability Rebuild - synchronized movement, smooth aisle transitions, non-jumping 3D catch-up",
   "modules": [
     "office-ambience-audio.js",
     "office-living-office.js",
@@ -17,5 +17,5 @@
     "office-character-studio.js",
     "office-character-studio.css"
   ],
-  "check": "Regression suite and JavaScript validation completed; live WebGL and multi-client deployment require smoke test."
+  "check": "Automated syntax, route, deterministic timeline, character transition and existing compatibility checks passed; browser/WebGL and live Supabase smoke test still needed."
 }
