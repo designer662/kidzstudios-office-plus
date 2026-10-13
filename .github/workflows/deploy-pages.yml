@@ -40,6 +40,8 @@ jobs:
           node scripts/test-3d-interactions.mjs
           node scripts/test-v86-16-simulation-rebuild.mjs
           node scripts/test-v86-18-office-seating.mjs
+          node scripts/test-v86-19-wall-chair.mjs
+          node scripts/test-expanded-office-v85.mjs
       - name: Stamp current build version
         env:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
