@@ -32,6 +32,17 @@ jobs:
           node scripts/test-workbook.mjs
       - name: Test Supabase API compatibility
         run: node scripts/test-bridge-mock.mjs
+      - name: Test Office Simulator stability
+        run: |
+          node scripts/test-walking-routes.cjs
+          node scripts/test-movement-timeline.mjs
+          node scripts/test-living-timeline-sync.mjs
+          node scripts/test-3d-interactions.mjs
+          node scripts/test-v86-16-simulation-rebuild.mjs
+      - name: Stamp current build version
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: node scripts/stamp-version.mjs
       - name: Disable Jekyll transformations
         run: touch public/.nojekyll
       - name: Configure Pages
