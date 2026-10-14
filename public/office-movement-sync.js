@@ -36,6 +36,10 @@
   function zoneHasSpace(snapshot,subject,zone){
     const limit=ZONE_CAPACITY[zone];
     if(!limit||occupiedZone(subject)===zone)return true;
+    // A showroom standee must always be able to return to its allocated home,
+    // even if visitor capacity is filled by other permanently based staff.
+    const resident=livePeople().find(e=>Number(e.id)===Number(subject.id));
+    if(resident&&homeFor(resident)===zone)return true;
     let count=0;
     for(const other of snapshot.staff){
       if(other===subject)continue;
@@ -91,9 +95,10 @@
     return null; // Never force movement into an occupied room.
   }
   function staffBase(e,now){
-    const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
+    const x=Number(e.deskX??e.visualX??e.x),y=Number(e.deskY??e.visualY??e.y);
     const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,failedRoutes:0,waitingSince:0,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0,ai:smart?.memory(null,now)};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:homeFor(e),
+      homeDeskId:String(e.deskId||''),homeX:x,homeY:y,homeRoom:homeFor(e),action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,failedRoutes:0,waitingSince:0,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0,ai:smart?.memory(null,now)};
   }
   function validStaff(a){
     return Array.isArray(a)&&a.length<=100&&a.every(s=>(!s.ai||(
@@ -125,8 +130,8 @@
   // Rebuild SIMULATION coordinates from the real roster desks, never a stale
   // visualX / visualRoomId inherited from an old server movement timeline.
   function homeBase(e,now){
-    const fresh={...e,visualX:Number.isFinite(+e.deskX)?+e.deskX:e.x,
-      visualY:Number.isFinite(+e.deskY)?+e.deskY:e.y,visualRoomId:homeFor(e)};
+    const fresh={...e,visualX:Number.isFinite(e.deskX)?e.deskX:(e.visualX??e.x),
+      visualY:Number.isFinite(e.deskY)?e.deskY:(e.visualY??e.y),visualRoomId:homeFor(e)};
     const s=staffBase(fresh,now);
     s.room=homeFor(e);s.walk=null;s.scene=null;
     s.nextAt=now+1200+Number(e.id)*300;
@@ -306,7 +311,25 @@
     const original=snapshot.staff.length;
     snapshot.staff=snapshot.staff.filter(s=>known.has(Number(s.id)));
     let changed=snapshot.staff.length!==original;
+    const directory=new Map(current.map(e=>[Number(e.id),e]));
     for(const s of snapshot.staff){
+      const employee=directory.get(Number(s.id));
+      if(employee){
+        const x=Number(employee.deskX??employee.visualX??employee.x),y=Number(employee.deskY??employee.visualY??employee.y);
+        // Migration + reallocation are committed by the one elected leader.
+        // No permanent staff-directory changes, no local-only teleport.
+        const hasHome=Number.isFinite(s.homeX)&&Number.isFinite(s.homeY)&&typeof s.homeDeskId==='string';
+        if(!hasHome&&s.room===homeFor(employee)&&!s.walk&&
+          Math.hypot(s.x-x,s.y-y)<.15){
+          // Older timelines already at the correct seat keep their schedule.
+          Object.assign(s,{homeDeskId:String(employee.deskId||''),homeRoom:homeFor(employee),homeX:x,homeY:y});
+          changed=true;
+        }else if(!hasHome||s.homeDeskId!==String(employee.deskId||'')||s.homeRoom!==homeFor(employee)||
+          Math.abs(Number(s.homeX)-x)>.01||Math.abs(Number(s.homeY)-y)>.01){
+          Object.assign(s,homeBase(employee,now));changed=true;
+          continue;
+        }
+      }
       if(!Number.isFinite(Number(s.lastWalkAt))||s.lastWalkAt==null){s.lastWalkAt=now-((Number(s.id)%4)*16000);changed=true}
       if(smart&&!s.ai){s.ai=smart.memory(null,now);changed=true}
     }

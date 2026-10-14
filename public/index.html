@@ -7,6 +7,7 @@
 <title>Kidzstudios · 3D Office & Operations</title>
 <link rel="stylesheet" href="office-3d.css?v=52.0">
 <script src="office-geometry-guard.js?v=86.39"></script>
+<script src="office-workstations.js?v=86.50"></script>
 <script src="office-seating-controller.js?v=86.22"></script>
 <script src="office-furniture-interactions.js?v=86.36"></script>
 <style id="ks-main-css">
@@ -1426,19 +1427,21 @@ body{overscroll-behavior:none;}
     { id:8,name:'Athira',gender:'female',department:'Sales and Marketing',position:'Sales and marketing',status:'In a meeting',homeRoom:'showroom',roomId:'showroom',x:16,y:32.7,deskId:'S03',deskLabel:'Sales Desk 03',deskX:16,deskY:32.7,currentJob:'',activity:'',lastActive:'',workload:[] }
   ];
 
-  let employees = DEFAULT_EMPLOYEES.map(e=>({...e,workload:[...(e.workload||[])]}));
+  let employees = window.KSOfficeWorkstations.allocate(DEFAULT_EMPLOYEES.map(e=>({...e,workload:[...(e.workload||[])]})),window.KSOfficeGeometry);
 
   let employeeById = Object.fromEntries(employees.map(e=>[e.id,e]));
   const employeeNodes = new Map();
   const roomNodes = new Map();
   const roomLabelNodes = new Map();
   const staffDeskAssignments = [
-    {deskId:'D01', employeeId:3, x:14.2, y:5.2, facing:'left'},
-    {deskId:'D02', employeeId:7, x:17.4, y:5.2, facing:'right'},
-    {deskId:'A01', employeeId:6, x:14.2, y:9.55, facing:'left'},
-    {deskId:'S01', employeeId:4, x:17.4, y:9.55, facing:'right'},
-    {deskId:'S02', employeeId:5, x:14.2, y:13.9, facing:'left'},
-    {deskId:'S03', employeeId:8, x:17.4, y:13.9, facing:'right'}
+    {deskId:'B02',x:9.2,y:3.0,facing:'left'},
+    {deskId:'A01',x:15.0,y:3.0,facing:'right'},
+    {deskId:'D02',x:10.7,y:9.1,facing:'left'},
+    {deskId:'D01',x:15.0,y:9.1,facing:'right'},
+    {deskId:'S01',x:10.7,y:13.5,facing:'left'},
+    {deskId:'S02',x:15.0,y:13.5,facing:'right'},
+    {deskId:'S03',x:10.7,y:17.9,facing:'left'},
+    {deskId:'S04',x:15.0,y:17.9,facing:'right'}
   ];
 
   const deptOrder=['All','Creative Department','Sales and Marketing','Management','Production Management','Finance Department'];
@@ -1930,7 +1933,8 @@ body{overscroll-behavior:none;}
     if(!payload||!Array.isArray(payload.staff))return false;
     const old=Object.fromEntries(employees.map(e=>[e.id,e]));
     const next=payload.staff.map((record,index)=>employeeFromStaffRecord(record,index,old[Number(record.id)])).filter(e=>Number.isFinite(e.id));
-    employees.splice(0,employees.length,...next);staffDirectoryVersion=Math.max(staffDirectoryVersion,Number(version||0));rebuildEmployeeIndex();
+    const allocated=window.KSOfficeWorkstations.allocate(next,window.KSOfficeGeometry);
+    employees.splice(0,employees.length,...allocated);staffDirectoryVersion=Math.max(staffDirectoryVersion,Number(version||0));rebuildEmployeeIndex();
     // Keep camera tracking and staff controls open during shared directory refresh.
     // Earlier releases called clearEmployeeSelection() on every mood/save update,
     // which immediately canceled follow and discarded the popup.
@@ -2135,7 +2139,7 @@ body{overscroll-behavior:none;}
 
   function furnish(room){
     if(room.kind==='staff'){
-      staffDeskAssignments.forEach(d=>addStaffBenchStation(d.x,d.y,2.9,1.7,d.facing,employeeById[d.employeeId],d.deskId));
+      staffDeskAssignments.forEach(d=>addStaffBenchStation(d.x,d.y,2.9,1.7,d.facing,employees.find(e=>e.deskId===d.deskId)||null,d.deskId));
     }
     if(room.kind==='showroom'){
       const bench=box(13.5,31.5,6.4,.55,5,'sofa');
@@ -2146,8 +2150,7 @@ body{overscroll-behavior:none;}
       furnitureLayer.append(box(16.9,27.1,1.35,.9,4.5,'display-plinth'));
     }
     if(room.kind==='office'){
-      addPCWorkstation(14.2,39.2,2.8,2.05,'left',employeeById[1],'B01');
-      addPCWorkstation(19.2,43.0,2.45,1.7,'right',employeeById[2],'B02');
+      addPCWorkstation(14.2,39.2,2.8,2.05,'left',employees.find(e=>e.deskId==='B01')||null,'B01');
     }
     if(room.kind==='storage'){
       furnitureLayer.append(box(13.0,49.4,8.2,1.4,8,'cabinet'));

@@ -1,9 +1,10 @@
 {
-  "release": "86.49",
-  "edition": "Office Plus \u00b7 Jarvis Smart AI 5-Stage Upgrade",
-  "package": "V86.45\u2013V86.49: fair movement, smoother activities, simulated routines, AI diagnostics, adaptive render updates",
+  "release": "86.50",
+  "edition": "Office Plus · Jarvis Dedicated Workstations",
+  "package": "V86.50: unique physical worktables, exclusive staff desk allocation, showroom standing overflow, AI home migration",
   "modules": [
     "office-geometry-guard.js",
+    "office-workstations.js",
     "office-seating-controller.js",
     "office-furniture-interactions.js",
     "office-ambience-audio.js",
@@ -24,5 +25,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "Shared Smart AI recovery uses versioned optimistic writes without modifying staff/jobs. Production 3D build and real browser/WebGL plus Supabase smoke tests are still required before rollout."
+  "check": "Staff directory data unchanged; physical desk ownership is computed deterministically. CI must build the 3D scene and pass browser/WebGL plus Supabase acceptance before production."
 }
