@@ -6,9 +6,6 @@
 <meta name="theme-color" content="#f7f7f5" />
 <title>Kidzstudios · 3D Office & Operations</title>
 <link rel="stylesheet" href="office-3d.css?v=52.0">
-<script src="office-geometry-guard.js?v=86.22"></script>
-<script src="office-seating-controller.js?v=86.22"></script>
-<script src="office-furniture-interactions.js?v=86.30"></script>
 <style id="ks-main-css">
 :root{
   --bg:#f7f7f5;--bg2:#fbfbfa;--card:rgba(255,255,255,.9);--solid:#fff;--text:#1d2022;--muted:#767b80;
@@ -26,7 +23,7 @@ button,input{font:inherit}.top-shell{padding:16px 20px 9px;z-index:30}.topbar{ma
 .employee{cursor:pointer;transition:opacity .28s var(--ease),filter .22s var(--ease)}.employee.dim{opacity:.19}.employee.search-hit{filter:url(#employeeGlow)}.avatar-shell{transform-box:fill-box;transform-origin:center;transition:transform .22s var(--ease)}.employee:hover .avatar-shell,.employee.active .avatar-shell{transform:scale(1.13);filter:url(#employeeGlow)}.employee-shadow{fill:rgba(40,43,45,.13)}.head{fill:#d7aa8f}.hair{fill:#4d4b49}.accent-ring{fill:none;stroke:transparent;stroke-width:1.1}.employee:hover .accent-ring,.employee.active .accent-ring{stroke:var(--orange)}.employee-name-bg{fill:rgba(255,255,255,.94);stroke:rgba(31,35,38,.09);stroke-width:.7}.employee-name{font:700 10px/1 var(--ui);fill:#4d5155;text-anchor:middle;letter-spacing:-.01em}.employee.idle .avatar-shell{animation:idle 3.5s ease-in-out infinite alternate}.employee.busy .head{animation:nod 1.2s ease-in-out infinite alternate}.employee.walking .avatar-shell{animation:walk .55s ease-in-out infinite alternate}
 .activity-bubble-wrap{pointer-events:none}.activity-bubble{display:inline-block;max-width:155px;background:rgba(255,255,255,.96);color:#45494d;border:1px solid rgba(31,35,38,.075);border-radius:12px 12px 12px 4px;padding:7px 9px;box-shadow:0 7px 22px rgba(25,28,30,.08);font:600 10px/1.25 var(--ui);animation:bubble 5.4s var(--ease) forwards}
 .panel{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:20px;backdrop-filter:blur(16px) saturate(125%)}.live-panel{position:absolute;left:50%;bottom:22px;translate:-50% 0;width:390px;z-index:14;padding:13px}.panel-kicker{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.panel-title{font-size:11.5px;font-weight:750}.live-state{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2.4s infinite}.activity-list{display:grid;gap:2px}.feed-item{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px;border-radius:11px;animation:feed .32s var(--ease);transition:.2s var(--ease)}.feed-item:hover{background:var(--bg);transform:translateX(2px)}.feed-avatar{width:28px;height:28px;border-radius:9px;background:var(--orangeSoft);display:grid;place-items:center;color:var(--orange2);font-size:10px;font-weight:800}.feed-copy{min-width:0}.feed-copy b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-copy span{display:block;color:var(--muted);font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-time{font-size:10px;color:var(--muted)}.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}.stat{padding:6px;border-radius:10px}.stat:hover{background:var(--bg)}.stat-num{display:block;font-size:17px;font-weight:780;letter-spacing:-.05em}.stat-label{display:block;font-size:10px;color:var(--muted);line-height:1.2;margin-top:4px}
-.context-card,.profile-card{position:absolute;right:18px;top:86px;width:min(296px,calc(100vw - 28px));z-index:18;padding:15px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.25s var(--ease)}.context-card.open,.profile-card.open{opacity:1;transform:none;pointer-events:auto}.context-head{display:flex;justify-content:space-between;gap:10px}.context-title{font-size:15px;font-weight:780;letter-spacing:-.035em}.context-sub{font-size:10px;color:var(--muted);margin-top:3px}.close-mini{border:0;background:transparent;color:var(--muted);font-size:19px;cursor:pointer}.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px}.metric{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px}.metric b{display:block;font-size:15px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.profile-top{display:flex;align-items:center;gap:11px;padding-right:22px}.profile-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--orangeSoft),rgba(239,123,69,.18));display:grid;place-items:center;color:var(--orange2);font-weight:800;font-size:12px}.profile-name{font-size:15px;font-weight:780}.profile-role{font-size:10px;color:var(--muted);margin-top:2px}.profile-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 7px;border-radius:999px;background:rgba(67,162,118,.09);color:var(--green);font-size:10px;font-weight:700}.profile-badge i{width:5px;height:5px;border-radius:50%;background:currentColor}.profile-details{display:grid;gap:7px;margin-top:13px}.detail-row{display:flex;justify-content:space-between;gap:11px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.detail-row span:first-child{color:var(--muted)}.detail-row span:last-child{text-align:right;font-weight:650}
+.context-card,.profile-card{position:absolute;right:22px;top:22px;width:296px;z-index:18;padding:15px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.25s var(--ease)}.context-card.open,.profile-card.open{opacity:1;transform:none;pointer-events:auto}.context-head{display:flex;justify-content:space-between;gap:10px}.context-title{font-size:15px;font-weight:780;letter-spacing:-.035em}.context-sub{font-size:10px;color:var(--muted);margin-top:3px}.close-mini{border:0;background:transparent;color:var(--muted);font-size:19px;cursor:pointer}.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px}.metric{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px}.metric b{display:block;font-size:15px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.profile-top{display:flex;align-items:center;gap:11px;padding-right:22px}.profile-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--orangeSoft),rgba(239,123,69,.18));display:grid;place-items:center;color:var(--orange2);font-weight:800;font-size:12px}.profile-name{font-size:15px;font-weight:780}.profile-role{font-size:10px;color:var(--muted);margin-top:2px}.profile-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 7px;border-radius:999px;background:rgba(67,162,118,.09);color:var(--green);font-size:10px;font-weight:700}.profile-badge i{width:5px;height:5px;border-radius:50%;background:currentColor}.profile-details{display:grid;gap:7px;margin-top:13px}.detail-row{display:flex;justify-content:space-between;gap:11px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.detail-row span:first-child{color:var(--muted)}.detail-row span:last-child{text-align:right;font-weight:650}
 .side-tools{position:absolute;top:50%;translate:0 -50%;z-index:13;display:grid;gap:10px}.side-tools.left{left:22px}.side-tools.right{right:22px}.side-tool-card{width:168px;height:42px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:var(--soft);backdrop-filter:blur(14px);text-decoration:none;color:var(--text);font-size:10.5px;font-weight:700;letter-spacing:-.01em;transition:transform .24s var(--ease),border-color .24s var(--ease),background .24s var(--ease),box-shadow .24s var(--ease)}.side-tool-card:hover{transform:translateY(-2px);border-color:rgba(239,123,69,.28);background:var(--orangeSoft);box-shadow:0 12px 28px rgba(239,123,69,.11)}.side-tool-icon{width:23px;height:23px;border-radius:8px;background:var(--orangeSoft);color:var(--orange2);display:grid;place-items:center;font-size:11px;flex:0 0 auto}.side-tools.right .side-tool-card{flex-direction:row-reverse;justify-content:flex-end}.side-tools.right .side-tool-icon{margin-left:auto}
 .map-tools{position:absolute;right:22px;bottom:22px;z-index:16;display:flex;align-items:center;gap:8px}.tool-group{display:flex;padding:4px;border-radius:15px;background:var(--card);border:1px solid var(--line);box-shadow:var(--soft);backdrop-filter:blur(14px)}.tool-btn{width:36px;height:36px;border:0;background:transparent;border-radius:10px;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.2s var(--ease)}.tool-btn:hover{background:var(--bg);color:var(--text);transform:scale(1.04)}.map-hint{position:absolute;left:50%;top:18px;bottom:auto;translate:-50% 0;z-index:10;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid var(--line);font-size:10px;color:var(--muted);backdrop-filter:blur(12px)}.tooltip{position:fixed;z-index:1000;pointer-events:none;opacity:0;transform:translateY(5px) scale(.98);transition:.17s ease;background:rgba(28,30,32,.95);color:white;padding:9px 10px;border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.18);max-width:220px}.tooltip.show{opacity:1;transform:none}.tooltip b{display:block;font-size:10.5px}.tooltip span{display:block;font-size:10px;color:rgba(255,255,255,.68);margin-top:3px;line-height:1.3}
 .mobile-search-button{display:none}.mobile-sheet{display:none}
@@ -630,7 +627,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* Clearer map guidance and an explicit camera-follow state. */
 .map-hint{font-size:10px;padding:8px 12px;box-shadow:0 5px 18px rgba(31,35,38,.05)}
-.follow-chip{position:absolute;left:50%;top:76px;translate:-50% -6px;z-index:19;display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 6px 5px 10px;border:1px solid rgba(239,123,69,.18);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 10px 28px rgba(31,35,38,.10);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.2s var(--ease)}
+.follow-chip{position:absolute;left:50%;top:50px;translate:-50% -6px;z-index:19;display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 6px 5px 10px;border:1px solid rgba(239,123,69,.18);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 10px 28px rgba(31,35,38,.10);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.2s var(--ease)}
 .follow-chip.show{opacity:1;translate:-50% 0;pointer-events:auto}
 .follow-chip span{color:var(--muted);font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}
 .follow-chip b{font-size:10px;color:var(--text)}
@@ -693,7 +690,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .today-panel.ops-panel{width:230px}
   .ops-tab{font-size:10px}
   .live-panel{width:min(340px,calc(100% - 84px));max-width:min(340px,calc(100% - 84px))}
-  .follow-chip{top:64px}
+  .follow-chip{top:42px}
   .office-chat{width:min(390px,calc(100% - 24px))}
   .today-panel.ops-panel.expanded{left:10px;right:10px;top:10px;width:auto;height:calc(100% - 20px);max-height:calc(100% - 20px)}
 }
@@ -705,7 +702,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .today-metric{min-height:49px;padding:8px 7px}.today-number{font-size:18px}.today-label{font-size:10px}
   .staff-directory-list,.workload-list,.recent-jobs{max-height:165px}.staff-directory-row,.workload-row{padding:6px}.job-row{padding:7px}
   .live-panel{left:8px;right:8px;width:auto;max-width:none}
-  .follow-chip{top:68px;max-width:calc(100% - 16px)}
+  .follow-chip{top:46px;max-width:calc(100% - 16px)}
   .follow-chip span{display:none}
   .profile-card,.context-card{width:auto;padding:15px}
   .notification-panel{left:8px;right:8px;width:auto}
@@ -714,8 +711,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* V26 collision prevention: detail cards sit beside Office Pulse instead of over it. */
-@media(min-width:1181px){.profile-card,.context-card{right:320px;top:92px}}
-@media(min-width:921px) and (max-width:1180px){.profile-card,.context-card{right:278px;top:90px}}
+@media(min-width:1181px){.profile-card,.context-card{right:320px;top:18px}}
+@media(min-width:921px) and (max-width:1180px){.profile-card,.context-card{right:278px;top:14px}}
 
 /* V26 department/chat polish */
 .office-chat-head-actions{display:flex;align-items:center;gap:6px}
@@ -913,7 +910,7 @@ body{overscroll-behavior:none;}
 @media(max-width:650px){.ops-sync-strip small{display:none}.ops-sync-strip>div{grid-template-columns:auto minmax(0,1fr)}.ops-insights{grid-template-columns:repeat(2,1fr)}.ops-insights>div{padding:5px 4px}.ops-insights b{font-size:10px}.ops-insights span{font-size:10px}.feed-title-row em{display:none}}
 
 /* V42 · Operations Refinement */
-.ops-sync-strip{align-items:flex-start}.ops-sync-strip .ops-sync-main{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px;align-items:center}.ops-sync-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.ops-data-age{font-size:10px;color:var(--muted);white-space:nowrap}.ops-data-age.stale{color:#a56f25;font-weight:800}.ops-sync-strip span[data-mode="stale"]{background:rgba(217,154,56,.14);color:#98691f}
+.ops-sync-strip{align-items:flex-start}.ops-sync-strip .ops-sync-main{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px;align-items:center}.ops-sync-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.ops-data-age{font-size:10px;color:var(--muted);white-space:nowrap}.ops-data-age.stale{color:#a56f25;font-weight:800}.ops-sync-strip span[data-mode="stale"]{background:rgba(217,154,56,.14);color:#98691f}.ops-mapping-btn{border:1px solid var(--line);background:var(--solid);color:#666d72;border-radius:8px;padding:4px 6px;font-size:10px;font-weight:850;cursor:pointer}.ops-mapping-btn:hover{background:var(--orangeSoft);color:var(--orange2);border-color:rgba(239,123,69,.24)}
 .ops-reconcile{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:6px;padding:6px 7px;border-radius:9px;background:rgba(247,247,245,.72);border:1px solid var(--line)}.ops-reconcile span{font-size:10px;color:#676d72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ops-unmapped-btn{border:0;border-radius:999px;background:#f0f1ef;color:#6f7478;padding:4px 6px;font-size:10px;font-weight:850;cursor:pointer;white-space:nowrap}.ops-unmapped-btn.warning{background:rgba(217,154,56,.14);color:#9a6a21}.ops-unmapped-btn[hidden]{display:none}
 .ops-secondary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:5px}.ops-secondary-metrics .today-metric{min-height:42px;padding:7px 6px;text-align:center}.ops-secondary-metrics .today-number{font-size:14px}.ops-secondary-metrics .today-label{font-size:10px}.ops-secondary-metrics .danger .today-number{color:#c65353}.ops-secondary-metrics .good .today-number{color:#43a276}
 .ops-daily-summary{margin-top:7px;padding:8px 9px;border-radius:10px;background:linear-gradient(135deg,rgba(239,123,69,.08),rgba(255,255,255,.72));border:1px solid rgba(239,123,69,.12)}.ops-daily-summary b{display:block;font-size:10px}.ops-daily-summary span{display:block;margin-top:3px;font-size:10px;line-height:1.35;color:var(--muted)}
@@ -923,8 +920,9 @@ body{overscroll-behavior:none;}
 .workload-smart{grid-template-columns:32px minmax(0,1fr) auto auto!important}.workload-mini{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}.workload-mini i{font-style:normal;font-size:10px;padding:2px 4px;border-radius:999px;background:#f1f2f0;color:#73797d}.workload-mini i.danger{background:rgba(203,74,74,.08);color:#b95050}.workload-level{align-self:center}
 .job-status.unmapped{background:rgba(217,154,56,.13);color:#96681f}
 .feed-system{opacity:.64}.feed-system:hover{opacity:.9}.feed-glyph{font-size:11px;background:#f1f2ef;color:#747a7f}.feed-title-row b small{font-size:10px;color:#9a6d4f;font-weight:900}
+.stage-mapping-dialog{width:min(560px,calc(100vw - 28px))}.stage-mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.stage-map-field{display:grid;gap:5px}.stage-map-field span{font-size:10px;font-weight:800;color:#62686d}.stage-map-field textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:11px;background:var(--bg);padding:8px;color:var(--text);font:600 10px/1.4 var(--ui);outline:none}.stage-map-field textarea:focus{background:var(--solid);border-color:rgba(239,123,69,.32);box-shadow:0 0 0 3px rgba(239,123,69,.07)}
 .today-panel.ops-panel.expanded{width:min(640px,calc(100% - 44px))}.today-panel.ops-panel.expanded .ops-secondary-metrics{gap:7px}.today-panel.ops-panel.expanded .ops-secondary-metrics .today-metric{min-height:62px}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(4,1fr);gap:7px}.today-panel.ops-panel.expanded .ops-stage-health>div{padding:10px}.today-panel.ops-panel.expanded .ops-stage-health b{font-size:17px}.today-panel.ops-panel.expanded .ops-alerts{gap:7px}.today-panel.ops-panel.expanded .ops-alert{padding:9px}.today-panel.ops-panel.expanded .ops-alert span{font-size:10px}.today-panel.ops-panel.expanded .ops-alert b{font-size:15px}.today-panel.ops-panel.expanded .ops-staff-load button{grid-template-columns:32px minmax(0,1fr) auto;padding:8px}.today-panel.ops-panel.expanded .ops-load-avatar{width:32px;height:32px}.today-panel.ops-panel.expanded .ops-staff-load b{font-size:10px}.today-panel.ops-panel.expanded .ops-staff-load small{font-size:10px}
-@media(max-width:650px){.ops-sync-strip{gap:5px}.ops-sync-actions{display:grid;justify-items:end}.ops-data-age{font-size:10px}.ops-secondary-metrics{grid-template-columns:repeat(2,1fr)}.ops-alerts{grid-template-columns:repeat(2,1fr)}.ops-stage-health{grid-template-columns:1fr 1fr}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.ops-sync-strip{gap:5px}.ops-sync-actions{display:grid;justify-items:end}.ops-data-age{font-size:10px}.ops-mapping-btn{font-size:10px;padding:3px 5px}.ops-secondary-metrics{grid-template-columns:repeat(2,1fr)}.ops-alerts{grid-template-columns:repeat(2,1fr)}.ops-stage-health{grid-template-columns:1fr 1fr}.stage-mapping-grid{grid-template-columns:1fr}.stage-map-field textarea{min-height:70px}.today-panel.ops-panel.expanded .ops-stage-health{grid-template-columns:repeat(2,1fr)}}
 .ops-primary-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.ops-primary-metrics .today-metric{min-height:48px;padding:7px 5px;text-align:center}.ops-primary-metrics .today-number{font-size:16px}.ops-primary-metrics .today-label{font-size:10px}.ops-mini-head{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid var(--line)}.ops-mini-head span{font-size:10px;font-weight:850}.ops-mini-head small{font-size:10px;color:var(--muted)}.today-panel.ops-panel.expanded .ops-primary-metrics{gap:7px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-metric{min-height:72px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-number{font-size:23px}.today-panel.ops-panel.expanded .ops-primary-metrics .today-label{font-size:10px}@media(max-width:650px){.ops-primary-metrics{grid-template-columns:repeat(2,1fr)}}
 
 </style>
@@ -975,84 +973,12 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v51.css?v=57.0">
 <link rel="stylesheet" href="office-v52.css?v=57.0">
   <script src="supabase-config.js"></script>
-  <script src="supabase-bridge.js?v=86.25"></script>
-<script src="ks-motion.js?v=59.0" defer></script>
-<script src="office-plus-ui.js?v=67.0" defer></script>
+  <script src="supabase-bridge.js"></script>
+  <script src="job-rules.js"></script>
+<script src="ks-motion.js?v=58.1" defer></script>
+<script src="office-plus-ui.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
-<link rel="stylesheet" href="office-plus.css?v=67.0">
-<link rel="stylesheet" href="office-v59-clean.css?v=61.0">
-<style id="ks-v60-emoji-picker">
-.character-emoji-picker{position:absolute;z-index:52;display:grid;gap:8px;min-width:194px;max-width:min(92vw,220px);padding:10px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(31,35,38,.08);box-shadow:0 16px 34px rgba(31,35,38,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
-.character-emoji-picker.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.character-emoji-picker[hidden]{display:none!important}
-.character-emoji-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:1px 1px 2px}.character-emoji-head strong{font-size:11px;line-height:1.1;color:#31363c;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.character-emoji-head span{display:block;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa0a6}.character-emoji-close{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid rgba(31,35,38,.07);background:#fff;color:#727a80;cursor:pointer;font:700 14px/1 var(--ui)}
-.character-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.emoji-choice-btn{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid rgba(31,35,38,.08);border-radius:12px;background:#fff;color:#4d535a;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease,background .16s ease}.emoji-choice-btn:hover,.emoji-choice-btn:focus-visible,.emoji-choice-btn.active{transform:translateY(-1px);border-color:rgba(239,123,69,.26);box-shadow:0 6px 13px rgba(239,123,69,.12);color:#dc6b33;outline:none;background:#fff8f3}.emoji-choice-btn .emoji-icon{font-size:17px;line-height:1}.emoji-choice-btn .emoji-copy{display:grid;gap:1px;text-align:left}.emoji-choice-btn .emoji-copy b{font-size:10.5px;line-height:1.05}.emoji-choice-btn .emoji-copy small{display:none}
-.character-emoji-actions{display:grid;grid-template-columns:1fr;gap:6px}.emoji-clear-btn{height:34px;border-radius:11px;border:1px solid rgba(31,35,38,.08);background:#faf8f6;color:#6c747b;font:700 10.5px/1 var(--ui);letter-spacing:.02em;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease}.emoji-clear-btn:hover,.emoji-clear-btn:focus-visible{background:#fff0ea;border-color:rgba(239,123,69,.24);color:#d46a34;outline:none}
-.bubble-emoji .activity-bubble{min-width:52px;max-width:70px!important;padding:8px 9px!important;text-align:center!important;font-size:21px!important;line-height:1!important;border-color:rgba(239,123,69,.18)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 12px 28px rgba(31,35,38,.12)!important}.bubble-emoji .activity-bubble:after{bottom:-4px;width:8px;height:8px}
-@media(max-width:920px){.character-emoji-picker{min-width:184px;max-width:208px;padding:9px;border-radius:14px}.character-emoji-grid{gap:6px}.emoji-choice-btn{padding:8px}}
-@media(max-width:650px){.character-emoji-picker{left:10px!important;right:10px!important;top:auto!important;bottom:76px;max-width:none;min-width:0}.character-emoji-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.emoji-choice-btn{justify-content:center;padding:9px 5px}.emoji-choice-btn .emoji-copy{display:none}.emoji-choice-btn .emoji-icon{font-size:19px}}
-</style>
-
-<style id="ks-v86-23-staff-interactions">
-/* Keep the selected employee controls above the WebGL scene and operations. */
-#profileCard.open{z-index:65!important;display:block!important;visibility:visible!important;pointer-events:auto!important;opacity:1!important;min-height:180px;overflow-y:auto;overscroll-behavior:contain}
-#profileCard .ks-staff-tabs{position:sticky;top:-17px;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 25px 14px 0;padding:5px;background:rgba(255,255,255,.97);border:1px solid #e8e3dc;border-radius:13px;z-index:2}
-#profileCard .ks-staff-tabs button{font:750 12px/1.2 Inter,system-ui,sans-serif;padding:10px 8px;border:0;border-radius:9px;background:transparent;color:#737778;cursor:pointer}
-#profileCard .ks-staff-tabs button.active,#profileCard .ks-staff-tabs button[aria-selected=true]{background:#fff0e4;color:#b65d27;box-shadow:inset 0 0 0 1px #f1cbb0}
-#profileCard .ks-staff-tabs button:focus-visible,#profileCard .ks-staff-emoji-choice:focus-visible{outline:2px solid #df783d;outline-offset:2px}
-#profileCard .ks-staff-tab-content[hidden],#profileCard .ks-staff-emoji-panel[hidden]{display:none!important}
-#profileCard .ks-staff-quick-emoji{border-top:1px solid #ebe6dd;margin-top:12px;padding-top:12px}
-#profileCard .ks-staff-quick-heading{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:8px}
-#profileCard .ks-staff-quick-heading strong{font-size:11px;color:#5d6165}
-#profileCard .ks-staff-quick-heading span{font-size:10px;color:#83878a}
-#profileCard .ks-staff-quick-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
-#profileCard .ks-staff-quick-grid button{border:1px solid #ece5dc;border-radius:10px;background:#fff;cursor:pointer;min-height:38px;font-size:20px;display:grid;place-items:center;padding:2px}
-#profileCard .ks-staff-quick-grid button[aria-pressed="true"]{border-color:#df935d;background:#ffead8;box-shadow:0 0 0 1px #df935d inset}
-#profileCard .ks-staff-quick-grid button:focus-visible{outline:2px solid #df783d;outline-offset:2px}
-#profileCard .ks-staff-emoji-panel{min-height:180px;padding-bottom:8px}
-#profileCard .ks-staff-emoji-title{font-size:11px;font-weight:750;color:#5d6165;margin:4px 0 12px}
-#profileCard .ks-staff-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#profileCard .ks-staff-emoji-choice{display:flex;align-items:center;gap:9px;min-height:45px;padding:8px;border:1px solid #e9e3dc;border-radius:11px;background:#fff;color:#565e64;cursor:pointer;text-align:left}
-#profileCard .ks-staff-emoji-choice span{font-size:22px}#profileCard .ks-staff-emoji-choice b{font-size:11px}
-#profileCard .ks-staff-emoji-choice[aria-pressed=true]{background:#fff5ed;border-color:#ebad83;color:#b65d27}
-#profileCard .ks-staff-emoji-clear{margin-top:11px;width:100%;min-height:36px;border:1px solid #e6dfd7;border-radius:10px;background:#fbfaf8;color:#656d74;cursor:pointer;font-weight:700;font-size:11px}
-@media(max-width:920px){#profileCard.open{z-index:80!important;max-height:min(510px,65vh)!important}#profileCard .ks-staff-tabs{top:-15px}}
-@media(max-width:650px){#profileCard.open{position:absolute!important;left:10px!important;right:10px!important;top:105px!important;bottom:auto!important;width:auto!important;max-height:min(450px,58vh)!important}}
-</style>
-<link rel="stylesheet" href="suite-header-v61.css?v=66.0">
-<style id="ks-v67-footer-cleanup">
-  #todayPanel .ops-sync-strip{display:none!important}
-  #ksDock{gap:12px!important}
-  #ksDock .ks-version-footer,.ks-version-footer{
-    display:inline-flex!important;align-items:center!important;gap:10px!important;
-    max-width:min(95vw,530px)!important;width:max-content!important;
-    font:700 10px/1.2 Inter,system-ui,sans-serif!important;
-    letter-spacing:.01em!important;color:#727a80!important;white-space:nowrap!important;
-  }
-  #ksDock .ks-version-footer{flex:0 0 auto!important;margin:0!important}
-  .ks-version-footer .ks-build-label{color:#535d66;font-weight:850}
-  .ks-version-footer .ks-footer-divider{display:block;flex:0 0 1px;height:13px;background:rgba(110,120,128,.23)}
-  .ks-version-footer .ks-footer-last-sync{color:#737c83;font-weight:650;font-variant-numeric:tabular-nums}
-  @media(max-width:920px){
-    #ksDock .ks-version-footer{display:inline-flex!important;opacity:1!important;position:static!important;inset:auto!important;max-width:calc(100vw - 40px)!important}
-    #ksDock{gap:8px!important}
-    #ksDock .ks-version-footer{font-size:9px!important}
-  }
-  @media(max-width:650px){
-    #ksDock .ks-version-footer{display:inline-flex!important;gap:6px!important}
-    #ksDock .ks-footer-last-sync{max-width:190px;overflow:hidden;text-overflow:ellipsis}
-  }
-  @media print{.ks-version-footer,#ksDock .ks-version-footer{display:none!important}}
-</style>
-<link rel="stylesheet" href="office-moods.css?v=70.0">
-<link rel="stylesheet" href="office-profile-layout.css?v=75.0">
-<link rel="stylesheet" href="office-living-office.css?v=86.4">
-<link rel="stylesheet" href="office-smart-labels.css?v=80.0">
-<link rel="stylesheet" href="office-command.css?v=86.1">
-<link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
-<link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
-<link rel="stylesheet" href="office-character-studio.css?v=86.9">
-<link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-mobile-layout.css?v=86.30.1">
+<link rel="stylesheet" href="office-plus.css?v=58.1">
 </head>
 <body>
 <div class="app" id="app" data-theme="light">
@@ -1082,9 +1008,13 @@ body{overscroll-behavior:none;}
 </div>
 </div></header>
 <main class="map-shell" id="mapShell">
+<div class="studio-toolbar" data-sync-ignore>
+ <nav id="deptNav" aria-label="Filter office team"></nav>
+ <div class="studio-view-controls"><button id="studio3d" class="active" aria-pressed="true">3D office</button><button id="studioPlan" aria-pressed="false">Top view</button><button id="studioPause" aria-label="Pause people animation" aria-pressed="false">Pause</button><button id="studioRotate" aria-label="Auto rotate office" aria-pressed="false">Rotate</button></div><div class="scene-emote-toolbar" role="group" aria-label="Selected worker animations"><span>EMOTES</span><button type="button" data-scene-emote="wave" title="Wave">👋 Wave</button><button type="button" data-scene-emote="dance" title="Dance">♫ Dance</button><button type="button" data-scene-emote="celebrate" title="Celebrate">✦ Cheer</button><button type="button" data-scene-emote="stretch" title="Stretch">↟ Stretch</button></div>
+</div>
 <div id="office3dHost" role="region" aria-label="Interactive 3D office floor. Drag to rotate, scroll to zoom, or select a staff name."></div>
 <div id="office3dLoading" role="status">Opening your studio…</div>
-<div class="studio-note">Character movement synced via Supabase · Camera stays personal</div>
+<div class="studio-note">People movement is illustrative · Jobs and workload use shared records</div>
 <button id="opsMobileToggle" aria-controls="todayPanel" aria-expanded="false">Operations</button>
 <svg id="officeSvg" viewBox="0 0 1240 760" aria-label="Interactive level 2 office map">
 <defs>
@@ -1129,7 +1059,7 @@ body{overscroll-behavior:none;}
 <button class="live-reopen-tab" id="liveReopenBtn" aria-label="Open live activity"><i class="pulse-dot"></i><span>Live Activity</span></button>
 <aside class="today-panel panel ops-panel" id="todayPanel" aria-label="Operations command panel">
   <div class="ops-head">
-    <div><span class="today-kicker">Office Plus</span><strong>Office Pulse</strong></div>
+    <div><span class="today-kicker">Operations</span><strong>Office Pulse+</strong></div>
     <div class="ops-source"><i id="opsSourceDot"></i><span id="opsSource">Waiting</span><button id="opsExpandBtn" title="Expand Office Pulse" aria-label="Expand Office Pulse" aria-expanded="false">⤢</button><button id="jobLinkSettingsBtn" title="Edit Job Management link" aria-label="Edit Job Management link">✎</button><button id="opsRefresh" title="Refresh Job Management data" aria-label="Refresh Job Management data">↻</button></div>
   </div>
   <div class="ops-tabs" role="tablist" aria-label="Operations views">
@@ -1139,37 +1069,34 @@ body{overscroll-behavior:none;}
     <button class="ops-tab" data-ops-tab="jobs" role="tab" aria-selected="false">Jobs</button>
   </div>
   <div class="ops-view active" data-ops-view="pulse">
-    <div class="ops-secondary-metrics ks-pulse-main-metrics" aria-label="Job summary">
-      <button class="today-metric" data-ops-quick="active"><span class="today-number">0</span><span class="today-label">Active</span></button>
-      <button class="today-metric" data-ops-quick="dueToday"><span class="today-number">0</span><span class="today-label">Due today</span></button>
-      <button class="today-metric danger" data-ops-quick="overdue"><span class="today-number">0</span><span class="today-label">Overdue</span></button>
-      <button class="today-metric good" data-ops-quick="completedToday"><span class="today-number">0</span><span class="today-label">Done today</span></button>
+    <div class="ops-sync-strip">
+      <div class="ops-sync-main"><span id="opsSyncHealth" data-mode="empty">EMPTY</span><b id="opsLastSync">Waiting for Job Management</b></div>
+      <div class="ops-sync-actions"><small id="opsDataAge" class="ops-data-age">No live data</small><button id="opsMappingBtn" class="ops-mapping-btn" type="button" title="Edit shared status-to-stage mapping">Mapping</button></div>
     </div>
-    <div class="ks-pulse-section-line"><span>Pipeline</span><a href="job-management.html" title="Open Job Management">Manage jobs ↗</a></div>
+    <div class="today-grid ops-primary-metrics">
+      <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
+      <button class="today-metric" data-ops-metric="artwork"><span class="today-number">0</span><span class="today-label">Artwork</span></button>
+      <button class="today-metric" data-ops-metric="production"><span class="today-number">0</span><span class="today-label">Production</span></button>
+      <button class="today-metric completed" data-ops-metric="completed"><span class="today-number">0</span><span class="today-label">Completed</span></button>
+    </div>
+    <div class="ops-secondary-metrics">
+      <button class="today-metric" data-ops-quick="active"><span class="today-number">0</span><span class="today-label">Active</span></button>
+      <button class="today-metric" data-ops-quick="dueToday"><span class="today-number">0</span><span class="today-label">Due Today</span></button>
+      <button class="today-metric danger" data-ops-quick="overdue"><span class="today-number">0</span><span class="today-label">Overdue</span></button>
+      <button class="today-metric good" data-ops-quick="completedToday"><span class="today-number">0</span><span class="today-label">Done Today</span></button>
+    </div>
     <div class="ops-pipeline" aria-label="Job Management pipeline"><div id="opsPipelineBar" class="ops-pipeline-bar"></div></div>
-    <div class="ks-pulse-stage-labels" aria-label="Pipeline stages"><span>Orders</span><span>Artwork</span><span>Production</span><span>Completed</span></div>
-    <div class="ks-pulse-section-line"><span>Needs attention</span><small>Next 3 days</small></div>
-    <div id="ksPulsePriority" class="ks-pulse-priority" aria-live="polite"><span class="ks-pulse-empty">Waiting for jobs…</span></div>
-    <div class="ops-mini-head"><span>Team workload</span><button type="button" id="ksPulseAllStaff" class="ks-pulse-text-btn">All workloads ↗</button></div>
+    <div class="ops-reconcile"><span id="opsReconcile">0 Sheet rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
+    <div id="opsDailySummary" class="ops-daily-summary"><b>Today</b><span>Waiting for Job Management data.</span></div>
+    <div id="opsStageHealth" class="ops-stage-health"></div>
+    <div id="opsAlerts" class="ops-alerts"></div>
+    <div class="ops-mini-head"><span>Team workload</span><small>PIC + Designer</small></div>
     <div id="opsStaffLoad" class="ops-staff-load"></div>
-    <details class="ks-pulse-extra" id="ksPulseExtra">
-      <summary>More details <span>Stages, alerts & links</span></summary>
-      <div class="today-grid ops-primary-metrics">
-        <button class="today-metric" data-ops-metric="orders"><span class="today-number">0</span><span class="today-label">Orders</span></button>
-        <button class="today-metric" data-ops-metric="artwork"><span class="today-number">0</span><span class="today-label">Artwork</span></button>
-        <button class="today-metric" data-ops-metric="production"><span class="today-number">0</span><span class="today-label">Production</span></button>
-        <button class="today-metric completed" data-ops-metric="completed"><span class="today-number">0</span><span class="today-label">Completed</span></button>
-      </div>
-      <div class="ops-reconcile"><span id="opsReconcile">0 Sheet rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
-      <div id="opsDailySummary" class="ops-daily-summary"><b>Today</b><span>Waiting for Job Management data.</span></div>
-      <div id="opsStageHealth" class="ops-stage-health"></div>
-      <div id="opsAlerts" class="ops-alerts"></div>
-      <div class="ops-note" id="opsNote">Waiting for shared Job Management data.</div>
-      <div class="ops-resources">
-        <a id="jobManagementResource" class="ops-resource" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer"><span>▦</span><b>Job Management</b><em>↗</em></a>
-        <div class="ops-resource-wrap"><a id="googleDriveResource" class="ops-resource" href="https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B" target="_blank" rel="noopener noreferrer"><span>◫</span><b>Google Drive</b><em>↗</em></a><button id="driveLinkSettingsBtn" class="ops-resource-edit" title="Edit shared Google Drive link" aria-label="Edit shared Google Drive link">✎</button></div>
-      </div>
-    </details>
+    <div class="ops-note" id="opsNote">Waiting for shared Job Management data.</div>
+    <div class="ops-resources">
+      <a id="jobManagementResource" class="ops-resource" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer"><span>▦</span><b>Job Management</b><em>↗</em></a>
+      <div class="ops-resource-wrap"><a id="googleDriveResource" class="ops-resource" href="https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B" target="_blank" rel="noopener noreferrer"><span>◫</span><b>Google Drive</b><em>↗</em></a><button id="driveLinkSettingsBtn" class="ops-resource-edit" title="Edit shared Google Drive link" aria-label="Edit shared Google Drive link">✎</button></div>
+    </div>
   </div>
   <div class="ops-view" data-ops-view="staff">
     <div class="ops-section-title staff-section-title"><span>Staff directory</span><button id="addStaffBtn" class="ops-add-staff">+ Add staff</button></div>
@@ -1196,29 +1123,15 @@ body{overscroll-behavior:none;}
 </section>
 <button class="office-chat-launcher" id="chatLauncher" aria-label="Open office chat" aria-expanded="false"><span>⌁</span><b>Chat</b><i id="chatUnread" hidden>0</i></button>
 <div class="map-tools">
-  <label class="ks-quality-mini" for="ksVisualQuality" title="3D graphics quality for this device"><span>3D</span><select id="ksVisualQuality" aria-label="3D graphics quality"><option value="eco">Eco</option><option value="balanced">Balanced</option><option value="high">High</option></select></label>
   <div class="rotation-control" aria-label="Rotate office model">
     <button class="tool-btn rotate-btn" id="rotateLeft" title="Rotate left" aria-label="Rotate left">↶</button>
     <button class="rotation-readout rotation-reset" id="rotationReadout" title="Reset rotation" aria-label="Reset rotation">0°</button>
     <button class="tool-btn rotate-btn" id="rotateRight" title="Rotate right" aria-label="Rotate right">↷</button>
   </div>
-  <div class="tool-group" aria-label="Zoom and view controls">
-    <button class="tool-btn" id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button><button class="tool-btn" id="resetView" title="Reset view and rotation" aria-label="Reset view and rotation">⌂</button><button class="tool-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Fullscreen">⛶</button><button class="tool-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
-  </div>
+  <div class="tool-group"><button class="tool-btn" id="zoomOut">−</button><button class="tool-btn" id="resetView" title="Reset view and rotation">⌂</button><button class="tool-btn" id="fullscreenBtn">⛶</button><button class="tool-btn" id="zoomIn">+</button></div>
 </div>
 <div class="map-hint">Click staff to follow · drag to rotate · right-drag to move · scroll to zoom</div>
 <div class="follow-chip" id="followChip" aria-hidden="true"><span>Following</span><b id="followChipName"></b><button id="followChipStop" type="button" aria-label="Stop following staff">×</button></div>
-<div class="character-emoji-picker" id="characterEmojiPicker" hidden aria-hidden="true">
-  <div class="character-emoji-head"><div><span>Mood</span><strong id="characterEmojiName">Choose mood</strong></div><button type="button" class="character-emoji-close" id="characterEmojiClose" aria-label="Close emoji picker">×</button></div>
-  <div class="character-emoji-grid">
-    <button type="button" class="emoji-choice-btn" data-emoji-mood="happy" data-emoji="😊"><span class="emoji-icon">😊</span><span class="emoji-copy"><b>Happy</b><small>Positive mood</small></span></button>
-    <button type="button" class="emoji-choice-btn" data-emoji-mood="sad" data-emoji="😔"><span class="emoji-icon">😔</span><span class="emoji-copy"><b>Sad</b><small>Low energy</small></span></button>
-    <button type="button" class="emoji-choice-btn" data-emoji-mood="angry" data-emoji="😠"><span class="emoji-icon">😠</span><span class="emoji-copy"><b>Angry</b><small>Urgent pressure</small></span></button>
-    <button type="button" class="emoji-choice-btn" data-emoji-mood="badmood" data-emoji="😒"><span class="emoji-icon">😒</span><span class="emoji-copy"><b>Bad mood</b><small>Not feeling it</small></span></button>
-    <button type="button" class="emoji-choice-btn" data-emoji-mood="busy" data-emoji="💻" title="Busy · Focus time"><span class="emoji-icon">💻</span><span class="emoji-copy"><b>Busy</b><small>Focus time</small></span></button>
-  </div>
-  <div class="character-emoji-actions"><button type="button" class="emoji-clear-btn" id="characterEmojiClear">Clear / reset mood</button></div>
-</div>
 </main>
 <div class="tooltip" id="tooltip"></div>
 
@@ -1229,6 +1142,20 @@ body{overscroll-behavior:none;}
     <input id="jobLinkInput" class="job-link-input" type="url" inputmode="url" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=...">
     <div class="job-link-help" id="jobLinkHelp">This link is shared through Supabase and will load for everyone.</div>
     <div class="job-link-actions"><button class="job-link-secondary" id="jobLinkReset">Use default</button><button class="job-link-primary" id="jobLinkSave">Save shared link</button></div>
+  </div>
+</div>
+
+<div class="job-link-modal" id="stageMappingModal" aria-hidden="true" data-sync-ignore>
+  <div class="job-link-dialog stage-mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="stageMappingTitle">
+    <div class="job-link-head"><div><span>Shared Job Management setting</span><strong id="stageMappingTitle">Status → Pipeline Mapping</strong></div><button id="stageMappingClose" aria-label="Close">×</button></div>
+    <div class="stage-mapping-grid">
+      <label class="stage-map-field"><span>ORDERS keywords</span><textarea id="stageOrdersInput" rows="5"></textarea></label>
+      <label class="stage-map-field"><span>ARTWORK keywords</span><textarea id="stageArtworkInput" rows="5"></textarea></label>
+      <label class="stage-map-field"><span>PRODUCTION keywords</span><textarea id="stageProductionInput" rows="5"></textarea></label>
+      <label class="stage-map-field"><span>COMPLETED keywords</span><textarea id="stageCompletedInput" rows="5"></textarea></label>
+    </div>
+    <div class="job-link-help" id="stageMappingHelp">Unknown statuses are flagged as Unmapped so the tally cannot silently drift.</div>
+    <div class="job-link-actions"><button class="job-link-secondary" id="stageMappingReset" type="button">Use defaults</button><button class="job-link-primary" id="stageMappingSave" type="button">Save shared mapping</button></div>
   </div>
 </div>
 
@@ -1250,24 +1177,6 @@ body{overscroll-behavior:none;}
       <label class="staff-form-field"><span>Department</span><select id="staffDepartmentInput"><option>Creative Department</option><option>Sales and Marketing</option><option>Management</option><option>Production Management</option><option>Finance Department</option></select></label>
       <label class="staff-form-field"><span>Character</span><select id="staffGenderInput"><option value="male">Male</option><option value="female">Female</option></select></label>
     </div>
-    <section id="staffCharacterStudio" class="ks-character-studio" aria-labelledby="ksCharHeading">
-      <div class="ks-char-heading"><strong id="ksCharHeading">Character customization</strong><small id="ksCharModelLabel">Classic hijab</small></div>
-      <div class="ks-char-layout">
-        <div id="ksCharPreview" class="ks-char-preview" role="img" aria-label="Character colour preview. Appearance changes are applied after saving.">
-          <div class="ks-char-figure"><div class="ks-char-legs"></div><div class="ks-char-shirt"></div><div class="ks-char-hijab"></div><div class="ks-char-face"></div><div class="ks-char-eyes"></div><div class="ks-char-glasses"></div><div class="ks-char-scarf-tail"></div></div>
-        </div>
-        <div class="ks-char-controls">
-          <label id="ksCharModelRow" class="ks-char-field"><span>Female outfit</span><select id="ksCharModel"><option value="classic">Classic Long Shirt</option><option value="semi-casual">Semi-Casual Shirt</option></select></label>
-          <label id="ksCharHairStyleRow" class="ks-char-field" hidden><span>Men's hairstyle</span><select id="ksCharHairStyle"><option value="fade">Fade</option><option value="quiff">Quiff</option><option value="sidepart">Side Part</option><option value="korean">Korean</option><option value="messy">Messy</option></select></label>
-          <label id="ksCharHairRow" class="ks-char-field" hidden><span>Hair colour</span><input id="ksCharHairColor" type="color" value="#3b2a23" aria-label="Hair colour"><div class="ks-char-swatches" id="ksCharHairSwatches" aria-label="Hair colour presets"></div></label>
-          <label class="ks-char-field"><span>Glasses</span><span class="ks-char-glasses-label"><input type="checkbox" id="ksCharGlasses"> Wear glasses</span></label>
-          <label id="ksCharScarfRow" class="ks-char-field"><span>Hijab colour</span><input id="ksCharScarfColor" type="color" value="#d9796d" aria-label="Hijab colour"><div class="ks-char-swatches" id="ksCharScarfSwatches" aria-label="Hijab colour presets"></div></label>
-          <label class="ks-char-field"><span>Shirt colour</span><input id="ksCharShirtColor" type="color" value="#dcd3bf" aria-label="Shirt colour"><div class="ks-char-swatches" id="ksCharShirtSwatches" aria-label="Shirt colour presets"></div></label>
-          <label class="ks-char-field"><span>Pants colour</span><input id="ksCharPantsColor" type="color" value="#42474b" aria-label="Pants colour"><div class="ks-char-swatches" id="ksCharPantsSwatches" aria-label="Pants colour presets"></div></label>
-        </div>
-      </div>
-      <p class="ks-char-note">Preview colours are approximate. Save staff to update the shared 3D office for everyone.</p>
-    </section>
     <div class="staff-editor-status" id="staffEditorStatus">Staff details are saved to the shared Supabase. Workload is edited from the Workload tab.</div>
     <div class="job-link-actions staff-editor-actions"><button class="staff-remove-btn" id="staffRemoveBtn">Remove staff</button><span></span><button class="job-link-primary" id="staffSaveBtn">Save staff</button></div>
   </div>
@@ -1284,7 +1193,6 @@ body{overscroll-behavior:none;}
 
 <div class="notification-toast" id="notificationToast" aria-live="polite" aria-atomic="true"></div>
 </div>
-<script src="office-character-studio.js?v=86.9"></script>
 <script id="ks-main-js">
 (() => {
   'use strict';
@@ -1294,8 +1202,6 @@ body{overscroll-behavior:none;}
   const $$ = s => [...document.querySelectorAll(s)];
 
   const app = $('#app');
-  const mapShell = $('#mapShell');
-  const office3dHost = $('#office3dHost');
   const svg = $('#officeSvg');
   const camera = $('#camera');
   const modelRotator = $('#modelRotator');
@@ -1336,22 +1242,33 @@ body{overscroll-behavior:none;}
   const workloadList = $('#workloadList');
   const workloadTotal = $('#workloadTotal');
   const followChip=$('#followChip'),followChipName=$('#followChipName'),followChipStop=$('#followChipStop');
-  const characterEmojiPicker=$('#characterEmojiPicker'),characterEmojiName=$('#characterEmojiName'),characterEmojiClose=$('#characterEmojiClose'),characterEmojiClear=$('#characterEmojiClear');
   const recentJobs = $('#recentJobs');
   const jobsFilterLabel = $('#jobsFilterLabel');
   const opsNote = $('#opsNote');
-  let opsLastSync = $('#opsLastSync');
+  const opsLastSync = $('#opsLastSync');
+  const opsSyncHealth = $('#opsSyncHealth');
   const opsTotalJobs = $('#opsTotalJobs');
   const opsActiveJobs = $('#opsActiveJobs');
   const opsCompletedToday = $('#opsCompletedToday');
   const opsDueToday = $('#opsDueToday');
   const opsPipelineBar = $('#opsPipelineBar');
+  const opsDataAge = $('#opsDataAge');
   const opsReconcile = $('#opsReconcile');
   const opsUnmappedBtn = $('#opsUnmappedBtn');
   const opsDailySummary = $('#opsDailySummary');
   const opsAlerts = $('#opsAlerts');
   const opsStageHealth = $('#opsStageHealth');
   const opsStaffLoad = $('#opsStaffLoad');
+  const opsMappingBtn = $('#opsMappingBtn');
+  const stageMappingModal = $('#stageMappingModal');
+  const stageMappingClose = $('#stageMappingClose');
+  const stageMappingSave = $('#stageMappingSave');
+  const stageMappingReset = $('#stageMappingReset');
+  const stageOrdersInput = $('#stageOrdersInput');
+  const stageArtworkInput = $('#stageArtworkInput');
+  const stageProductionInput = $('#stageProductionInput');
+  const stageCompletedInput = $('#stageCompletedInput');
+  const stageMappingHelp = $('#stageMappingHelp');
   const liveLabel = $('#liveLabel');
   const staffDirectoryList = $('#staffDirectoryList');
   const addStaffBtn = $('#addStaffBtn');
@@ -1480,6 +1397,7 @@ body{overscroll-behavior:none;}
   let eventPollTimer=null,eventInitialized=false,lastEventId=0,notificationOpen=false,notificationUnreadCount=0,notificationToastTimer=null,editingWorkloadId=null,jobAutoTimer=null,jobSyncInFlight=false;
   let notifications=[];
   const workloadNoticeIds=new Set();
+  let audioContext=null,audioArmed=false;
   let jobSheetUrl=DEFAULT_JOB_SHEET_URL;
   let jobDataSource='html';
   let jobSheetBase='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo';
@@ -1569,6 +1487,13 @@ body{overscroll-behavior:none;}
   function showNotificationToast(event){
     if(!notificationToast)return;notificationToast.textContent=`${clockTime(event.createdAt)} · ${event.title||'Office update'} · ${event.message||'Updated'}`;notificationToast.classList.add('show');clearTimeout(notificationToastTimer);notificationToastTimer=setTimeout(()=>notificationToast.classList.remove('show'),3200);
   }
+  function armNotificationAudio(){
+    if(audioArmed)return;try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;audioContext=new Ctx();audioContext.resume?.();audioArmed=true}catch(_){}
+  }
+  function playNotificationBeep(){
+    if(!audioContext||audioContext.state!=='running')return;
+    try{const now=audioContext.currentTime,osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(880,now);osc.frequency.exponentialRampToValueAtTime(660,now+.12);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.055,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+.16);osc.connect(gain);gain.connect(audioContext.destination);osc.start(now);osc.stop(now+.18)}catch(_){}
+  }
   function markWorkloadNotice(employeeId){
     const id=Number(employeeId);if(!Number.isFinite(id))return;workloadNoticeIds.add(id);employeeNodes.get(id)?.classList.add('workload-alert');
   }
@@ -1580,7 +1505,7 @@ body{overscroll-behavior:none;}
   }
   function addNotification(event,{initial=false,local=false}={}){
     notifications.unshift(event);if(notifications.length>40)notifications.length=40;renderNotifications();
-    if(!initial&&!local){if(!notificationOpen)setNotificationUnread(notificationUnreadCount+1);showNotificationToast(event);window.KSNotificationSound?.play(event.eventType||'update');}
+    if(!initial&&!local){if(!notificationOpen)setNotificationUnread(notificationUnreadCount+1);showNotificationToast(event);playNotificationBeep();}
   }
   function handleOfficeEvent(event,{initial=false,local=false}={}){
     if(!event||!event.id)return;const type=String(event.eventType||'office_update'),empId=Number(event.employeeId)||null,emp=empId?employeeById[empId]:null;
@@ -1588,9 +1513,8 @@ body{overscroll-behavior:none;}
     addNotification(event,{initial,local});
     if(type==='workload_updated'&&empId){if(!initial){markWorkloadNotice(empId);if(emp)showBubble(emp,event.message||workloadBubbleText(emp)||'Workload updated',{kind:'workload',duration:8200})}loadStaffDirectory({seedIfMissing:false});}
     else if(type==='staff_added'||type==='staff_removed'||type==='staff_updated'){loadStaffDirectory({seedIfMissing:false});}
-    else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});}}
-    else if(type==='mood_cleared'&&empId){loadStaffDirectory({seedIfMissing:false});if(emp)clearMoodBubble(emp.id);}
     else if(type==='job_management_updated'){refreshJobsFromSharedCache();}
+    else if(type==='job_stage_mapping_updated'){initSharedJobManagement();}
     else if(type==='chat_message'){if(!chatOpen)pullChat();}
   }
   async function postOfficeEvent({eventType,title,message='',employeeId=null,metadata={},dedupeKey=''},options={}){
@@ -1654,8 +1578,11 @@ body{overscroll-behavior:none;}
     jobDataSource=cfg.jobDataSource||'html';
     applyJobManagementUrl(cfg.jobManagementUrl||DEFAULT_JOB_SHEET_URL);
     applyGoogleDriveUrl(cfg.googleDriveUrl||DEFAULT_GOOGLE_DRIVE_URL);
-    stageMapping=normalizeStageMapping(DEFAULT_STAGE_MAPPING);renderOps();return cfg;
+    stageMapping=normalizeStageMapping(cfg.jobStageMapping||DEFAULT_STAGE_MAPPING);renderOps();return cfg;
   }
+  function openStageMappingEditor(){if(!stageMappingModal)return;stageOrdersInput.value=mappingText('orders');stageArtworkInput.value=mappingText('artwork');stageProductionInput.value=mappingText('production');stageCompletedInput.value=mappingText('completed');stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Shared mapping. Unknown Job Management statuses will be flagged as Unmapped instead of silently counted.';stageMappingModal.classList.add('open');stageMappingModal.setAttribute('aria-hidden','false');setTimeout(()=>stageOrdersInput?.focus(),40)}
+  function closeStageMappingEditor(){stageMappingModal?.classList.remove('open');stageMappingModal?.setAttribute('aria-hidden','true')}
+  async function saveStageMapping(){const next=normalizeStageMapping({orders:parseMappingText(stageOrdersInput.value),artwork:parseMappingText(stageArtworkInput.value),production:parseMappingText(stageProductionInput.value),completed:parseMappingText(stageCompletedInput.value)});if(!Object.values(next).every(v=>v.length)){stageMappingHelp.className='job-link-help error';stageMappingHelp.textContent='Each stage needs at least one status keyword.';return}stageMappingSave.disabled=true;stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Saving shared stage mapping…';try{const current=await readGlobalConfig(),payload={...current,jobStageMapping:next,jobStageMappingUpdatedAt:Date.now()};const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:GLOBAL_CONFIG_SCOPE,payload,clientId:'dashboard-stage-mapping'})});if(!res.ok)throw new Error(`Save failed (${res.status})`);stageMapping=next;renderOps();stageMappingHelp.className='job-link-help ok';stageMappingHelp.textContent='Saved. Office Pulse reclassified all Job Management rows.';await postOfficeEvent({eventType:'job_stage_mapping_updated',title:'Pipeline mapping updated',message:'Job Management status mapping was changed',dedupeKey:`stage-map:${hashString(JSON.stringify(next))}:${Date.now()}`});setTimeout(closeStageMappingEditor,650)}catch(err){stageMappingHelp.className='job-link-help error';stageMappingHelp.textContent=err.message||'Could not save mapping.'}finally{stageMappingSave.disabled=false}}
   async function saveJobManagementUrl(value){
     const parsed=parseJobManagementUrl(value);if(!parsed.ok)throw new Error(parsed.error);
     const current=await readGlobalConfig();
@@ -1771,6 +1698,8 @@ body{overscroll-behavior:none;}
     }
     return out;
   }
+  function mappingText(key){return (stageMapping[key]||[]).join(', ')}
+  function parseMappingText(value){return [...new Set(String(value||'').split(/[,\n]+/).map(normalizeKey).filter(Boolean))].slice(0,80)}
   function stageMatch(text=''){
     const hay=normalizeKey(text);if(!hay)return null;
     for(const stage of ['completed','artwork','production','orders']){
@@ -1781,6 +1710,7 @@ body{overscroll-behavior:none;}
     return null;
   }
   function classifyJobStage(job){
+    if(jobDataSource==='html' && window.KSJobs?.stage)return{stage:window.KSJobs.stage(job),keyword:'',source:'shared job management'};
     const dept=normalizeKey(job?.currentDepartment||'');
     if(dept){
       if(/closed|complete|completed|done/.test(dept))return{stage:'completed',keyword:dept,source:'current department'};
@@ -1823,11 +1753,10 @@ body{overscroll-behavior:none;}
     return d.getFullYear()===base.getFullYear()&&d.getMonth()===base.getMonth()&&d.getDate()===base.getDate();
   }
   function renderOpsSyncMeta(){
-    if(!opsLastSync)opsLastSync=$('#opsLastSync');
-    if(!opsLastSync)return;
-    if(!opsLastSyncAt){opsLastSync.textContent='Last sync: waiting';opsLastSync.title='Waiting for Job Management synchronization';return}
-    opsLastSync.textContent=`Last sync: ${fullClockTime(opsLastSyncAt)}`;
-    opsLastSync.title=`Last Job Management sync: ${new Date(opsLastSyncAt).toLocaleString('en-MY')} (${relativeEventTime(opsLastSyncAt)})`;
+    const ageMs=opsLastSyncAt?Math.max(0,Date.now()-opsLastSyncAt):null,ageMin=ageMs==null?null:Math.floor(ageMs/60000);
+    if(opsLastSync)opsLastSync.textContent=opsLastSyncAt?`Last sync ${fullClockTime(opsLastSyncAt)} · ${relativeEventTime(opsLastSyncAt)}`:'Waiting for Job Management';
+    if(opsDataAge){opsDataAge.textContent=ageMin==null?'No live data':ageMin<1?'Data age now':`Data age ${ageMin}m`;opsDataAge.classList.toggle('stale',ageMin!=null&&ageMin>=5)}
+    if(opsSyncHealth){const stale=ageMin!=null&&ageMin>=5,liveLabel=jobDataSource==='html'?'LIVE DATABASE':'LIVE SHEET',label=opsDataMode==='live'?(stale?'LIVE · STALE':liveLabel):opsDataMode==='cached'?'SERVER CACHE':'EMPTY';opsSyncHealth.textContent=label;opsSyncHealth.dataset.mode=stale?'stale':opsDataMode}
   }
   function setOpsSource(mode,label,note='',timestamp=null){
     opsDataMode=mode;opsLastSyncSource=label||mode;
@@ -1852,23 +1781,6 @@ body{overscroll-behavior:none;}
   function filterLabel(filter){return({all:'All',active:'Active',orders:'Orders',artwork:'Artwork',production:'Production',completed:'Completed',overdue:'Overdue',dueToday:'Due today',completedToday:'Completed today',unmapped:'Unmapped',noPic:'No PIC',noDesigner:'No Designer',stuckArtwork:'Artwork >2d',stuckProduction:'Production >3d',waitingApproval:'Waiting approval'})[filter]||filter}
   function filteredJobs(){let list=jobs.filter(j=>matchesOpsFilter(j,opsFilter));return list.sort((a,b)=>{const ad=parseLooseDate(a.orderDate)?.getTime()||0,bd=parseLooseDate(b.orderDate)?.getTime()||0;return bd-ad||((a._index??0)-(b._index??0))})}
   function employeeJobStats(emp){const list=activeJobsForEmployee(emp),artwork=list.filter(j=>categoryForJob(j)==='artwork').length,production=list.filter(j=>categoryForJob(j)==='production').length,overdue=list.filter(isOverdueJob).length,level=list.length>=5||overdue>=2?'Busy':list.length>=2?'Normal':'Light';return{list,active:list.length,artwork,production,overdue,level}}
-  function renderPulsePriority(){
-    const root=$('#ksPulsePriority');if(!root)return;
-    const today=new Date();today.setHours(0,0,0,0);
-    const priority=jobs.filter(job=>!isCompletedJob(job)).map(job=>{
-      const date=parseLooseDate(job.due);if(!date)return null;
-      const due=new Date(date.getFullYear(),date.getMonth(),date.getDate());
-      const days=Math.round((due-today)/86400000);
-      return days<=3?{job,days}:null;
-    }).filter(Boolean).sort((a,b)=>a.days-b.days).slice(0,3);
-    if(!priority.length){root.innerHTML='<p class="ks-pulse-empty">No urgent deadlines right now.</p>';return;}
-    root.innerHTML=priority.map(({job,days})=>{
-      const when=days<0?`${-days}d late`:days===0?'Today':`In ${days}d`;
-      const tag=days<0?'late':days===0?'today':'soon';
-      const index=jobs.indexOf(job);
-      return `<button type="button" class="ks-priority-row" data-job-index="${index}"><span class="ks-priority-copy"><b>${esc(job.ref||'Job')}</b><small>${esc(job.customer||job.title||'Job')} · ${esc(job.pic||job.designer||'Unassigned')}</small></span><span class="ks-priority-due ${tag}">${when}</span></button>`;
-    }).join('');
-  }
   function renderOps(){
     if(!todayPanel)return;const counts={orders:0,artwork:0,production:0,completed:0,unmapped:0,overdue:0};jobs.forEach(job=>{const stage=categoryForJob(job);counts[stage]=(counts[stage]||0)+1;if(isOverdueJob(job))counts.overdue++});
     const now=new Date(),activeCount=counts.orders+counts.artwork+counts.production,completedToday=jobs.filter(j=>isCompletedJob(j)&&isSameLocalDay(j.completedDate||j.deliveryDate,now)).length,dueToday=jobs.filter(j=>!isCompletedJob(j)&&isSameLocalDay(j.due,now)).length,waitingApproval=jobs.filter(j=>!isCompletedJob(j)&&isWaitingApproval(j)).length,noPic=jobs.filter(j=>!isCompletedJob(j)&&!String(j.pic||'').trim()).length,noDesigner=jobs.filter(j=>!isCompletedJob(j)&&!String(j.designer||'').trim()).length,stuckArtwork=jobs.filter(isStuckArtwork).length,stuckProduction=jobs.filter(isStuckProduction).length;
@@ -1880,7 +1792,6 @@ body{overscroll-behavior:none;}
     if(opsStageHealth){const fmt=v=>Number.isFinite(v)?`${v.toFixed(v>=10?0:1)}d`:'—';opsStageHealth.innerHTML=[['orders','Orders'],['artwork','Artwork'],['production','Production']].map(([key,label])=>`<div><span>${label}</span><b>${counts[key]}</b><small>avg job age ${fmt(avgAgeForStage(key))}</small></div>`).join('')+`<div><span>Waiting approval</span><b>${waitingApproval}</b><small>artwork/client hold</small></div>`}
     const alerts=[['dueToday','Due today',dueToday,'due'],['overdue','Overdue',counts.overdue,'danger'],['noPic','No PIC',noPic,'warn'],['noDesigner','No Designer',noDesigner,'warn'],['stuckArtwork','Artwork >2d',stuckArtwork,'warn'],['stuckProduction','Production >3d',stuckProduction,'warn'],['completedToday','Completed today',completedToday,'good'],['waitingApproval','Waiting approval',waitingApproval,'']];if(opsAlerts)opsAlerts.innerHTML=alerts.map(([key,label,value,tone])=>`<button class="ops-alert ${tone}" data-ops-alert-filter="${key}"><span>${esc(label)}</span><b>${value}</b></button>`).join('');
     if(opsStaffLoad){const stats=employees.map(emp=>({emp,...employeeJobStats(emp)})).sort((a,b)=>b.active-a.active||b.overdue-a.overdue).slice(0,4);opsStaffLoad.innerHTML=stats.map(s=>`<button data-pulse-staff="${s.emp.id}"><span class="ops-load-avatar">${initials(s.emp.name)}</span><span><b>${esc(s.emp.name)}</b><small>${s.active} active · ${s.artwork} artwork · ${s.production} production${s.overdue?` · ${s.overdue} overdue`:''}</small></span><em class="load-${s.level.toLowerCase()}">${s.level}</em></button>`).join('')}
-    renderPulsePriority();
     renderOpsSyncMeta();syncEmployeeJobsFromOps();const workloadOrder=[...employees].sort((a,b)=>a.id-b.id),totalActive=jobs.filter(j=>!isCompletedJob(j)&&categoryForJob(j)!=='unmapped').length;if(workloadTotal)workloadTotal.textContent=`${totalActive} active`;
     if(workloadList)workloadList.innerHTML=workloadOrder.map(emp=>{const st=employeeJobStats(emp),manual=workloadLines(emp.workload),manualHtml=manual.slice(0,3).map(line=>`<i>${esc(line)}</i>`).join('');return `<div class="workload-row workload-smart" data-workload-employee="${emp.id}" role="button" tabindex="0"><div class="workload-avatar">${initials(emp.name)}</div><div class="workload-copy"><b>${esc(emp.name)}</b><span>${esc(emp.position)} · ${st.active} active</span><div class="workload-mini"><i>${st.artwork} artwork</i><i>${st.production} production</i>${st.overdue?`<i class="danger">${st.overdue} overdue</i>`:''}</div>${manualHtml?`<div class="manual-workload">${manualHtml}</div>`:''}</div><div class="workload-level level-${st.level.toLowerCase()}">${st.level}</div></div>`}).join('');
     renderStaffDirectory();const list=filteredJobs().slice(0,8);if(jobsFilterLabel)jobsFilterLabel.textContent=filterLabel(opsFilter);if(recentJobs)recentJobs.innerHTML=list.length?list.map(job=>{const stage=categoryForJob(job),cat=isOverdueJob(job)?'overdue':stage,emp=employeeForPic(job.pic),age=jobAgeDays(job);return `<div class="job-row" data-job-index="${jobs.indexOf(job)}" role="button" tabindex="0"><div class="job-main"><div class="job-top"><span class="job-ref">${esc(job.ref)}</span><span class="job-title">${esc(job.title)}</span></div><div class="job-sub">Customer ${esc(job.customer||'Client')} · ${esc(emp?.name||job.pic||'Unassigned')} · ${esc(job.status||stage)}${job.daysLeft!==''&&job.daysLeft!=null&&Number.isFinite(Number(job.daysLeft))?` · ${Number(job.daysLeft)<0?`${Math.abs(Number(job.daysLeft))}d overdue`:Number(job.daysLeft)===0?'due today':`${Number(job.daysLeft)}d left`}`:''}${Number.isFinite(age)?` · ${age.toFixed(age>=10?0:1)}d old`:''}</div></div><span class="job-status ${cat}">${esc(stage==='unmapped'?'Unmapped':isOverdueJob(job)?'Overdue':job.status||stage)}</span></div>`}).join(''):`<div class="ops-note">No jobs match this filter.</div>`;
@@ -1910,28 +1821,28 @@ body{overscroll-behavior:none;}
   function normalizeSharedHtmlJob(job,index=0){
     const j={...(job||{})};j.ref=j.ref||j.jobsheetFiles||j.invoice||`JOB-${index+1}`;j.customer=j.customer||'';j.jobType=j.jobType||j.item||'';j.printingType=j.printingType||j.typeOfPrinting||'';j.title=j.title||[j.jobType,j.printingType].filter(Boolean).join(' · ')||'Job';j.currentDepartment=j.currentDepartment||j.status||'';j.status=j.currentDepartment||j.status||j.artworkStatus||'Active';j.sales=j.sales||j.pic||'';j.pic=j.sales||j.pic||'';j.productionPic=j.productionPic||'';j.due=j.due||j.deliveryTime||'';j.deliveryTime=j.deliveryTime||j.due||'';j.completedDate=j.completedDate||j.actualComplete2||j.actualComplete1||'';j.statusUpdated=j.statusUpdated||j.lastUpdate||'';j.orderDate=j.orderDate||'';j.assignees=Array.isArray(j.assignees)?j.assignees:[j.sales,j.designer,j.productionPic].filter(Boolean);j._index=index;if(!Array.isArray(j._details)&&j._record&&typeof j._record==='object')j._details=Object.entries(j._record).filter(([,v])=>String(v??'').trim()).map(([label,value])=>({label,value:String(value)}));return j;
   }
-  async function readJobCache({strict=false}={}){
+  async function readJobCache(){
     try{
       const res=await fetch('/api/state?scope=dashboard%3Ajobs',{cache:'no-store'});
-      if(res.status===404)return null;if(!res.ok)throw new Error(`Job data unavailable (${res.status})`);
+      if(!res.ok)return null;
       const row=await res.json(),parsed=row?.payload;
-      if(!Array.isArray(parsed?.jobs))throw new Error('Invalid shared job data');
+      if(!Array.isArray(parsed?.jobs))return null;
       return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
-    }catch(error){if(strict)throw error;return null}
+    }catch(_){return null}
   }
   async function loadJobsFromSheet({background=false}={}){
     if(jobSyncInFlight)return jobs;jobSyncInFlight=true;
     if(!background&&opsRefreshBtn)opsRefreshBtn.classList.add('loading');
     if(jobDataSource==='html'){
       try{
-        const shared=await readJobCache({strict:true});
+        const shared=await readJobCache();
         if(shared){
           const changed=Number(shared.version||0)!==jobSharedVersion;jobSharedVersion=Number(shared.version||jobSharedVersion);opsLastSyncAt=shared.savedAt||opsLastSyncAt;
           if(changed||opsDataMode!=='live'){jobs=shared.jobs;setOpsSource('live','Job Management',`${jobs.length} shared jobs synced from the live database · ${fullClockTime()}.`,shared.savedAt);renderOps();}
           else renderOpsSyncMeta();
         }else{jobs=[];jobSharedVersion=0;setOpsSource('empty','No Data','No shared Job Management rows saved yet. Add or import a job to begin.');renderOps();}
         return jobs;
-      }catch(error){setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);renderOps();return jobs}finally{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')}
+      }finally{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')}
     }
     const shared=await readJobCache();
     const previousSignature=shared?.signature||jobsSignature(shared?.jobs||[]);
@@ -1978,7 +1889,7 @@ body{overscroll-behavior:none;}
     return source.map(v=>String(v||'').trim()).filter(Boolean).slice(0,30);
   }
   function staffRecord(emp){
-    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),appearance:window.KSCharacterStudio.normalize(emp.appearance,emp.gender,emp.name),mood:String(emp.mood||'').trim().slice(0,32),workload:workloadLines(emp.workload||[])};
+    return {id:Number(emp.id),name:String(emp.name||'Staff').trim(),position:String(emp.position||'Staff').trim(),department:normalizeDepartment(emp.department,emp.position),gender:normalizeGender(emp.gender,DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender||'male'),workload:workloadLines(emp.workload||[])};
   }
   function dynamicStaffBase(id,index=0,department='Production Management',gender='male'){
     const isHead=department==='Management',roomId=isHead?'boss':'staff';
@@ -1990,7 +1901,7 @@ body{overscroll-behavior:none;}
     const gender=normalizeGender(record.gender||existing?.gender||defaultBase?.gender||'male');
     const base=defaultBase?{...defaultBase}:dynamicStaffBase(id,index,department,gender);
     const runtime=existing?{visualX:existing.visualX,visualY:existing.visualY,visualRoomId:existing.visualRoomId,roam:existing.roam,motionWalking:existing.motionWalking,motionAction:existing.motionAction,moving:existing.moving}:{};
-    return {...base,...runtime,id,gender,appearance:window.KSCharacterStudio.normalize(record.appearance??existing?.appearance,gender,record.name||base.name),name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,mood:String(record.mood??existing?.mood??base.mood??'').trim().slice(0,32),workload:workloadLines(record.workload||[])};
+    return {...base,...runtime,id,gender,name:String(record.name||base.name||'Staff').trim().slice(0,80)||'Staff',position:String(record.position||base.position||'Staff').trim().slice(0,80)||'Staff',department,workload:workloadLines(record.workload||[])};
   }
   function serializeStaffDirectory(){return employees.map(staffRecord)}
   function applyStaffDirectory(payload,version=0){
@@ -1998,18 +1909,7 @@ body{overscroll-behavior:none;}
     const old=Object.fromEntries(employees.map(e=>[e.id,e]));
     const next=payload.staff.map((record,index)=>employeeFromStaffRecord(record,index,old[Number(record.id)])).filter(e=>Number.isFinite(e.id));
     employees.splice(0,employees.length,...next);staffDirectoryVersion=Math.max(staffDirectoryVersion,Number(version||0));rebuildEmployeeIndex();
-    // Keep camera tracking and staff controls open during shared directory refresh.
-    // Earlier releases called clearEmployeeSelection() on every mood/save update,
-    // which immediately canceled follow and discarded the popup.
-    const keepStaffId=followEmployeeId;
-    const keepPanelOpen=profileCard.classList.contains('open');
-    const keepTab=profileCard.querySelector('[data-profile-tab][aria-selected="true"]')?.dataset.profileTab||'staff';
-    contextCard.classList.remove('open');drawRooms();drawEmployees();syncAllMoodBubbles();renderNav();renderOps();updateStats();renderFeed();
-    if(keepStaffId!=null&&employeeById[keepStaffId]){
-      if(keepPanelOpen){openEmployee(employeeById[keepStaffId]);if(keepTab==='emoji')profileCard.querySelector('[data-profile-tab="emoji"]')?.click();}
-      syncFollowChip();
-    }else if(keepStaffId!=null){clearEmployeeSelection();}
-
+    clearEmployeeSelection();contextCard.classList.remove('open');drawRooms();drawEmployees();renderNav();renderOps();updateStats();renderFeed();
     return true;
   }
   async function saveStaffDirectory(records){
@@ -2033,12 +1933,12 @@ body{overscroll-behavior:none;}
     staffDirectoryList.innerHTML=employees.map(emp=>{const lines=workloadLines(emp.workload),preview=lines.slice(0,2).map(line=>`<i>${esc(line)}</i>`).join('');return `<div class="staff-directory-row" data-edit-staff="${emp.id}" role="button" tabindex="0"><div class="staff-directory-avatar">${initials(emp.name)}</div><div class="staff-directory-copy"><b>${esc(emp.name)}</b><span>${esc(emp.position)} · ${esc(emp.department)}</span>${preview?`<div class="staff-workload-lines">${preview}</div>`:''}</div><span class="staff-directory-action">✎</span></div>`}).join('');
   }
   function openStaffEditor(emp=null){
-    if(!staffEditorModal)return;editingStaffId=emp?Number(emp.id):null;staffEditorTitle.textContent=emp?'Edit Staff':'Add Staff';staffNameInput.value=emp?.name||'';staffRoleInput.value=emp?.position||'';staffDepartmentInput.value=normalizeDepartment(emp?.department,emp?.position);staffGenderInput.value=normalizeGender(emp?.gender,emp?.id?DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender:'male');window.KSCharacterStudio.load(emp?.appearance,staffGenderInput.value,emp?.name||'');staffRemoveBtn.hidden=!emp;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Staff details sync to everyone. Workload is updated separately from the Workload tab.';staffEditorModal.classList.add('open');staffEditorModal.setAttribute('aria-hidden','false');setTimeout(()=>staffNameInput.focus(),40);
+    if(!staffEditorModal)return;editingStaffId=emp?Number(emp.id):null;staffEditorTitle.textContent=emp?'Edit Staff':'Add Staff';staffNameInput.value=emp?.name||'';staffRoleInput.value=emp?.position||'';staffDepartmentInput.value=normalizeDepartment(emp?.department,emp?.position);staffGenderInput.value=normalizeGender(emp?.gender,emp?.id?DEFAULT_EMPLOYEES.find(v=>v.id===Number(emp.id))?.gender:'male');staffRemoveBtn.hidden=!emp;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Staff details sync to everyone. Workload is updated separately from the Workload tab.';staffEditorModal.classList.add('open');staffEditorModal.setAttribute('aria-hidden','false');setTimeout(()=>staffNameInput.focus(),40);
   }
   function closeStaffEditor(){if(!staffEditorModal)return;staffEditorModal.classList.remove('open');staffEditorModal.setAttribute('aria-hidden','true');editingStaffId=null}
   async function saveStaffEditor(){
     const name=staffNameInput.value.trim(),position=staffRoleInput.value.trim(),department=staffDepartmentInput.value,gender=normalizeGender(staffGenderInput.value);if(!name){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Staff name is required.';staffNameInput.focus();return}if(!position){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Position / role is required.';staffRoleInput.focus();return}
-    const records=serializeStaffDirectory(),existing=editingStaffId?employeeById[Number(editingStaffId)]:null,isNew=!existing;const record={id:editingStaffId||Math.max(0,...records.map(r=>Number(r.id)||0))+1,name,position,department,gender,appearance:window.KSCharacterStudio.read(),mood:existing?.mood||'',workload:workloadLines(existing?.workload||[])};const at=records.findIndex(r=>Number(r.id)===Number(editingStaffId));if(at>=0)records[at]=record;else records.push(record);
+    const records=serializeStaffDirectory(),existing=editingStaffId?employeeById[Number(editingStaffId)]:null,isNew=!existing;const record={id:editingStaffId||Math.max(0,...records.map(r=>Number(r.id)||0))+1,name,position,department,gender,workload:workloadLines(existing?.workload||[])};const at=records.findIndex(r=>Number(r.id)===Number(editingStaffId));if(at>=0)records[at]=record;else records.push(record);
     staffSaveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Saving to server…';try{await saveStaffDirectory(records);await postOfficeEvent({eventType:isNew?'staff_added':'staff_updated',title:isNew?`${name} · Staff added`:`${name} · Staff updated`,message:isNew?`${position} added to the shared office`:`Staff details updated · ${position}`,employeeId:record.id,metadata:{name,position,department,gender},dedupeKey:`staff:${isNew?'add':'edit'}:${record.id}:${hashString(`${name}|${position}|${department}|${gender}|${Date.now()}`)}`});staffEditorStatus.className='staff-editor-status ok';staffEditorStatus.textContent='Saved. Live Activity and everyone online will receive this update.';setTimeout(closeStaffEditor,520)}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not save staff.'}finally{staffSaveBtn.disabled=false}
   }
   async function removeStaffEditor(){
@@ -2318,14 +2218,14 @@ body{overscroll-behavior:none;}
       const t=el('text',{x:0,y:18.6,class:'employee-name'});t.textContent=e.name;g.append(t);
       // Direct character interaction. Prevent the SVG pan layer from stealing a tap/click.
       g.addEventListener('pointerdown',ev=>ev.stopPropagation());
-      g.addEventListener('click',ev=>{ev.stopPropagation();followCharacter(e,ev)});
+      g.addEventListener('click',ev=>{ev.stopPropagation();followCharacter(e)});
       g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ev.stopPropagation();followCharacter(e)}});
       employeeNodes.set(e.id,g);frag.append(g);
     });
     employeesLayer.append(frag);
   }
 
-  function renderNav(){if(!deptNav)return;deptNav.innerHTML='';deptNav.hidden=true}
+  function renderNav(){if(!deptNav)return;deptNav.innerHTML=deptOrder.filter(d=>d==='All'||deptCounts[d]>0).map(d=>`<button class="dept-tab${d==='All'?' active':''}" data-dept="${d}">${({'All':'Everyone','Creative Department':'Design','Sales and Marketing':'Sales & marketing','Production Management':'Admin'})[d]||d}<span class="count">${deptCounts[d]}</span></button>`).join('')}
   function countStatuses(list){return list.reduce((a,e)=>{const status=effectiveStatus(e);a[status]=(a[status]||0)+1;return a},{})}
   function animateNum(node,to){const from=Number(node.textContent)||0;if(from===to)return;const start=performance.now(),dur=360;function step(now){const t=Math.max(0,Math.min(1,(now-start)/dur)),e=1-Math.pow(1-t,3);node.textContent=Math.round(from+(to-from)*e);if(t<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
   function updateStats(){const list=activeDept==='All'?employees:employees.filter(e=>e.department===activeDept),counts=countStatuses(list);$$('.stat-num').forEach(n=>animateNum(n,counts[n.dataset.stat]||0))}
@@ -2333,7 +2233,7 @@ body{overscroll-behavior:none;}
   function groupedActivityFeed(){const out=[];for(const a of activityFeed){const key=`${a.type||''}|${a.employeeId||''}|${a.title||''}|${a.text||''}`,prev=out.find(x=>x._key===key&&Math.abs((x.createdAt||0)-(a.createdAt||0))<10*60000);if(prev){prev.groupCount=(prev.groupCount||1)+1;prev.createdAt=Math.max(prev.createdAt||0,a.createdAt||0)}else out.push({...a,_key:key,groupCount:1})}return out}
   function renderFeed(){if(!activityList)return;const feed=groupedActivityFeed(),count=livePanel&&livePanel.classList.contains('expanded')?feed.length:4;if(!feed.length){activityList.innerHTML='<div class="ops-note clean-empty">No office activity yet.</div>';return}activityList.innerHTML=feed.slice(0,count).map(a=>{const at=a.createdAt||Date.now(),kind=activityTypeLabel(a.type||a.eventType||'office'),system=String(a.type||'').includes('sync');return `<div class="feed-item${a.employeeId?' feed-clickable':''}${a.realtime?' realtime':''}${system?' feed-system':''}" ${a.employeeId?`data-employee-id="${a.employeeId}" role="button" tabindex="0"`:''} title="${esc(new Date(at).toLocaleString('en-MY'))}"><div class="feed-avatar feed-glyph">${activityFeedGlyph(a.type)}</div><div class="feed-copy"><div class="feed-title-row"><b>${esc(a.title)}${a.groupCount>1?` <small>×${a.groupCount}</small>`:''}</b><em>${esc(kind)}</em></div><span>${esc(a.text)}</span></div><span class="feed-time"><b>${esc(clockTime(at))}</b><small>${esc(relativeEventTime(at))}</small></span></div>`}).join('')}
   function positionBubbleForEmployee(fo,emp){if(!fo||!emp)return;const p=iso(emp.visualX??emp.x,emp.visualY??emp.y);const w=Number(fo.getAttribute('width'))||190;fo.setAttribute('x',p.x-w/2);fo.setAttribute('y',p.y-96)}
-  function showBubble(emp,text,{kind='activity',duration=6800}={}){if(!emp||!text)return null;window.office3d?.showBubble(emp.id,String(text),duration,kind);const existing=bubblesLayer.querySelector(`.activity-bubble-wrap[data-employee-id="${emp.id}"][data-bubble-kind="${kind}"]`);if(existing)existing.remove();const fo=el('foreignObject',{x:0,y:0,width:210,height:86,class:`activity-bubble-wrap bubble-${kind}`,'data-employee-id':emp.id,'data-bubble-kind':kind}),div=document.createElement('div');div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');div.className='activity-bubble';if(kind==='emoji'){fo.dataset.mood=Object.keys(characterEmojiPresets).find(k=>characterEmojiPresets[k].emoji===text)||'happy';const icon=document.createElement('span');icon.className='animated-mood-icon';icon.textContent=String(text);div.appendChild(icon);div.setAttribute('aria-label',fo.dataset.mood);if(fo.dataset.mood==='busy'){const dots=document.createElement('span');dots.className='busy-dots';dots.innerHTML='<i></i><i></i><i></i>';div.appendChild(dots)}}else div.textContent=String(text).slice(0,220);fo.append(div);positionBubbleForEmployee(fo,emp);bubblesLayer.append(fo);if(duration>0)setTimeout(()=>fo.isConnected&&fo.remove(),duration);return fo}
+  function showBubble(emp,text,{kind='activity',duration=6800}={}){if(!emp||!text)return null;window.office3d?.showBubble(emp.id,String(text),duration);const existing=bubblesLayer.querySelector(`.activity-bubble-wrap[data-employee-id="${emp.id}"][data-bubble-kind="${kind}"]`);if(existing)existing.remove();const fo=el('foreignObject',{x:0,y:0,width:210,height:86,class:`activity-bubble-wrap bubble-${kind}`,'data-employee-id':emp.id,'data-bubble-kind':kind}),div=document.createElement('div');div.setAttribute('xmlns','http://www.w3.org/1999/xhtml');div.className='activity-bubble';div.textContent=String(text).slice(0,220);fo.append(div);positionBubbleForEmployee(fo,emp);bubblesLayer.append(fo);if(duration>0)setTimeout(()=>fo.isConnected&&fo.remove(),duration);return fo}
   function updateEmployeeBubbles(emp){bubblesLayer.querySelectorAll(`.activity-bubble-wrap[data-employee-id="${emp.id}"]`).forEach(fo=>positionBubbleForEmployee(fo,emp))}
   function workloadBubbleText(emp){const lines=workloadLines(emp?.workload);if(lines.length)return `Workload: ${lines[0]}${lines.length>1?` +${lines.length-1} more`:''}`;const active=activeJobsForEmployee(emp||{})[0];if(active)return `Workload: ${active.ref||'Job'} · ${active.title||active.customer||'Active job'}`;return emp?.currentJob?`Workload: ${emp.currentJob}`:''}
   function scheduleRandomWorkloadBubble(){if(workloadBubbleTimer)clearTimeout(workloadBubbleTimer);const delay=13000+Math.random()*12000;workloadBubbleTimer=setTimeout(()=>{workloadBubbleTimer=null;if(!document.hidden){const candidates=employees.filter(emp=>workloadBubbleText(emp));if(candidates.length){const emp=candidates[Math.floor(Math.random()*candidates.length)];showBubble(emp,workloadBubbleText(emp),{kind:'workload',duration:7600})}}scheduleRandomWorkloadBubble()},delay)}
@@ -2393,7 +2293,7 @@ body{overscroll-behavior:none;}
   function syncFollowChip(){const emp=followEmployeeId?employeeById[followEmployeeId]:null;if(!followChip)return;followChip.classList.toggle('show',Boolean(emp));followChip.setAttribute('aria-hidden',String(!emp));if(followChipName)followChipName.textContent=emp?.name||''}
   function collapseOpsPanel(){if(!todayPanel?.classList.contains('expanded'))return;todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false');opsExpandBtn.setAttribute('title','Expand Office Pulse')}}
   function clearFollowBubble(){bubblesLayer.querySelectorAll('.activity-bubble-wrap[data-bubble-kind="follow"]').forEach(n=>n.remove())}
-  function clearEmployeeSelection(){stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active'))}
+  function clearEmployeeSelection(){stopCameraFollow();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active'))}
   function roomPeople(room){return employees.filter(e=>(e.visualRoomId||e.roomId)===room.id)}
   function openRoom(room){collapseOpsPanel();clearEmployeeSelection();const relevant=roomPeople(room),counts=countStatuses(relevant);contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(room.name)}</div><div class="context-sub">${room.dept?esc(room.dept)+' area':'Shared office area'}</div></div><button class="close-mini">×</button></div><div class="context-grid"><div class="metric"><b>${relevant.length}</b><span>people</span></div><div class="metric"><b>${counts['At desk']||0}</b><span>at desks</span></div><div class="metric"><b>${counts['In a meeting']||0}</b><span>in meeting</span></div><div class="metric"><b>${(counts['Walking']||0)+(counts['On break']||0)}</b><span>moving / break</span></div></div>`;contextCard.classList.add('open');contextCard.querySelector('.close-mini').onclick=()=>contextCard.classList.remove('open')}
   function openEmployee(e){
@@ -2404,148 +2304,7 @@ body{overscroll-behavior:none;}
     const jobsHtml=activeJobs.map(job=>`<div class="profile-workload-item job-item"><span class="profile-workload-tag job">JM</span><span><b>${esc(job.ref||'Job')}</b> · ${esc(job.customer||job.title||'Customer')} · ${esc(job.status||'Active')}</span></div>`).join('');
     const workloadHtml=(manualHtml+jobsHtml)||'<div class="profile-workload-empty">No workload assigned yet.</div>';
     profileCard.innerHTML=`<button class="close-mini" style="position:absolute;right:14px;top:14px">×</button><div class="profile-top"><div class="profile-avatar">${initials(e.name)}</div><div><div class="profile-name">${esc(e.name)}</div><div class="profile-role">${esc(e.position)}</div><div class="profile-badge"><i></i>${esc(effectiveStatus(e))}</div></div></div><div class="profile-details"><div class="detail-row"><span>Department</span><span>${esc(e.department)}</span></div><div class="detail-row"><span>Current location</span><span>${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span></div><div class="detail-row profile-job-row"><span>Current job</span><span>${esc(e.currentJob||'No active job')}</span></div></div><div class="profile-workload"><div class="profile-workload-head"><span>Workload</span><span>${totalWorkload} item${totalWorkload===1?'':'s'}</span></div><div class="profile-workload-list">${workloadHtml}</div></div><div class="profile-job-actions"><button class="profile-job-action" data-edit-profile-workload="${e.id}">Update workload</button><button class="profile-job-action" data-edit-profile-staff="${e.id}">Edit staff</button></div>`;
-    // V86.23: Staff and Emoji are one reliable, keyboard-accessible panel.
-    // No second floating popup can get covered by the 3D canvas or Office Pulse.
-    profileCard.dataset.employeeId=String(e.id);
-    const details=document.createElement('section');details.className='ks-staff-tab-content';details.id='ksSelectedStaffDetails';
-    while(profileCard.firstChild)details.append(profileCard.firstChild);
-    const close=details.querySelector('.close-mini');if(close)profileCard.append(close);
-    // Profile information remains visible on selection, with immediate mood
-    // choices below it. The Emoji tab also provides the full chooser.
-    const quick=document.createElement('section');quick.className='ks-staff-quick-emoji';
-    quick.innerHTML='<div class="ks-staff-quick-heading"><strong>Set Mood</strong><span>Select an emoji for '+esc(e.name)+'</span></div><div class="ks-staff-quick-grid">'+Object.entries(characterEmojiPresets).map(([mood,preset])=>'<button type="button" data-quick-mood="'+mood+'" title="'+esc(preset.label)+'" aria-label="'+esc(preset.label)+'" aria-pressed="'+(e.mood===mood)+'">'+preset.emoji+'</button>').join('')+'</div>';
-    details.append(quick);
-    quick.querySelectorAll('[data-quick-mood]').forEach(button=>button.onclick=async()=>{
-      const mood=button.dataset.quickMood;
-      quick.querySelectorAll('[data-quick-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.quickMood===mood)));
-      await triggerCharacterEmoji(e,mood);
-    });
-
-    const tabs=document.createElement('div');tabs.className='ks-staff-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label',e.name+' controls');
-    tabs.innerHTML='<button type="button" role="tab" id="ksStaffInfoTab" aria-controls="ksSelectedStaffDetails" aria-selected="true" data-profile-tab="staff">👤 Staff</button><button type="button" role="tab" id="ksStaffEmojiTab" aria-controls="ksSelectedStaffEmoji" aria-selected="false" data-profile-tab="emoji">😊 Emoji</button>';
-    details.setAttribute('role','tabpanel');details.setAttribute('aria-labelledby','ksStaffInfoTab');
-    const emojiPane=document.createElement('section');emojiPane.id='ksSelectedStaffEmoji';emojiPane.className='ks-staff-emoji-panel';emojiPane.setAttribute('role','tabpanel');emojiPane.setAttribute('aria-labelledby','ksStaffEmojiTab');emojiPane.hidden=true;
-    emojiPane.innerHTML='<p class="ks-staff-emoji-title">Choose '+esc(e.name)+'’s mood</p><div class="ks-staff-emoji-grid">'+Object.entries(characterEmojiPresets).map(([mood,preset])=>'<button type="button" class="ks-staff-emoji-choice" data-profile-mood="'+mood+'" aria-pressed="'+(e.mood===mood)+'"><span aria-hidden="true">'+preset.emoji+'</span><b>'+esc(preset.label)+'</b></button>').join('')+'</div><button type="button" class="ks-staff-emoji-clear" data-profile-emoji-clear>Clear mood</button>';
-    profileCard.append(tabs,details,emojiPane);
-    const activateTab=(tab)=>{
-      const emoji=tab==='emoji';details.hidden=emoji;emojiPane.hidden=!emoji;
-      tabs.querySelectorAll('[data-profile-tab]').forEach(button=>{const active=button.dataset.profileTab===tab;button.setAttribute('aria-selected',String(active));button.classList.toggle('active',active)});
-    };
-    tabs.querySelectorAll('[data-profile-tab]').forEach(button=>button.onclick=()=>activateTab(button.dataset.profileTab));
-    emojiPane.querySelectorAll('[data-profile-mood]').forEach(button=>button.onclick=async()=>{
-      await triggerCharacterEmoji(e,button.dataset.profileMood);
-      emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.profileMood===e.mood)));
-    });
-    emojiPane.querySelector('[data-profile-emoji-clear]').onclick=async()=>{
-      await clearCharacterMood(e);emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed','false'));
-    };
-    activateTab('staff');
-    profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;
-    const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);
-    const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
-  }
-  const characterEmojiPresets={happy:{emoji:'😊',label:'Happy'},sad:{emoji:'😔',label:'Sad'},angry:{emoji:'😠',label:'Angry'},badmood:{emoji:'😒',label:'Bad mood'},busy:{emoji:'💻',label:'Busy'}};
-  function clearMoodBubble(employeeId){
-    if(employeeId==null)return;
-    const selector=`.activity-bubble-wrap[data-employee-id="${employeeId}"][data-bubble-kind="emoji"]`;
-    bubblesLayer?.querySelectorAll(selector).forEach(n=>n.remove());
-    if(window.office3d?.clearBubble)window.office3d.clearBubble(employeeId);
-  }
-  function syncMoodBubble(emp){
-    if(!emp)return;
-    clearMoodBubble(emp.id);
-    const preset=characterEmojiPresets[String(emp.mood||'')];
-    if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});
-  }
-  function syncAllMoodBubbles(){employees.forEach(syncMoodBubble)}
-  function closeCharacterEmojiPicker(){
-    if(!characterEmojiPicker)return;
-    characterEmojiPicker.classList.remove('show');
-    characterEmojiPicker.setAttribute('aria-hidden','true');
-    characterEmojiPicker.hidden=true;
-    delete characterEmojiPicker.dataset.employeeId;
-  }
-  function positionCharacterEmojiPicker(emp,ev=null){
-    if(!characterEmojiPicker||!mapShell)return;
-    const shellRect=mapShell.getBoundingClientRect();
-    const pickerRect=characterEmojiPicker.getBoundingClientRect();
-    const pickerWidth=Math.max(194,pickerRect.width||194),pickerHeight=Math.max(140,pickerRect.height||140);
-    let left=shellRect.width-pickerWidth-18,top=92;
-    const profileRect=profileCard?.classList.contains('open')?profileCard.getBoundingClientRect():null;
-    if(profileRect){
-      left=profileRect.left-shellRect.left-pickerWidth-14;
-      top=profileRect.top-shellRect.top+10;
-      if(left<10){
-        // When there is no room beside the staff card, keep the picker on
-        // the office side instead of placing it over Office Pulse.
-        left=profileRect.left-shellRect.left;
-        const below=profileRect.bottom-shellRect.top+12;
-        top=below+pickerHeight<shellRect.height-12?below:Math.max(10,profileRect.top-shellRect.top-pickerHeight-12);
-      }
-    }else if(document.documentElement.classList.contains('studio3d-ready')&&office3dHost){
-      const hostRect=office3dHost.getBoundingClientRect();
-      left=hostRect.left-shellRect.left+18;top=hostRect.top-shellRect.top+18;
-    }else if(ev&&Number.isFinite(ev.clientX)&&Number.isFinite(ev.clientY)){
-      left=ev.clientX-shellRect.left-pickerWidth/2;
-      top=ev.clientY-shellRect.top-pickerHeight-18;
-    }else if(emp){
-      const p=employeeCameraPoint(emp),svgRect=svg.getBoundingClientRect();
-      const viewX=((p.x*cam.scale)+cam.tx)/1240*svgRect.width+svgRect.left-shellRect.left;
-      const viewY=((p.y*cam.scale)+cam.ty)/760*svgRect.height+svgRect.top-shellRect.top;
-      left=viewX-pickerWidth/2;top=viewY-pickerHeight-16;
-    }
-    left=Math.max(10,Math.min(shellRect.width-pickerWidth-10,left));
-    top=Math.max(10,Math.min(shellRect.height-pickerHeight-10,top));
-    characterEmojiPicker.style.left=`${left}px`;
-    characterEmojiPicker.style.top=`${top}px`;
-  }
-  function openCharacterEmojiPicker(emp,ev=null){
-    if(!characterEmojiPicker||!emp)return;
-    characterEmojiPicker.dataset.employeeId=String(emp.id);
-    if(characterEmojiName)characterEmojiName.textContent=emp.name;
-    characterEmojiPicker.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===String(emp.mood||'')));
-    characterEmojiPicker.hidden=false;
-    characterEmojiPicker.setAttribute('aria-hidden','false');
-    requestAnimationFrame(()=>{positionCharacterEmojiPicker(emp,ev);characterEmojiPicker.classList.add('show')});
-  }
-  // Keep the emoji picker anchored if the profile was re-docked by the
-  // responsive anti-overlap layout after a 3D character selection.
-  document.addEventListener('ks:office-profile-layout',()=>{
-    if(characterEmojiPicker?.hidden)return;
-    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)];
-    if(emp)positionCharacterEmojiPicker(emp);
-  });
-  async function saveCharacterMood(emp,mood){
-    const records=serializeStaffDirectory();
-    const at=records.findIndex(r=>Number(r.id)===Number(emp.id));
-    if(at<0)throw new Error('Staff not found');
-    records[at]={...records[at],mood:String(mood||'')};
-    await saveStaffDirectory(records);
-  }
-  async function clearCharacterMood(emp){
-    if(!emp)return;
-    const previousMood=emp.mood;emp.mood='';
-    clearMoodBubble(emp.id);
-    drawEmployees();
-    try{
-      await saveCharacterMood(emp,'');
-      await postOfficeEvent({eventType:'mood_cleared',title:`${emp.name} · Mood cleared`,message:'Mood reset',employeeId:emp.id,metadata:{mood:''},dedupeKey:`mood-clear:${emp.id}:${Date.now()}`});
-    }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
-    closeCharacterEmojiPicker();
-  }
-  async function triggerCharacterEmoji(emp,mood){
-    const preset=characterEmojiPresets[mood];
-    if(!emp||!preset)return;
-    const previousMood=emp.mood;emp.mood=mood;
-    characterEmojiPicker?.querySelectorAll('[data-emoji-mood]').forEach(btn=>btn.classList.toggle('active',btn.dataset.emojiMood===mood));
-    drawEmployees();
-    syncMoodBubble(emp);
-    pushActivity({title:`${emp.name} reaction`,text:`${preset.label} ${preset.emoji}`,avatar:initials(emp.name),type:'mood_reaction',employeeId:emp.id});
-    try{
-      await saveCharacterMood(emp,mood);
-      await postOfficeEvent({eventType:'mood_updated',title:`${emp.name} · Mood updated`,message:`${preset.label} ${preset.emoji}`,employeeId:emp.id,metadata:{mood,emoji:preset.emoji,label:preset.label},dedupeKey:`mood:${emp.id}:${mood}:${Date.now()}`});
-    }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
-    closeCharacterEmojiPicker();
+    profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;const edit=profileCard.querySelector('[data-edit-profile-staff]');if(edit)edit.onclick=()=>openStaffEditor(e);const workloadEdit=profileCard.querySelector('[data-edit-profile-workload]');if(workloadEdit)workloadEdit.onclick=()=>openWorkloadEditor(e);
   }
   function characterFollowText(e){
     const manual=workloadLines(e?.workload),jobs=activeJobsForEmployee(e||{}).slice(0,2),parts=[];
@@ -2554,18 +2313,14 @@ body{overscroll-behavior:none;}
     else if(e?.currentJob)parts.push(e.currentJob);
     return `${e?.name||'Staff'}${parts.length?' · '+parts.join(' · '):''}`;
   }
-  function followCharacter(e,ev=null){
+  function followCharacter(e){
     if(!e)return;
     collapseOpsPanel();clearWorkloadNotice(e.id);contextCard.classList.remove('open');tooltip.classList.remove('show');
-    // Mark the 3D raycast selection BEFORE the browser's synthetic click-away
-    // handler runs after pointerup; otherwise the popup instantly closes.
-    window.KSOutsideClose?.markCharacterSelection?.();
     // Open the profile and start camera follow in the same interaction frame.
     openEmployee(e);
     focusEmployee(e);
     profileCard.classList.add('open');
     clearFollowBubble();showBubble(e,characterFollowText(e),{kind:'follow',duration:0});
-    closeCharacterEmojiPicker();
   }
   function showTip(e,ev){tooltip.innerHTML=`<div class="tt-head"><b>${esc(e.name)}</b><em><i style="background:${statusColor(effectiveStatus(e))}"></i>${esc(effectiveStatus(e))}</em></div><span class="tt-role">${esc(e.position)} · ${esc(roomById[e.visualRoomId||e.roomId]?.name||'Office')}</span><div class="tt-job"><small>Working</small><strong>${esc(e.currentJob||'No active job')}</strong></div><span class="tt-desk">${esc(e.deskLabel||e.deskId||'No assigned desk')}</span>`;tooltip.classList.add('show');positionTip(ev)}
   function showDeskTip(emp,deskId,ev){tooltip.innerHTML=emp?`<div class="tt-head"><b>${esc(emp.name)}</b><em><i style="background:${statusColor(emp.status)}"></i>${esc(emp.status)}</em></div><span class="tt-role">${esc(emp.position)} · ${esc(emp.deskLabel||deskId)}</span><div class="tt-job"><small>Current job</small><strong>${esc(emp.currentJob||'No active job')}</strong></div>`:`<div class="tt-head"><b>${esc(deskId||'Workstation')}</b></div><span class="tt-role">Available workstation</span>`;tooltip.classList.add('show');positionTip(ev)}
@@ -2596,7 +2351,7 @@ body{overscroll-behavior:none;}
     rotationAnim=requestAnimationFrame(frame);
   }
   function rotateModel(delta){if(window.office3d){stopCameraFollow();window.office3d.rotateBy(delta*Math.PI/180);return;}stopCameraFollow();animateModelRotation(modelAngle+delta)}
-  function resetScene(){window.office3d?.reset();window.office3d?.setRotating?.(true);stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');contextCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false);animateModelRotation(0)}
+  function resetScene(){window.office3d?.reset();stopCameraFollow();profileCard.classList.remove('open');contextCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false);animateModelRotation(0)}
 
   function applyCamera(){camera.setAttribute('transform',`translate(${cam.tx.toFixed(2)} ${cam.ty.toFixed(2)}) scale(${cam.scale.toFixed(3)})`)}
   function scheduleCameraApply(){if(cameraFrame)return;cameraFrame=requestAnimationFrame(()=>{cameraFrame=null;applyCamera()})}
@@ -2604,7 +2359,7 @@ body{overscroll-behavior:none;}
   function svgPoint(x,y){const r=svg.getBoundingClientRect();return{x:(x-r.left)*1240/r.width,y:(y-r.top)*760/r.height}}
   function setScale(next,anchor={x:620,y:370}){stopCameraFollow();viewMode='custom';next=Math.max(.76,Math.min(2.25,next));const wx=(anchor.x-cam.tx)/cam.scale,wy=(anchor.y-cam.ty)/cam.scale;cam.tx=anchor.x-wx*next;cam.ty=anchor.y-wy*next;cam.scale=next;clampCamera();scheduleCameraApply()}
   function animateCamera(scale,tx,ty,markCustom=true){if(markCustom)viewMode='custom';if(camAnim)cancelAnimationFrame(camAnim);const s={...cam},t={scale,tx,ty},t0=performance.now(),dur=reduceMotion.matches?1:500;function f(now){const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,4);cam.scale=s.scale+(t.scale-s.scale)*e;cam.tx=s.tx+(t.tx-s.tx)*e;cam.ty=s.ty+(t.ty-s.ty)*e;clampCamera();applyCamera();if(p<1)camAnim=requestAnimationFrame(f);else camAnim=null}camAnim=requestAnimationFrame(f)}
-  function resetCamera(){window.office3d?.reset();window.office3d?.setRotating?.(true);stopCameraFollow();closeCharacterEmojiPicker();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false)}
+  function resetCamera(){window.office3d?.reset();stopCameraFollow();profileCard.classList.remove('open');$$('.employee').forEach(n=>n.classList.remove('active','dim','search-hit'));viewMode='overview';overviewCam=getOverviewCam();animateCamera(overviewCam.scale,overviewCam.tx,overviewCam.ty,false)}
   function roomCenter(room){const b=polygonBounds(room.poly);return iso(b.x+b.w/2,b.y+b.h/2)}
   function rotatePointAroundModel(p){if(!modelAngle)return p;const pivot=modelPivot(),a=modelAngle*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),dx=p.x-pivot.x,dy=p.y-pivot.y;return{x:pivot.x+dx*c-dy*sn,y:pivot.y+dx*sn+dy*c}}
   function employeeCameraPoint(e){return rotatePointAroundModel(iso(e.visualX??e.x,e.visualY??e.y))}
@@ -2628,7 +2383,7 @@ body{overscroll-behavior:none;}
     };
     followCameraFrame=requestAnimationFrame(tick);
   }
-  function stopCameraFollow(){window.office3d?.stopFollowing();window.office3d?.setRotating?.(true);stopFollowCameraLoop();followEmployeeId=null;syncFollowChip();clearFollowBubble();app.classList.remove('camera-follow-mode');if(viewMode==='follow')viewMode='custom'}
+  function stopCameraFollow(){window.office3d?.stopFollowing();stopFollowCameraLoop();followEmployeeId=null;syncFollowChip();clearFollowBubble();app.classList.remove('camera-follow-mode');if(viewMode==='follow')viewMode='custom'}
   function focusRoom(room){stopCameraFollow();viewMode='focus';const p=roomCenter(room);animateCamera(1.20,650-p.x*1.20,344-p.y*1.20,false)}
   function focusEmployee(e){
     if(!e)return;
@@ -2638,7 +2393,7 @@ body{overscroll-behavior:none;}
     followCameraForEmployee(e,false);startFollowCameraLoop();
   }
 
-  function setDept(d){if(!deptNav)return;window.office3d?.selectDepartment(d);activeDept=d;$$('.dept-tab').forEach(b=>b.classList.toggle('active',b.dataset.dept===d));$$('.employee').forEach(n=>{n.classList.toggle('dim',d!=='All'&&n.dataset.dept!==d);n.classList.remove('search-hit')});$$('.room').forEach(n=>{const r=roomById[n.dataset.room];n.classList.toggle('focused',d!=='All'&&r.dept===d);n.classList.toggle('dim',d!=='All'&&r.dept&&r.dept!==d)});updateStats();if(d==='All'){contextCard.classList.remove('open');resetCamera()}else{const r=roomById[deptRoom[d]];if(r){openRoom(r);focusRoom(r)}pushActivity({title:`${d} selected`,text:`${deptCounts[d]} staff`,avatar:initials(d)})}}
+  function setDept(d){window.office3d?.selectDepartment(d);activeDept=d;$$('.dept-tab').forEach(b=>b.classList.toggle('active',b.dataset.dept===d));$$('.employee').forEach(n=>{n.classList.toggle('dim',d!=='All'&&n.dataset.dept!==d);n.classList.remove('search-hit')});$$('.room').forEach(n=>{const r=roomById[n.dataset.room];n.classList.toggle('focused',d!=='All'&&r.dept===d);n.classList.toggle('dim',d!=='All'&&r.dept&&r.dept!==d)});updateStats();if(d==='All'){contextCard.classList.remove('open');resetCamera()}else{const r=roomById[deptRoom[d]];if(r){openRoom(r);focusRoom(r)}pushActivity({title:`${d} selected`,text:`${deptCounts[d]} staff`,avatar:initials(d)})}}
 
   function targetFor(e,status){if(status==='At desk'&&Number.isFinite(e.deskX)&&Number.isFinite(e.deskY))return{roomId:e.homeRoom,x:e.deskX,y:e.deskY};const id=status==='In a meeting'?'showroom':status==='On break'?'pantry':status==='Walking'?'showroom':e.homeRoom,r=roomById[id],b=polygonBounds(r.poly);return{roomId:id,x:b.x+1+Math.random()*Math.max(1,b.w-2),y:b.y+1+Math.random()*Math.max(1,b.h-2)}}
   function move(e,status){if(e.moving)return;e.moving=true;const n=employeeNodes.get(e.id),start={x:e.x,y:e.y},tar=targetFor(e,status),mid={x:(start.x+tar.x)/2+(Math.random()-.5)*2.6,y:(start.y+tar.y)/2+(Math.random()-.5)*2.0},t0=performance.now(),dur=4200+Math.random()*1600;n.classList.remove('idle','busy');n.classList.add('walking');function bez(t,a,b,c){const u=1-t;return u*u*a+2*u*t*b+t*t*c}function f(now){const p=Math.min(1,(now-t0)/dur),q=1-Math.pow(1-p,3);e.x=bez(q,start.x,mid.x,tar.x);e.y=bez(q,start.y,mid.y,tar.y);const pos=iso(e.x,e.y);n.setAttribute('transform',`translate(${pos.x} ${pos.y})`);updateEmployeeBubbles(e);if(p<1)requestAnimationFrame(f);else{e.roomId=tar.roomId;e.status=status;e.activity='';e.moving=false;n.classList.remove('walking');n.classList.add(employeeClass(e));n.querySelector('.status-dot').setAttribute('fill',statusColor(status));updateStats()}}requestAnimationFrame(f)}
@@ -2656,10 +2411,11 @@ body{overscroll-behavior:none;}
     setTimeout(()=>document.documentElement.classList.remove('office-intro-running'),620);
   },110)));
 
+  if(deptNav)deptNav.onclick=e=>{const b=e.target.closest('.dept-tab');if(b)setDept(b.dataset.dept)};
   roomsLayer.onclick=e=>{if(dragging||rotateDragging||performance.now()<suppressClickUntil)return;const n=e.target.closest('.room');if(!n)return;e.stopPropagation();activeDept='All';$$('.room').forEach(x=>x.classList.remove('focused','dim'));resetScene();updateStats()};
   roomsLayer.onpointerover=e=>{const n=e.target.closest('.room');if(!n)return;if(activeRoomLabel)activeRoomLabel.classList.remove('label-active');activeRoomLabel=roomLabelNodes.get(n.dataset.room)||null;activeRoomLabel?.classList.add('label-active');};
   roomsLayer.onpointerout=e=>{const n=e.target.closest('.room');if(!n)return;const to=e.relatedTarget&&e.relatedTarget.closest?e.relatedTarget.closest('.room'):null;if(to===n)return;activeRoomLabel?.classList.remove('label-active');activeRoomLabel=null;};
-  employeesLayer.onpointerover=e=>{const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)showTip(emp,e)};employeesLayer.onpointermove=e=>{if(tooltip.classList.contains('show'))positionTip(e)};employeesLayer.onpointerout=e=>{if(e.target.closest('.employee'))tooltip.classList.remove('show')};employeesLayer.onclick=e=>{e.stopPropagation();const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)followCharacter(emp,e)};
+  employeesLayer.onpointerover=e=>{const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)showTip(emp,e)};employeesLayer.onpointermove=e=>{if(tooltip.classList.contains('show'))positionTip(e)};employeesLayer.onpointerout=e=>{if(e.target.closest('.employee'))tooltip.classList.remove('show')};employeesLayer.onclick=e=>{e.stopPropagation();const n=e.target.closest('.employee');if(!n)return;const emp=employeeById[Number(n.dataset.id)];if(emp)followCharacter(emp)};
   furnitureLayer.onpointerover=e=>{const hit=e.target.closest('.desk-hit');if(!hit)return;const emp=employeeById[Number(hit.dataset.employeeId)]||null;showDeskTip(emp,hit.dataset.deskId,e)};
   furnitureLayer.onpointermove=e=>{if(e.target.closest('.desk-hit')&&tooltip.classList.contains('show'))positionTip(e)};
   furnitureLayer.onpointerout=e=>{if(e.target.closest('.desk-hit'))tooltip.classList.remove('show')};
@@ -2670,24 +2426,6 @@ body{overscroll-behavior:none;}
   if(chatLauncher)chatLauncher.onclick=()=>setChatOpen(!chatOpen);
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;
-  if(characterEmojiClose)characterEmojiClose.onclick=closeCharacterEmojiPicker;
-  if(characterEmojiClear)characterEmojiClear.onclick=async()=>{const emp=employeeById[Number(characterEmojiPicker?.dataset.employeeId)]||employeeById[followEmployeeId];if(emp)await clearCharacterMood(emp)};
-  if(characterEmojiPicker)characterEmojiPicker.onclick=async e=>{
-    const btn=e.target.closest('[data-emoji-mood]');
-    if(!btn)return;
-    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)]||employeeById[followEmployeeId];
-    if(emp)await triggerCharacterEmoji(emp,btn.dataset.emojiMood);
-  };
-  document.addEventListener('pointerdown',e=>{
-    if(!characterEmojiPicker||characterEmojiPicker.hidden)return;
-    if(e.target.closest('#characterEmojiPicker')||e.target.closest('.employee')||e.target.closest('.person-label'))return;
-    closeCharacterEmojiPicker();
-  });
-  window.addEventListener('resize',()=>{
-    if(characterEmojiPicker?.hidden)return;
-    const emp=employeeById[Number(characterEmojiPicker.dataset.employeeId)]||employeeById[followEmployeeId];
-    if(emp)positionCharacterEmojiPicker(emp);
-  });
   if(chatSendBtn)chatSendBtn.onclick=sendChat;
   if(chatChangeUser)chatChangeUser.onclick=()=>document.getElementById('tempUserBtn')?.click();
   if(chatInput)chatInput.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}};
@@ -2700,7 +2438,6 @@ body{overscroll-behavior:none;}
   if(workloadEditorModal)workloadEditorModal.onclick=e=>{if(e.target===workloadEditorModal)closeWorkloadEditor()};
   if(workloadEditorSave)workloadEditorSave.onclick=saveWorkloadOnly;
   if(todayPanel)todayPanel.onclick=e=>{
-    if(e.target.closest('#ksPulseAllStaff')){setOpsTab('workload');return}
     const tab=e.target.closest('.ops-tab');if(tab){setOpsTab(tab.dataset.opsTab);return}
     const metric=e.target.closest('[data-ops-metric]');if(metric){opsFilter=metric.dataset.opsMetric;setOpsTab('jobs');renderOps();return}
     const quick=e.target.closest('[data-ops-quick]');if(quick){opsFilter=quick.dataset.opsQuick;setOpsTab('jobs');renderOps();return}
@@ -2724,6 +2461,11 @@ body{overscroll-behavior:none;}
   if(driveLinkClose)driveLinkClose.onclick=closeDriveLinkEditor;
   if(driveLinkModal)driveLinkModal.onclick=e=>{if(e.target===driveLinkModal)closeDriveLinkEditor()};
   if(driveLinkReset)driveLinkReset.onclick=()=>{driveLinkInput.value=DEFAULT_GOOGLE_DRIVE_URL;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Default Kidzstudios Google Drive folder loaded. Click Save shared link to apply it for everyone.'};
+  if(opsMappingBtn)opsMappingBtn.onclick=e=>{e.stopPropagation();openStageMappingEditor()};
+  if(stageMappingClose)stageMappingClose.onclick=closeStageMappingEditor;
+  if(stageMappingModal)stageMappingModal.onclick=e=>{if(e.target===stageMappingModal)closeStageMappingEditor()};
+  if(stageMappingSave)stageMappingSave.onclick=saveStageMapping;
+  if(stageMappingReset)stageMappingReset.onclick=()=>{stageOrdersInput.value=DEFAULT_STAGE_MAPPING.orders.join(', ');stageArtworkInput.value=DEFAULT_STAGE_MAPPING.artwork.join(', ');stageProductionInput.value=DEFAULT_STAGE_MAPPING.production.join(', ');stageCompletedInput.value=DEFAULT_STAGE_MAPPING.completed.join(', ');stageMappingHelp.className='job-link-help';stageMappingHelp.textContent='Default mapping loaded. Save to share it with everyone.'};
   if(driveLinkSave)driveLinkSave.onclick=async()=>{const parsed=parseHttpUrl(driveLinkInput.value,'Google Drive link');if(!parsed.ok){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=parsed.error;return}driveLinkSave.disabled=true;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Saving to shared database…';try{await saveGoogleDriveUrl(driveLinkInput.value);driveLinkHelp.className='job-link-help ok';driveLinkHelp.textContent='Saved. Everyone will now open the same Google Drive folder.';setTimeout(closeDriveLinkEditor,520)}catch(err){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=err.message||'Could not save link.'}finally{driveLinkSave.disabled=false}};
   if(jobLinkClose)jobLinkClose.onclick=closeJobLinkEditor;
   if(jobLinkModal)jobLinkModal.onclick=e=>{if(e.target===jobLinkModal)closeJobLinkEditor()};
@@ -2761,7 +2503,8 @@ body{overscroll-behavior:none;}
   $('#zoomIn').onclick=()=>window.office3d?window.office3d.zoomBy(1.16):setScale(cam.scale*1.16);$('#zoomOut').onclick=()=>window.office3d?window.office3d.zoomBy(1/1.16):setScale(cam.scale/1.16);$('#resetView').onclick=resetScene;$('#fullscreenBtn').onclick=()=>document.fullscreenElement?document.exitFullscreen?.():app.requestFullscreen?.();
   document.onkeydown=e=>{if(!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){if(e.key.toLowerCase()==='q')rotateModel(-15);if(e.key.toLowerCase()==='e')rotateModel(15);if(e.key==='0')resetScene()}if(e.key==='Escape'){if(livePanel.classList.contains('maximized')){livePanel.classList.remove('maximized');maximizeLiveBtn?.setAttribute('aria-pressed','false');if(maximizeLiveBtn)maximizeLiveBtn.textContent='□'}clearEmployeeSelection();contextCard.classList.remove('open');setChatOpen(false);setNotificationOpen(false);closeWorkloadEditor();if(todayPanel?.classList.contains('expanded')){todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false')}}}};
   document.addEventListener('click',e=>{if(notificationOpen&&!e.target.closest('.notification-wrap'))setNotificationOpen(false)});
-  // V69 notification audio is unlocked and controlled by the shared sound module.
+  document.addEventListener('pointerdown',armNotificationAudio,{once:true,capture:true});
+  document.addEventListener('keydown',armNotificationAudio,{once:true,capture:true});
   svg.onwheel=e=>{e.preventDefault();setScale(cam.scale*(e.deltaY>0?.92:1.085),svgPoint(e.clientX,e.clientY))};
   svg.onpointerdown=e=>{if(e.button!==0)return;const interactive=e.target.closest?.('.employee,.desk-hit');if(interactive)return;stopCameraFollow();dragging=!e.shiftKey;rotateDragging=e.shiftKey;dragMoved=false;lastPointer={x:e.clientX,y:e.clientY};svg.setPointerCapture(e.pointerId);svg.classList.add(rotateDragging?'rotating':'dragging')};
   svg.onpointermove=e=>{if(!dragging&&!rotateDragging)return;stopCameraFollow();const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;if(Math.abs(dx)+Math.abs(dy)>2)dragMoved=true;if(rotateDragging){viewMode='custom';modelAngle=Math.max(-45,Math.min(45,modelAngle+dx*.18));applyModelRotation()}else{const r=svg.getBoundingClientRect();viewMode='custom';cam.tx+=dx*1240/r.width;cam.ty+=dy*760/r.height;clampCamera();scheduleCameraApply()}lastPointer={x:e.clientX,y:e.clientY}};
@@ -2769,161 +2512,33 @@ body{overscroll-behavior:none;}
   svg.onpointercancel=()=>{dragging=false;rotateDragging=false;svg.classList.remove('dragging','rotating')};
   svg.onclick=e=>{if(dragging||rotateDragging||dragMoved||performance.now()<suppressClickUntil)return;if(e.target.closest?.('.employee,.desk-hit,.room'))return;resetScene();tooltip.classList.remove('show');};
 
-  // Roaming routes are planned locally only by the elected Supabase timeline leader.
-  // All connected browsers replay the same route/start-time; see office-movement-sync.js.
+  // Random visual roaming. This is deliberately local/ephemeral: shared Supabase
+  // job and form data remain synchronized, while avatars wander independently for life.
   const roamZones={
     staff:{roomId:'staff',point:e=>({x:e.deskX??e.x,y:e.deskY??e.y})},
     showroom:{roomId:'showroom',point:()=>({x:11+Math.random()*2.2,y:30+Math.random()*2.1})},
     corridor:{roomId:'corridor',point:()=>({x:9.4,y:38+Math.random()*9})},
     pantry:{roomId:'pantry',point:()=>({x:5.5,y:45+Math.random()*3})},
-    boss:{roomId:'boss',point:e=>({x:e.deskX??17.9,y:e.deskY??43.1})},
-    store:{roomId:'store',point:()=>({x:13.5+Math.random()*5.8,y:50.0+Math.random()*6.6})},
-    prayer:{roomId:'prayer',point:()=>({x:10.2+Math.random()*7.4,y:61.2+Math.random()*5.8})},
-    'toilet-a':{roomId:'toilet-a',point:()=>({x:.8+Math.random()*2.2,y:60.4+Math.random()*3.7})},
-    'toilet-b':{roomId:'toilet-b',point:()=>({x:4.3+Math.random()*2.2,y:60.4+Math.random()*3.7})}
+    boss:{roomId:'boss',point:e=>({x:e.deskX??17.9,y:e.deskY??43.1})}
   };
-  const zoneGate={
-    staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6},
-    store:{x:13.2,y:55.1},prayer:{x:11.2,y:59.7},'toilet-a':{x:1.9,y:59.0},'toilet-b':{x:5.5,y:59.0}
-  };
+  const zoneGate={staff:{x:8.1,y:25.4},showroom:{x:9.4,y:33},corridor:{x:9.4,y:44.6},pantry:{x:7,y:46},boss:{x:12.1,y:44.6}};
   const roamChoices={
-    1:['boss','corridor','showroom','pantry','store','prayer','toilet-a'],2:['boss','corridor','showroom','pantry','store','prayer','toilet-b'],
-    3:['staff','showroom','corridor','pantry','prayer','toilet-a'],4:['staff','showroom','corridor','pantry','store','prayer','toilet-a'],
-    5:['showroom','staff','corridor','pantry','prayer','toilet-b'],6:['staff','showroom','corridor','pantry','store','prayer','toilet-b'],
-    7:['staff','showroom','corridor','pantry','prayer','toilet-a'],8:['staff','showroom','corridor','pantry','prayer','toilet-b']
+    1:['boss','corridor','showroom','pantry'],2:['boss','corridor','showroom','pantry'],
+    3:['staff','showroom','corridor','pantry'],4:['staff','showroom','corridor','pantry'],
+    5:['showroom','staff','corridor','pantry'],6:['staff','showroom','corridor','pantry'],
+    7:['staff','showroom','corridor','pantry'],8:['staff','showroom','corridor','pantry']
   };
-  const corridorLinkedZones=new Set(['boss','pantry','store','prayer','toilet-a','toilet-b','corridor']);
   function zoneOfEmployee(e){return e.visualRoomId||e.roomId||e.homeRoom||'staff'}
   function randomDifferent(list,current){const pool=list.filter(v=>v!==current);return(pool.length?pool:list)[Math.floor(Math.random()*(pool.length||list.length))]}
-  function chooseScheduledZone(e,current,home){
-    const choices=roamChoices[e.id]||['staff','showroom','corridor','pantry','store','prayer','toilet-a'];
-    const hour=new Date().getHours();
-    const ownHome=home||(['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff');
-    if(['store','prayer','toilet-a','toilet-b'].includes(current))return ownHome;
-    const roleText=`${e.position||''} ${e.department||''}`.toLowerCase();
-    if(hour>=12&&hour<14&&choices.includes('prayer')&&Math.random()<.34)return 'prayer';
-    if(hour>=15&&hour<17&&choices.includes('prayer')&&Math.random()<.16)return 'prayer';
-    if(Math.random()<.11)return e.gender==='female'&&choices.includes('toilet-b')?'toilet-b':'toilet-a';
-    if(/admin|production|finance|boss|assistant/.test(roleText)&&choices.includes('store')&&Math.random()<.20)return 'store';
-    if(choices.includes('showroom')&&Math.random()<.18)return 'showroom';
-    if(choices.includes('pantry')&&Math.random()<.18)return 'pantry';
-    if(choices.includes('corridor')&&Math.random()<.10)return 'corridor';
-    return randomDifferent(choices,current);
-  }
-  // V66 collision geometry uses the actual 3D furniture footprint mapped into
-  // this page's logical office coordinates. Do not navigate through worktops.
-  // These are rectangles in floor coordinates, NOT positions of staff/chairs.
-  const navigationObstacles=window.KSOfficeGeometry?.obstacles||[];
-  const navStep=.5,navCols=47,navRows=141,navPadding=.3;
-  if(!window.KSOfficeGeometry)console.error("Office wall geometry could not load; refresh the page before enabling shared movement.");
-  function navBlocked(x,y){
-    if(!Number.isFinite(x)||!Number.isFinite(y)||x<.5||x>22.5||y<.5||y>69.5)return true;
-    return (window.KSOfficeGeometry?.blocked(x,y)??true)||navigationObstacles.some(b=>x>=b.x-navPadding&&x<=b.x+b.w+navPadding&&y>=b.y-navPadding&&y<=b.y+b.h+navPadding);
-  }
-  function navClearLine(a,b){return window.KSOfficeGeometry?.navClearLine(a,b)??false;}
-  // Choose a walkable point that has a visible exit for free starting positions.
-  function navSnap(p){
-    const cx=Math.round(Math.min(22.5,Math.max(.5,p.x))/navStep);
-    const cy=Math.round(Math.min(69.5,Math.max(.5,p.y))/navStep);
-    const inside=navBlocked(p.x,p.y);
-    let nearest=null,best=Infinity;
-    for(let dy=-20;dy<=20;dy++)for(let dx=-20;dx<=20;dx++){
-      const gx=cx+dx,gy=cy+dy,x=gx*navStep,y=gy*navStep;
-      if(gx<1||gx>=navCols-1||gy<1||gy>=navRows-1||navBlocked(x,y))continue;
-      if(!inside&&!navClearLine(p,{x,y}))continue;
-      const dist=(x-p.x)**2+(y-p.y)**2;
-      if(dist<best){nearest={gx,gy,x,y};best=dist}
-    }
-    return nearest;
-  }
-  function navLeg(from,to){
-    // Navigation legs never begin/end inside tables. Desk docking is handled
-    // separately after walking finishes, so it cannot create a visible crossing.
-    if(navBlocked(from.x,from.y)||navBlocked(to.x,to.y))return null;
-    if(navClearLine(from,to))return[to];
-    const start=navSnap(from),end=navSnap(to);
-    if(!start||!end)return null;
-    const encode=(x,y)=>y*navCols+x,origin=encode(start.gx,start.gy),destination=encode(end.gx,end.gy);
-    const frontier=[],gScore=new Map([[origin,0]]),cameFrom=new Map(),visited=new Set();
-    const heuristic=(x,y)=>Math.hypot(end.gx-x,end.gy-y);
-    const push=node=>{frontier.push(node);let n=frontier.length-1;while(n){const parent=(n-1)>>1;if(frontier[parent].f<=node.f)break;frontier[n]=frontier[parent];n=parent}frontier[n]=node};
-    const pop=()=>{const result=frontier[0],last=frontier.pop();if(frontier.length){let n=0;while(n*2+1<frontier.length){let child=n*2+1;if(child+1<frontier.length&&frontier[child+1].f<frontier[child].f)child++;if(frontier[child].f>=last.f)break;frontier[n]=frontier[child];n=child}frontier[n]=last}return result};
-    push({id:origin,x:start.gx,y:start.gy,g:0,f:heuristic(start.gx,start.gy)});
-    const directions=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
-    let solved=false;
-    for(let iterations=0;frontier.length&&iterations<10000;iterations++){
-      const node=pop();if(visited.has(node.id)||node.g>gScore.get(node.id)+.00001)continue;
-      if(node.id===destination){solved=true;break}visited.add(node.id);
-      for(const [dx,dy] of directions){
-        const x=node.x+dx,y=node.y+dy;
-        if(x<1||x>=navCols-1||y<1||y>=navRows-1||navBlocked(x*navStep,y*navStep))continue;
-        if(dx&&dy&&(navBlocked(x*navStep,node.y*navStep)||navBlocked(node.x*navStep,y*navStep)))continue;
-        const id=encode(x,y);if(visited.has(id))continue;
-        const cost=node.g+Math.hypot(dx,dy),prev=gScore.get(id);
-        if(prev!==undefined&&cost>=prev)continue;
-        gScore.set(id,cost);cameFrom.set(id,node.id);
-        push({id,x,y,g:cost,f:cost+heuristic(x,y)});
-      }
-    }
-    if(!solved)return null;
-    const trace=[];let current=destination;
-    while(current!==origin){trace.push({x:(current%navCols)*navStep,y:Math.floor(current/navCols)*navStep});current=cameFrom.get(current);if(current===undefined)return null}
-    trace.push({x:start.x,y:start.y});trace.reverse();
-    // String-pulling: only skip intermediate points when the direct segment is clear.
-    const points=[...trace,to],result=[];let prev=from,index=0;
-    while(index<points.length){
-      let last=-1;
-      for(let i=index;i<points.length;i++){if(navClearLine(prev,points[i]))last=i}
-      if(last<index)return null;
-      const next=points[last];
-      if(Math.hypot(next.x-prev.x,next.y-prev.y)>.02)result.push({x:next.x,y:next.y});
-      prev=next;index=last+1;
-    }
-    return result;
-  }
-  function safeWalkingRoute(start,roughPoints){
-    if(navBlocked(start.x,start.y))return null;
-    const path=[];let previous={x:start.x,y:start.y};
-    for(const next of roughPoints){
-      const segment=navLeg(previous,next);
-      if(!segment)return null;
-      for(const p of segment){
-        if(!navClearLine(previous,p))return null;
-        if(Math.hypot(p.x-previous.x,p.y-previous.y)>.08)path.push({x:p.x,y:p.y});
-        previous={x:p.x,y:p.y};
-      }
-    }
-    return path;
-  }
   function pathBetweenZones(from,to,target){
     const pts=[];
     if(from===to)return[target];
     const push=p=>{if(p)pts.push({...p})};
-    const leave=z=>{
-      if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}
-      else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}
-      else if(z==='store'){push(zoneGate.store);push(zoneGate.corridor)}
-      else if(z==='prayer'){push(zoneGate.prayer);push(zoneGate.corridor)}
-      else if(z==='toilet-a'){push(zoneGate['toilet-a']);push(zoneGate.corridor)}
-      else if(z==='toilet-b'){push(zoneGate['toilet-b']);push(zoneGate.corridor)}
-      else if(z==='staff'){push(zoneGate.staff)}
-      else if(z==='showroom'){push(zoneGate.showroom)}
-    };
-    const enter=z=>{
-      if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}
-      else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}
-      else if(z==='store'){push(zoneGate.corridor);push(zoneGate.store)}
-      else if(z==='prayer'){push(zoneGate.corridor);push(zoneGate.prayer)}
-      else if(z==='toilet-a'){push(zoneGate.corridor);push(zoneGate['toilet-a'])}
-      else if(z==='toilet-b'){push(zoneGate.corridor);push(zoneGate['toilet-b'])}
-      else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}
-      else if(z==='showroom'){push(zoneGate.showroom)}
-      else if(z==='corridor'){push(zoneGate.corridor)}
-    };
+    const leave=z=>{if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}else if(z==='staff'){push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}};
+    const enter=z=>{if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}else if(z==='corridor'){push(zoneGate.corridor)}};
     leave(from);
     if((from==='staff'&&to!=='showroom')||(to==='staff'&&from!=='showroom'))push(zoneGate.showroom);
-    if((from==='showroom'&&corridorLinkedZones.has(to))||(to==='showroom'&&corridorLinkedZones.has(from)))push(zoneGate.corridor);
-    if(corridorLinkedZones.has(from)&&corridorLinkedZones.has(to)&&from!==to)push(zoneGate.corridor);
+    if((from==='showroom'&&['boss','pantry','corridor'].includes(to))||(to==='showroom'&&['boss','pantry','corridor'].includes(from)))push(zoneGate.corridor);
     enter(to);push(target);
     return pts.filter((p,i,a)=>i===0||Math.hypot(p.x-a[i-1].x,p.y-a[i-1].y)>.35);
   }
@@ -2934,39 +2549,20 @@ body{overscroll-behavior:none;}
     node.classList.toggle('busy',!walking&&e.status==='At desk'&&e.id%2===0);
     const dot=node.querySelector('.status-dot');if(dot)dot.setAttribute('fill',statusColor(effectiveStatus(e)));
   }
-  function planSharedRoam(e,requestedZone=null,requestedPoint=null){
-    const current=zoneOfEmployee(e),home=['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff';
-    const away=current!==home;
-    const targetZone=requestedZone&&roamZones[requestedZone]?requestedZone:(away?home:chooseScheduledZone(e,current,home));
-    const target=requestedPoint&&Number.isFinite(requestedPoint.x)&&Number.isFinite(requestedPoint.y)?{x:requestedPoint.x,y:requestedPoint.y}:targetZone===home?{x:e.deskX??e.x,y:e.deskY??e.y}:roamZones[targetZone].point(e);
-    if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8)return null;
-    const origin={x:e.visualX??e.x,y:e.visualY??e.y};
-    const exit=navSnap(origin);
-    if(!exit)return null;
-    const startingAtDesk=navBlocked(origin.x,origin.y);
-    const departure=startingAtDesk?{x:exit.x,y:exit.y}:origin;
-    const atOwnDesk=Number.isFinite(e.deskX)&&Math.hypot(origin.x-e.deskX,origin.y-e.deskY)<.5;
-    const seatStart=(startingAtDesk||atOwnDesk)?{...origin}:null;
-    const ownDesk=targetZone===home&&Math.hypot(target.x-(e.deskX??e.x),target.y-(e.deskY??e.y))<.5;
-    const seatGoal=ownDesk&&navBlocked(target.x,target.y)?{...target}:null;
-    const arrival=navBlocked(target.x,target.y)?navSnap(target):target;
-    if(!arrival)return null;
-    const route=safeWalkingRoute(departure,pathBetweenZones(current,targetZone,arrival));
-    if(!route?.length)return null;
-    const points=[{x:departure.x,y:departure.y},...route];
-    const durations=route.map((pt,i)=>Math.max(850,Math.hypot(pt.x-points[i].x,pt.y-points[i].y)*470));
-    return {from:points[0],route,segmentMs:durations,targetZone,seatGoal,seatStart};
-  }
   function beginRoam(e,now){
-    const plan=planSharedRoam(e);
-    if(!plan){e.roam={phase:'idle',nextAt:now+10000};return false}
-    e.visualX=plan.from.x;e.visualY=plan.from.y;
-    const node=employeeNodes.get(e.id);
-    if(node){const p=iso(plan.from.x,plan.from.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}
+    const current=zoneOfEmployee(e),home=e.homeRoom==='boss'?'boss':'staff';
+    // Favor desk work, with an occasional coffee or collaboration trip.
+    const away=current!==home,roll=Math.random();
+    const targetZone=away?home:roll<.12?'pantry':roll<.27?'showroom':roll<.32?'corridor':home;
+    const target=roamZones[targetZone].point(e);
+    if(targetZone===current&&Math.hypot(target.x-(e.visualX??e.x),target.y-(e.visualY??e.y))<.8){
+      e.motionAction=targetZone==='staff'||targetZone==='boss'?'typing':'meeting';
+      e.roam={phase:'idle',nextAt:now+13000+Math.random()*18000};return;
+    }
+    const route=pathBetweenZones(current,targetZone,target);
     e.motionAction='walking';
-    e.roam={phase:'walk',route:plan.route,index:0,startAt:now,startX:plan.from.x,startY:plan.from.y,targetZone:plan.targetZone,seatGoal:plan.seatGoal};
+    e.roam={phase:'walk',route,index:0,startAt:now,startX:e.visualX??e.x,startY:e.visualY??e.y,targetZone};
     prepareRoamSegment(e,now);
-    return true;
   }
   function prepareRoamSegment(e,now){
     const r=e.roam,pt=r.route[r.index];if(!pt){finishRoam(e,now);return}
@@ -2974,18 +2570,8 @@ body{overscroll-behavior:none;}
     const dist=Math.hypot(r.endX-r.startX,r.endY-r.startY);r.duration=Math.max(850,dist*470);
   }
   function finishRoam(e,now){
-    const node=employeeNodes.get(e.id),seat=e.roam?.seatGoal;
-    // Seat docking is instantaneous; never animate the feet through the table mesh.
-    if(seat){e.visualX=seat.x;e.visualY=seat.y;if(node){const p=iso(seat.x,seat.y);node.setAttribute('transform',`translate(${p.x} ${p.y})`)}}
-    e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
-    if(e.visualRoomId==='showroom'){e.status='In a meeting';e.motionAction='meeting';e.activity='Showroom discussion';}
-    else if(e.visualRoomId==='store'){e.status='At desk';e.motionAction='stocking';e.activity='Arranging store stock';}
-    else if(e.visualRoomId==='prayer'){e.status='On break';e.motionAction='sleep';e.activity='Resting in surau';}
-    else if(e.visualRoomId==='toilet-a'||e.visualRoomId==='toilet-b'){e.status='On break';e.motionAction='idle';e.activity='Quick break';}
-    else if(e.visualRoomId==='pantry'){e.status='On break';e.motionAction=Math.random()<.55?'drink':'eat';e.activity='Pantry snack / drink';}
-    else if(e.visualRoomId==='corridor'){e.status='At desk';e.motionAction='chat';e.activity='Corridor chat';}
-    else{e.status='At desk';e.motionAction='pc-work';e.activity='Using PC';}
-    e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node){setMotionClass(e,node,false);updateEmployeeBubbles(e)}
+    const node=employeeNodes.get(e.id);e.visualRoomId=e.roam?.targetZone||e.visualRoomId||e.roomId;
+    e.motionAction=e.visualRoomId==='pantry'?'coffee':e.visualRoomId==='showroom'?'meeting':e.visualRoomId==='corridor'?'chat':'typing';e.roam={phase:'idle',nextAt:now+19000+Math.random()*26000};if(node)setMotionClass(e,node,false);
   }
   function activeWalkers(){return employees.reduce((n,e)=>n+(e.roam?.phase==='walk'?1:0),0)}
   function randomRoamFrame(now){
@@ -2994,7 +2580,7 @@ body{overscroll-behavior:none;}
     for(const e of employees){
       const node=employeeNodes.get(e.id);if(!node)continue;
       if(!e.roam)e.roam={phase:'idle',nextAt:now+8000+e.id*1200+Math.random()*11000};
-      if(e.roam.phase==='idle'&&now>=e.roam.nextAt&&walkers<2){if(beginRoam(e,now))walkers++}
+      if(e.roam.phase==='idle'&&now>=e.roam.nextAt&&walkers<2){beginRoam(e,now);walkers++}
       if(e.roam.phase==='walk'){
         const r=e.roam,t=Math.min(1,(now-r.startAt)/r.duration),q=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
         const x=r.startX+(r.endX-r.startX)*t,y=r.startY+(r.endY-r.startY)*t;e.visualX=x;e.visualY=y;
@@ -3005,55 +2591,21 @@ body{overscroll-behavior:none;}
     const second=Math.floor(now/1000);if(second!==lastMotionStatsSecond){lastMotionStatsSecond=second;updateStats()}
     if(activeWalkers()>0){roamFrame=requestAnimationFrame(randomRoamFrame)}else{const next=Math.min(...employees.map(e=>e.roam?.nextAt||now+1200));const wait=Math.max(120,Math.min(1800,next-now));roamTimer=setTimeout(()=>{roamTimer=null;roamFrame=requestAnimationFrame(randomRoamFrame)},wait)}
   }
-  let sharedMovementEnabled=false;
-  function startRandomRoam(){if(sharedMovementEnabled)return;if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null;if(!document.hidden&&!reduceMotion.matches&&!visualPaused)roamFrame=requestAnimationFrame(randomRoamFrame)}
+  function startRandomRoam(){if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null;if(!document.hidden&&!reduceMotion.matches&&!visualPaused)roamFrame=requestAnimationFrame(randomRoamFrame)}
   function stopRandomRoam(){if(roamFrame)cancelAnimationFrame(roamFrame);if(roamTimer)clearTimeout(roamTimer);roamFrame=null;roamTimer=null}
   document.addEventListener('visibilitychange',()=>{app.classList.toggle('animations-paused',document.hidden);document.hidden?stopRandomRoam():startRandomRoam()});
   reduceMotion.addEventListener?.('change',()=>{reduceMotion.matches?stopRandomRoam():startRandomRoam()});
   let resizeTimer=null;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(viewMode==='overview'){overviewCam=getOverviewCam();cam={...overviewCam};applyCamera()}else if(viewMode==='follow'&&followEmployeeId&&employeeById[followEmployeeId])followCameraForEmployee(employeeById[followEmployeeId],true)},120)},{passive:true});
   startRandomRoam();scheduleRandomWorkloadBubble();
 
-  // V86.16: The CAS-elected Supabase planner already reserves safe paths and
-  // inter-character spacing. Never make local-only collision corrections: they
-  // produce different coordinates per browser, jump at clearance thresholds,
-  // and can move characters into desks. Legacy snapshots get re-planned by
-  // the leader; viewers render their *exact* authoritative positions.
-  function separateWorkerPositions(items){
-    return items.filter(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y));
-  }
-  // A small bridge for the shared movement timeline. Camera and input remain local.
-  function renderSharedPositions(items){
-    if(!Array.isArray(items))return;
-    let statusChanged=false;
-    for(const item of separateWorkerPositions(items)){
-      const e=employeeById[Number(item.id)],node=e&&employeeNodes.get(e.id);
-      if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
-      e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
-      e.motionAction=item.action||'typing';e.motionFurnitureId=item.furnitureId||null;e.motionFaceTo=item.faceTo||null;
-      if(item.walking&&Number.isFinite(item.heading))e.motionHeading=item.heading;
-      if(Boolean(e.motionWalking)!==Boolean(item.walking)){setMotionClass(e,node,!!item.walking);statusChanged=true}
-      const p=iso(item.x,item.y);
-      node.setAttribute('transform',`translate(${p.x} ${p.y})`);
-      updateEmployeeBubbles(e);
-    }
-    if(statusChanged)updateStats();
-  }
   window.OfficeSuite={
-    sharedMovement:{
-      enable(){sharedMovementEnabled=true;stopRandomRoam()},
-      getPeople:()=>employees,
-      plan:(id,zone=null,target=null)=>{const e=employeeById[Number(id)];return e?planSharedRoam(e,zone,target):null},
-      render:renderSharedPositions
-    },
     getStaff:()=>employees.map(e=>({...e,hasAlert:workloadNoticeIds.has(e.id),motionStatus:effectiveStatus(e)})),
-    getSelectedStaffId:()=>followEmployeeId,
-    markCharacterSelection:()=>window.KSOutsideClose?.markCharacterSelection?.(),
     selectPerson:id=>{const e=employeeById[id];if(e)followCharacter(e)},
     selectDepartment:setDept,
     stopFollow:stopCameraFollow,
     reset:resetScene,
-    selectRoom:id=>{const mapping={workspace:'staff',office:'boss',surau:'prayer',toilets:'toilet-a'};const room=roomById[mapping[id]||id];if(room){openRoom(room);focusRoom(room)}},
-    pause:paused=>{visualPaused=paused;app.classList.toggle('animations-paused',paused);if(paused)stopRandomRoam();else if(!sharedMovementEnabled){const now=performance.now();for(const e of employees){if(e.roam?.phase==='walk')prepareRoamSegment(e,now)}startRandomRoam()}}
+    selectRoom:id=>{const mapping={workspace:'staff',office:'boss',surau:'prayer',toilets:'toilet-a'};const room=roomById[mapping[id]||id];if(room)openRoom(room)},
+    pause:paused=>{visualPaused=paused;app.classList.toggle('animations-paused',paused);if(paused)stopRandomRoam();else {const now=performance.now();for(const e of employees){if(e.roam?.phase==='walk')prepareRoamSegment(e,now)}startRandomRoam()}}
   };
   window.dispatchEvent(new CustomEvent('ks:suite-ready'));
 })();
@@ -3281,19 +2833,8 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.29 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
-<script src="office-notification-sound.js?v=69.0"></script>
+<footer class="ks-version-footer no-print" aria-label="Build version">v58 · 3D</footer>
 <script src="suite-header.js"></script>
-<script src="office-smart-labels.js?v=80.0" defer></script>
-<script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.30" defer></script>
-<script src="office-quality.js?v=86.3" defer></script>
-<script src="office-ambience-audio.js?v=86.4" defer></script>
-<script src="office-living-office.js?v=86.15" defer></script>
-<script src="office-smart-ai.js?v=86.29" defer></script>
-<script src="office-movement-sync.js?v=86.30" defer></script>
-<script src="office-online-users.js?v=86.25" defer></script>
-<script src="office-outside-close.js?v=76.0" defer></script>
-<script src="office-profile-layout.js?v=75.0" defer></script>
+<script src="office-3d.js?v=57.0" defer></script>
 </body>
 </html>

@@ -147,14 +147,14 @@
   const roomById = Object.fromEntries(rooms.map(r => [r.id, r]));
 
   const DEFAULT_EMPLOYEES = [
-    { id:1,name:'Boss',gender:'male',department:'Management',position:'Boss',status:'At desk',homeRoom:'boss',roomId:'boss',x:13.7,y:40.3,deskId:'B01',deskLabel:'Boss Desk',deskX:13.7,deskY:40.3,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:2,name:'Cikda',gender:'female',department:'Management',position:'Boss Assistant',status:'At desk',homeRoom:'boss',roomId:'boss',x:22.1,y:43.95,deskId:'B02',deskLabel:'Boss Assistant Desk',deskX:22.1,deskY:43.95,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:3,name:'Afiq',gender:'male',department:'Creative Department',position:'Designer',status:'At desk',homeRoom:'staff',roomId:'staff',x:13.7,y:6.1,deskId:'D01',deskLabel:'Designer Desk 01',deskX:13.7,deskY:6.1,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:4,name:'Amirul',gender:'male',department:'Sales and Marketing',position:'Sales',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:10.45,deskId:'S01',deskLabel:'Sales Desk 01',deskX:20.75,deskY:10.45,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:5,name:'Nisa',gender:'female',department:'Sales and Marketing',position:'Sales',status:'In a meeting',homeRoom:'staff',roomId:'showroom',x:17.3,y:29.3,deskId:'S02',deskLabel:'Sales Desk 02',deskX:13.7,deskY:14.8,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:6,name:'Lisa',gender:'female',department:'Production Management',position:'Admin',status:'At desk',homeRoom:'staff',roomId:'staff',x:13.7,y:10.45,deskId:'A01',deskLabel:'Admin Desk',deskX:13.7,deskY:10.45,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:7,name:'Minn',gender:'female',department:'Creative Department',position:'Designer',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:6.1,deskId:'D02',deskLabel:'Designer Desk 02',deskX:20.75,deskY:6.1,currentJob:'',activity:'',lastActive:'',workload:[] },
-    { id:8,name:'Athira',gender:'female',department:'Sales and Marketing',position:'Sales',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:14.8,deskId:'S03',deskLabel:'Sales Desk 03',deskX:20.75,deskY:14.8,currentJob:'',activity:'',lastActive:'',workload:[] }
+    { id:1,name:'Boss',department:'Management',position:'Boss',status:'At desk',homeRoom:'boss',roomId:'boss',x:13.7,y:40.3,deskId:'B01',deskLabel:'Boss Desk',deskX:13.7,deskY:40.3,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:2,name:'Cikda',department:'Management',position:'Boss Assistant',status:'At desk',homeRoom:'boss',roomId:'boss',x:22.1,y:43.95,deskId:'B02',deskLabel:'Boss Assistant Desk',deskX:22.1,deskY:43.95,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:3,name:'Afiq',department:'Creative Department',position:'Designer',status:'At desk',homeRoom:'staff',roomId:'staff',x:13.7,y:6.1,deskId:'D01',deskLabel:'Designer Desk 01',deskX:13.7,deskY:6.1,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:4,name:'Amirul',department:'Sales and Marketing',position:'Sales',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:10.45,deskId:'S01',deskLabel:'Sales Desk 01',deskX:20.75,deskY:10.45,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:5,name:'Nisa',department:'Sales and Marketing',position:'Sales',status:'In a meeting',homeRoom:'staff',roomId:'showroom',x:17.3,y:29.3,deskId:'S02',deskLabel:'Sales Desk 02',deskX:13.7,deskY:14.8,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:6,name:'Lisa',department:'Production Management',position:'Admin',status:'At desk',homeRoom:'staff',roomId:'staff',x:13.7,y:10.45,deskId:'A01',deskLabel:'Admin Desk',deskX:13.7,deskY:10.45,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:7,name:'Minn',department:'Creative Department',position:'Designer',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:6.1,deskId:'D02',deskLabel:'Designer Desk 02',deskX:20.75,deskY:6.1,currentJob:'',activity:'',lastActive:'',workload:[] },
+    { id:8,name:'Athira',department:'Sales and Marketing',position:'Sales',status:'At desk',homeRoom:'staff',roomId:'staff',x:20.75,y:14.8,deskId:'S03',deskLabel:'Sales Desk 03',deskX:20.75,deskY:14.8,currentJob:'',activity:'',lastActive:'',workload:[] }
   ];
 
   let employees = DEFAULT_EMPLOYEES.map(e=>({...e,workload:[...(e.workload||[])]}));
@@ -505,6 +505,7 @@
     return null;
   }
   function classifyJobStage(job){
+    if(jobDataSource==='html' && window.KSJobs?.stage)return{stage:window.KSJobs.stage(job),keyword:'',source:'shared job management'};
     const dept=normalizeKey(job?.currentDepartment||'');
     if(dept){
       if(/closed|complete|completed|done/.test(dept))return{stage:'completed',keyword:dept,source:'current department'};
@@ -609,7 +610,7 @@
   }
   async function saveJobCache(list,signature=jobsSignature(list)){
     try{
-      await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({scope:'dashboard:jobs',payload:{savedAt:Date.now(),signature,jobs:list.slice(0,250)},clientId:eventClientId})});
+      await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({scope:'dashboard:jobs',payload:{savedAt:Date.now(),signature,jobs:list},clientId:eventClientId})});
     }catch(_){}
   }
   function normalizeSharedHtmlJob(job,index=0){
@@ -621,7 +622,7 @@
       if(!res.ok)return null;
       const row=await res.json(),parsed=row?.payload;
       if(!Array.isArray(parsed?.jobs))return null;
-      return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob).filter(job=>!isLegacyDemoJob(job)),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
+      return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
     }catch(_){return null}
   }
   async function loadJobsFromSheet({background=false}={}){
@@ -1313,69 +1314,29 @@
     showroom:{roomId:'showroom',point:()=>({x:12.8+Math.random()*8.2,y:26.2+Math.random()*7.6})},
     corridor:{roomId:'corridor',point:()=>({x:8.4+Math.random()*2.3,y:38.5+Math.random()*15.0})},
     pantry:{roomId:'pantry',point:()=>({x:1.4+Math.random()*4.7,y:38.5+Math.random()*14.2})},
-    boss:{roomId:'boss',point:()=>({x:13.2+Math.random()*8.0,y:38.0+Math.random()*7.8})},
-    store:{roomId:'store',point:()=>({x:13.2+Math.random()*8.4,y:49.4+Math.random()*8.4})},
-    prayer:{roomId:'prayer',point:()=>({x:9.2+Math.random()*12.5,y:61.2+Math.random()*6.8})},
-    'toilet-a':{roomId:'toilet-a',point:()=>({x:.9+Math.random()*2.1,y:60.1+Math.random()*4.2})},
-    'toilet-b':{roomId:'toilet-b',point:()=>({x:4.5+Math.random()*2.1,y:60.1+Math.random()*4.2})}
+    boss:{roomId:'boss',point:()=>({x:13.2+Math.random()*8.0,y:38.0+Math.random()*7.8})}
   };
   const zoneGate={
     staff:{x:10.6,y:25.1},showroom:{x:10.6,y:34.8},corridor:{x:9.8,y:40.0},
-    pantry:{x:7.0,y:53.5},boss:{x:12.8,y:44.1},store:{x:12.8,y:50.2},prayer:{x:12.0,y:60.4},'toilet-a':{x:7.1,y:61.8},'toilet-b':{x:7.4,y:61.8}
+    pantry:{x:7.0,y:53.5},boss:{x:12.8,y:44.1}
   };
   const roamChoices={
-    1:['boss','corridor','showroom','pantry','store','prayer','toilet-a'],2:['boss','corridor','showroom','pantry','store','prayer','toilet-b'],
-    3:['staff','showroom','corridor','pantry','prayer','toilet-a'],4:['staff','showroom','corridor','pantry','store','prayer','toilet-a'],
-    5:['showroom','staff','corridor','pantry','prayer','toilet-b'],6:['staff','showroom','corridor','pantry','store','prayer','toilet-b'],
-    7:['staff','showroom','corridor','pantry','prayer','toilet-a'],8:['staff','showroom','corridor','pantry','prayer','toilet-b']
+    1:['boss','corridor','showroom','pantry'],2:['boss','corridor','showroom','pantry'],
+    3:['staff','showroom','corridor','pantry'],4:['staff','showroom','corridor','pantry'],
+    5:['showroom','staff','corridor','pantry'],6:['staff','showroom','corridor','pantry'],
+    7:['staff','showroom','corridor','pantry'],8:['staff','showroom','corridor','pantry']
   };
-  const corridorLinkedZones=new Set(['boss','pantry','store','prayer','toilet-a','toilet-b','corridor']);
   function zoneOfEmployee(e){return e.visualRoomId||e.roomId||e.homeRoom||'staff'}
   function randomDifferent(list,current){const pool=list.filter(v=>v!==current);return(pool.length?pool:list)[Math.floor(Math.random()*(pool.length||list.length))]}
-  function chooseScheduledZone(e,current,home){
-    const choices=roamChoices[e.id]||['staff','showroom','corridor','pantry','store','prayer','toilet-a'];
-    const hour=new Date().getHours();
-    const ownHome=home||(['boss','staff','showroom'].includes(e.homeRoom)?e.homeRoom:'staff');
-    if(['store','prayer','toilet-a','toilet-b'].includes(current))return ownHome;
-    const roleText=`${e.position||''} ${e.department||''}`.toLowerCase();
-    if(hour>=12&&hour<14&&choices.includes('prayer')&&Math.random()<.34)return 'prayer';
-    if(hour>=15&&hour<17&&choices.includes('prayer')&&Math.random()<.16)return 'prayer';
-    if(Math.random()<.11)return e.gender==='female'&&choices.includes('toilet-b')?'toilet-b':'toilet-a';
-    if(/admin|production|finance|boss|assistant/.test(roleText)&&choices.includes('store')&&Math.random()<.20)return 'store';
-    if(choices.includes('showroom')&&Math.random()<.18)return 'showroom';
-    if(choices.includes('pantry')&&Math.random()<.18)return 'pantry';
-    if(choices.includes('corridor')&&Math.random()<.10)return 'corridor';
-    return randomDifferent(choices,current);
-  }
   function pathBetweenZones(from,to,target){
     const pts=[];
     if(from===to)return[target];
     const push=p=>{if(p)pts.push({...p})};
-    const leave=z=>{
-      if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}
-      else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}
-      else if(z==='store'){push(zoneGate.store);push(zoneGate.corridor)}
-      else if(z==='prayer'){push(zoneGate.prayer);push(zoneGate.corridor)}
-      else if(z==='toilet-a'){push(zoneGate['toilet-a']);push(zoneGate.corridor)}
-      else if(z==='toilet-b'){push(zoneGate['toilet-b']);push(zoneGate.corridor)}
-      else if(z==='staff'){push(zoneGate.staff)}
-      else if(z==='showroom'){push(zoneGate.showroom)}
-    };
-    const enter=z=>{
-      if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}
-      else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}
-      else if(z==='store'){push(zoneGate.corridor);push(zoneGate.store)}
-      else if(z==='prayer'){push(zoneGate.corridor);push(zoneGate.prayer)}
-      else if(z==='toilet-a'){push(zoneGate.corridor);push(zoneGate['toilet-a'])}
-      else if(z==='toilet-b'){push(zoneGate.corridor);push(zoneGate['toilet-b'])}
-      else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}
-      else if(z==='showroom'){push(zoneGate.showroom)}
-      else if(z==='corridor'){push(zoneGate.corridor)}
-    };
+    const leave=z=>{if(z==='boss'){push(zoneGate.boss);push(zoneGate.corridor)}else if(z==='pantry'){push(zoneGate.pantry);push(zoneGate.corridor)}else if(z==='staff'){push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}};
+    const enter=z=>{if(z==='boss'){push(zoneGate.corridor);push(zoneGate.boss)}else if(z==='pantry'){push(zoneGate.corridor);push(zoneGate.pantry)}else if(z==='staff'){push(zoneGate.showroom);push(zoneGate.staff)}else if(z==='showroom'){push(zoneGate.showroom)}else if(z==='corridor'){push(zoneGate.corridor)}};
     leave(from);
     if((from==='staff'&&to!=='showroom')||(to==='staff'&&from!=='showroom'))push(zoneGate.showroom);
-    if((from==='showroom'&&corridorLinkedZones.has(to))||(to==='showroom'&&corridorLinkedZones.has(from)))push(zoneGate.corridor);
-    if(corridorLinkedZones.has(from)&&corridorLinkedZones.has(to)&&from!==to)push(zoneGate.corridor);
+    if((from==='showroom'&&['boss','pantry','corridor'].includes(to))||(to==='showroom'&&['boss','pantry','corridor'].includes(from)))push(zoneGate.corridor);
     enter(to);push(target);
     return pts.filter((p,i,a)=>i===0||Math.hypot(p.x-a[i-1].x,p.y-a[i-1].y)>.35);
   }
