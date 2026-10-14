@@ -37,12 +37,23 @@ try{
   for(let i=0;i<before.length;i++)for(const key of ['root','body','yaw','phase','seatMix'])assert.deepEqual(after[i][key],before[i][key],`Pause changed ${key}`);
   await page.evaluate(()=>office3d.setPaused(false));
   const frames=await page.evaluate(()=>new Promise(resolve=>{
-    const samples=[];function next(){samples.push(office3d.getDiagnostics().staff.find(p=>p.id===3));if(samples.length===100)resolve(samples);else requestAnimationFrame(next);}requestAnimationFrame(next);
+    const samples=[];function next(){const staff=office3d.getDiagnostics().staff.find(p=>p.id===3);samples.push({...staff,frameTime:performance.now()});if(samples.length===100)resolve(samples);else requestAnimationFrame(next);}requestAnimationFrame(next);
   }));
   const rising=frames.filter(p=>p.phase==='rising');assert(rising.length>0);
   assert(rising.every(p=>Math.hypot(p.root.x-before[2].root.x,p.root.z-before[2].root.z)<1e-8),'Stand up before moving');
   assert(frames.some(p=>p.phase==='walking'&&Math.hypot(p.root.x-before[2].root.x,p.root.z-before[2].root.z)>.2));
-  for(let i=1;i<frames.length;i++)assert(Math.hypot(frames[i].root.x-frames[i-1].root.x,frames[i].root.z-frames[i-1].root.z)<.121,'No departure snap');
+  // V86.28 uses up to 7.2 world-units/second for lag recovery. A fixed
+  // .121 units/frame threshold assumed exactly 60fps and fails under CI's
+  // software WebGL renderer, where a frame may take 20-50ms. The renderer
+  // clamps delta time to 50ms, so even a slow frame cannot teleport >.36u.
+  // Keep both an elapsed-time speed limit and an absolute per-frame ceiling.
+  for(let i=1;i<frames.length;i++){
+    const travelled=Math.hypot(frames[i].root.x-frames[i-1].root.x,frames[i].root.z-frames[i-1].root.z);
+    const elapsed=Math.max(0,(frames[i].frameTime-frames[i-1].frameTime)/1000);
+    const maxByFrameTime=7.2*Math.min(elapsed,.05)+.06; // allow render/sampling jitter
+    const maxAbsolute=7.2*.05+.006;
+    assert(travelled<=Math.min(maxByFrameTime,maxAbsolute),`No departure snap: ${travelled.toFixed(4)} units in ${(elapsed*1000).toFixed(1)}ms`);
+  }
   await page.evaluate(()=>{const p=testStaff.find(p=>p.id===3);p.motionWalking=false;p.visualX=p.deskX;p.visualY=p.deskY;});
   await page.waitForFunction(()=>office3d.getDiagnostics().staff.find(p=>p.id===3).phase==='seated',null,{timeout:45000});
   const zoom=await page.evaluate(()=>office3d.getDiagnostics().zoom);
