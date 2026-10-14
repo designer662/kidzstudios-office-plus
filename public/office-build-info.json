@@ -1,7 +1,7 @@
 {
-  "release": "86.51",
-  "edition": "Office Plus · Jarvis Office Reports",
-  "package": "V86.51: opening, shared notifications, Job Management reports, centered nav pills; existing classic desks and smart AI preserved",
+  "release": "86.52",
+  "edition": "Office Plus · Jarvis Layout & Job Data Fix",
+  "package": "V86.52: responsive full-width tools, centered dashboard, non-overlapping navigation, unified Google Sheet import, All Jobs CSV export; Smart AI and classic desks preserved",
   "modules": [
     "office-geometry-guard.js",
     "office-workstations.js",

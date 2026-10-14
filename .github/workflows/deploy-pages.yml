@@ -62,6 +62,7 @@ jobs:
           node scripts/test-v86-50-workstations.mjs
           node scripts/test-v86-50-profile-dedup.mjs
           node scripts/test-v86-51-reports-navigation.mjs
+          node scripts/test-v86-52-layout-import.mjs
       - name: Test job data and workbook tools
         run: |
           node scripts/test-job-data.mjs
