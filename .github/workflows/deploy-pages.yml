@@ -99,7 +99,7 @@ jobs:
       - name: Publish verified website ZIP for download
         uses: actions/upload-artifact@v4
         with:
-          name: KidzStudios_OfficePlus_V86.51_Production_Website
+          name: KidzStudios_OfficePlus_V86.52_Production_Website
           path: public/
           include-hidden-files: true
           if-no-files-found: error
