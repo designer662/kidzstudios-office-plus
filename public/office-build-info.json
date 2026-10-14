@@ -1,7 +1,7 @@
 {
-  "release": "86.27",
+  "release": "86.28",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.27 crowd-safe staff roaming, duplicated-reservation prevention, alternate activity routes",
+  "package": "V86.28 synchronized walk-follow animation and lag-aware collision-safe 3D playback",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
@@ -21,5 +21,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "Existing overlap escape without new collisions, no crossing routes, fair 8-staff scheduling, job-management export preserved"
+  "check": "V86.28 delayed timeline catch-up, walking gait on arrival, wall-safe motion, shared timeline regression"
 }

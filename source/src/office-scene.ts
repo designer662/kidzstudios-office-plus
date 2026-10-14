@@ -194,14 +194,17 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
   }
   const deltaX=h.root.position.x-h.lastPosition.x,deltaZ=h.root.position.z-h.lastPosition.z;
   const travelled=Math.hypot(deltaX,deltaZ);
-  // Only face the direction actually traversed in the 3D world. A delayed
-  // Supabase target or route recovery can point the opposite way momentarily.
-  if(p.status==='walking'&&travelled>.00007)h.targetRotation=Math.atan2(deltaX,deltaZ);
+  // A follower that received the shared route late may still be catching up
+  // even after the timeline says the walk is finished. Keep the feet moving
+  // and facing actual travel until the rendered body reaches its destination.
+  const syncLag=Math.hypot(h.targetPosition.x-h.root.position.x,h.targetPosition.z-h.root.position.z);
+  const catchingUp=Boolean(options.externalMotion&&!hold&&travelled>.00007&&syncLag>.10);
+  if((p.status==='walking'||catchingUp)&&travelled>.00007)h.targetRotation=Math.atan2(deltaX,deltaZ);
   h.lastPosition.copy(h.root.position);
   const chair=p.seated&&p.status!=='walking'?seating?.selectChair(h.root.position.x,h.root.position.z,p.id):null;
   if(!paused){
    if(hold&&rig.seatStateV8620.chair)h.targetRotation=rig.seatStateV8620.chair.yaw;
-   else if(chair)h.targetRotation=chair.yaw;
+   else if(chair&&!catchingUp)h.targetRotation=chair.yaw;
    else if(socialPairs.has(p.id)&&p.status!=='walking')h.targetRotation=socialPairs.get(p.id).face;
    const diff=h.targetRotation-h.root.rotation.y;
    h.root.rotation.y+=Math.atan2(Math.sin(diff),Math.cos(diff))*(1-Math.exp(-dt*9));
@@ -212,7 +215,8 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
     canDock:(target:any)=>geometry?.clearLine(geometry.worldToPlan(h.root.position,FLOOR_SPACE_SCALE),geometry.worldToPlan(target,FLOOR_SPACE_SCALE))===true
    },dt);
    if(seatState)rig.seatStateV8620=seatState;
-   const animationPerson={...p,status:hold?'desk' as const:p.status,seated:seatState?seatState.ready:p.seated};
+   const animationPerson={...p,status:hold?'desk' as const:catchingUp?'walking' as const:p.status,
+    seated:seatState?seatState.ready:p.seated};
    animateCharacter(h,animationPerson,simTime,dt,hold?0:travelled);
    if(seatState)seating.pose(h,seatState);
   }
