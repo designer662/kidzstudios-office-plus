@@ -1129,7 +1129,7 @@ body{overscroll-behavior:none;}
 <aside class="today-panel panel ops-panel" id="todayPanel" aria-label="Operations command panel">
   <div class="ops-head">
     <div><span class="today-kicker">Office Plus</span><strong>Office Pulse</strong></div>
-    <div class="ops-source"><i id="opsSourceDot"></i><span id="opsSource">Waiting</span><button id="opsExpandBtn" title="Expand Office Pulse" aria-label="Expand Office Pulse" aria-expanded="false">⤢</button><button id="jobLinkSettingsBtn" title="Edit Job Management link" aria-label="Edit Job Management link">✎</button><button id="opsRefresh" title="Refresh Job Management data" aria-label="Refresh Job Management data">↻</button></div>
+    <div class="ops-source"><i id="opsSourceDot"></i><span id="opsSource">Waiting</span><button id="opsExpandBtn" title="Expand Office Pulse" aria-label="Expand Office Pulse" aria-expanded="false">⤢</button><button id="opsRefresh" title="Refresh Job Management data" aria-label="Refresh Job Management data">↻</button></div>
   </div>
   <div class="ops-tabs" role="tablist" aria-label="Operations views">
     <button class="ops-tab active" data-ops-tab="pulse" role="tab" aria-selected="true">Pulse</button>
@@ -1161,13 +1161,13 @@ body{overscroll-behavior:none;}
         <button class="today-metric" data-ops-metric="production"><span class="today-number">0</span><span class="today-label">Production</span></button>
         <button class="today-metric completed" data-ops-metric="completed"><span class="today-number">0</span><span class="today-label">Completed</span></button>
       </div>
-      <div class="ops-reconcile"><span id="opsReconcile">0 Sheet rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
+      <div class="ops-reconcile"><span id="opsReconcile">0 Job Management rows · 0 classified · 0 unmapped</span><button id="opsUnmappedBtn" class="ops-unmapped-btn" type="button" hidden>Review unmapped</button></div>
       <div id="opsDailySummary" class="ops-daily-summary"><b>Today</b><span>Waiting for Job Management data.</span></div>
       <div id="opsStageHealth" class="ops-stage-health"></div>
       <div id="opsAlerts" class="ops-alerts"></div>
       <div class="ops-note" id="opsNote">Waiting for shared Job Management data.</div>
       <div class="ops-resources">
-        <a id="jobManagementResource" class="ops-resource" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer"><span>▦</span><b>Job Management</b><em>↗</em></a>
+        <a id="jobManagementResource" class="ops-resource" href="job-management.html"><span>▦</span><b>Job Management</b><em>↗</em></a>
         <div class="ops-resource-wrap"><a id="googleDriveResource" class="ops-resource" href="https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B" target="_blank" rel="noopener noreferrer"><span>◫</span><b>Google Drive</b><em>↗</em></a><button id="driveLinkSettingsBtn" class="ops-resource-edit" title="Edit shared Google Drive link" aria-label="Edit shared Google Drive link">✎</button></div>
       </div>
     </details>
@@ -1183,7 +1183,7 @@ body{overscroll-behavior:none;}
   <div class="ops-view" data-ops-view="jobs">
     <div class="ops-section-title"><span>Recent jobs</span><small id="jobsFilterLabel">All</small></div>
     <div class="recent-jobs" id="recentJobs"></div>
-    <a class="ops-open-sheet" href="https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996" target="_blank" rel="noopener noreferrer">Open Job Management <span>↗</span></a>
+    <a class="ops-open-sheet" href="job-management.html">Open Job Management <span>↗</span></a>
   </div>
 </aside>
 <aside class="context-card panel" id="contextCard"></aside><aside class="profile-card panel" id="profileCard"></aside>
@@ -1222,16 +1222,6 @@ body{overscroll-behavior:none;}
 </div>
 </main>
 <div class="tooltip" id="tooltip"></div>
-
-<div class="job-link-modal" id="jobLinkModal" aria-hidden="true">
-  <div class="job-link-dialog" role="dialog" aria-modal="true" aria-labelledby="jobLinkTitle">
-    <div class="job-link-head"><div><span>Shared setting</span><strong id="jobLinkTitle">Job Management Link</strong></div><button id="jobLinkClose" aria-label="Close">×</button></div>
-    <label class="job-link-label" for="jobLinkInput">Google Sheet edit link</label>
-    <input id="jobLinkInput" class="job-link-input" type="url" inputmode="url" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=...">
-    <div class="job-link-help" id="jobLinkHelp">This link is shared through Supabase and will load for everyone.</div>
-    <div class="job-link-actions"><button class="job-link-secondary" id="jobLinkReset">Use default</button><button class="job-link-primary" id="jobLinkSave">Save shared link</button></div>
-  </div>
-</div>
 
 <div class="job-link-modal" id="driveLinkModal" aria-hidden="true" data-sync-ignore>
   <div class="job-link-dialog" role="dialog" aria-modal="true" aria-labelledby="driveLinkTitle">
@@ -1331,13 +1321,6 @@ body{overscroll-behavior:none;}
   const opsSource = $('#opsSource');
   const opsSourceDot = $('#opsSourceDot');
   const opsRefreshBtn = $('#opsRefresh');
-  const jobLinkSettingsBtn = $('#jobLinkSettingsBtn');
-  const jobLinkModal = $('#jobLinkModal');
-  const jobLinkInput = $('#jobLinkInput');
-  const jobLinkHelp = $('#jobLinkHelp');
-  const jobLinkSave = $('#jobLinkSave');
-  const jobLinkReset = $('#jobLinkReset');
-  const jobLinkClose = $('#jobLinkClose');
   const workloadList = $('#workloadList');
   const workloadTotal = $('#workloadTotal');
   const followChip=$('#followChip'),followChipName=$('#followChipName'),followChipStop=$('#followChipStop');
@@ -1470,7 +1453,6 @@ body{overscroll-behavior:none;}
   let activityFeed=[];
 
 
-  const DEFAULT_JOB_SHEET_URL='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996';
   const GLOBAL_CONFIG_SCOPE='config:global';
   const STAFF_DIRECTORY_SCOPE='office:staff';
   const DEFAULT_GOOGLE_DRIVE_URL='https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B';
@@ -1485,10 +1467,6 @@ body{overscroll-behavior:none;}
   let eventPollTimer=null,eventInitialized=false,lastEventId=0,notificationOpen=false,notificationUnreadCount=0,notificationToastTimer=null,editingWorkloadId=null,jobAutoTimer=null,jobSyncInFlight=false;
   let notifications=[];
   const workloadNoticeIds=new Set();
-  let jobSheetUrl=DEFAULT_JOB_SHEET_URL;
-  let jobDataSource='html';
-  let jobSheetBase='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo';
-  let jobSheetGid='588550996';
   const LEGACY_DEMO_JOB_REFS=new Set(['KS-1044','KS-1045','KS-1046','KS-1047','KS-1048','KS-1049','KS-1050','KS-1051','KS-1052']);
   function isLegacyDemoJob(job){return LEGACY_DEMO_JOB_REFS.has(String(job?.ref||job?.jobsheetFiles||'').trim().toUpperCase())}
   const DEFAULT_STAGE_MAPPING={
@@ -1581,7 +1559,7 @@ body{overscroll-behavior:none;}
     const id=Number(employeeId);workloadNoticeIds.delete(id);employeeNodes.get(id)?.classList.remove('workload-alert');
   }
   async function refreshJobsFromSharedCache(){
-    const cached=await readJobCache();if(!cached||Number(cached.version||0)<jobSharedVersion)return;jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);setOpsSource(jobDataSource==='html'?'live':'cached',jobDataSource==='html'?'Job Management':'Database',`Job Management update received · ${jobs.length} shared jobs synced.`,cached.savedAt);renderOps();
+    const cached=await readJobCache();if(!cached||Number(cached.version||0)<jobSharedVersion)return;jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);setOpsSource('live','Job Management',`Job Management update received · ${jobs.length} shared jobs synced.`,cached.savedAt);renderOps();
   }
   function addNotification(event,{initial=false,local=false}={}){
     notifications.unshift(event);if(notifications.length>40)notifications.length=40;renderNotifications();
@@ -1626,53 +1604,16 @@ body{overscroll-behavior:none;}
   }
 
   function normalizeKey(v=''){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
-  function parseJobManagementUrl(value){
-    let url;
-    try{url=new URL(String(value||'').trim())}catch(_){return{ok:false,error:'Enter a valid https:// link.'}}
-    if(url.protocol!=='https:'&&url.protocol!=='http:')return{ok:false,error:'Link must start with https:// or http://.'};
-    const clean=url.toString();
-    const m=url.pathname.match(/^\/spreadsheets\/d\/([^/]+)/);
-    let gid=url.searchParams.get('gid')||'';
-    if(!gid&&url.hash){const hm=url.hash.match(/(?:^#|[?&])gid=(\d+)/);if(hm)gid=hm[1]}
-    if(url.hostname==='docs.google.com'&&m){
-      return{ok:true,url:clean,base:`https://docs.google.com/spreadsheets/d/${m[1]}`,gid:gid||'0',sheet:true};
-    }
-    return{ok:true,url:clean,base:null,gid:null,sheet:false};
-  }
-  function applyJobManagementUrl(value,{broadcast=true}={}){
-    const parsed=parseJobManagementUrl(value);
-    if(!parsed.ok)return parsed;
-    jobSheetUrl=parsed.url;jobSheetBase=parsed.base;jobSheetGid=parsed.gid;
-    document.querySelectorAll('a').forEach(a=>{
-      const sharedJobLink=a.hasAttribute('data-shared-job-link')||a.id==='jobManagementResource'||a.classList.contains('ops-open-sheet');
-      if(sharedJobLink){a.href=jobSheetUrl;a.target='_blank';a.rel='noopener noreferrer'}
-    });
-    if(jobLinkInput&&document.activeElement!==jobLinkInput)jobLinkInput.value=jobSheetUrl;
-    if(broadcast)window.dispatchEvent(new CustomEvent('ks:job-management-url',{detail:{url:jobSheetUrl}}));
-    return parsed;
-  }
   async function readGlobalConfig(){
     try{const res=await fetch(`/api/state?scope=${encodeURIComponent(GLOBAL_CONFIG_SCOPE)}`,{cache:'no-store',headers:{accept:'application/json'}});if(!res.ok)return{};const row=await res.json();return row?.payload&&typeof row.payload==='object'?row.payload:{}}catch(_){return{}}
   }
   async function initSharedJobManagement(){
+    // Office Pulse reads ONLY Job Management's authoritative shared jobs.
+    // Global configuration is needed for the unrelated Google Drive shortcut.
     const cfg=await readGlobalConfig();
-    jobDataSource=cfg.jobDataSource||'html';
-    applyJobManagementUrl(cfg.jobManagementUrl||DEFAULT_JOB_SHEET_URL);
     applyGoogleDriveUrl(cfg.googleDriveUrl||DEFAULT_GOOGLE_DRIVE_URL);
     stageMapping=normalizeStageMapping(DEFAULT_STAGE_MAPPING);renderOps();return cfg;
   }
-  async function saveJobManagementUrl(value){
-    const parsed=parseJobManagementUrl(value);if(!parsed.ok)throw new Error(parsed.error);
-    const current=await readGlobalConfig();
-    const payload={...current,jobManagementUrl:parsed.url,jobManagementUpdatedAt:Date.now()};
-    const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:GLOBAL_CONFIG_SCOPE,payload,clientId:'dashboard-link-editor'})});
-    if(!res.ok)throw new Error(`Save failed (${res.status})`);
-    applyJobManagementUrl(parsed.url);
-    await postOfficeEvent({eventType:'job_link_updated',title:'Job Management link updated',message:'Shared Job Management link changed',metadata:{url:parsed.url},dedupeKey:`job-link:${hashString(parsed.url)}:${Date.now()}`});
-    return parsed;
-  }
-  function openJobLinkEditor(){if(!jobLinkModal)return;jobLinkInput.value=jobSheetUrl;jobLinkHelp.className='job-link-help';jobLinkHelp.textContent='This Google Sheet link is shared as the import/reference source for Job Management HTML.';jobLinkModal.classList.add('open');jobLinkModal.setAttribute('aria-hidden','false');setTimeout(()=>jobLinkInput.focus(),40)}
-  function closeJobLinkEditor(){if(!jobLinkModal)return;jobLinkModal.classList.remove('open');jobLinkModal.setAttribute('aria-hidden','true')}
   function parseHttpUrl(value,label='Link'){
     let url;try{url=new URL(String(value||'').trim())}catch(_){return{ok:false,error:`Enter a valid ${label.toLowerCase()} URL.`}}
     if(!['https:','http:'].includes(url.protocol))return{ok:false,error:`${label} must start with https:// or http://.`};
@@ -1761,12 +1702,6 @@ body{overscroll-behavior:none;}
     });
     return out;
   }
-  function gvizToJobs(response){
-    const table=response&&response.table;if(!table||!Array.isArray(table.rows))return[];
-    const headers=(table.cols||[]).map((c,i)=>c?.label||c?.id||`Column ${i+1}`);
-    const rows=table.rows.map(r=>(r.c||[]).map(c=>c?.f??c?.v??''));
-    return tableToJobs(headers,rows);
-  }
   function normalizeStageMapping(value){
     const out={};
     for(const key of ['orders','artwork','production','completed']){
@@ -1835,7 +1770,7 @@ body{overscroll-behavior:none;}
     }
     const status=$('#ksPulseDataStatus');if(!status)return;
     const stamp=opsLastSyncAt?` · saved ${new Date(opsLastSyncAt).toLocaleString('en-MY')}`:'';
-    const labels={loading:'Loading Office Pulse…',live:`Shared Job Management · synchronized${stamp}`,sheet:'Google Sheet preview · read-only (not saved)',cached:`Showing last saved data${stamp}`,offline:opsHasSnapshot?`Unable to refresh · showing last loaded data${stamp}`:'Unable to load Office Pulse · Retry refresh',empty:'No saved jobs yet · Open Job Management'};
+    const labels={loading:'Loading Office Pulse…',live:`Shared Job Management · synchronized${stamp}`,cached:`Showing last saved data${stamp}`,offline:opsHasSnapshot?`Unable to refresh · showing last loaded data${stamp}`:'Unable to load Office Pulse · Retry refresh',empty:'No saved jobs yet · Open Job Management'};
     status.textContent=jobSyncInFlight&&opsHasSnapshot&&opsDataMode==='live'?'Refreshing Office Pulse… previously loaded jobs remain visible.':labels[opsDataMode]||'Job data status unavailable';
     status.dataset.state=opsDataMode;
   }
@@ -1844,7 +1779,7 @@ body{overscroll-behavior:none;}
     if(mode==='live'||mode==='cached')opsLastSyncAt=timestamp||opsLastSyncAt||Date.now();
     else if(mode==='empty')opsLastSyncAt=null;
     if(opsSource)opsSource.textContent=label;
-    const parent=opsSource?.parentElement;if(parent){parent.classList.toggle('is-live',mode==='live');parent.classList.toggle('is-cached',mode==='cached'||mode==='offline'||mode==='sheet')}
+    const parent=opsSource?.parentElement;if(parent){parent.classList.toggle('is-live',mode==='live');parent.classList.toggle('is-cached',mode==='cached'||mode==='offline')}
     if(opsNote&&note)opsNote.textContent=note;
     renderOpsSyncMeta();
   }
@@ -1869,12 +1804,11 @@ body{overscroll-behavior:none;}
     const priority=snapshot.attention.slice(0,todayPanel.classList.contains('expanded')?5:3);
     if(!priority.length){root.innerHTML='<p class="ks-pulse-empty">No jobs currently require attention.</p>';return}
     root.innerHTML=priority.map(entry=>{
-      const direct=jobDataSource==='html'?window.KSPulseInsights.jobHref(entry.ref):'';
-      const href=direct|| (jobDataSource!=='html'?jobSheetUrl:'job-management.html?view=queue');
+      const href=window.KSPulseInsights.jobHref(entry.ref)||'job-management.html?view=queue';
       const tag=entry.primary.category==='overdue'?'late':entry.primary.category==='today'?'today':'soon';
       const reason=entry.reasons.slice(1,3).map(r=>r.label).join(' · ');
       const title=entry.primary.label;
-      return `<a class="ks-priority-row" href="${esc(href)}" ${jobDataSource!=='html'?'target="_blank" rel="noopener noreferrer"':''} title="${esc(entry.primary.action)}"><span class="ks-priority-copy"><b>${esc(entry.ref||'Missing reference')}</b><small>${esc(entry.customer||'Customer not recorded')} · ${esc(title)}${reason?' · '+esc(reason):''}</small></span><span class="ks-priority-due ${tag}">${esc(title)}</span></a>`;
+      return `<a class="ks-priority-row" href="${esc(href)}" title="${esc(entry.primary.action)}"><span class="ks-priority-copy"><b>${esc(entry.ref||'Missing reference')}</b><small>${esc(entry.customer||'Customer not recorded')} · ${esc(title)}${reason?' · '+esc(reason):''}</small></span><span class="ks-priority-due ${tag}">${esc(title)}</span></a>`;
     }).join('');
   }
   function renderOps(){
@@ -1882,7 +1816,7 @@ body{overscroll-behavior:none;}
     todayPanel.querySelectorAll('[data-ops-metric]').forEach(btn=>{const key=btn.dataset.opsMetric,node=btn.querySelector('.today-number');if(node)animateNum(node,counts[key]||0);btn.classList.toggle('active-filter',opsFilter===key)});todayPanel.querySelectorAll('[data-ops-quick]').forEach(btn=>{const key=btn.dataset.opsQuick,node=btn.querySelector('.today-number'),value=key==='active'?activeCount:key==='dueToday'?dueToday:key==='overdue'?counts.overdue:key==='completedToday'?completedToday:key==='attention'?pulse.attentionCount:0;if(node)animateNum(node,value);btn.classList.toggle('active-filter',opsFilter===key)});
     if(opsTotalJobs)animateNum(opsTotalJobs,jobs.length);if(opsActiveJobs)animateNum(opsActiveJobs,activeCount);if(opsCompletedToday)animateNum(opsCompletedToday,completedToday);if(opsDueToday)animateNum(opsDueToday,dueToday);
     if(opsPipelineBar){const total=Math.max(1,counts.orders+counts.artwork+counts.production+counts.completed),parts=['orders','artwork','production','completed'];opsPipelineBar.innerHTML=parts.map(key=>`<i class="pipeline-${key}" style="width:${(counts[key]/total*100).toFixed(2)}%" title="${key}: ${counts[key]}"></i>`).join('');opsPipelineBar.setAttribute('aria-label',`Job Management classified tally: ${counts.orders} orders, ${counts.artwork} artwork, ${counts.production} production, ${counts.completed} completed, ${counts.unmapped} unmapped`)}
-    const classified=jobs.length-counts.unmapped;if(opsReconcile){const sourceLabel=jobDataSource==='html'?'Job Management row':'Sheet row';opsReconcile.textContent=`${jobs.length} ${sourceLabel}${jobs.length===1?'':'s'} · ${classified} classified · ${counts.unmapped} unmapped`}if(opsUnmappedBtn){opsUnmappedBtn.hidden=counts.unmapped===0;opsUnmappedBtn.textContent=`Review ${counts.unmapped} unmapped`;opsUnmappedBtn.classList.toggle('warning',counts.unmapped>0)}
+    const classified=jobs.length-counts.unmapped;if(opsReconcile){const sourceLabel='Job Management row';opsReconcile.textContent=`${jobs.length} ${sourceLabel}${jobs.length===1?'':'s'} · ${classified} classified · ${counts.unmapped} unmapped`}if(opsUnmappedBtn){opsUnmappedBtn.hidden=counts.unmapped===0;opsUnmappedBtn.textContent=`Review ${counts.unmapped} unmapped`;opsUnmappedBtn.classList.toggle('warning',counts.unmapped>0)}
     if(opsDailySummary){const date=now.toLocaleDateString('en-MY',{day:'numeric',month:'short'});opsDailySummary.innerHTML=`<b>Today · ${esc(date)}</b><span>${activeCount} active · ${counts.artwork} artwork · ${counts.production} production · ${completedToday} completed today · ${counts.overdue} overdue</span>`}
     if(opsStageHealth){const fmt=v=>Number.isFinite(v)?`${v.toFixed(v>=10?0:1)}d`:'—';opsStageHealth.innerHTML=[['orders','Orders'],['artwork','Artwork'],['production','Production']].map(([key,label])=>`<div><span>${label}</span><b>${counts[key]}</b><small>avg job age ${fmt(avgAgeForStage(key))}</small></div>`).join('')+`<div><span>Waiting approval</span><b>${waitingApproval}</b><small>artwork/client hold</small></div>`}
     const alerts=[['dueToday','Due today',dueToday,'due'],['overdue','Overdue',counts.overdue,'danger'],['noPic','No PIC',noPic,'warn'],['noDesigner','No Designer',noDesigner,'warn'],['stuckArtwork','Artwork >2d',stuckArtwork,'warn'],['stuckProduction','Production >3d',stuckProduction,'warn'],['completedToday','Completed today',completedToday,'good'],['waitingApproval','Waiting approval',waitingApproval,'']];if(opsAlerts)opsAlerts.innerHTML=alerts.map(([key,label,value,tone])=>`<button class="ops-alert ${tone}" data-ops-alert-filter="${key}"><span>${esc(label)}</span><b>${value}</b></button>`).join('');
@@ -1900,7 +1834,7 @@ body{overscroll-behavior:none;}
       {label:'Job',value:job.title||''},{label:'Customer',value:job.customer||''},{label:'Status',value:job.status||''},{label:'PIC',value:job.pic||''}
     ].filter(v=>String(v.value||'').trim());
     const detailHtml=details.map(item=>`<div class="detail-row"><span>${esc(item.label)}</span><span>${esc(item.value)}</span></div>`).join('');
-    contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(job.ref||'Job')}</div><div class="context-sub">Live Job Management record</div></div><button class="close-mini">×</button></div><div class="profile-details sheet-job-details">${detailHtml||'<div class="detail-row"><span>Job</span><span>No detail available</span></div>'}</div><div class="profile-job-actions">${emp?`<button class="profile-job-action" data-focus-job-employee="${emp.id}">Focus ${esc(emp.name)}</button>`:''}<a class="profile-job-action" href="${jobDataSource==='html'?(window.KSPulseInsights.jobHref(job.ref)||'job-management.html?view=queue'):esc(jobSheetUrl)}" ${jobDataSource==='html'?'':'target="_blank" rel="noopener noreferrer"'}>Open Job ↗</a></div>`;
+    contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(job.ref||'Job')}</div><div class="context-sub">Live Job Management record</div></div><button class="close-mini">×</button></div><div class="profile-details sheet-job-details">${detailHtml||'<div class="detail-row"><span>Job</span><span>No detail available</span></div>'}</div><div class="profile-job-actions">${emp?`<button class="profile-job-action" data-focus-job-employee="${emp.id}">Focus ${esc(emp.name)}</button>`:''}<a class="profile-job-action" href="${window.KSPulseInsights.jobHref(job.ref)||'job-management.html?view=queue'}">Open Job ↗</a></div>`;
     contextCard.classList.add('open');
     contextCard.querySelector('.close-mini').onclick=()=>contextCard.classList.remove('open');
     const focus=contextCard.querySelector('[data-focus-job-employee]');if(focus)focus.onclick=()=>{openEmployee(emp);focusEmployee(emp)};
@@ -1921,41 +1855,40 @@ body{overscroll-behavior:none;}
       return {...parsed,jobs:parsed.jobs.map(normalizeSharedHtmlJob),version:Number(row?.version||0),updatedAt:row?.updatedAt||null};
     }catch(error){if(strict)throw error;return null}
   }
-  async function loadJobsFromSheet({background=false}={}){
-    if(jobSyncInFlight)return jobs;jobSyncInFlight=true;
+  async function loadJobsFromManagement({background=false}={}){
+    if(jobSyncInFlight)return jobs;
+    jobSyncInFlight=true;
     if(!background&&opsRefreshBtn)opsRefreshBtn.classList.add('loading');
-    if(!opsHasSnapshot){setOpsSource('loading','Loading','Checking shared Job Management data…')}
+    if(!opsHasSnapshot)setOpsSource('loading','Loading','Checking shared Job Management data…');
     renderOpsSyncMeta();
-    if(jobDataSource==='html'){
-      try{
-        const shared=await readJobCache({strict:true});
-        if(shared){
-          if(opsHasSnapshot&&Number(shared.version||0)<jobSharedVersion)return jobs;
-          const changed=Number(shared.version||0)!==jobSharedVersion;jobSharedVersion=Number(shared.version||jobSharedVersion);opsLastSyncAt=shared.savedAt||opsLastSyncAt;
-          if(changed||opsDataMode!=='live'){jobs=shared.jobs;opsHasSnapshot=true;setOpsSource('live','Job Management',`${jobs.length} shared jobs synced from the live database · ${fullClockTime()}.`,shared.savedAt);renderOps();}
-          else renderOpsSyncMeta();
-        }else if(!opsHasSnapshot){jobs=[];opsHasSnapshot=true;jobSharedVersion=0;setOpsSource('empty','No Data','No shared Job Management rows saved yet. Add or import a job to begin.');renderOps();}
-        return jobs;
-      }catch(error){setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);renderOps();return jobs}finally{jobSyncInFlight=false;renderOpsSyncMeta();if(!background)opsRefreshBtn?.classList.remove('loading')}
+    try{
+      const shared=await readJobCache({strict:true});
+      if(shared){
+        // Never replace newer accepted data with an older response.
+        if(opsHasSnapshot&&Number(shared.version||0)<jobSharedVersion)return jobs;
+        const changed=Number(shared.version||0)!==jobSharedVersion;
+        jobSharedVersion=Number(shared.version||jobSharedVersion);
+        opsLastSyncAt=shared.savedAt||opsLastSyncAt;
+        if(changed||opsDataMode!=='live'){
+          jobs=shared.jobs;opsHasSnapshot=true;
+          setOpsSource('live','Job Management',`${jobs.length} shared jobs synchronized from Job Management.`,shared.savedAt);
+          renderOps();
+        }else renderOpsSyncMeta();
+      }else if(!opsHasSnapshot){
+        jobs=[];opsHasSnapshot=true;jobSharedVersion=0;
+        setOpsSource('empty','No Data','No shared Job Management jobs yet. Add or import a job to begin.');
+        renderOps();
+      }
+      return jobs;
+    }catch(error){
+      setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);
+      renderOps();return jobs;
+    }finally{
+      jobSyncInFlight=false;renderOpsSyncMeta();
+      if(!background)opsRefreshBtn?.classList.remove('loading');
     }
-    const shared=await readJobCache();
-    if(shared&&(!opsHasSnapshot||Number(shared.version||0)>=jobSharedVersion)){jobs=shared.jobs;opsHasSnapshot=true;jobSharedVersion=Number(shared.version||jobSharedVersion);const mins=Math.max(1,Math.round((Date.now()-shared.savedAt)/60000));setOpsSource('cached','Database',background?'Checking Job Management for updates…':`Shared database loaded · ${mins} min old. Refreshing Job Management…`,shared.savedAt);renderOps();}
-    else if(!background)setOpsSource('empty','Syncing','Connecting to Job Management and shared database.');
-    return new Promise((resolve,reject)=>{
-      const callback=`__ksJobData_${Date.now()}_${Math.floor(Math.random()*1000)}`;let done=false,script=document.createElement('script'),timer=null;
-      const finish=(err,data)=>{if(done)return;done=true;if(timer)clearTimeout(timer);try{delete window[callback]}catch(_){window[callback]=undefined}script.remove();err?reject(err):resolve(data)};
-      window[callback]=response=>{try{const parsed=gvizToJobs(response);if(!parsed.length)throw new Error('No usable rows');finish(null,parsed)}catch(err){finish(err)}};
-      const tqx=encodeURIComponent(`out:json;responseHandler:${callback}`);if(!jobSheetBase){finish(new Error('Saved Job Management link is not a Google Sheet'));return}script.src=`${jobSheetBase}/gviz/tq?gid=${jobSheetGid||'0'}&headers=1&tqx=${tqx}&_=${Date.now()}`;script.async=true;script.onerror=()=>finish(new Error('Sheet unavailable'));document.head.appendChild(script);
-      timer=setTimeout(()=>finish(new Error('Sheet sync timed out')),5200);
-    }).then(async list=>{
-      jobs=list;opsHasSnapshot=true;setOpsSource('sheet','Sheet preview',`${list.length} Google Sheet rows loaded read-only. Import through Job Management to save shared records.`);renderOps();
-      // A Sheet preview is not an authoritative shared-state change.
-      return list;
-    }).catch(async()=>{
-      const cached=await readJobCache();if(cached&&(!opsHasSnapshot||Number(cached.version||0)>=jobSharedVersion)){jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);const mins=Math.max(1,Math.round((Date.now()-cached.savedAt)/60000));setOpsSource('cached','Database',`Live Sheet was unavailable. Showing shared Supabase data from ${mins} min ago.`,cached.savedAt)}else{setOpsSource('offline','Retry needed',opsHasSnapshot?'Sheet unavailable. Showing last loaded jobs.':'Sheet unavailable; no shared jobs could be loaded. Retry refresh.')};renderOps();return jobs;
-    }).finally(()=>{jobSyncInFlight=false;renderOpsSyncMeta();if(!background)opsRefreshBtn?.classList.remove('loading')});
   }
-  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);jobAutoTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadJobsFromSheet({background:true})},3500)}
+  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);jobAutoTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadJobsFromManagement({background:true})},3500)}
 
   const DEPARTMENTS=['Creative Department','Sales and Marketing','Management','Production Management','Finance Department'];
   function normalizeDepartment(value,position=''){
@@ -2641,7 +2574,7 @@ body{overscroll-behavior:none;}
   function targetFor(e,status){if(status==='At desk'&&Number.isFinite(e.deskX)&&Number.isFinite(e.deskY))return{roomId:e.homeRoom,x:e.deskX,y:e.deskY};const id=status==='In a meeting'?'showroom':status==='On break'?'pantry':status==='Walking'?'showroom':e.homeRoom,r=roomById[id],b=polygonBounds(r.poly);return{roomId:id,x:b.x+1+Math.random()*Math.max(1,b.w-2),y:b.y+1+Math.random()*Math.max(1,b.h-2)}}
   function move(e,status){if(e.moving)return;e.moving=true;const n=employeeNodes.get(e.id),start={x:e.x,y:e.y},tar=targetFor(e,status),mid={x:(start.x+tar.x)/2+(Math.random()-.5)*2.6,y:(start.y+tar.y)/2+(Math.random()-.5)*2.0},t0=performance.now(),dur=4200+Math.random()*1600;n.classList.remove('idle','busy');n.classList.add('walking');function bez(t,a,b,c){const u=1-t;return u*u*a+2*u*t*b+t*t*c}function f(now){const p=Math.min(1,(now-t0)/dur),q=1-Math.pow(1-p,3);e.x=bez(q,start.x,mid.x,tar.x);e.y=bez(q,start.y,mid.y,tar.y);const pos=iso(e.x,e.y);n.setAttribute('transform',`translate(${pos.x} ${pos.y})`);updateEmployeeBubbles(e);if(p<1)requestAnimationFrame(f);else{e.roomId=tar.roomId;e.status=status;e.activity='';e.moving=false;n.classList.remove('walking');n.classList.add(employeeClass(e));n.querySelector('.status-dot').setAttribute('fill',statusColor(status));updateStats()}}requestAnimationFrame(f)}
 
-  renderNav();drawBase();drawRooms();drawEmployees();startOfficeClock();renderFeed();updateStats();renderOps();startStaffDirectorySync();startChat();startEventStream();setTimeout(()=>initSharedJobManagement().then(()=>loadJobsFromSheet()).then(startJobAutoSync),180);
+  renderNav();drawBase();drawRooms();drawEmployees();startOfficeClock();renderFeed();updateStats();renderOps();startStaffDirectorySync();startChat();startEventStream();setTimeout(()=>initSharedJobManagement().then(()=>loadJobsFromManagement()).then(startJobAutoSync),180);
   // Cinematic page-open zoom: begin slightly closer, then settle into the reference overview.
   const introTarget={...overviewCam};
   const introScale=Math.min(1.88,introTarget.scale*1.14);
@@ -2710,9 +2643,8 @@ body{overscroll-behavior:none;}
     const jobRow=e.target.closest('[data-job-index]');if(jobRow){showJobDetail(jobs[Number(jobRow.dataset.jobIndex)]);return}
   };
   if(todayPanel)todayPanel.onkeydown=e=>{if(e.key!=='Enter'&&e.key!==' ')return;const target=e.target.closest('[data-edit-staff],[data-workload-employee],[data-job-index]');if(!target)return;e.preventDefault();target.click()};
-  if(opsRefreshBtn)opsRefreshBtn.onclick=e=>{e.stopPropagation();loadJobsFromSheet()};
+  if(opsRefreshBtn)opsRefreshBtn.onclick=e=>{e.stopPropagation();loadJobsFromManagement()};
   if(followChipStop)followChipStop.onclick=e=>{e.stopPropagation();stopCameraFollow();$$('.employee').forEach(n=>n.classList.remove('active'))};
-  if(jobLinkSettingsBtn)jobLinkSettingsBtn.onclick=e=>{e.stopPropagation();openJobLinkEditor()};
   if(addStaffBtn)addStaffBtn.onclick=e=>{e.stopPropagation();openStaffEditor(null)};
   if(staffEditorClose)staffEditorClose.onclick=closeStaffEditor;
   if(staffEditorModal)staffEditorModal.onclick=e=>{if(e.target===staffEditorModal)closeStaffEditor()};
@@ -2723,11 +2655,6 @@ body{overscroll-behavior:none;}
   if(driveLinkModal)driveLinkModal.onclick=e=>{if(e.target===driveLinkModal)closeDriveLinkEditor()};
   if(driveLinkReset)driveLinkReset.onclick=()=>{driveLinkInput.value=DEFAULT_GOOGLE_DRIVE_URL;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Default Kidzstudios Google Drive folder loaded. Click Save shared link to apply it for everyone.'};
   if(driveLinkSave)driveLinkSave.onclick=async()=>{const parsed=parseHttpUrl(driveLinkInput.value,'Google Drive link');if(!parsed.ok){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=parsed.error;return}driveLinkSave.disabled=true;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='Saving to shared database…';try{await saveGoogleDriveUrl(driveLinkInput.value);driveLinkHelp.className='job-link-help ok';driveLinkHelp.textContent='Saved. Everyone will now open the same Google Drive folder.';setTimeout(closeDriveLinkEditor,520)}catch(err){driveLinkHelp.className='job-link-help error';driveLinkHelp.textContent=err.message||'Could not save link.'}finally{driveLinkSave.disabled=false}};
-  if(jobLinkClose)jobLinkClose.onclick=closeJobLinkEditor;
-  if(jobLinkModal)jobLinkModal.onclick=e=>{if(e.target===jobLinkModal)closeJobLinkEditor()};
-  if(jobLinkReset)jobLinkReset.onclick=()=>{jobLinkInput.value=DEFAULT_JOB_SHEET_URL;jobLinkHelp.className='job-link-help';jobLinkHelp.textContent='Default Kidzstudios Job Management link loaded. Click Save shared link to apply it for everyone.'};
-  if(jobLinkSave)jobLinkSave.onclick=async()=>{const parsed=parseJobManagementUrl(jobLinkInput.value);if(!parsed.ok){jobLinkHelp.className='job-link-help error';jobLinkHelp.textContent=parsed.error;return}jobLinkSave.disabled=true;jobLinkHelp.className='job-link-help';jobLinkHelp.textContent='Saving to shared database…';try{await saveJobManagementUrl(jobLinkInput.value);jobLinkHelp.className='job-link-help ok';jobLinkHelp.textContent=parsed.sheet?'Saved. Job Management HTML can now import from this Google Sheet.':'Saved. Everyone will open this link. Live job syncing needs a Google Sheet edit link.';setTimeout(()=>{closeJobLinkEditor();loadJobsFromSheet()},650)}catch(err){jobLinkHelp.className='job-link-help error';jobLinkHelp.textContent=err.message||'Could not save link.'}finally{jobLinkSave.disabled=false}};
-  window.addEventListener('ks:job-management-url',e=>{if(e.detail?.url&&e.detail.url!==jobSheetUrl){applyJobManagementUrl(e.detail.url,{broadcast:false});loadJobsFromSheet()}});
   window.addEventListener('ks:google-drive-url',e=>{if(e.detail?.url&&e.detail.url!==googleDriveUrl)applyGoogleDriveUrl(e.detail.url,{broadcast:false})});
   $$('.side-tool-card').forEach(a=>a.onclick=e=>{e.preventDefault();pushActivity({title:'Tool shortcut selected',text:a.dataset.tool,avatar:'UI'});showBubble(employees.find(v=>v.name==='Afiq')||employees[0],a.dataset.tool)});
   $$('.tool-nav-btn').forEach(btn=>btn.addEventListener('click',()=>{$$('.tool-nav-btn').forEach(n=>n.classList.toggle('active',n===btn));}));
@@ -3075,20 +3002,10 @@ body{overscroll-behavior:none;}
   let started = false;
 
   const GLOBAL_CONFIG_SCOPE='config:global';
-  const DEFAULT_JOB_MANAGEMENT_URL='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996';
   const DEFAULT_GOOGLE_DRIVE_URL='https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B';
   let globalConfigVersion=0;
   function applyGlobalConfig(payload={}){
-    const jobUrl=String(payload.jobManagementUrl||DEFAULT_JOB_MANAGEMENT_URL).trim();
     const driveUrl=String(payload.googleDriveUrl||DEFAULT_GOOGLE_DRIVE_URL).trim();
-    if(/^https?:\/\//i.test(jobUrl)){
-      document.querySelectorAll('a').forEach(a=>{
-        const looksDefault=(a.getAttribute('href')||'').includes('docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo');
-        const sharedJobLink=a.hasAttribute('data-shared-job-link')||a.id==='jobManagementResource'||a.classList.contains('ops-open-sheet');
-        if(sharedJobLink||looksDefault){a.href=jobUrl;a.target='_blank';a.rel='noopener noreferrer'}
-      });
-      window.dispatchEvent(new CustomEvent('ks:job-management-url',{detail:{url:jobUrl}}));
-    }
     if(/^https?:\/\//i.test(driveUrl)){
       document.querySelectorAll('a[data-shared-drive],a[data-tool="Google Drive"]').forEach(a=>{a.href=driveUrl;a.target='_blank';a.rel='noopener noreferrer'});
       window.dispatchEvent(new CustomEvent('ks:google-drive-url',{detail:{url:driveUrl}}));
@@ -3279,7 +3196,7 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.38 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.40 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>

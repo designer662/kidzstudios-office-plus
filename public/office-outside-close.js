@@ -29,7 +29,6 @@
     ['staffEditorModal', 'staffEditorClose', '.job-link-dialog', 'open'],
     ['workloadEditorModal', 'workloadEditorClose', '.job-link-dialog', 'open'],
     ['driveLinkModal', 'driveLinkClose', '.job-link-dialog', 'open'],
-    ['jobLinkModal', 'jobLinkClose', '.job-link-dialog', 'open'],
     ['saveProfileModal', null, '.modal-content', 'block'],
     ['previewModal', null, '.modal-content', 'block']
   ];
