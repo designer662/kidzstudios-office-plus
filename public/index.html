@@ -1001,14 +1001,6 @@ body{overscroll-behavior:none;}
 #profileCard .ks-staff-tabs button.active,#profileCard .ks-staff-tabs button[aria-selected=true]{background:#fff0e4;color:#b65d27;box-shadow:inset 0 0 0 1px #f1cbb0}
 #profileCard .ks-staff-tabs button:focus-visible,#profileCard .ks-staff-emoji-choice:focus-visible{outline:2px solid #df783d;outline-offset:2px}
 #profileCard .ks-staff-tab-content[hidden],#profileCard .ks-staff-emoji-panel[hidden]{display:none!important}
-#profileCard .ks-staff-quick-emoji{border-top:1px solid #ebe6dd;margin-top:12px;padding-top:12px}
-#profileCard .ks-staff-quick-heading{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:8px}
-#profileCard .ks-staff-quick-heading strong{font-size:11px;color:#5d6165}
-#profileCard .ks-staff-quick-heading span{font-size:10px;color:#83878a}
-#profileCard .ks-staff-quick-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
-#profileCard .ks-staff-quick-grid button{border:1px solid #ece5dc;border-radius:10px;background:#fff;cursor:pointer;min-height:38px;font-size:20px;display:grid;place-items:center;padding:2px}
-#profileCard .ks-staff-quick-grid button[aria-pressed="true"]{border-color:#df935d;background:#ffead8;box-shadow:0 0 0 1px #df935d inset}
-#profileCard .ks-staff-quick-grid button:focus-visible{outline:2px solid #df783d;outline-offset:2px}
 #profileCard .ks-staff-emoji-panel{min-height:180px;padding-bottom:8px}
 #profileCard .ks-staff-emoji-title{font-size:11px;font-weight:750;color:#5d6165;margin:4px 0 12px}
 #profileCard .ks-staff-emoji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -2346,17 +2338,7 @@ body{overscroll-behavior:none;}
     const details=document.createElement('section');details.className='ks-staff-tab-content';details.id='ksSelectedStaffDetails';
     while(profileCard.firstChild)details.append(profileCard.firstChild);
     const close=details.querySelector('.close-mini');if(close)profileCard.append(close);
-    // Profile information remains visible on selection, with immediate mood
-    // choices below it. The Emoji tab also provides the full chooser.
-    const quick=document.createElement('section');quick.className='ks-staff-quick-emoji';
-    quick.innerHTML='<div class="ks-staff-quick-heading"><strong>Set Mood</strong><span>Select an emoji for '+esc(e.name)+'</span></div><div class="ks-staff-quick-grid">'+Object.entries(characterEmojiPresets).map(([mood,preset])=>'<button type="button" data-quick-mood="'+mood+'" title="'+esc(preset.label)+'" aria-label="'+esc(preset.label)+'" aria-pressed="'+(e.mood===mood)+'">'+preset.emoji+'</button>').join('')+'</div>';
-    details.append(quick);
-    quick.querySelectorAll('[data-quick-mood]').forEach(button=>button.onclick=async()=>{
-      const mood=button.dataset.quickMood;
-      quick.querySelectorAll('[data-quick-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.quickMood===mood)));
-      await triggerCharacterEmoji(e,mood);
-    });
-
+    // Mood actions live exclusively in the Emoji tab to avoid duplicate controls.
     const tabs=document.createElement('div');tabs.className='ks-staff-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label',e.name+' controls');
     tabs.innerHTML='<button type="button" role="tab" id="ksStaffInfoTab" aria-controls="ksSelectedStaffDetails" aria-selected="true" data-profile-tab="staff">👤 Staff</button><button type="button" role="tab" id="ksStaffEmojiTab" aria-controls="ksSelectedStaffEmoji" aria-selected="false" data-profile-tab="emoji">😊 Emoji</button>';
     details.setAttribute('role','tabpanel');details.setAttribute('aria-labelledby','ksStaffInfoTab');
@@ -2373,7 +2355,7 @@ body{overscroll-behavior:none;}
       emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.profileMood===e.mood)));
     });
     emojiPane.querySelector('[data-profile-emoji-clear]').onclick=async()=>{
-      await clearCharacterMood(e);emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed','false'));
+      await clearCharacterMood(e);emojiPane.querySelectorAll('[data-profile-mood]').forEach(choice=>choice.setAttribute('aria-pressed',String(choice.dataset.profileMood===e.mood)));
     };
     activateTab('staff');
     profileCard.classList.add('open');profileCard.querySelector('.close-mini').onclick=clearEmployeeSelection;

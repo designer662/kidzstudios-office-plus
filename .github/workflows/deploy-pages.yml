@@ -59,6 +59,7 @@ jobs:
           node scripts/test-v86-43-dashboard-polling.mjs
           node scripts/test-v86-44-smart-ai.mjs
           node scripts/test-v86-50-workstations.mjs
+          node scripts/test-v86-50-profile-dedup.mjs
       - name: Test job data and workbook tools
         run: |
           node scripts/test-job-data.mjs
