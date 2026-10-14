@@ -5,7 +5,7 @@ const brainSource=readFileSync('public/office-smart-ai.js','utf8');
 const syncSource=readFileSync('public/office-movement-sync.js','utf8');
 const page=readFileSync('public/index.html','utf8');
 const workflow=readFileSync('.github/workflows/deploy-pages.yml','utf8');
-assert(page.indexOf('office-smart-ai.js?v=86.29')<page.indexOf('office-movement-sync.js?v=86.29')&&page.includes('office-smart-ai.js?v=86.29'),'The decision engine must be available before timeline initialization');
+assert(page.indexOf('office-smart-ai.js?v=86.29')<page.indexOf('office-movement-sync.js?v=86.30')&&page.includes('office-smart-ai.js?v=86.29'),'The decision engine must be available before timeline initialization');
 assert(workflow.includes('test-v86-29-smart-ai.mjs'),'CI must guard the autonomous behavior');
 assert(syncSource.includes('smart.record(s,selectedIntent,now)')&&syncSource.includes('smart.decide('),'Only the movement authority commits Smart AI decisions');
 const fakeDocument={readyState:'loading',addEventListener(){}};

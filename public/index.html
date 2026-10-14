@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="office-3d.css?v=52.0">
 <script src="office-geometry-guard.js?v=86.22"></script>
 <script src="office-seating-controller.js?v=86.22"></script>
+<script src="office-furniture-interactions.js?v=86.30"></script>
 <style id="ks-main-css">
 :root{
   --bg:#f7f7f5;--bg2:#fbfbfa;--card:rgba(255,255,255,.9);--solid:#fff;--text:#1d2022;--muted:#767b80;
@@ -3027,7 +3028,7 @@ body{overscroll-behavior:none;}
       const e=employeeById[Number(item.id)],node=e&&employeeNodes.get(e.id);
       if(!e||!node||!Number.isFinite(item.x)||!Number.isFinite(item.y))continue;
       e.visualX=item.x;e.visualY=item.y;e.visualRoomId=item.room||e.visualRoomId||e.roomId;
-      e.motionAction=item.action||'typing';e.motionFaceTo=item.faceTo||null;
+      e.motionAction=item.action||'typing';e.motionFurnitureId=item.furnitureId||null;e.motionFaceTo=item.faceTo||null;
       if(item.walking&&Number.isFinite(item.heading))e.motionHeading=item.heading;
       if(Boolean(e.motionWalking)!==Boolean(item.walking)){setMotionClass(e,node,!!item.walking);statusChanged=true}
       const p=iso(item.x,item.y);
@@ -3284,12 +3285,12 @@ body{overscroll-behavior:none;}
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 <script src="office-command-data.js?v=86.1" defer></script>
-<script src="office-3d.js?v=86.28" defer></script>
+<script src="office-3d.js?v=86.30" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
 <script src="office-living-office.js?v=86.15" defer></script>
 <script src="office-smart-ai.js?v=86.29" defer></script>
-<script src="office-movement-sync.js?v=86.29" defer></script>
+<script src="office-movement-sync.js?v=86.30" defer></script>
 <script src="office-online-users.js?v=86.25" defer></script>
 <script src="office-outside-close.js?v=76.0" defer></script>
 <script src="office-profile-layout.js?v=75.0" defer></script>

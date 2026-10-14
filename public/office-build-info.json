@@ -1,10 +1,11 @@
 {
-  "release": "86.29",
+  "release": "86.30",
   "edition": "Office Plus \u00b7 Unified Pulse",
-  "package": "V86.29 Smart AI character goal planner, role-aware decisions, shared memory and context activity bubbles",
+  "package": "V86.30 Shared Furniture-Aware Smart AI Equipment Interactions",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
+    "office-furniture-interactions.js",
     "office-ambience-audio.js",
     "office-living-office.js",
     "office-notification-sound.js",

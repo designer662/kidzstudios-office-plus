@@ -80,6 +80,10 @@
   if(zone!==home)return {intent:{...work,kind:'return'},candidates:[],brain:previous};
   const scoreWork=(hasWork?80:57)+previous.focus*21-(1-previous.energy)*13-Math.min(30,previous.streak*7)-(sinceWalk>115000?65:0);
   const ranked=[{...work,score:scoreWork}];
+  // Showroom-based staff can inspect the real sample table even when it is in
+  // their home room. A same-room interaction still needs a walking route.
+  if(home==='showroom'&&sinceWalk>65000&&available('showroom'))
+   ranked.push({zone:'showroom',action:'meeting',kind:'equipment',reason:'👕 Reviewing showroom samples',score:scoreWork+34});
   for(const key of ['pantry','corridor','showroom','store','prayer']){
    const item=GOALS[key];
    if(item.zone===home||!available(item.zone))continue;
@@ -128,6 +132,7 @@
   const parent=host.parentElement;
   if(typeof getComputedStyle==='function'&&getComputedStyle(parent).position==='static')parent.style.position='relative';
   parent.appendChild(label);
+  window.OfficeFurnitureInteractions?.status?.('loading');
  }
  window.OfficeSmartAI={version:'86.29',roleFor,memory,evolved,decide,record,initUI};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initUI,{once:true});else initUI();

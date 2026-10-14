@@ -317,13 +317,14 @@ export function animateCharacter(r:CharacterRig,p:Person,time:number,dt:number,d
   arm.end.rotation.z=0;
  }
  if(p.status==='showroom'&&!walk&&!sit){const g=.5+.5*Math.sin(t*.82);r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.6,g);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,-.43,g);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-.76,g)}
- const rest=p.status==='break'&&p.action==='coffee'?(1-walk):0;
+ const rest=p.status==='break'&&['coffee','drink'].includes(p.action||'')?(1-walk):0;
  const sip=rest*smooth(2.8,3.5,t%12)*(1-smooth(5.2,6,t%12));
  r.cup.visible=rest>.2;
  if(rest){r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.43-.4*sip,rest);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-1.08-.83*sip,rest);r.head.rotation.x-=.065*sip}
  // Quiet simulated tasks make idle poses more varied without disturbing gait.
  if(p.action==='chat'&&!walk){const strength=(1-sit)*(.35+.18*Math.sin(t*.9));r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.55,strength);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,.52,strength);r.head.rotation.y+=Math.sin(t*.85)*.08}
  if(p.action==='calling'&&!walk){const strength=1-sit*.2;r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-1.3,strength);r.right.joint.rotation.z=mix(r.right.joint.rotation.z,.68,strength);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-1.24,strength);r.head.rotation.z-=.045*strength}
+ if(p.action==='stocking'&&!walk){const reach=.42+.15*Math.sin(t*1.4);r.right.joint.rotation.x=mix(r.right.joint.rotation.x,-.75,reach);r.right.lower.rotation.x=mix(r.right.lower.rotation.x,-.54,reach);r.head.rotation.x+=.025;}
  if(p.action==='reviewing'&&!walk){r.head.rotation.x-=.07;r.left.joint.rotation.x=mix(r.left.joint.rotation.x,-.52,.6)}
  if(p.action==='reading'&&!walk){r.head.rotation.x+=.06;r.left.joint.rotation.x=mix(r.left.joint.rotation.x,-.78,.45)}
  if(p.action==='stretching'&&!walk){const stretch=.45+.45*Math.sin(t*.5);r.left.joint.rotation.z-=1.65*stretch;r.right.joint.rotation.z+=1.65*stretch;r.head.rotation.x-=.035*stretch}

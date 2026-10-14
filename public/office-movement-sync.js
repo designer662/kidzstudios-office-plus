@@ -13,11 +13,12 @@
   const motion=window.OfficeSuite?.sharedMovement;
   const living=window.OfficeLiving;
   const smart=window.OfficeSmartAI;
+  const furniture=window.OfficeFurnitureInteractions;
   if(!motion)return;
   // Do not run an independent simulation while waiting for authentication/network.
   motion.enable();
   let state=null,version=0,leader=false,lastSave=0,writing=false,reading=false,authorized=false,stopped=false;
-  let refreshTimer=null,heartbeatTimer=null,frame=null,signalTimer=null,failedReads=0;
+  let refreshTimer=null,heartbeatTimer=null,frame=null,signalTimer=null,failedReads=0,uiWaitUntil=0;
   const clone=p=>JSON.parse(JSON.stringify(p));
   const point=p=>p&&Number.isFinite(+p.x)&&Number.isFinite(+p.y)&&+p.x>=0&&+p.x<=23&&+p.y>=0&&+p.y<=70;
   const livePeople=()=>motion.getPeople();
@@ -88,6 +89,7 @@
       (!s.ai.lastAction||typeof s.ai.lastAction==='string'&&s.ai.lastAction.length<=24)
     ))&&Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
       typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from&&
+      (!s.scene.furnitureId||(typeof s.scene.furnitureId==='string'&&s.scene.furnitureId.length<=64&&Boolean(furniture?.get(s.scene.furnitureId))))&&
       (!s.scene.dialogue||(Array.isArray(s.scene.dialogue)&&s.scene.dialogue.length>=2&&s.scene.dialogue.length<=8&&s.scene.dialogue.every(line=>typeof line==='string'&&line.length<=80)&&
         Number.isInteger(Number(s.scene.speakerId))&&Number.isInteger(Number(s.scene.partnerId))&&s.scene.speakerId!==s.scene.partnerId&&Number(s.scene.turnMs)>=1800&&Number(s.scene.turnMs)<=6000))
     ))&&(!s.walk||(
@@ -95,6 +97,7 @@
       point(s.walk.from)&&Array.isArray(s.walk.route)&&s.walk.route.length<=250&&s.walk.route.every(point)&&
       Array.isArray(s.walk.segmentMs)&&s.walk.segmentMs.length===s.walk.route.length&&
       s.walk.segmentMs.every(n=>Number.isFinite(+n)&&+n>=100&&+n<120000)&&
+      (!s.walk.furnitureId||(typeof s.walk.furnitureId==='string'&&s.walk.furnitureId.length<=64&&Boolean(furniture?.get(s.walk.furnitureId))))&&
       (!s.walk.seatStart||point(s.walk.seatStart))&&(!s.walk.seatGoal||point(s.walk.seatGoal))&&
       ['departMs','dockMs'].every(k=>s.walk[k]===undefined||(Number.isFinite(s.walk[k])&&s.walk[k]>=0&&s.walk[k]<=5000))&&
       Number(s.walk.endAt)>=Number(s.walk.startedAt)
@@ -106,9 +109,10 @@
     const w=s.walk;
     const scene=s.scene&&now>=s.scene.from&&now<s.scene.until?s.scene:null;
     const faceTo=['conversation','huddle'].includes(scene?.kind)?s.faceTo||null:null;
-    if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false,scene,faceTo};
+    const furnitureId=scene?.kind==='equipment'?scene.furnitureId||null:null;
+    if(!w||!w.route?.length)return {id:s.id,x:s.x,y:s.y,room:s.room,action:s.action,walking:false,scene,faceTo,furnitureId};
     const departMs=w.departMs||0,dockMs=w.dockMs||0,start=w.seatStart||w.from;
-    const result=(p,walking,action,room=s.room)=>({id:s.id,x:p.x,y:p.y,room,action,walking,scene,faceTo:walking?null:faceTo});
+    const result=(p,walking,action,room=s.room)=>({id:s.id,x:p.x,y:p.y,room,action,walking,scene,faceTo:walking?null:faceTo,furnitureId:walking?null:furnitureId});
     const blend=(a,b,t)=>{t=clamp(t,0,1);t=t*t*(3-2*t);return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}};
     if(now<w.startedAt)return result(start,false,'waiting');
     let left=Math.max(0,now-w.startedAt);
@@ -147,6 +151,13 @@
       const now=Date.now(),positions=state.staff.map(s=>{const p=movementAt(s,now);if(p.walking)p.heading=headingAt(s,now);return p});
       motion.render(positions);
       living?.update?.(state,positions);
+      if(furniture){
+        const doing=positions.find(p=>p.scene?.kind==='equipment');
+        if(failedReads>2)furniture.status('error');
+        else if(!state.staff.length)furniture.status('empty');
+        else if(now<uiWaitUntil)furniture.status('waiting');
+        else furniture.status(doing?'using':'ready',doing?`🧠 ${doing.scene.text}`:undefined);
+      }
     }
     if(!document.hidden)frame=requestAnimationFrame(render);else frame=null;
   }
@@ -336,7 +347,8 @@
         s.walk=null;
         s.nextAt=['conversation','huddle'].includes(s.scene?.kind)?Math.max(now+3000,s.scene.until+2600):
           s.scene?.kind==='break'?Math.max(now+3500,s.scene.until+1000):
-          s.scene?.kind==='meeting'?Math.max(now+3500,s.scene.until+1200):now+(['pantry','prayer','toilet-a','toilet-b'].includes(s.room)?17000:19000)+Math.random()*15000;
+          s.scene?.kind==='meeting'?Math.max(now+3500,s.scene.until+1200):
+          s.scene?.kind==='equipment'?Math.max(now+3000,s.scene.until+1500):now+(['pantry','prayer','toilet-a','toilet-b'].includes(s.room)?17000:19000)+Math.random()*15000;
         changed=true;
       }
     }
@@ -357,7 +369,7 @@
         (other.room==='prayer'||other.walk?.targetZone==='prayer')&&
         (other.action==='sleep'||other.walk?.action==='sleep')))intent.action='reading';
       const work=living?.workFor(employee)||'typing';
-      if(intent.zone===((['boss','staff','showroom'].includes(employee.homeRoom))?employee.homeRoom:'staff')&&s.room===intent.zone){
+      if(intent.zone===((['boss','staff','showroom'].includes(employee.homeRoom))?employee.homeRoom:'staff')&&s.room===intent.zone&&!furniture?.forIntent(intent,employee)){
         // Desk / idle animation changes without moving the character through furniture.
         s.action=intent.action==='typing'?'pc-work':intent.action||work;
         if(intent.kind==='meeting')s.scene={kind:'meeting',text:'🗓 Planning at the project desk',from:now,until:now+12500};
@@ -376,19 +388,37 @@
       let walked=false,selectedIntent=intent;
       for(const option of alternateIntents(employee,s,intent,snapshot)){
         if(!zoneHasSpace(snapshot,s,option.zone))continue;
+        const fixture=furniture?.forIntent(option,employee)||null;
+        if(fixture&&(!furniture.validate(fixture)||furniture.occupied(fixture,snapshot,s.id,now)))continue;
         for(let attempt=0;attempt<2&&!walked;attempt++){
-          const plan=motion.plan(Number(s.id),option.zone);
-          if(attachWalk(s,plan,option,now,snapshot)){walked=true;selectedIntent=option}
+          const plannedIntent=fixture?{...option,action:fixture.action,reason:fixture.label}:option;
+          const plan=motion.plan(Number(s.id),option.zone,fixture?.point||null);
+          // Refuse an equipment task if the navigation system redirected the
+          // arrival somewhere far from the physical workstation.
+          const end=plan?.seatGoal||plan?.route?.[plan.route.length-1];
+          if(fixture&&(!end||Math.hypot(end.x-fixture.point.x,end.y-fixture.point.y)>.65))continue;
+          if(attachWalk(s,plan,plannedIntent,now,snapshot)){
+            walked=true;selectedIntent=plannedIntent;
+            if(fixture){s.walk.furnitureId=fixture.id;
+              s.scene={kind:'equipment',furnitureId:fixture.id,text:fixture.label,
+                from:s.walk.endAt+250,until:s.walk.endAt+250+fixture.duration};
+              s.nextAt=s.scene.until+1600;
+            }
+          }
         }
         if(walked)break;
       }
       if(!walked){
+        uiWaitUntil=now+2000;furniture?.status?.('waiting');
         s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
       }
       s.lastTripZone=selectedIntent.zone;s.lastTripAt=now;
       if(smart)smart.record(s,selectedIntent,now);
       if(selectedIntent.kind==='break')s.lastBreakAt=now;
-      if(selectedIntent.kind==='meeting'){
+      if(s.scene?.kind==='equipment'){
+        // Keep the committed furniture activity visible until release.
+        s.nextAt=Math.max(s.nextAt,s.scene.until+1600);
+      }else if(selectedIntent.kind==='meeting'){
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
         s.nextAt=s.walk.endAt+15000;
       }else if(selectedIntent.zone==='store'&&selectedIntent.action==='stocking'){
@@ -444,8 +474,9 @@
         reading=false;
         await save(seed(Date.now()),0);return;
       }
-      if(status!==200||!validPayload(data?.payload)){failedReads++;return}
+      if(status!==200||!validPayload(data?.payload)){failedReads++;if(failedReads>2)furniture?.status?.('error');return}
       failedReads=0;
+      furniture?.status?.('ready');
       accept(data);
       const now=Date.now();
       if(state.leaseUntil<=now&&!document.hidden){
@@ -468,6 +499,7 @@
   }
   function start(){
     if(authorized||stopped)return;
+    furniture?.status?.(furniture?.list().length?'loading':'error');
     authorized=true;
     queueRefresh(0);
     refreshTimer=setInterval(()=>refresh(),POLL_MS);
@@ -490,5 +522,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents};
+  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents,evolve};
 })();
