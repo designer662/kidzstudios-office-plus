@@ -57,9 +57,11 @@
  function status(mode,message){
   const el=root.document?.getElementById?.('ksSmartAIStatus');if(!el)return;
   el.dataset.state=mode;
-  const text=message||({loading:'🧠 Mapping office furniture…',ready:'🧠 Smart AI · furniture ready',using:'🧠 Interacting with furniture',empty:'🧠 No staff to simulate',waiting:'🧠 Waiting for clear route',error:'🧠 Smart AI paused · retrying sync'}[mode]||'🧠 Smart AI');
+  const text=message||({loading:'🧠 Mapping office furniture…',ready:'🧠 Smart AI · furniture ready',walking:'🧠 Staff moving to activities',aligning:'🧠 Approaching workstation',using:'🧠 Interacting with furniture',empty:'🧠 No staff to simulate',waiting:'🧠 Waiting for clear route',recovering:'🧠 Reconnecting to shared office',error:'🧠 Smart AI paused · retrying sync'}[mode]||'🧠 Smart AI');
   if(el.textContent!==text)el.textContent=text;
-  el.title=mode==='error'?'Shared simulation or furniture is temporarily unavailable. The last valid positions remain displayed.':'Shared Smart AI simulation; furniture use respects occupied interaction points.';
+  el.title=['error','recovering'].includes(mode)?'Shared simulation is reconnecting. Last valid positions remain displayed.':'Simulated shared staff activities, not real employee tracking. Equipment use respects existing reservations.';
+  el.setAttribute?.('role','status');
+  el.setAttribute?.('aria-live','polite');
  }
  root.OfficeFurnitureInteractions={version:'86.30',list:()=>[...catalogue.values()],get,forIntent,occupied,validate,registerScene,reset,status};
 })(window);

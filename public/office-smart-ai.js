@@ -128,7 +128,7 @@
   label.textContent='🧠 Smart AI active';
   label.title='Goal-based simulated staff: role-aware activities, destination memory and collision-safe shared movement. Not a real employee activity monitor or cloud AI.';
   label.setAttribute('aria-label','Smart AI character simulation enabled');
-  label.style.cssText='position:absolute;bottom:12px;left:12px;z-index:8;padding:5px 10px;border:1px solid #b9d8cb;border-radius:999px;background:rgba(255,255,255,.92);color:#225a47;font:600 11px system-ui,sans-serif;pointer-events:none;box-shadow:0 2px 8px #0001;';
+  label.style.cssText='position:absolute;bottom:12px;left:12px;z-index:8;padding:5px 10px;border:1px solid #b9d8cb;border-radius:999px;background:rgba(255,255,255,.92);color:#225a47;font:600 11px system-ui,sans-serif;pointer-events:none;max-width:min(80vw,320px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px #0001;';
   const parent=host.parentElement;
   if(typeof getComputedStyle==='function'&&getComputedStyle(parent).position==='static')parent.style.position='relative';
   parent.appendChild(label);

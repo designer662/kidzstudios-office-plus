@@ -10,7 +10,8 @@ export const stabilityTests=Object.freeze([
   'scripts/test-v86-22-simulation.mjs',
   'scripts/test-v86-28-synchronized-walking.mjs',
   'scripts/test-v86-29-smart-ai.mjs',
-  'scripts/test-v86-30-furniture-ai.mjs'
+  'scripts/test-v86-30-furniture-ai.mjs',
+  'scripts/test-v86-36-activity-lifecycle.mjs'
 ]);
 
 export function runStabilitySuite(tests=stabilityTests,runner=file=>spawnSync(process.execPath,[file],{stdio:'inherit'}),report=console){

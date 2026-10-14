@@ -12,8 +12,8 @@ assert(messages.join('\n').includes('fails'));
 const all=runStabilitySuite(['first','after'],()=>({status:0}),report);
 assert.equal(all.exitCode,0);
 assert.equal(all.passed,2);
-assert.equal(stabilityTests.length,8,'CI must retain the existing five and all V86.28–V86.30 AI checks');
-for(const file of ['test-v86-28-synchronized-walking.mjs','test-v86-29-smart-ai.mjs','test-v86-30-furniture-ai.mjs']){
+assert.equal(stabilityTests.length,9,'CI must retain the original five, V86.28–V86.30 AI checks and the V86.36 lifecycle regression');
+for(const file of ['test-v86-28-synchronized-walking.mjs','test-v86-29-smart-ai.mjs','test-v86-30-furniture-ai.mjs','test-v86-36-activity-lifecycle.mjs']){
  assert(stabilityTests.some(entry=>entry.endsWith('/'+file)),`CI must execute ${file}`);
 }
 console.log('PASS simulator runner: failures aggregated, subsequent tests executed, CI exit remains strict.');

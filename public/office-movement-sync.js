@@ -90,6 +90,7 @@
     ))&&Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
       typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from&&
       (!s.scene.furnitureId||(typeof s.scene.furnitureId==='string'&&s.scene.furnitureId.length<=64&&Boolean(furniture?.get(s.scene.furnitureId))))&&
+      (!s.scene.furnitureId||!s.walk||Number(s.scene.from)>=Number(s.walk.endAt))&&
       (!s.scene.dialogue||(Array.isArray(s.scene.dialogue)&&s.scene.dialogue.length>=2&&s.scene.dialogue.length<=8&&s.scene.dialogue.every(line=>typeof line==='string'&&line.length<=80)&&
         Number.isInteger(Number(s.scene.speakerId))&&Number.isInteger(Number(s.scene.partnerId))&&s.scene.speakerId!==s.scene.partnerId&&Number(s.scene.turnMs)>=1800&&Number(s.scene.turnMs)<=6000))
     ))&&(!s.walk||(
@@ -97,6 +98,7 @@
       point(s.walk.from)&&Array.isArray(s.walk.route)&&s.walk.route.length<=250&&s.walk.route.every(point)&&
       Array.isArray(s.walk.segmentMs)&&s.walk.segmentMs.length===s.walk.route.length&&
       s.walk.segmentMs.every(n=>Number.isFinite(+n)&&+n>=100&&+n<120000)&&
+      (s.walk.kind===undefined||['return','activity'].includes(s.walk.kind))&&
       (!s.walk.furnitureId||(typeof s.walk.furnitureId==='string'&&s.walk.furnitureId.length<=64&&Boolean(furniture?.get(s.walk.furnitureId))))&&
       (!s.walk.seatStart||point(s.walk.seatStart))&&(!s.walk.seatGoal||point(s.walk.seatGoal))&&
       ['departMs','dockMs'].every(k=>s.walk[k]===undefined||(Number.isFinite(s.walk[k])&&s.walk[k]>=0&&s.walk[k]<=5000))&&
@@ -132,6 +134,30 @@
     if(dockMs&&left<dockMs)return result(blend(previous,final,left/dockMs),true,'walking');
     return result(final,false,w.action||'typing',w.targetZone||s.room);
   }
+  // V86.36: derive activity phases only from the committed schema-1 timeline.
+  // Followers never make independent decisions or persist these display fields.
+  function phaseAt(s,now){
+    if(!s||!Number.isFinite(now))return {phase:'recovering',label:'Waiting for shared state'};
+    const w=s.walk,scene=s.scene;
+    if(w&&now<Number(w.startedAt))return {phase:'waiting',label:'Waiting to depart'};
+    if(w&&now<Number(w.endAt)){
+      if(Number(w.dockMs)>0&&now>=Number(w.endAt)-Number(w.dockMs))
+        return {phase:'aligning',label:'Approaching destination'};
+      return w.kind==='return'?{phase:'returning',label:'Returning to workstation'}:
+        {phase:'walking',label:'Walking to destination'};
+    }
+    if(scene&&now>=Number(scene.from)&&now<Number(scene.until)){
+      if(scene.kind==='equipment')return {phase:'interacting',label:String(scene.text||'Using equipment').slice(0,80)};
+      return {phase:'activity',label:String(scene.text||'Working').slice(0,80)};
+    }
+    if(w&&scene?.kind==='equipment'&&now>=Number(w.endAt)&&now<Number(scene.from))
+      return {phase:'aligning',label:'Getting ready at equipment'};
+    if(scene&&now>=Number(scene.until)&&now<Number(s.nextAt))
+      return {phase:'completing',label:'Finishing activity'};
+    if(s.action==='waiting'&&now<Number(s.nextAt))
+      return {phase:'waiting',label:'Waiting for clear route'};
+    return {phase:'ready',label:'Ready for next activity'};
+  }
   function headingAt(s,now){
     if(!s.walk)return null;
     // Sample forward direction on the committed timeline rather than deriving
@@ -148,15 +174,24 @@
   function render(){
     if(stopped)return;
     if(state&&validPayload(state)){
-      const now=Date.now(),positions=state.staff.map(s=>{const p=movementAt(s,now);if(p.walking)p.heading=headingAt(s,now);return p});
+      const now=Date.now(),positions=state.staff.map(s=>{
+        const p=movementAt(s,now),activity=phaseAt(s,now);
+        p.phase=activity.phase;
+        if(p.walking)p.heading=headingAt(s,now);
+        return p;
+      });
       motion.render(positions);
       living?.update?.(state,positions);
       if(furniture){
-        const doing=positions.find(p=>p.scene?.kind==='equipment');
+        const interacting=state.staff.find(s=>phaseAt(s,now).phase==='interacting');
+        const phases=new Set(positions.map(p=>p.phase));
         if(failedReads>2)furniture.status('error');
         else if(!state.staff.length)furniture.status('empty');
-        else if(now<uiWaitUntil)furniture.status('waiting');
-        else furniture.status(doing?'using':'ready',doing?`🧠 ${doing.scene.text}`:undefined);
+        else if(interacting)furniture.status('using',`🧠 ${phaseAt(interacting,now).label}`);
+        else if(phases.has('waiting')||now<uiWaitUntil)furniture.status('waiting');
+        else if(phases.has('aligning'))furniture.status('aligning');
+        else if(phases.has('walking')||phases.has('returning'))furniture.status('walking');
+        else furniture.status('ready');
       }
     }
     if(!document.hidden)frame=requestAnimationFrame(render);else frame=null;
@@ -190,6 +225,7 @@
     const duration=segmentMs.reduce((sum,ms)=>sum+ms,0)+departMs+dockMs;
     if(!duration||duration>115000)return null;
     return {from:plan.from,seatStart:point(plan.seatStart)?plan.seatStart:null,departMs,dockMs,route:plan.route,segmentMs,startedAt:now+delay,endAt:now+delay+duration,
+      kind:intent?.kind==='return'?'return':'activity',
       targetZone:plan.targetZone,seatGoal:point(plan.seatGoal)?plan.seatGoal:null,action:intent?.action==='typing'?'pc-work':intent?.action||'pc-work'};
   }
   function routeHasClearance(snapshot,subject,walk,now){
@@ -303,12 +339,12 @@
     }
     return true;
   }
-  function alternateIntents(employee,s,requested,snapshot){
+  function alternateIntents(employee,s,requested,snapshot,now=Date.now()){
     const home=homeFor(employee);
     if(s.room!==home)return [requested]; // Always bring staff back to their own desk.
     const candidates=[requested];
     if(smart){
-      const preferred=smart.decide(employee,s,snapshot,Date.now(),{
+      const preferred=smart.decide(employee,s,snapshot,now,{
         hasWork:!!living?.jobKey(employee),available:zone=>zoneHasSpace(snapshot,s,zone)
       });
       for(const goal of preferred.candidates||[]){
@@ -358,7 +394,7 @@
     for(const s of due){
       // A conversation can reserve a second employee after `due` was built.
       // Never plan another walk over an existing reservation in the same tick.
-      if(s.walk||s.nextAt>now)continue;
+      if(s.walk||s.nextAt>now||(s.scene&&s.scene.until>now))continue;
       if(walkers>=MAX_ACTIVE_WALKERS)break;
       const employee=people.get(Number(s.id));if(!employee)continue;
       // Reserve two free walking slots before planning a paired conversation.
@@ -386,7 +422,7 @@
       // Every candidate is checked against all committed shared trajectories.
       motion.render([movementAt(s,now)]);
       let walked=false,selectedIntent=intent;
-      for(const option of alternateIntents(employee,s,intent,snapshot)){
+      for(const option of alternateIntents(employee,s,intent,snapshot,now)){
         if(!zoneHasSpace(snapshot,s,option.zone))continue;
         const fixture=furniture?.forIntent(option,employee)||null;
         if(fixture&&(!furniture.validate(fixture)||furniture.occupied(fixture,snapshot,s.id,now)))continue;
@@ -410,6 +446,7 @@
       }
       if(!walked){
         uiWaitUntil=now+2000;furniture?.status?.('waiting');
+        s.action='waiting'; // Schema-1 action field doubles as follower-visible retry state.
         s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
       }
       s.lastTripZone=selectedIntent.zone;s.lastTripAt=now;
@@ -484,7 +521,7 @@
         const takeOver=clone(state);
         await save(takeOver,version);
       }
-    }catch(error){failedReads++}finally{reading=false}
+    }catch(error){failedReads++;if(failedReads>2)furniture?.status?.('error')}finally{reading=false}
   }
   function queueRefresh(delay=250){
     if(signalTimer||!authorized)return;
@@ -522,5 +559,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,headingAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents,evolve};
+  window.OfficeMovementTimeline={movementAt,headingAt,phaseAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents,evolve};
 })();
