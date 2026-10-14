@@ -1,92 +1,69 @@
-/* V86.52 Jarvis layout: independent full-width tool workspaces; centered home dashboard. */
-:root { --ks-page-gutter:clamp(12px,1.4vw,28px); }
-html { min-width:0; }
-body { min-width:0; }
-.ks-master-header { width:100%!important;max-width:none!important;padding:12px var(--ks-page-gutter) 6px!important; }
-.ks-master-header .topbar {
- width:100%!important;max-width:none!important;min-width:0!important;
- display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;
- align-items:center!important;column-gap:14px!important;row-gap:8px!important;
- padding:9px 12px!important;overflow:visible!important;
+/* V86.52.1 — index-only dashboard layout.  Never apply to Job Management or tool pages. */
+body.ks-dashboard {--ks-home-gutter:clamp(8px,1.1vw,20px);min-width:0;}
+body.ks-dashboard .ks-master-header{
+  width:100%!important;max-width:none!important;
+  padding:10px var(--ks-home-gutter) 7px!important;
 }
-.ks-master-header .brand { grid-column:1!important;grid-row:1!important;max-width:none!important;min-width:0!important;justify-self:start!important; }
-.ks-master-header .ks-home-pill { max-width:100%; }
-.ks-master-header .tool-nav {
- grid-column:2!important;grid-row:1!important;justify-self:stretch!important;
- width:100%!important;max-width:none!important;min-width:0!important;
- justify-content:flex-start!important;flex-wrap:nowrap!important;
- overflow-x:auto!important;overflow-y:hidden!important;
- scroll-padding-inline:8px;scrollbar-width:thin!important;scroll-snap-type:x proximity;
+body.ks-dashboard .ks-master-header .topbar{
+  display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;
+  grid-template-rows:auto!important;align-items:center!important;
+  width:100%!important;max-width:1600px!important;min-width:0!important;
+  margin:0 auto!important;gap:12px!important;padding:9px 12px!important;
+  overflow:visible!important;
 }
-.ks-master-header .tool-nav-btn { scroll-snap-align:start;flex-shrink:0!important;min-width:max-content!important; }
-.ks-master-header .header-tools { grid-column:3!important;grid-row:1!important;min-width:max-content!important;justify-self:end!important;position:relative; }
-.ks-master-header .notification-panel { z-index:1000!important;max-width:calc(100vw - 24px)!important; }
-.ks-master-header .tool-nav :focus-visible,.ks-master-header .ks-home-pill:focus-visible {
- outline:2px solid #d97848!important;outline-offset:2px!important;
+body.ks-dashboard .ks-master-header .brand{
+  grid-column:1!important;grid-row:1!important;
+  max-width:100%!important;min-width:0!important;justify-self:start!important;
 }
-/* Table rows scroll within their own viewport, not against other panels. */
-body[data-ks-page="job-management"] .page,
-body:not(.ks-dashboard) .report-page {max-width:none!important;width:100%!important;padding:14px var(--ks-page-gutter) 50px!important;margin:0!important;}
-body[data-ks-page="job-management"] .workspace,
-body:not(.ks-dashboard) .report-card {min-width:0;max-width:100%;}
-body[data-ks-page="job-management"] .toolbar {grid-template-columns:minmax(220px,1.7fr) minmax(130px,.8fr) minmax(120px,.7fr) auto minmax(85px,auto)!important;align-items:center;}
-body[data-ks-page="job-management"] .table-wrap {width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;}
-body[data-ks-page="job-management"] .stats {grid-template-columns:repeat(7,minmax(0,1fr))!important;}
-body[data-ks-page="calculator"] .main-content,
-body[data-ks-page="simple-markup-calculator"] .main-content {width:100%;max-width:none!important;padding:20px var(--ks-page-gutter) 50px!important;}
-body[data-ks-page="calculator"] .layout-wrapper,
-body[data-ks-page="simple-markup-calculator"] .calculator-container,
-body[data-ks-page="commission"] .commission-form,
-body[data-ks-page="file-generator"] .main-wrapper,
-body[data-ks-page="orderform"] .main-layout,
-body[data-ks-page="orderform2"] .main-layout,
-body[data-ks-page="compress"] main {max-width:none!important;width:100%!important;min-width:0!important;}
-body[data-ks-page="calculator"] .layout-wrapper {grid-template-columns:minmax(0,1fr) minmax(300px,28%)!important;}
-body[data-ks-page="file-generator"] .main-wrapper,
-body[data-ks-page="orderform"] .main-layout,
-body[data-ks-page="orderform2"] .main-layout {padding:18px var(--ks-page-gutter) 40px!important;}
-body[data-ks-page="compress"] main {padding-left:var(--ks-page-gutter)!important;padding-right:var(--ks-page-gutter)!important;}
-body[data-ks-page="commission"] .commission-form {margin:16px var(--ks-page-gutter) 30px!important;width:calc(100% - 2 * var(--ks-page-gutter))!important;}
-/* Only the home dashboard retains a centered maximum width. */
-body.ks-dashboard .ks-master-header .topbar {max-width:1600px!important;margin-inline:auto!important;}
-body.ks-dashboard #mapShell {max-width:1600px!important;width:calc(100% - 2 * var(--ks-page-gutter))!important;margin-inline:auto!important;}
-@media(max-width:1100px){
- .ks-master-header .topbar {grid-template-columns:minmax(0,1fr) max-content!important;grid-template-rows:auto auto!important;}
- .ks-master-header .brand {grid-column:1!important;grid-row:1!important;}
- .ks-master-header .header-tools {grid-column:2!important;grid-row:1!important;}
- .ks-master-header .tool-nav {grid-column:1/-1!important;grid-row:2!important;}
- body[data-ks-page="job-management"] .stats {grid-template-columns:repeat(4,minmax(0,1fr))!important;}
- body[data-ks-page="job-management"] .toolbar {grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr))!important;}
- body[data-ks-page="job-management"] .toolbar .filter-more,body[data-ks-page="job-management"] .toolbar .toolbar-meta {grid-column:auto!important;}
+body.ks-dashboard .ks-master-header .tool-nav{
+  grid-column:2!important;grid-row:1!important;
+  justify-self:stretch!important;justify-content:safe center!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  display:flex!important;flex-wrap:nowrap!important;gap:6px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+  overscroll-behavior-x:contain!important;scrollbar-width:thin!important;
+  scroll-padding-inline:10px;
+}
+body.ks-dashboard .ks-master-header .tool-nav-btn {flex-shrink:0!important;min-width:max-content!important;}
+body.ks-dashboard .ks-master-header .header-tools{
+  grid-column:3!important;grid-row:1!important;
+  justify-self:end!important;position:relative!important;min-width:max-content!important;
+}
+body.ks-dashboard .ks-master-header .notification-panel{
+  z-index:1000!important;max-width:calc(100vw - 24px)!important;
+}
+body.ks-dashboard #mapShell{
+  box-sizing:border-box;width:calc(100% - 2 * var(--ks-home-gutter))!important;
+  max-width:1600px!important;margin:0 auto 14px!important;min-width:0!important;
+}
+body.ks-dashboard .ks-master-header :is(.tool-nav-btn,.ks-home-pill):focus-visible{
+  outline:2px solid #e47743!important;outline-offset:2px!important;
+}
+/* The tools move to their own row before navigation can collide with account controls. */
+@media(max-width:1250px){
+ body.ks-dashboard .ks-master-header .topbar{
+  grid-template-columns:minmax(0,1fr) max-content!important;grid-template-rows:auto auto!important;
+ }
+ body.ks-dashboard .ks-master-header .brand{grid-column:1!important;grid-row:1!important;}
+ body.ks-dashboard .ks-master-header .header-tools{grid-column:2!important;grid-row:1!important;}
+ body.ks-dashboard .ks-master-header .tool-nav{
+  grid-column:1/-1!important;grid-row:2!important;
+  justify-content:flex-start!important;max-width:100%!important;
+ }
 }
 @media(max-width:700px){
- .ks-master-header {padding:8px 8px 5px!important;}
- .ks-master-header .topbar {padding:8px!important;gap:8px!important;border-radius:16px!important;}
- .ks-master-header .brand {max-width:calc(100vw - 140px)!important;width:auto!important;font-size:12px!important;}
- .ks-master-header .ks-home-pill {min-height:35px;padding-inline:10px!important;max-width:100%;}
- .ks-master-header .ks-home-pill span {display:inline-block!important;max-width:125px;overflow:hidden;text-overflow:ellipsis;}
- .ks-master-header .tool-nav {padding:3px 0 5px!important;}
- .ks-master-header .tool-nav-btn>span:not(.nav-tool-icon) {display:inline!important;}
- .ks-master-header .tool-nav-btn {font-size:10px!important;padding:0 10px!important;height:36px!important;}
- .ks-master-header .header-tools {gap:5px!important;}
- .ks-master-header .notification-panel {position:fixed!important;left:8px!important;right:8px!important;top:105px!important;width:auto!important;}
- body[data-ks-page="job-management"] .stats {grid-template-columns:repeat(2,minmax(0,1fr))!important;}
- body[data-ks-page="job-management"] .toolbar {grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;}
- body[data-ks-page="job-management"] .toolbar #searchInput {grid-column:1/-1!important;}
- body[data-ks-page="job-management"] .toolbar .toolbar-meta {grid-column:1/-1!important;}
- body[data-ks-page="job-management"] .hero {gap:12px!important;}
- body[data-ks-page="calculator"] .layout-wrapper {grid-template-columns:1fr!important;}
- body:not(.ks-dashboard) .report-page {padding-top:10px!important;}
- body:not(.ks-dashboard) .kpis {grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+ body.ks-dashboard .ks-master-header{padding:7px 7px 5px!important;}
+ body.ks-dashboard .ks-master-header .topbar{gap:7px!important;padding:8px!important;border-radius:16px!important;}
+ body.ks-dashboard .ks-master-header .brand{width:auto!important;max-width:calc(100vw - 105px)!important;}
+ body.ks-dashboard .ks-master-header .ks-home-pill{width:35px!important;min-width:35px!important;justify-content:center!important;padding:0!important;}
+ body.ks-dashboard .ks-master-header .ks-home-pill span{display:none!important;}
+ body.ks-dashboard .ks-master-header .tool-nav{padding:4px 0 6px!important;}
+ body.ks-dashboard .ks-master-header .tool-nav-btn{height:34px!important;padding:0 9px!important;}
+ body.ks-dashboard .ks-master-header .header-tools{gap:5px!important;}
+ body.ks-dashboard .ks-master-header .notification-panel{
+   position:fixed!important;left:8px!important;right:8px!important;
+   top:110px!important;width:auto!important;
+ }
+ body.ks-dashboard #mapShell{width:calc(100% - 12px)!important;margin:0 auto 7px!important;}
 }
-@media(max-width:390px){.ks-master-header .ks-home-pill span{max-width:96px}.ks-master-header .tool-nav-btn{padding:0 8px!important}.ks-master-header .temp-user-chip{width:32px!important;min-width:32px!important}.ks-master-header .icon-btn{width:32px!important;}}
-@media print{.ks-master-header{display:none!important}}
-/* Prevent legacy V44 flex stats from becoming a clipped horizontal carousel. */
-body[data-ks-page="job-management"] .stats.v44-stats {display:grid!important;overflow:visible!important;grid-auto-flow:row!important;}
-body[data-ks-page="job-management"] .stats.v44-stats .stat {width:auto!important;min-width:0!important;flex:none!important;padding:12px!important;}
-body[data-ks-page="job-management"] .stats.v44-stats .stat strong {font-size:clamp(18px,1.6vw,24px)!important;}
-body[data-ks-page="job-management"] .stats.v44-stats .stat span {font-size:11px!important;}
-body[data-ks-page="job-management"] .hero p {font-size:12px!important;line-height:1.5;}
-body[data-ks-page="job-management"] .toolbar :is(.field,.select),body[data-ks-page="job-management"] .btn {font-size:12px!important;}
-body[data-ks-page="job-management"] .jobs-table :is(th,td) {font-size:11px;}
-@media(max-width:700px){body[data-ks-page="job-management"] .stats.v44-stats .stat{padding:12px 14px!important;}body[data-ks-page="job-management"] .stat:last-child{grid-column:auto!important;}body[data-ks-page="job-management"] .toolbar .btn{min-height:40px;}}
+@media print{body.ks-dashboard .ks-master-header{display:none!important;}}
