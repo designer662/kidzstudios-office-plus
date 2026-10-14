@@ -75,5 +75,7 @@ assert.equal(arrived.walking,false);
 assert.equal(api.movementAt(staff,staff.scene.until+100).furnitureId,null,'Release after interaction');
 assert(bridge.includes('motionFurnitureId')&&source.includes('fixture.yaw'),'Follower forwards fixture and renderer faces it');
 assert(character.includes("['coffee','drink'].includes"),'Drink gesture remains linked to shared action');
-assert(workflow.includes('test-v86-30-furniture-ai.mjs'));
+const stabilityManifest=readFileSync('scripts/stability-suite.mjs','utf8');
+assert(workflow.includes('node scripts/run-stability-suite.mjs'), 'CI must execute the strict simulator suite');
+assert(stabilityManifest.includes('test-v86-30-furniture-ai.mjs'), 'CI must guard furniture interactions through the simulator suite');
 console.log('PASS V86.30 furniture interactions: four safe anchors, occupancy, priority, single-leader reservation, arrival timing, follower playback, gesture/facing connection, schema and CI wiring.');
