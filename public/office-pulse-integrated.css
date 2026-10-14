@@ -38,3 +38,20 @@
 @media(max-width:920px){#todayPanel .ks-pulse-extra summary span{font-size:9px}.ks-quality-mini{padding:5px;gap:2px}.ks-quality-mini select{max-width:78px}}
 @media(max-width:420px){#todayPanel .ks-priority-copy small{max-width:180px}#todayPanel .ks-pulse-main-metrics .today-metric{padding:10px}#todayPanel .ks-pulse-extra .ops-alerts{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){#todayPanel .ks-priority-row{transition:none!important}}
+
+/* V86.38: shared attention queue and explicit data freshness */
+#todayPanel .ks-pulse-attention{grid-column:1/-1;min-height:48px;display:flex;align-items:center;justify-content:space-between;text-align:left;border-color:rgba(239,123,69,.22);background:#fffaf5}
+#todayPanel .ks-pulse-attention .today-number{order:2}
+#todayPanel .ks-pulse-attention .today-label{order:1}
+#todayPanel .ks-pulse-data-status{padding:7px 9px;border-radius:9px;background:#f3f6f9;color:#546c85;margin:7px 0 4px;font:650 10px/1.45 Inter,system-ui,sans-serif;overflow-wrap:anywhere}
+#todayPanel .ks-pulse-data-status[data-state="offline"]{color:#a84e3b;background:#fff1ed}
+#todayPanel .ks-pulse-data-status[data-state="cached"],#todayPanel .ks-pulse-data-status[data-state="sheet"]{color:#8f672c;background:#fff7e7}
+#todayPanel .ks-pulse-data-status[data-state="live"]{color:#31785f;background:#eaf8f0}
+#todayPanel .ks-priority-row{text-decoration:none;min-width:0}
+#todayPanel .ks-priority-due{white-space:normal;text-align:right;max-width:42%;overflow-wrap:anywhere}
+#todayPanel .ks-priority-copy small{white-space:normal;overflow-wrap:anywhere}
+#todayPanel .ks-pulse-section-line a:focus-visible,#todayPanel .ks-pulse-attention:focus-visible{outline:2px solid #e77e45;outline-offset:2px}
+@media(max-width:420px){#todayPanel .ks-priority-row{gap:6px;padding:7px}#todayPanel .ks-priority-due{max-width:44%;font-size:9px}}
+
+#todayPanel.ops-panel:not(.expanded){overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+@media(max-width:650px){#todayPanel.ops-panel:not(.expanded){max-height:55vh}}

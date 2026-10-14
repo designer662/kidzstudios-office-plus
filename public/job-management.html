@@ -161,6 +161,7 @@
   <script src="job-rules.js"></script>
   <script src="office-command-data.js"></script>
   <script src="job-attention-queue.js"></script>
+  <script src="office-pulse-insights.js?v=86.38"></script>
   <script src="job-data.js"></script>
   <script src="office-workbook.js"></script>
 <script src="ks-motion.js?v=58.1" defer></script>
@@ -629,6 +630,18 @@ function showJobView(view){
  $('#jobViewQueue').setAttribute('aria-pressed',String(activeJobView==='queue'));
  if(activeJobView==='queue')renderActionQueue();
 }
+function openIncomingPulseJob(){
+ const query=new URLSearchParams(location.search),ref=query.get('job');
+ if(query.get('view')==='queue')showJobView('queue');
+ if(ref===null)return;
+ if(!jobsEverLoaded){toast('Unable to open requested job. Refresh shared jobs and try again.');return}
+ const result=window.KSPulseInsights.resolveReference(jobs,ref);
+ if(result.status==='found'){openEditor(result.index);return}
+ if(result.status==='duplicate')toast('Multiple jobs match this reference. Resolve duplicates in Job Management.');
+ else if(result.status==='invalid')toast('Invalid job link. Open a job from the Action Queue.');
+ else toast('Requested job not found. It may have been removed or renamed.');
+ showJobView('queue');
+}
 function renderActionQueue(){
  const status=$('#attentionStatus'),container=$('#attentionItems'),empty=$('#attentionEmpty');
  const state=queueLoadState;status.dataset.state=state;
@@ -812,7 +825,7 @@ $('#editor').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
 setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);
-Promise.all([loadConfig(),loadStaff()]).then(()=>pull()).then(()=>loadDropdownOptions()).then(()=>{render();clearInterval(pollTimer);let optionPoll=0;pollTimer=setInterval(async()=>{if(document.hidden||$('#editor').classList.contains('open')||$('#optionsModal').classList.contains('open')||saving)return;await pull({quiet:true});optionPoll++;if(optionPoll%4===0){try{const row=await getState(OPTIONS_SCOPE);if(row&&Number(row.version)>optionsVersion){dropdownOptions=sanitizeDropdownOptions(row.payload?.options);optionsVersion=Number(row.version||0);optionsSavedAt=Number(row.payload?.savedAt)||new Date(row.updatedAt||Date.now()).getTime();optionsLoaded=true;renderSmartOptions()}}catch(_){}}},3500)});
+Promise.all([loadConfig(),loadStaff()]).then(()=>pull()).then(()=>{openIncomingPulseJob();return loadDropdownOptions()}).then(()=>{render();clearInterval(pollTimer);let optionPoll=0;pollTimer=setInterval(async()=>{if(document.hidden||$('#editor').classList.contains('open')||$('#optionsModal').classList.contains('open')||saving)return;await pull({quiet:true});optionPoll++;if(optionPoll%4===0){try{const row=await getState(OPTIONS_SCOPE);if(row&&Number(row.version)>optionsVersion){dropdownOptions=sanitizeDropdownOptions(row.payload?.options);optionsVersion=Number(row.version||0);optionsSavedAt=Number(row.payload?.savedAt)||new Date(row.updatedAt||Date.now()).getTime();optionsLoaded=true;renderSmartOptions()}}catch(_){}}},3500)});
 })();
 </script>
 </body></html>

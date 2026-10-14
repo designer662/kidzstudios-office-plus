@@ -1048,7 +1048,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-living-office.css?v=86.4">
 <link rel="stylesheet" href="office-smart-labels.css?v=80.0">
 <link rel="stylesheet" href="office-command.css?v=86.1">
-<link rel="stylesheet" href="office-pulse-integrated.css?v=86.1">
+<link rel="stylesheet" href="office-pulse-integrated.css?v=86.38">
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
@@ -1143,11 +1143,13 @@ body{overscroll-behavior:none;}
       <button class="today-metric" data-ops-quick="dueToday"><span class="today-number">0</span><span class="today-label">Due today</span></button>
       <button class="today-metric danger" data-ops-quick="overdue"><span class="today-number">0</span><span class="today-label">Overdue</span></button>
       <button class="today-metric good" data-ops-quick="completedToday"><span class="today-number">0</span><span class="today-label">Done today</span></button>
+      <button class="today-metric ks-pulse-attention" data-ops-quick="attention" title="Open production Action Queue"><span class="today-number">0</span><span class="today-label">Need action ↗</span></button>
     </div>
     <div class="ks-pulse-section-line"><span>Pipeline</span><a href="job-management.html" title="Open Job Management">Manage jobs ↗</a></div>
     <div class="ops-pipeline" aria-label="Job Management pipeline"><div id="opsPipelineBar" class="ops-pipeline-bar"></div></div>
     <div class="ks-pulse-stage-labels" aria-label="Pipeline stages"><span>Orders</span><span>Artwork</span><span>Production</span><span>Completed</span></div>
-    <div class="ks-pulse-section-line"><span>Needs attention</span><small>Next 3 days</small></div>
+    <div class="ks-pulse-section-line"><span>Needs attention</span><a href="job-management.html?view=queue">View all priorities ↗</a></div>
+    <div id="ksPulseDataStatus" class="ks-pulse-data-status" role="status" aria-live="polite">Loading Office Pulse…</div>
     <div id="ksPulsePriority" class="ks-pulse-priority" aria-live="polite"><span class="ks-pulse-empty">Waiting for jobs…</span></div>
     <div class="ops-mini-head"><span>Team workload</span><button type="button" id="ksPulseAllStaff" class="ks-pulse-text-btn">All workloads ↗</button></div>
     <div id="opsStaffLoad" class="ops-staff-load"></div>
@@ -1284,6 +1286,10 @@ body{overscroll-behavior:none;}
 <div class="notification-toast" id="notificationToast" aria-live="polite" aria-atomic="true"></div>
 </div>
 <script src="office-character-studio.js?v=86.9"></script>
+<script src="job-rules.js?v=86.38"></script>
+<script src="office-command-data.js?v=86.38"></script>
+<script src="job-attention-queue.js?v=86.37"></script>
+<script src="office-pulse-insights.js?v=86.38"></script>
 <script id="ks-main-js">
 (() => {
   'use strict';
@@ -1492,7 +1498,7 @@ body{overscroll-behavior:none;}
     completed:['completed','complete','done','delivered','closed','finished']
   };
   let stageMapping=JSON.parse(JSON.stringify(DEFAULT_STAGE_MAPPING));
-  let jobs=[],opsDataMode='empty',opsFilter='all',jobSharedVersion=0;
+  let jobs=[],opsDataMode='loading',opsFilter='all',jobSharedVersion=0,opsHasSnapshot=false;
   let opsLastSyncAt=null,opsLastSyncSource='Waiting',clockTimer=null,lastOpsBriefHour='';
 
   function getOverviewCam(){
@@ -1548,7 +1554,7 @@ body{overscroll-behavior:none;}
     return'OFFICE';
   }
   function updateLiveClock(){if(liveLabel)liveLabel.textContent=`Live · ${clockTime()}`;renderFeed();renderNotifications();renderOpsSyncMeta()}
-  function maybePushOpsTimeBrief(){const d=new Date(),key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`;if(d.getMinutes()>2||lastOpsBriefHour===key)return;lastOpsBriefHour=key;const active=jobs.filter(j=>!isCompletedJob(j)&&categoryForJob(j)!=='unmapped').length,due=jobs.filter(j=>!isCompletedJob(j)&&isSameLocalDay(j.due,d)).length,overdue=jobs.filter(isOverdueJob).length;pushActivity({title:`${clockTime()} · Office checkpoint`,text:`${active} active · ${due} due today · ${overdue} overdue`,avatar:'TM',type:'time_brief'})}
+  function maybePushOpsTimeBrief(){const d=new Date(),key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`;if(d.getMinutes()>2||lastOpsBriefHour===key)return;lastOpsBriefHour=key;const overview=window.KSPulseInsights.summarize(jobs,d,categoryForJob),active=overview.active,due=overview.dueToday,overdue=overview.overdue;pushActivity({title:`${clockTime()} · Office checkpoint`,text:`${active} active · ${due} due today · ${overdue} overdue`,avatar:'TM',type:'time_brief'})}
   function startOfficeClock(){updateLiveClock();maybePushOpsTimeBrief();if(clockTimer)clearInterval(clockTimer);clockTimer=setInterval(()=>{updateLiveClock();maybePushOpsTimeBrief()},30000)}
   function eventGlyph(type=''){
     if(type==='workload_updated')return'WL';if(type==='staff_added')return'＋';if(type==='staff_removed')return'−';if(type==='staff_updated')return'ST';if(type.startsWith('job_'))return'JM';if(type==='chat_message')return'CH';if(type.includes('drive'))return'DR';return'UP';
@@ -1575,7 +1581,7 @@ body{overscroll-behavior:none;}
     const id=Number(employeeId);workloadNoticeIds.delete(id);employeeNodes.get(id)?.classList.remove('workload-alert');
   }
   async function refreshJobsFromSharedCache(){
-    const cached=await readJobCache();if(!cached)return;jobs=cached.jobs;jobSharedVersion=Number(cached.version||jobSharedVersion);setOpsSource(jobDataSource==='html'?'live':'cached',jobDataSource==='html'?'Job Management':'Database',`Job Management update received · ${jobs.length} shared jobs synced.`,cached.savedAt);renderOps();
+    const cached=await readJobCache();if(!cached||Number(cached.version||0)<jobSharedVersion)return;jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);setOpsSource(jobDataSource==='html'?'live':'cached',jobDataSource==='html'?'Job Management':'Database',`Job Management update received · ${jobs.length} shared jobs synced.`,cached.savedAt);renderOps();
   }
   function addNotification(event,{initial=false,local=false}={}){
     notifications.unshift(event);if(notifications.length>40)notifications.length=40;renderNotifications();
@@ -1823,18 +1829,22 @@ body{overscroll-behavior:none;}
   }
   function renderOpsSyncMeta(){
     if(!opsLastSync)opsLastSync=$('#opsLastSync');
-    if(!opsLastSync)return;
-    if(!opsLastSyncAt){opsLastSync.textContent='Last sync: waiting';opsLastSync.title='Waiting for Job Management synchronization';return}
-    opsLastSync.textContent=`Last sync: ${fullClockTime(opsLastSyncAt)}`;
-    opsLastSync.title=`Last Job Management sync: ${new Date(opsLastSyncAt).toLocaleString('en-MY')} (${relativeEventTime(opsLastSyncAt)})`;
+    if(opsLastSync){
+      opsLastSync.textContent=opsLastSyncAt?`Last sync: ${fullClockTime(opsLastSyncAt)}`:'Last sync: waiting';
+      opsLastSync.title=opsLastSyncAt?`Last accepted data: ${new Date(opsLastSyncAt).toLocaleString('en-MY')}`:'Waiting for Job Management data';
+    }
+    const status=$('#ksPulseDataStatus');if(!status)return;
+    const stamp=opsLastSyncAt?` · saved ${new Date(opsLastSyncAt).toLocaleString('en-MY')}`:'';
+    const labels={loading:'Loading Office Pulse…',live:`Shared Job Management · synchronized${stamp}`,sheet:'Google Sheet preview · read-only (not saved)',cached:`Showing last saved data${stamp}`,offline:opsHasSnapshot?`Unable to refresh · showing last loaded data${stamp}`:'Unable to load Office Pulse · Retry refresh',empty:'No saved jobs yet · Open Job Management'};
+    status.textContent=jobSyncInFlight&&opsHasSnapshot&&opsDataMode==='live'?'Refreshing Office Pulse… previously loaded jobs remain visible.':labels[opsDataMode]||'Job data status unavailable';
+    status.dataset.state=opsDataMode;
   }
   function setOpsSource(mode,label,note='',timestamp=null){
     opsDataMode=mode;opsLastSyncSource=label||mode;
-    if(mode==='live')opsLastSyncAt=timestamp||Date.now();
-    else if(mode==='cached')opsLastSyncAt=timestamp||opsLastSyncAt||Date.now();
+    if(mode==='live'||mode==='cached')opsLastSyncAt=timestamp||opsLastSyncAt||Date.now();
     else if(mode==='empty')opsLastSyncAt=null;
     if(opsSource)opsSource.textContent=label;
-    const parent=opsSource?.parentElement;if(parent){parent.classList.toggle('is-live',mode==='live');parent.classList.toggle('is-cached',mode==='cached')}
+    const parent=opsSource?.parentElement;if(parent){parent.classList.toggle('is-live',mode==='live');parent.classList.toggle('is-cached',mode==='cached'||mode==='offline'||mode==='sheet')}
     if(opsNote&&note)opsNote.textContent=note;
     renderOpsSyncMeta();
   }
@@ -1846,32 +1856,30 @@ body{overscroll-behavior:none;}
     employees.forEach(emp=>{const job=activeJobsForEmployee(emp)[0];emp.currentJob=job?`${job.ref} · ${job.title}`:'';emp.activity=''});
   }
   function matchesOpsFilter(job,filter){
-    if(filter==='all')return true;if(filter==='active')return !isCompletedJob(job)&&categoryForJob(job)!=='unmapped';if(filter==='overdue')return isOverdueJob(job);if(filter==='dueToday')return !isCompletedJob(job)&&isSameLocalDay(job.due);if(filter==='completedToday')return isCompletedJob(job)&&isSameLocalDay(job.completedDate||job.deliveryDate);if(filter==='unmapped')return categoryForJob(job)==='unmapped';if(filter==='noPic')return !isCompletedJob(job)&&!String(job.pic||'').trim();if(filter==='noDesigner')return !isCompletedJob(job)&&!String(job.designer||'').trim();if(filter==='stuckArtwork')return isStuckArtwork(job);if(filter==='stuckProduction')return isStuckProduction(job);if(filter==='waitingApproval')return !isCompletedJob(job)&&isWaitingApproval(job);return categoryForJob(job)===filter;
+    if(filter==='all')return true;const stopped=/\b(cancelled|canceled|cancel|hold|paused|suspended)\b/i.test(String(job.currentDepartment||job.status||''));if(filter==='active')return !stopped&&!isCompletedJob(job)&&categoryForJob(job)!=='unmapped';if(filter==='overdue')return !stopped&&isOverdueJob(job);if(filter==='dueToday')return !stopped&&!isCompletedJob(job)&&isSameLocalDay(job.due);if(filter==='completedToday')return isCompletedJob(job)&&isSameLocalDay(job.actualComplete2||job.actualComplete1||job.completedDate);if(filter==='unmapped')return categoryForJob(job)==='unmapped';if(filter==='noPic')return !isCompletedJob(job)&&!String(job.pic||'').trim();if(filter==='noDesigner')return !isCompletedJob(job)&&!String(job.designer||'').trim();if(filter==='stuckArtwork')return isStuckArtwork(job);if(filter==='stuckProduction')return isStuckProduction(job);if(filter==='waitingApproval')return !isCompletedJob(job)&&isWaitingApproval(job);return categoryForJob(job)===filter;
   }
   function filterLabel(filter){return({all:'All',active:'Active',orders:'Orders',artwork:'Artwork',production:'Production',completed:'Completed',overdue:'Overdue',dueToday:'Due today',completedToday:'Completed today',unmapped:'Unmapped',noPic:'No PIC',noDesigner:'No Designer',stuckArtwork:'Artwork >2d',stuckProduction:'Production >3d',waitingApproval:'Waiting approval'})[filter]||filter}
   function filteredJobs(){let list=jobs.filter(j=>matchesOpsFilter(j,opsFilter));return list.sort((a,b)=>{const ad=parseLooseDate(a.orderDate)?.getTime()||0,bd=parseLooseDate(b.orderDate)?.getTime()||0;return bd-ad||((a._index??0)-(b._index??0))})}
   function employeeJobStats(emp){const list=activeJobsForEmployee(emp),artwork=list.filter(j=>categoryForJob(j)==='artwork').length,production=list.filter(j=>categoryForJob(j)==='production').length,overdue=list.filter(isOverdueJob).length,level=list.length>=5||overdue>=2?'Busy':list.length>=2?'Normal':'Light';return{list,active:list.length,artwork,production,overdue,level}}
-  function renderPulsePriority(){
+  function renderPulsePriority(snapshot){
     const root=$('#ksPulsePriority');if(!root)return;
-    const today=new Date();today.setHours(0,0,0,0);
-    const priority=jobs.filter(job=>!isCompletedJob(job)).map(job=>{
-      const date=parseLooseDate(job.due);if(!date)return null;
-      const due=new Date(date.getFullYear(),date.getMonth(),date.getDate());
-      const days=Math.round((due-today)/86400000);
-      return days<=3?{job,days}:null;
-    }).filter(Boolean).sort((a,b)=>a.days-b.days).slice(0,3);
-    if(!priority.length){root.innerHTML='<p class="ks-pulse-empty">No urgent deadlines right now.</p>';return;}
-    root.innerHTML=priority.map(({job,days})=>{
-      const when=days<0?`${-days}d late`:days===0?'Today':`In ${days}d`;
-      const tag=days<0?'late':days===0?'today':'soon';
-      const index=jobs.indexOf(job);
-      return `<button type="button" class="ks-priority-row" data-job-index="${index}"><span class="ks-priority-copy"><b>${esc(job.ref||'Job')}</b><small>${esc(job.customer||job.title||'Job')} · ${esc(job.pic||job.designer||'Unassigned')}</small></span><span class="ks-priority-due ${tag}">${when}</span></button>`;
+    if(opsDataMode==='loading'&&!opsHasSnapshot){root.innerHTML='<p class="ks-pulse-empty">Checking job priorities…</p>';return}
+    if(opsDataMode==='offline'&&!opsHasSnapshot){root.innerHTML='<p class="ks-pulse-empty">Unable to load jobs. Use Refresh to retry.</p>';return}
+    if(!jobs.length){root.innerHTML='<p class="ks-pulse-empty">No saved jobs yet. Add or import a job to begin.</p>';return}
+    const priority=snapshot.attention.slice(0,todayPanel.classList.contains('expanded')?5:3);
+    if(!priority.length){root.innerHTML='<p class="ks-pulse-empty">No jobs currently require attention.</p>';return}
+    root.innerHTML=priority.map(entry=>{
+      const direct=jobDataSource==='html'?window.KSPulseInsights.jobHref(entry.ref):'';
+      const href=direct|| (jobDataSource!=='html'?jobSheetUrl:'job-management.html?view=queue');
+      const tag=entry.primary.category==='overdue'?'late':entry.primary.category==='today'?'today':'soon';
+      const reason=entry.reasons.slice(1,3).map(r=>r.label).join(' · ');
+      const title=entry.primary.label;
+      return `<a class="ks-priority-row" href="${esc(href)}" ${jobDataSource!=='html'?'target="_blank" rel="noopener noreferrer"':''} title="${esc(entry.primary.action)}"><span class="ks-priority-copy"><b>${esc(entry.ref||'Missing reference')}</b><small>${esc(entry.customer||'Customer not recorded')} · ${esc(title)}${reason?' · '+esc(reason):''}</small></span><span class="ks-priority-due ${tag}">${esc(title)}</span></a>`;
     }).join('');
   }
   function renderOps(){
-    if(!todayPanel)return;const counts={orders:0,artwork:0,production:0,completed:0,unmapped:0,overdue:0};jobs.forEach(job=>{const stage=categoryForJob(job);counts[stage]=(counts[stage]||0)+1;if(isOverdueJob(job))counts.overdue++});
-    const now=new Date(),activeCount=counts.orders+counts.artwork+counts.production,completedToday=jobs.filter(j=>isCompletedJob(j)&&isSameLocalDay(j.completedDate||j.deliveryDate,now)).length,dueToday=jobs.filter(j=>!isCompletedJob(j)&&isSameLocalDay(j.due,now)).length,waitingApproval=jobs.filter(j=>!isCompletedJob(j)&&isWaitingApproval(j)).length,noPic=jobs.filter(j=>!isCompletedJob(j)&&!String(j.pic||'').trim()).length,noDesigner=jobs.filter(j=>!isCompletedJob(j)&&!String(j.designer||'').trim()).length,stuckArtwork=jobs.filter(isStuckArtwork).length,stuckProduction=jobs.filter(isStuckProduction).length;
-    todayPanel.querySelectorAll('[data-ops-metric]').forEach(btn=>{const key=btn.dataset.opsMetric,node=btn.querySelector('.today-number');if(node)animateNum(node,counts[key]||0);btn.classList.toggle('active-filter',opsFilter===key)});todayPanel.querySelectorAll('[data-ops-quick]').forEach(btn=>{const key=btn.dataset.opsQuick,node=btn.querySelector('.today-number'),value=key==='active'?activeCount:key==='dueToday'?dueToday:key==='overdue'?counts.overdue:key==='completedToday'?completedToday:0;if(node)animateNum(node,value);btn.classList.toggle('active-filter',opsFilter===key)});
+    if(!todayPanel)return;const now=new Date(),pulse=window.KSPulseInsights.summarize(jobs,now,categoryForJob),counts={...pulse.stages,overdue:pulse.overdue},activeCount=pulse.active,completedToday=pulse.completedToday,dueToday=pulse.dueToday,waitingApproval=jobs.filter(j=>!isCompletedJob(j)&&isWaitingApproval(j)).length,noPic=jobs.filter(j=>!isCompletedJob(j)&&!String(j.pic||'').trim()).length,noDesigner=jobs.filter(j=>!isCompletedJob(j)&&!String(j.designer||'').trim()).length,stuckArtwork=jobs.filter(isStuckArtwork).length,stuckProduction=jobs.filter(isStuckProduction).length;
+    todayPanel.querySelectorAll('[data-ops-metric]').forEach(btn=>{const key=btn.dataset.opsMetric,node=btn.querySelector('.today-number');if(node)animateNum(node,counts[key]||0);btn.classList.toggle('active-filter',opsFilter===key)});todayPanel.querySelectorAll('[data-ops-quick]').forEach(btn=>{const key=btn.dataset.opsQuick,node=btn.querySelector('.today-number'),value=key==='active'?activeCount:key==='dueToday'?dueToday:key==='overdue'?counts.overdue:key==='completedToday'?completedToday:key==='attention'?pulse.attentionCount:0;if(node)animateNum(node,value);btn.classList.toggle('active-filter',opsFilter===key)});
     if(opsTotalJobs)animateNum(opsTotalJobs,jobs.length);if(opsActiveJobs)animateNum(opsActiveJobs,activeCount);if(opsCompletedToday)animateNum(opsCompletedToday,completedToday);if(opsDueToday)animateNum(opsDueToday,dueToday);
     if(opsPipelineBar){const total=Math.max(1,counts.orders+counts.artwork+counts.production+counts.completed),parts=['orders','artwork','production','completed'];opsPipelineBar.innerHTML=parts.map(key=>`<i class="pipeline-${key}" style="width:${(counts[key]/total*100).toFixed(2)}%" title="${key}: ${counts[key]}"></i>`).join('');opsPipelineBar.setAttribute('aria-label',`Job Management classified tally: ${counts.orders} orders, ${counts.artwork} artwork, ${counts.production} production, ${counts.completed} completed, ${counts.unmapped} unmapped`)}
     const classified=jobs.length-counts.unmapped;if(opsReconcile){const sourceLabel=jobDataSource==='html'?'Job Management row':'Sheet row';opsReconcile.textContent=`${jobs.length} ${sourceLabel}${jobs.length===1?'':'s'} · ${classified} classified · ${counts.unmapped} unmapped`}if(opsUnmappedBtn){opsUnmappedBtn.hidden=counts.unmapped===0;opsUnmappedBtn.textContent=`Review ${counts.unmapped} unmapped`;opsUnmappedBtn.classList.toggle('warning',counts.unmapped>0)}
@@ -1879,7 +1887,7 @@ body{overscroll-behavior:none;}
     if(opsStageHealth){const fmt=v=>Number.isFinite(v)?`${v.toFixed(v>=10?0:1)}d`:'—';opsStageHealth.innerHTML=[['orders','Orders'],['artwork','Artwork'],['production','Production']].map(([key,label])=>`<div><span>${label}</span><b>${counts[key]}</b><small>avg job age ${fmt(avgAgeForStage(key))}</small></div>`).join('')+`<div><span>Waiting approval</span><b>${waitingApproval}</b><small>artwork/client hold</small></div>`}
     const alerts=[['dueToday','Due today',dueToday,'due'],['overdue','Overdue',counts.overdue,'danger'],['noPic','No PIC',noPic,'warn'],['noDesigner','No Designer',noDesigner,'warn'],['stuckArtwork','Artwork >2d',stuckArtwork,'warn'],['stuckProduction','Production >3d',stuckProduction,'warn'],['completedToday','Completed today',completedToday,'good'],['waitingApproval','Waiting approval',waitingApproval,'']];if(opsAlerts)opsAlerts.innerHTML=alerts.map(([key,label,value,tone])=>`<button class="ops-alert ${tone}" data-ops-alert-filter="${key}"><span>${esc(label)}</span><b>${value}</b></button>`).join('');
     if(opsStaffLoad){const stats=employees.map(emp=>({emp,...employeeJobStats(emp)})).sort((a,b)=>b.active-a.active||b.overdue-a.overdue).slice(0,4);opsStaffLoad.innerHTML=stats.map(s=>`<button data-pulse-staff="${s.emp.id}"><span class="ops-load-avatar">${initials(s.emp.name)}</span><span><b>${esc(s.emp.name)}</b><small>${s.active} active · ${s.artwork} artwork · ${s.production} production${s.overdue?` · ${s.overdue} overdue`:''}</small></span><em class="load-${s.level.toLowerCase()}">${s.level}</em></button>`).join('')}
-    renderPulsePriority();
+    renderPulsePriority(pulse);
     renderOpsSyncMeta();syncEmployeeJobsFromOps();const workloadOrder=[...employees].sort((a,b)=>a.id-b.id),totalActive=jobs.filter(j=>!isCompletedJob(j)&&categoryForJob(j)!=='unmapped').length;if(workloadTotal)workloadTotal.textContent=`${totalActive} active`;
     if(workloadList)workloadList.innerHTML=workloadOrder.map(emp=>{const st=employeeJobStats(emp),manual=workloadLines(emp.workload),manualHtml=manual.slice(0,3).map(line=>`<i>${esc(line)}</i>`).join('');return `<div class="workload-row workload-smart" data-workload-employee="${emp.id}" role="button" tabindex="0"><div class="workload-avatar">${initials(emp.name)}</div><div class="workload-copy"><b>${esc(emp.name)}</b><span>${esc(emp.position)} · ${st.active} active</span><div class="workload-mini"><i>${st.artwork} artwork</i><i>${st.production} production</i>${st.overdue?`<i class="danger">${st.overdue} overdue</i>`:''}</div>${manualHtml?`<div class="manual-workload">${manualHtml}</div>`:''}</div><div class="workload-level level-${st.level.toLowerCase()}">${st.level}</div></div>`}).join('');
     renderStaffDirectory();const list=filteredJobs().slice(0,8);if(jobsFilterLabel)jobsFilterLabel.textContent=filterLabel(opsFilter);if(recentJobs)recentJobs.innerHTML=list.length?list.map(job=>{const stage=categoryForJob(job),cat=isOverdueJob(job)?'overdue':stage,emp=employeeForPic(job.pic),age=jobAgeDays(job);return `<div class="job-row" data-job-index="${jobs.indexOf(job)}" role="button" tabindex="0"><div class="job-main"><div class="job-top"><span class="job-ref">${esc(job.ref)}</span><span class="job-title">${esc(job.title)}</span></div><div class="job-sub">Customer ${esc(job.customer||'Client')} · ${esc(emp?.name||job.pic||'Unassigned')} · ${esc(job.status||stage)}${job.daysLeft!==''&&job.daysLeft!=null&&Number.isFinite(Number(job.daysLeft))?` · ${Number(job.daysLeft)<0?`${Math.abs(Number(job.daysLeft))}d overdue`:Number(job.daysLeft)===0?'due today':`${Number(job.daysLeft)}d left`}`:''}${Number.isFinite(age)?` · ${age.toFixed(age>=10?0:1)}d old`:''}</div></div><span class="job-status ${cat}">${esc(stage==='unmapped'?'Unmapped':isOverdueJob(job)?'Overdue':job.status||stage)}</span></div>`}).join(''):`<div class="ops-note">No jobs match this filter.</div>`;
@@ -1892,7 +1900,7 @@ body{overscroll-behavior:none;}
       {label:'Job',value:job.title||''},{label:'Customer',value:job.customer||''},{label:'Status',value:job.status||''},{label:'PIC',value:job.pic||''}
     ].filter(v=>String(v.value||'').trim());
     const detailHtml=details.map(item=>`<div class="detail-row"><span>${esc(item.label)}</span><span>${esc(item.value)}</span></div>`).join('');
-    contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(job.ref||'Job')}</div><div class="context-sub">Live Job Management record</div></div><button class="close-mini">×</button></div><div class="profile-details sheet-job-details">${detailHtml||'<div class="detail-row"><span>Job</span><span>No detail available</span></div>'}</div><div class="profile-job-actions">${emp?`<button class="profile-job-action" data-focus-job-employee="${emp.id}">Focus ${esc(emp.name)}</button>`:''}<a class="profile-job-action" href="${jobDataSource==='html'?'job-management.html':jobSheetUrl}" ${jobDataSource==='html'?'':'target="_blank" rel="noopener noreferrer"'}>Open Job ↗</a></div>`;
+    contextCard.innerHTML=`<div class="context-head"><div><div class="context-title">${esc(job.ref||'Job')}</div><div class="context-sub">Live Job Management record</div></div><button class="close-mini">×</button></div><div class="profile-details sheet-job-details">${detailHtml||'<div class="detail-row"><span>Job</span><span>No detail available</span></div>'}</div><div class="profile-job-actions">${emp?`<button class="profile-job-action" data-focus-job-employee="${emp.id}">Focus ${esc(emp.name)}</button>`:''}<a class="profile-job-action" href="${jobDataSource==='html'?(window.KSPulseInsights.jobHref(job.ref)||'job-management.html?view=queue'):esc(jobSheetUrl)}" ${jobDataSource==='html'?'':'target="_blank" rel="noopener noreferrer"'}>Open Job ↗</a></div>`;
     contextCard.classList.add('open');
     contextCard.querySelector('.close-mini').onclick=()=>contextCard.classList.remove('open');
     const focus=contextCard.querySelector('[data-focus-job-employee]');if(focus)focus.onclick=()=>{openEmployee(emp);focusEmployee(emp)};
@@ -1900,11 +1908,6 @@ body{overscroll-behavior:none;}
   function jobsSignature(list){
     const compact=(list||[]).map(job=>({ref:job.ref||'',customer:job.customer||'',title:job.title||'',status:job.status||'',pic:job.pic||'',designer:job.designer||'',supplier:job.supplier||'',due:job.due||'',deliveryDate:job.deliveryDate||'',completedDate:job.completedDate||'',statusUpdated:job.statusUpdated||'',details:job._details||[]}));
     return hashString(JSON.stringify(compact));
-  }
-  async function saveJobCache(list,signature=jobsSignature(list)){
-    try{
-      await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({scope:'dashboard:jobs',payload:{savedAt:Date.now(),signature,jobs:list.slice(0,250)},clientId:eventClientId})});
-    }catch(_){}
   }
   function normalizeSharedHtmlJob(job,index=0){
     const j={...(job||{})};j.ref=j.ref||j.jobsheetFiles||j.invoice||`JOB-${index+1}`;j.customer=j.customer||'';j.jobType=j.jobType||j.item||'';j.printingType=j.printingType||j.typeOfPrinting||'';j.title=j.title||[j.jobType,j.printingType].filter(Boolean).join(' · ')||'Job';j.currentDepartment=j.currentDepartment||j.status||'';j.status=j.currentDepartment||j.status||j.artworkStatus||'Active';j.sales=j.sales||j.pic||'';j.pic=j.sales||j.pic||'';j.productionPic=j.productionPic||'';j.due=j.due||j.deliveryTime||'';j.deliveryTime=j.deliveryTime||j.due||'';j.completedDate=j.completedDate||j.actualComplete2||j.actualComplete1||'';j.statusUpdated=j.statusUpdated||j.lastUpdate||'';j.orderDate=j.orderDate||'';j.assignees=Array.isArray(j.assignees)?j.assignees:[j.sales,j.designer,j.productionPic].filter(Boolean);j._index=index;if(!Array.isArray(j._details)&&j._record&&typeof j._record==='object')j._details=Object.entries(j._record).filter(([,v])=>String(v??'').trim()).map(([label,value])=>({label,value:String(value)}));return j;
@@ -1921,20 +1924,22 @@ body{overscroll-behavior:none;}
   async function loadJobsFromSheet({background=false}={}){
     if(jobSyncInFlight)return jobs;jobSyncInFlight=true;
     if(!background&&opsRefreshBtn)opsRefreshBtn.classList.add('loading');
+    if(!opsHasSnapshot){setOpsSource('loading','Loading','Checking shared Job Management data…')}
+    renderOpsSyncMeta();
     if(jobDataSource==='html'){
       try{
         const shared=await readJobCache({strict:true});
         if(shared){
+          if(opsHasSnapshot&&Number(shared.version||0)<jobSharedVersion)return jobs;
           const changed=Number(shared.version||0)!==jobSharedVersion;jobSharedVersion=Number(shared.version||jobSharedVersion);opsLastSyncAt=shared.savedAt||opsLastSyncAt;
-          if(changed||opsDataMode!=='live'){jobs=shared.jobs;setOpsSource('live','Job Management',`${jobs.length} shared jobs synced from the live database · ${fullClockTime()}.`,shared.savedAt);renderOps();}
+          if(changed||opsDataMode!=='live'){jobs=shared.jobs;opsHasSnapshot=true;setOpsSource('live','Job Management',`${jobs.length} shared jobs synced from the live database · ${fullClockTime()}.`,shared.savedAt);renderOps();}
           else renderOpsSyncMeta();
-        }else{jobs=[];jobSharedVersion=0;setOpsSource('empty','No Data','No shared Job Management rows saved yet. Add or import a job to begin.');renderOps();}
+        }else if(!opsHasSnapshot){jobs=[];opsHasSnapshot=true;jobSharedVersion=0;setOpsSource('empty','No Data','No shared Job Management rows saved yet. Add or import a job to begin.');renderOps();}
         return jobs;
-      }catch(error){setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);renderOps();return jobs}finally{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')}
+      }catch(error){setOpsSource('offline','Retry needed',`${error.message}. Last loaded jobs are kept.`,opsLastSyncAt);renderOps();return jobs}finally{jobSyncInFlight=false;renderOpsSyncMeta();if(!background)opsRefreshBtn?.classList.remove('loading')}
     }
     const shared=await readJobCache();
-    const previousSignature=shared?.signature||jobsSignature(shared?.jobs||[]);
-    if(shared){jobs=shared.jobs;const mins=Math.max(1,Math.round((Date.now()-shared.savedAt)/60000));setOpsSource('cached','Database',background?'Checking Job Management for updates…':`Shared database loaded · ${mins} min old. Refreshing Job Management…`,shared.savedAt);renderOps();}
+    if(shared&&(!opsHasSnapshot||Number(shared.version||0)>=jobSharedVersion)){jobs=shared.jobs;opsHasSnapshot=true;jobSharedVersion=Number(shared.version||jobSharedVersion);const mins=Math.max(1,Math.round((Date.now()-shared.savedAt)/60000));setOpsSource('cached','Database',background?'Checking Job Management for updates…':`Shared database loaded · ${mins} min old. Refreshing Job Management…`,shared.savedAt);renderOps();}
     else if(!background)setOpsSource('empty','Syncing','Connecting to Job Management and shared database.');
     return new Promise((resolve,reject)=>{
       const callback=`__ksJobData_${Date.now()}_${Math.floor(Math.random()*1000)}`;let done=false,script=document.createElement('script'),timer=null;
@@ -1943,18 +1948,12 @@ body{overscroll-behavior:none;}
       const tqx=encodeURIComponent(`out:json;responseHandler:${callback}`);if(!jobSheetBase){finish(new Error('Saved Job Management link is not a Google Sheet'));return}script.src=`${jobSheetBase}/gviz/tq?gid=${jobSheetGid||'0'}&headers=1&tqx=${tqx}&_=${Date.now()}`;script.async=true;script.onerror=()=>finish(new Error('Sheet unavailable'));document.head.appendChild(script);
       timer=setTimeout(()=>finish(new Error('Sheet sync timed out')),5200);
     }).then(async list=>{
-      const signature=jobsSignature(list),changed=Boolean(shared?.jobs?.length&&signature!==previousSignature);
-      jobs=list;await saveJobCache(list,signature);setOpsSource('live','Job Mgmt',`${list.length} Job Management rows synced · pipeline tally updated ${fullClockTime()}.`);pushActivity({title:'Job Management synced',text:`${list.length} rows · Office Pulse tally refreshed`,avatar:'JM',type:'job_sync'});renderOps();renderFeed();
-      if(changed){
-        const oldMap=new Map((shared.jobs||[]).map(j=>[String(j.ref||''),jobsSignature([j])]));
-        const changedRows=list.filter(j=>oldMap.get(String(j.ref||''))!==jobsSignature([j]));
-        const sample=changedRows.slice(0,3).map(j=>j.ref||j.title).filter(Boolean).join(', ');
-        await postOfficeEvent({eventType:'job_management_updated',title:'Job Management updated',message:sample?`${changedRows.length} job change${changedRows.length===1?'':'s'} · ${sample}`:`${list.length} jobs refreshed`,metadata:{count:list.length,changed:changedRows.length,signature},dedupeKey:`jobs:${signature}`});
-      }
+      jobs=list;opsHasSnapshot=true;setOpsSource('sheet','Sheet preview',`${list.length} Google Sheet rows loaded read-only. Import through Job Management to save shared records.`);renderOps();
+      // A Sheet preview is not an authoritative shared-state change.
       return list;
     }).catch(async()=>{
-      const cached=await readJobCache();if(cached){jobs=cached.jobs;const mins=Math.max(1,Math.round((Date.now()-cached.savedAt)/60000));setOpsSource('cached','Database',`Live Sheet was unavailable. Showing shared Supabase data from ${mins} min ago.`,cached.savedAt)}else{jobs=[];setOpsSource('empty','No Data','No Job Management data is available yet. Add or import a job to begin.')};renderOps();return jobs;
-    }).finally(()=>{jobSyncInFlight=false;if(!background)opsRefreshBtn?.classList.remove('loading')});
+      const cached=await readJobCache();if(cached&&(!opsHasSnapshot||Number(cached.version||0)>=jobSharedVersion)){jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);const mins=Math.max(1,Math.round((Date.now()-cached.savedAt)/60000));setOpsSource('cached','Database',`Live Sheet was unavailable. Showing shared Supabase data from ${mins} min ago.`,cached.savedAt)}else{setOpsSource('offline','Retry needed',opsHasSnapshot?'Sheet unavailable. Showing last loaded jobs.':'Sheet unavailable; no shared jobs could be loaded. Retry refresh.')};renderOps();return jobs;
+    }).finally(()=>{jobSyncInFlight=false;renderOpsSyncMeta();if(!background)opsRefreshBtn?.classList.remove('loading')});
   }
   function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);jobAutoTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadJobsFromSheet({background:true})},3500)}
 
@@ -2702,7 +2701,7 @@ body{overscroll-behavior:none;}
     if(e.target.closest('#ksPulseAllStaff')){setOpsTab('workload');return}
     const tab=e.target.closest('.ops-tab');if(tab){setOpsTab(tab.dataset.opsTab);return}
     const metric=e.target.closest('[data-ops-metric]');if(metric){opsFilter=metric.dataset.opsMetric;setOpsTab('jobs');renderOps();return}
-    const quick=e.target.closest('[data-ops-quick]');if(quick){opsFilter=quick.dataset.opsQuick;setOpsTab('jobs');renderOps();return}
+    const quick=e.target.closest('[data-ops-quick]');if(quick){if(quick.dataset.opsQuick==='attention'){location.href='job-management.html?view=queue';return}opsFilter=quick.dataset.opsQuick;setOpsTab('jobs');renderOps();return}
     const alert=e.target.closest('[data-ops-alert-filter]');if(alert){opsFilter=alert.dataset.opsAlertFilter;setOpsTab('jobs');renderOps();return}
     const unmapped=e.target.closest('#opsUnmappedBtn');if(unmapped){opsFilter='unmapped';setOpsTab('jobs');renderOps();return}
     const staffLoad=e.target.closest('[data-pulse-staff]');if(staffLoad){const emp=employeeById[Number(staffLoad.dataset.pulseStaff)];if(emp){openEmployee(emp);focusEmployee(emp)}return}
@@ -3280,11 +3279,11 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.35 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.38 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
-<script src="office-command-data.js?v=86.1" defer></script>
+
 <script src="office-3d.js?v=86.30" defer></script>
 <script src="office-quality.js?v=86.3" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
