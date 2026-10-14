@@ -3,7 +3,7 @@
 ## Behavior
 - Every employee receives an **exclusive, physically rendered workstation** while one is free.
 - The office has **9 assignable seats**: B01, B02, D01, D02, S01, S02, S03, S04, A01.
-- The six workstations in the main work area have individual desk surfaces, chair bindings, and monitors. The rear counter has B02/A01 and Boss keeps B01.
+- The six workstations in the main work area retain exclusive chair bindings and monitors on the original V86.49 continuous shared worktable (classic visual design). The rear counter has B02/A01 and Boss keeps B01.
 - With the default 8 employees, everybody has a desk. Employee #9 gets the final desk; employees #10+ stand at distinct, navigable showroom positions.
 - Deleting a staff member makes that person's desk available to the next staff member according to deterministic employee ID order. Existing default ID-to-seat bindings take priority.
 - 2D map and 3D chair bindings share the same desk IDs. Showroom overflow never gets a phantom seat.

@@ -64,13 +64,12 @@ export function createOffice(host:HTMLDivElement,callbacks:Callbacks,options:{ro
  function chair(x:number,z:number,rotation=Math.PI,color=dark,key?:string){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rotation;g.scale.setScalar(1.2);world.add(g);cyl(g,0,.28,0,.045,.5,'#8c948e');box(g,0,.54,0,.6,.13,.56,color,true);box(g,0,.91,-.25,.58,.62,.1,color,true);for(const a of [0,Math.PI/2]){const b=box(g,0,.09,0,.72,.045,.06,'#727b76');b.rotation.y=a}for(const [xx,zz]of [[.3,0],[-.3,0],[0,.3],[0,-.3]])ball(g,xx,.07,zz,.055,.06,.055,'#5b625e');for(const xx of [-.32,.32]){box(g,xx,.66,0,.035,.27,.03,'#89918a');box(g,xx,.8,.02,.075,.04,.32,color)}(window as any).KSOfficeSeating?.registerChair({key,workPoint:key?workTargets.get(key):null,x:x*FLOOR_SPACE_SCALE,z:z*FLOOR_SPACE_SCALE,yaw:rotation,seatHeight:(.54+.13/2)*g.scale.y})}
  function mug(x:number,y:number,z:number,c='#bf9364'){cyl(world,x,y,z,.09,.19,c);cyl(world,x,y+.1,z,.071,.008,'#625740');const handle=mesh(geo(new THREE.TorusGeometry(.064,.018,6,10)),material(c),world,x+.095,y,z);handle.rotation.x=Math.PI/2}
  function monitor(x:number,z:number,rotation:number,tone='#b7cfca',key?:string,keyboardForward=.53){const g=new THREE.Group();g.position.set(x,1.2,z);g.rotation.y=rotation;world.add(g);box(g,0,.03,0,.4,.035,.29,'#697370');box(g,0,.25,-.03,.065,.43,.055,'#8c9790');box(g,0,.57,-.04,.85,.56,.085,'#465451',true);box(g,0,.57,.007,.77,.47,.012,'#e3ede7');box(g,-.16,.59,.017,.34,.28,.01,tone);for(let i=0;i<3;i++)box(g,.21,.7-i*.12,.017,.24,.025,.01,'#aec2b1');box(g,0,.022,keyboardForward,.57,.035,.23,'#c9d1c5',true);box(g,.48,.04,keyboardForward,.11,.055,.17,'#b7c2b0',true);if(key)workTargets.set(key,{x:(x+Math.sin(rotation)*keyboardForward)*FLOOR_SPACE_SCALE,y:1.2+.022+.035/2,z:(z+Math.cos(rotation)*keyboardForward)*FLOOR_SPACE_SCALE})}
- // Six individual worktables with independent chairs and monitors.
- // Keep workstation anchors and navigation furniture footprint unchanged.
- for(const z of [-12.45,-10.2,-7.95])for(const x of [.17,1.56]){
-  box(world,x,1.12,z,1.16,.14,1.88,wood,true);
-  for(const dx of [-.48,.48])for(const dz of [-.72,.72])
-   box(world,x+dx,.55,z+dz,.085,1.07,.085,'#d5d9cf');
- }
+ // Classic V86.49 worktable: one continuous six-seat island with center divider.
+ // V86.50 seat ownership remains exclusive: each chair/monitor retains a unique ID.
+ // Preserve furniture geometry and navigation anchors; only the tabletop styling reverts.
+ box(world,.85,1.12,-10.7,2.85,.14,7.25,wood,true);
+ for(const z of [-13.65,-10.7,-7.75])box(world,.85,.55,z,2.5,1.06,.12,'#e6e8dd');
+ box(world,.85,1.35,-10.7,.06,.36,7,'#8c968e');
  for(const z of [-12.45,-10.2,-7.95]){const left=z===-12.45?'D02':z===-10.2?'S01':'S03',right=z===-12.45?'D01':z===-10.2?'S02':'S04';monitor(.52,z,-Math.PI/2,'#b5c6d0',left,.94);monitor(1.18,z,Math.PI/2,'#d9c8a4',right,.94);chair(-.85,z,Math.PI/2,dark,left);chair(2.56,z,-Math.PI/2,dark,right)}
  mug(-.15,1.31,-11.1);mug(1.92,1.31,-8.65,'#9dab80');box(world,1.88,1.215,-10.8,.38,.04,.57,'#ede8d8');
  box(world,1.1,1.12,-16.25,8,.14,1.25,wood,true);for(const x of [-2.35,4.55])box(world,x,.55,-16.25,.12,1.1,1.04,'#ddd7c7');monitor(-.15,-16.3,0,'#b7cfca','B02');monitor(3.1,-16.3,0,'#dbccaa','A01');chair(-.15,-15.33,Math.PI,dark,'B02');chair(3.1,-15.33,Math.PI,dark,'A01');mug(.85,1.31,-16.15);

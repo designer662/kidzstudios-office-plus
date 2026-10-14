@@ -39,7 +39,11 @@ assert.equal(afterRemoval.find(p=>p.id===10).deskId,'S04','Next staff gets final
 assert.equal(afterRemoval.filter(p=>!p.deskId).length,4);
 const allIds=[...new Set(seats.seats.map(s=>s.id))];
 for(const key of allIds)assert(source.includes(`'${key}'`),`Physical office 3D must register ${key}`);
-assert(source.includes('Six individual worktables'),'Six distinct tabletops (not one shared island) required');
+// Visual regression: restore the V86.49 continuous island without reverting V86.50 seat allocation.
+assert(source.includes('Classic V86.49 worktable'),'The classic worktable style must be retained');
+assert(source.includes('box(world,.85,1.12,-10.7,2.85,.14,7.25,wood,true)'),'Original continuous island tabletop geometry must be restored');
+assert(source.includes("box(world,.85,1.35,-10.7,.06,.36,7,'#8c968e')"),'Original central divider must be restored');
+assert(!source.includes('Six individual worktables'),'The V86.50 split-table visual must not return');
 assert(html.includes('office-workstations.js?v=86.50'));
 assert(html.includes('window.KSOfficeWorkstations.allocate(next,window.KSOfficeGeometry)'));
 assert(html.includes("employees.find(e=>e.deskId===d.deskId)"),'2D clickable desk is assigned from the actual roster');
@@ -81,4 +85,4 @@ timeline.evolve(old,now+1000);
 assert.deepEqual(old.staff.map(s=>[s.id,s.homeX,s.homeY,s.homeDeskId,s.x,s.y,s.nextAt]),first,'Seat ownership migration is idempotent');
 assert(timeline.validPayload(old),'Reallocated movement timeline remains valid');
 assert.equal(writes,0,'No staff/database mutation from seating module');
-console.log('PASS V86.50: 9 exclusive physical desks, per-person worktables, showroom overflow, dynamic vacancy refill, stable IDs, geometry, shared-AI timeline migration and no data writes.');
+console.log('PASS V86.50: 9 exclusive workstations, classic V86.49 shared worktable, showroom overflow, dynamic vacancy refill, stable IDs, geometry, shared-AI timeline migration and no data writes.');
