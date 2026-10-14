@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const src=path=>readFileSync(path,'utf8');
+const now=1_810_000_000_000;
+const person={id:7,homeRoom:'staff',department:'Production',visualX:11,y:22,visualY:22};
+const root={OfficeSmartAI:{decide(){return {intent:{zone:'staff',action:'production',kind:'work'},candidates:[]}},record(){},memory(){return null}},
+ OfficeLiving:{workFor:()=> 'production',jobKey:()=>''}, OfficeSuite:{sharedMovement:{enable(){},getPeople:()=>[person],render(){},plan(){return null}}},addEventListener(){}};
+vm.runInNewContext(src('public/office-movement-sync.js'),{window:root,document:{hidden:false,documentElement:{dataset:{ksAuth:'pending'}},addEventListener(){}},globalThis:{crypto:{randomUUID:()=> 'mobility-test'}},Math,Date,JSON,Number,String,Object,Array,Set,Map,console},{filename:'office-movement-sync.js'});
+const timeline=root.OfficeMovementTimeline;
+const longIdle={id:7,x:11,y:22,room:'staff',action:'production',walk:null,scene:null,lastWalkAt:now-260000,lastTripAt:0,nextAt:now,ai:null};
+assert.notEqual(timeline.chooseSmartIntent(person,longIdle,now,{staff:[longIdle]}).zone,'staff','Long-idle staff with free common areas should get a movement opportunity even if role AI keeps choosing desk work');
+const away={...longIdle,room:'corridor',lastTripZone:'corridor',lastTripAt:now-60000};
+const homeIntent={zone:'staff',action:'production',kind:'return'};
+const recovery=timeline.alternateIntents(person,away,homeIntent,{staff:[away]},now);
+assert.equal(recovery[0].zone,'staff','Returning home remains the primary goal');
+assert(recovery.some(option=>option.zone!=='staff'&&option.zone!=='corridor'),'Blocked home routes must offer a safe, capacity-checked detour instead of retrying one path forever');
+// Real showroom bottleneck: a valid corridor path passes 1.7 plan units
+// from a colleague staying at an assigned desk. The old global 1.85 gap
+// permanently rejected this route even when nobody else was walking.
+const parkedPerson={id:8,homeRoom:'showroom',deskX:16,deskY:32.7,visualX:16,visualY:32.7};
+root.OfficeSuite.sharedMovement.getPeople=()=>[person,parkedPerson];
+const showroomWorker={id:5,x:19,y:28.8,room:'showroom',action:'chat',nextAt:now,walk:null};
+const parked={id:8,x:16,y:32.7,room:'showroom',action:'reviewing',nextAt:now+30000,walk:null};
+const corridorRoute={from:{x:19,y:28.8},route:[{x:16,y:31},{x:9.4,y:33},{x:9.4,y:44.6}],segmentMs:[1750,3240,5450],startedAt:now,endAt:now+10440,targetZone:'corridor',action:'chat'};
+assert.equal(timeline.routeHasClearance({staff:[showroomWorker,parked]},showroomWorker,corridorRoute,now),true,'A seated desk neighbor should not permanently block a valid corridor route that stays outside a smaller safe desk clearance');
+const walkingNeighbor={...parked,walk:{from:{x:16,y:32.7},route:[{x:16,y:32.7}],segmentMs:[12000],startedAt:now,endAt:now+12000,targetZone:'showroom',action:'walking'}};
+assert.equal(timeline.routeHasClearance({staff:[showroomWorker,walkingNeighbor]},showroomWorker,corridorRoute,now),false,'Keep the original walking-to-walking safety clearance');
+const recentlyWalked={...longIdle,lastWalkAt:now-15000};
+assert.equal(timeline.chooseSmartIntent(person,recentlyWalked,now,{staff:[recentlyWalked]}).zone,'staff','Normal desk work must remain possible');
+const fullAreas=['corridor','showroom','pantry'].flatMap((room,i)=>Array.from({length:i===1?3:2},(_,k)=>({id:100+i*10+k,room})));
+const blockedAreas=[...fullAreas, ...['store','prayer'].flatMap((room,i)=>[{id:200+i*10,room},{id:201+i*10,room}])];
+assert.equal(timeline.chooseSmartIntent(person,longIdle,now,{staff:[longIdle,...blockedAreas]}).zone,'staff','Do not force workers into occupied destinations');
+const g=await import('data:text/javascript;base64,'+Buffer.from(src('public/office-geometry-guard.js')).toString('base64'));
+const geometry=g.default||globalThis.KSOfficeGeometry;
+const guard=geometry||(()=>{throw Error('geometry unavailable')})();
+assert.equal(guard.navBlocked(13,15),true,'Regression fixture starts inside a furniture obstacle');
+assert.equal(guard.blocked(13,15),false,'Regression fixture is not inside a structural wall');
+assert.equal(typeof guard.canExitFurnitureStart,'function','Geometry must provide a wall-safe recovery from a blocked seating start');
+const SCALE=1.5,world=(x,y)=>({x:(x/2-5.75)*SCALE,z:(y/2-17.5)*SCALE});
+const start=world(13,15),exit=world(9,15);
+assert.equal(guard.canExitFurnitureStart(start,world(12.5,15),SCALE),true,'Allow incremental motion outward from a furniture-occluded start');
+assert.equal(guard.canExitFurnitureStart(exit,start,SCALE),false,'Never allow a clear walker to enter furniture as an escape');
+const navigation=await import('data:text/javascript;base64,'+Buffer.from(src('source/src/office-navigation.js')).toString('base64'));
+const rig={root:{position:{...start}},targetPosition:{...exit},person:{status:'walking'},routeRecovery:null,targetRotation:0};
+for(let i=0;i<45;i++)navigation.followSceneTarget(rig,.05,guard,SCALE);
+const result=guard.worldToPlan(rig.root.position,SCALE);
+assert(Math.hypot(result.x-9,result.y-15)<.3,`A seated walker must actually leave its furniture-blocked start; reached (${result.x.toFixed(2)}, ${result.y.toFixed(2)})`);
+assert.equal(guard.navBlocked(result.x,result.y),false,'Final position is navigable');
+// Wall collision remains absolute: do not permit the same escape if the body starts within a wall.
+const wall={x:0,y:35},wallFrom=world(wall.x,wall.y);
+assert.equal(guard.blocked(...[wall.x,wall.y]),true);
+assert.equal(guard.canExitFurnitureStart(wallFrom,world(2,35),SCALE),false,'Structural wall escape is forbidden');
+assert.equal(guard.canExitFurnitureStart(start,world(13,50),SCALE),false,'Recovery cannot cross a structural partition');
+const site=src('public/index.html');
+assert(site.includes('office-geometry-guard.js?v=86.39'),'Cache-bust furniture-safe navigation guard');
+assert(site.includes('office-movement-sync.js?v=86.49'),'Cache-bust updated scheduler');
+assert(site.includes('office-3d.js?v=86.49'),'Cache-bust recompiled 3D navigation when deployed');
+assert(src('scripts/stability-suite.mjs').includes('test-v86-39-staff-mobility.mjs'),'Add regression to strict CI suite');
+console.log('PASS V86.39 mobility: long-idle goal selection, capacity safety, furniture-start escape, wall protection, 3D follower recovery, and CI wiring.');

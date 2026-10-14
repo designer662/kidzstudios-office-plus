@@ -1,0 +1,110 @@
+name: Deploy Office Plus to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Verify project layout
+        shell: bash
+        run: |
+          test -f public/index.html
+          test -f public/job-management.html
+          test -f source/package.json
+          test -f source/package-lock.json
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - name: Install build and test dependencies
+        run: npm ci --prefix source
+      - name: Validate deployment prerequisites and config security
+        run: |
+          node scripts/test-deployment-setup.mjs
+          node scripts/test-public-config.mjs
+          node scripts/test-build-integrity.mjs
+          node scripts/test-version-stamping.mjs
+          node scripts/test-stability-runner.mjs
+      - name: Rebuild 3D from source
+        run: npm run build:3d --prefix source
+      - name: Create public Supabase configuration
+        env:
+          PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/generate-config.mjs
+      - name: Check site assets and deduplicated runtime
+        run: |
+          node scripts/check-repo.mjs
+          node scripts/audit-runtime-wiring.mjs
+          node scripts/test-v86-41-code-cleanup.mjs
+          node scripts/test-shared-sync-production.mjs
+          node scripts/test-v86-43-sync-optimization.mjs
+          node scripts/test-v86-43-3d-index.mjs
+          node scripts/test-v86-43-dashboard-polling.mjs
+          node scripts/test-v86-44-smart-ai.mjs
+      - name: Test job data and workbook tools
+        run: |
+          node scripts/test-job-data.mjs
+          node scripts/test-workbook.mjs
+          node scripts/test-job-rules.mjs
+          node scripts/test-job-validation.mjs
+          node scripts/test-job-saving.mjs
+          node scripts/test-job-ui-v86-31.mjs
+          node scripts/test-delete-modal.mjs
+          node scripts/test-outside-close.mjs
+          node scripts/test-v86-37-action-queue.mjs
+          node scripts/test-v86-38-office-pulse.mjs
+          node scripts/test-v86-40-office-pulse-source.mjs
+      - name: Test Supabase API compatibility
+        run: node scripts/test-bridge-mock.mjs
+      - name: Test Office Simulator stability
+        run: node scripts/run-stability-suite.mjs
+      - name: Install test browser
+        run: npm exec --prefix source -- playwright install --with-deps chromium
+      - name: Test auth recovery in Chromium
+        run: node scripts/test-v86-43-auth-browser.mjs
+      - name: Test rebuilt 3D in WebGL
+        run: node scripts/test-v86-22-browser.mjs
+      - name: Stamp current build version
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: node scripts/stamp-version.mjs
+      - name: Disable Jekyll transformations
+        run: touch public/.nojekyll
+      - name: Validate deploy artifact (fail closed)
+        run: |
+          node scripts/test-deploy-artifact.mjs
+          node scripts/check-repo.mjs
+      - name: Publish verified website ZIP for download
+        uses: actions/upload-artifact@v4
+        with:
+          name: KidzStudios_OfficePlus_V86.49_Production_Website
+          path: public/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

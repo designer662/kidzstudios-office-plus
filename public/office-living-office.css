@@ -1,0 +1,32 @@
+/* V86.4 Minimal controls: one light indicator and one sound toggle. */
+.ks-living-controls{position:absolute;z-index:7;left:22px;top:56px;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;pointer-events:none;max-width:calc(100% - 50px)}
+.ks-living-daylight,.ks-living-audio{min-height:30px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:999px;border:1px solid rgba(192,196,192,.75);background:rgba(255,255,255,.95);color:#5e6863;font:750 11px/1.2 Inter,Arial,sans-serif;padding:6px 11px;box-shadow:0 3px 14px rgba(35,44,37,.06);backdrop-filter:blur(8px)}
+.ks-living-audio{pointer-events:auto;cursor:pointer;border-color:rgba(222,150,95,.28);color:#986541;touch-action:manipulation}
+.ks-living-audio:hover,.ks-living-audio:focus-visible{background:#fff2e8;outline:2px solid rgba(235,149,86,.36);outline-offset:1px}
+.ks-living-audio[aria-pressed="true"]{background:#f0faed;border-color:#a5c59f;color:#597550}
+@media(max-width:920px){.ks-living-controls{left:12px;top:109px;gap:5px}.ks-living-daylight,.ks-living-audio{min-height:32px;font-size:10px;padding:6px 9px}}
+@media(max-width:650px){.ks-living-controls{left:12px;top:109px}.ks-living-daylight,.ks-living-audio{min-height:32px;font-size:10px}}
+@media print{.ks-living-controls{display:none!important}}
+#office3dHost .scene-bubble[data-bubble-kind="living"]{max-width:145px;padding:7px 9px;font-size:10px;text-align:center;color:#6f6252;border:1px solid rgba(224,178,121,.28);background:rgba(255,252,244,.97);box-shadow:0 6px 15px rgba(80,62,42,.09)}
+@media(max-width:920px){.ks-living-controls{left:12px;top:109px;gap:5px;max-width:calc(100% - 24px)}.ks-living-daylight,.ks-living-audio{font-size:9px;padding:6px 8px}}
+@media(max-width:650px){.ks-living-controls{left:12px;top:109px}.ks-living-daylight{display:none}.ks-living-audio{min-height:27px}}
+@media print{.ks-living-controls{display:none!important}}
+/* V84: readable simulated dialogue. Smart-label collision manager handles the placement. */
+#office3dHost .scene-bubble[data-bubble-kind="conversation"]{
+  max-width:170px;padding:9px 12px;border-radius:15px;
+  font-size:11px;font-weight:650;line-height:1.4;
+  color:#405a56;background:rgba(247,255,253,.98);
+  border:1px solid rgba(97,166,151,.32);
+  box-shadow:0 9px 23px rgba(39,74,64,.13);
+  animation:ks-conversation-enter .23s ease-out both;
+}
+#office3dHost .scene-bubble[data-bubble-kind="conversation"]:after{
+  content:"";position:absolute;bottom:-5px;left:calc(50% - 5px);
+  height:9px;width:9px;transform:rotate(45deg);
+  background:rgba(247,255,253,.98);
+  border-right:1px solid rgba(97,166,151,.32);
+  border-bottom:1px solid rgba(97,166,151,.32);
+}
+@keyframes ks-conversation-enter{from{opacity:0;scale:.95}to{opacity:1;scale:1}}
+@media(max-width:650px){#office3dHost .scene-bubble[data-bubble-kind="conversation"]{max-width:138px;font-size:10px;padding:7px 9px}}
+@media(prefers-reduced-motion:reduce){#office3dHost .scene-bubble[data-bubble-kind="conversation"]{animation:none}}

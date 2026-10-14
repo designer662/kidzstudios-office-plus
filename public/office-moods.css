@@ -1,0 +1,21 @@
+/* v70: animate the inner glyph so the bubble keeps following its character. */
+.animated-mood-icon,.emoji-choice-btn .emoji-icon{display:inline-block;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;transform-origin:50% 75%;animation:ks-mood-happy 2.8s ease-in-out infinite}
+[data-mood="sad"] .animated-mood-icon,[data-emoji-mood="sad"] .emoji-icon{animation:ks-mood-sad 3.4s ease-in-out infinite}
+[data-mood="angry"] .animated-mood-icon,[data-emoji-mood="angry"] .emoji-icon{animation:ks-mood-angry 3s ease-in-out infinite}
+[data-mood="badmood"] .animated-mood-icon,[data-emoji-mood="badmood"] .emoji-icon{animation:ks-mood-sway 3.5s ease-in-out infinite}
+[data-mood="busy"] .animated-mood-icon,[data-emoji-mood="busy"] .emoji-icon{animation:ks-mood-busy 1.6s ease-in-out infinite}
+#office3dHost .scene-mood-bubble{display:flex;align-items:center;justify-content:center;gap:5px;min-width:46px;width:auto;max-width:90px;padding:9px 10px;border-radius:15px;font-size:25px;line-height:1.15;background:rgba(255,255,255,.98);border:1px solid rgba(239,123,69,.2);box-shadow:0 8px 22px rgba(31,35,38,.12)}
+.busy-dots{display:inline-flex;gap:3px;align-items:center;margin-left:3px;vertical-align:middle}
+.busy-dots i{display:block;width:3px;height:3px;border-radius:50%;background:#dc7d32;animation:ks-busy-dot 1.3s ease-in-out infinite}
+.busy-dots i:nth-child(2){animation-delay:.16s}.busy-dots i:nth-child(3){animation-delay:.32s}
+.emoji-choice-btn[data-emoji-mood="busy"]{grid-column:1/-1;background:#fff7ed}
+.emoji-choice-btn[data-emoji-mood="busy"] .emoji-copy small{color:#a57037}
+.scene-paused .animated-mood-icon,.scene-paused .busy-dots i{animation-play-state:paused}
+@keyframes ks-mood-happy{0%,65%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-7deg)}45%{transform:translateY(-2px) rotate(6deg)}}
+@keyframes ks-mood-sad{0%,100%{transform:rotate(0)}45%,65%{transform:translateY(2px) rotate(-9deg)}}
+@keyframes ks-mood-angry{0%,45%,70%,100%{transform:rotate(0)}50%,60%{transform:rotate(-8deg)}55%,65%{transform:rotate(8deg)}}
+@keyframes ks-mood-sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+@keyframes ks-mood-busy{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-2px) rotate(3deg)}}
+@keyframes ks-busy-dot{0%,75%,100%{opacity:.3;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
+@media(max-width:650px){.character-emoji-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.emoji-choice-btn[data-emoji-mood="busy"]{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.animated-mood-icon,.emoji-choice-btn .emoji-icon,.busy-dots i{animation:none!important}}
