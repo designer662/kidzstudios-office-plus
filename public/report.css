@@ -19,3 +19,13 @@
 @media print{.ks-master-header,.report-toolbar,.report-actions{display:none!important}body{background:white}.report-page{max-width:none;padding:0}.kpi,.report-card{break-inside:avoid;box-shadow:none!important}.report-table{min-width:0;font-size:9px}}
 
 .ks-version-footer{color:#a4a8aa;text-align:center;font-size:10px;padding:14px 0 27px}
+/* V86.53 — accessible operations insights; identical shared data source. */
+.report-extended-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:0 0 15px}
+.report-micro-kpi{display:flex;flex-direction:column;gap:8px;min-width:0;background:#fbfbfa;border:1px solid #e7e8e5;border-radius:15px;padding:16px 18px}
+.report-micro-kpi span{font-size:11px;color:#7a8283;font-weight:750}.report-micro-kpi strong{font-size:clamp(21px,2vw,28px);letter-spacing:-.04em;color:#303a3c}.report-micro-kpi small{font-size:10px;line-height:1.4;color:#9ba2a2}
+.report-insights-grid{grid-template-columns:1fr 1fr}.report-card-heading{display:flex;justify-content:space-between;gap:12px;align-items:start}.report-note{font-size:10px;color:#ab775b;font-weight:750;background:#fff2e9;border:1px solid #f7e5d6;padding:6px 8px;border-radius:9px;white-space:nowrap}
+.report-insight-list{display:grid;gap:15px}.insight-customer-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:7px;align-items:center;margin-bottom:8px}.insight-customer-top b{font-size:12px;font-weight:750;color:#374246;overflow-wrap:anywhere}.insight-customer-top span{font-size:10px;color:#858e8e}.insight-track{height:7px;border-radius:100px;background:#f0f1ef;overflow:hidden}.insight-track i{display:block;height:100%;background:#e79b70;border-radius:100px}
+.report-health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.health-cell{background:#fbfbfa;border:1px solid #eef0ec;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:5px}.health-cell small{font-size:10px;color:#83898c;font-weight:700}.health-cell strong{font-size:24px;color:#333e41}.health-cell span{font-size:10px;color:#929a9c}.health-cell.at-risk{background:#fff8f4;border-color:#f7e1d5}.health-cell.at-risk strong{color:#cf7144}.report-empty-insight{font-size:12px;color:#8e9597;padding:16px 0}
+@media(max-width:1050px){.report-extended-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.report-insights-grid{grid-template-columns:1fr}}
+@media(max-width:500px){.report-extended-kpis{gap:8px}.report-micro-kpi{padding:13px}.report-micro-kpi strong{font-size:22px}.report-health-grid{gap:7px}.health-cell{padding:10px}}
+@media print{.report-micro-kpi,.health-cell,.report-insights-grid .report-card{break-inside:avoid;background:#fff!important}}

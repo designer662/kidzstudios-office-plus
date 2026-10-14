@@ -137,7 +137,7 @@
   parent.appendChild(label);
   const controls=document.createElement('div');controls.id='ksSmartAIControls';
   controls.style.cssText='position:absolute;bottom:42px;left:12px;z-index:9;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 24px);';
-  for(const [target,caption] of [['priority','Reset Afiq/Boss'],['all','Reset All AI']]){
+  for(const [target,caption] of [['all','Reset All AI']]){
    const button=document.createElement('button');button.type='button';
    button.textContent=caption;button.dataset.target=target;
    button.setAttribute('aria-label',caption+' movement simulation');

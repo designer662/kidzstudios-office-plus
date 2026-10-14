@@ -63,6 +63,7 @@ jobs:
           node scripts/test-v86-50-profile-dedup.mjs
           node scripts/test-v86-51-reports-navigation.mjs
           node scripts/test-v86-52-layout-import.mjs
+          node scripts/test-v86-53-dashboard-report.mjs
       - name: Test job data and workbook tools
         run: |
           node scripts/test-job-data.mjs
@@ -99,7 +100,7 @@ jobs:
       - name: Publish verified website ZIP for download
         uses: actions/upload-artifact@v4
         with:
-          name: KidzStudios_OfficePlus_V86.52_Production_Website
+          name: KidzStudios_OfficePlus_V86.53_Production_Website
           path: public/
           include-hidden-files: true
           if-no-files-found: error

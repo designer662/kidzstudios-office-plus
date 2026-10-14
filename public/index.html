@@ -1045,7 +1045,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"></head>
+<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"></head>
 <body class="ks-dashboard">
 <div class="app" id="app" data-theme="light">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -1190,6 +1190,7 @@ body{overscroll-behavior:none;}
 </section>
 <button class="office-chat-launcher" id="chatLauncher" aria-label="Open office chat" aria-expanded="false"><span>⌁</span><b>Chat</b><i id="chatUnread" hidden>0</i></button>
 <div class="map-tools">
+  <button type="button" class="ks-office-fullscreen" id="ksOfficeFullscreen" aria-label="Enter fullscreen office simulator" aria-pressed="false" title="Toggle fullscreen simulator">⛶ <span>Fullscreen</span></button>
   <label class="ks-quality-mini" for="ksVisualQuality" title="3D graphics quality for this device"><span>3D</span><select id="ksVisualQuality" aria-label="3D graphics quality"><option value="eco">Eco</option><option value="balanced">Balanced</option><option value="high">High</option></select></label>
   <div class="rotation-control" aria-label="Rotate office model">
     <button class="tool-btn rotate-btn" id="rotateLeft" title="Rotate left" aria-label="Rotate left">↶</button>
@@ -2983,11 +2984,12 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.52 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.53 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>
 
+<script src="office-fullscreen.js?v=86.53" defer></script>
 <script src="office-3d.js?v=86.49" defer></script>
 <script src="office-quality.js?v=86.49" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>

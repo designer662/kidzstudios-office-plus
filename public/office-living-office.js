@@ -200,7 +200,23 @@
   badge=document.createElement('span');badge.className='ks-living-daylight';
   btn=document.createElement('button');btn.type='button';btn.className='ks-living-audio';btn.setAttribute('aria-label','Toggle office ambience');
   btn.addEventListener('click',e=>{e.stopPropagation();setEnabled(!enabled)});
-  controls.append(badge,btn);host.parentElement.appendChild(controls);
+  const resetAI=document.createElement('button');
+  resetAI.type='button';resetAI.id='ksResetAI';resetAI.className='ks-living-reset';
+  resetAI.textContent='↻ Reset AI';resetAI.title='Reset only the simulation movement for all staff';
+  resetAI.setAttribute('aria-label','Reset all staff AI movement');
+  resetAI.addEventListener('click',event=>{
+    event.stopPropagation();
+    if(!window.confirm('Reset AI movement for all staff? Staff records and jobs will not be changed.'))return;
+    resetAI.disabled=true;resetAI.textContent='↻ Resetting…';
+    window.dispatchEvent(new CustomEvent('ks:smart-ai-reset-request',{detail:{target:'all'}}));
+  });
+  window.addEventListener('ks:smart-ai-reset-result',event=>{
+    resetAI.disabled=false;
+    resetAI.textContent=event.detail?.ok?'✓ AI reset':'⚠ Reset failed';
+    resetAI.title=event.detail?.message||'Reset all staff AI movement';
+    window.setTimeout(()=>{resetAI.textContent='↻ Reset AI'},2600);
+  });
+  controls.append(badge,btn,resetAI);host.parentElement.appendChild(controls);
   syncButton();updateSoundStatus(enabled?'tap-to-start':'off');applyLighting(null,null,null,null,null);
  }
  // Unlock on the next genuine user gesture, including after a browser restores a tab.

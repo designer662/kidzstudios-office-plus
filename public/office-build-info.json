@@ -1,7 +1,7 @@
 {
-  "release": "86.52",
-  "edition": "Office Plus · Jarvis Layout & Job Data Fix",
-  "package": "V86.52: responsive full-width tools, centered dashboard, non-overlapping navigation, unified Google Sheet import, All Jobs CSV export; Smart AI and classic desks preserved",
+  "release": "86.53",
+  "edition": "Office Plus · Jarvis Minimal Header & Fullscreen Simulator",
+  "package": "V86.53: shared minimalist header; edge-to-edge simulator, single Reset AI beside sound, hidden monitor UI, enhanced read-only Job Reports. Classic Job Management UI and Import/Export retained.",
   "modules": [
     "office-geometry-guard.js",
     "office-workstations.js",
@@ -23,7 +23,12 @@
     "office-character-studio.js",
     "office-character-studio.css",
     "office-online-users.js",
-    "office-online-users.css"
+    "office-online-users.css",
+    "suite-header-minimal.css",
+    "office-fullscreen.css",
+    "office-fullscreen.js",
+    "report-data.js",
+    "report.js"
   ],
   "check": "Staff directory data unchanged; physical desk ownership is computed deterministically. CI must build the 3D scene and pass browser/WebGL plus Supabase acceptance before production."
 }

@@ -34,17 +34,31 @@
   }
   function summarize(jobs,now=new Date()){
     const stages={orders:0,artwork:0,production:0,completed:0,unmapped:0};
-    let urgent=0,late=0,invoice=0,paid=0,outstanding=0,undated=0;
+    let urgent=0,late=0,invoice=0,paid=0,outstanding=0,undated=0,dueSoon=0,missingDelivery=0,missingCustomer=0,missingRef=0;
+    const customers=new Map();
     const months=Array.from({length:12},()=>0);
     for(const j of jobs){
       stages[stage(j)]++;if(clean(j.priority).toLowerCase()==='urgent')urgent++;
       if(overdue(j,now))late++;
+      const due=date(j.deliveryTime||j.due),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+      if(!completed(j)&&due){const delta=Math.floor((new Date(due.getFullYear(),due.getMonth(),due.getDate()).getTime()-today)/86400000);if(delta>=0&&delta<=7)dueSoon++}
+      if(!due)missingDelivery++;
+      if(!clean(j.customer))missingCustomer++;
+      if(!clean(j.jobsheetFiles||j.ref))missingRef++;
+      const client=clean(j.customer)||'Unspecified customer';
+      const prior=customers.get(client)||{name:client,count:0,billed:0};
+      prior.count++;prior.billed+=amount(j.invoiceAmount);customers.set(client,prior);
       invoice+=amount(j.invoiceAmount);paid+=amount(j.paid);
       // Prefer explicitly saved balance, falling back to invoice less paid.
       outstanding+=clean(j.balance)!==''?amount(j.balance):amount(j.invoiceAmount)-amount(j.paid);
       const d=date(j.orderDate);if(!d)undated++;else months[d.getMonth()]++;
     }
-    return {total:jobs.length,stages,urgent,overdue:late,invoice,paid,outstanding,undated,months};
+    return {total:jobs.length,stages,urgent,overdue:late,invoice,paid,outstanding,undated,months,dueSoon,
+      completionRate:jobs.length?Math.round(stages.completed/jobs.length*100):0,
+      averageInvoice:jobs.length?invoice/jobs.length:0,
+      collectionRate:invoice>0?Math.round(Math.max(0,paid)/invoice*100):0,
+      missingDelivery,missingCustomer,missingRef,
+      topCustomers:[...customers.values()].sort((a,b)=>b.count-a.count||b.billed-a.billed||a.name.localeCompare(b.name)).slice(0,5)};
   }
   function years(jobs){return [...new Set(jobs.map(j=>date(j.orderDate)?.getFullYear()).filter(Boolean))].sort((a,b)=>b-a)};
   function safeCSV(v){const raw=clean(v),safe=/^[=+@\-\t\r]/.test(raw)?"'"+raw:raw;return '"'+safe.replace(/"/g,'""')+'"'};

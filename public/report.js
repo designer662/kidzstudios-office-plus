@@ -17,6 +17,12 @@
     put('kpiTotal',stats.total);put('kpiActive',stats.stages.orders+stats.stages.artwork+stats.stages.production);
     put('kpiCompleted',stats.stages.completed);put('kpiOverdue',stats.overdue);put('kpiUrgent',stats.urgent);
     put('kpiInvoice',fmtRM(stats.invoice));put('kpiPaid',fmtRM(stats.paid));put('kpiBalance',fmtRM(stats.outstanding));
+    put('kpiCompletionRate',stats.completionRate+'%');put('kpiDueSoon',stats.dueSoon);
+    put('kpiAverageInvoice',fmtRM(stats.averageInvoice));put('kpiCollectionRate',stats.collectionRate+'%');
+    const topMax=Math.max(1,...stats.topCustomers.map(c=>c.count));
+    $('reportCustomers').innerHTML=stats.topCustomers.length?stats.topCustomers.map((c,i)=>`<div class="insight-customer"><div class="insight-customer-top"><b>${i+1}. ${escape(c.name)}</b><span>${c.count} job${c.count===1?'':'s'} · ${escape(fmtRM(c.billed))}</span></div><div class="insight-track"><i style="width:${Math.round(c.count/topMax*100)}%"></i></div></div>`).join(''):'<div class="report-empty-insight">No customers in this selection.</div>';
+    const health=[['Upcoming delivery',stats.dueSoon,'Due in next 7 days'],['Already overdue',stats.overdue,'Open jobs past delivery'],['Missing delivery date',stats.missingDelivery,'Records needing a date'],['Missing reference / customer',stats.missingRef+stats.missingCustomer,'Incomplete identifying fields']];
+    $('reportHealth').innerHTML=health.map(([label,count,detail],i)=>`<div class="health-cell${i===1&&count?' at-risk':''}"><small>${label}</small><strong>${count}</strong><span>${detail}</span></div>`).join('');
     const max=Math.max(1,...stats.months);
     $('reportMonthly').innerHTML=stats.months.map((count,m)=>`<div class="month-col" title="${months[m]}: ${count} jobs"><b>${count}</b><div class="month-bar" style="--bar:${Math.round(112*count/max)}px"></div><span>${months[m]}</span></div>`).join('');
     const colors={orders:'#b2afbd',artwork:'#d19b65',production:'#eb935a',completed:'#6eab8b',unmapped:'#c1c8ca'};
