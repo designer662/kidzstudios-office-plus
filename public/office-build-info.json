@@ -1,13 +1,14 @@
 {
-  "release": "86.28",
-  "edition": "Office Plus · Unified Pulse",
-  "package": "V86.28 synchronized walk-follow animation and lag-aware collision-safe 3D playback",
+  "release": "86.29",
+  "edition": "Office Plus \u00b7 Unified Pulse",
+  "package": "V86.29 Smart AI character goal planner, role-aware decisions, shared memory and context activity bubbles",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
     "office-ambience-audio.js",
     "office-living-office.js",
     "office-notification-sound.js",
+    "office-smart-ai.js",
     "office-movement-sync.js",
     "office-3d.js",
     "office-command-data.js",
@@ -21,5 +22,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "V86.28 delayed timeline catch-up, walking gait on arrival, wall-safe motion, shared timeline regression"
+  "check": "Autonomous AI simulation; shared movement timeline and V86.28 speed limits preserved"
 }

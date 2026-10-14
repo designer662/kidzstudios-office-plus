@@ -1,4 +1,4 @@
-/* Office Plus V86.27: Shared collision-safe movement + fair activity reservations.
+/* Office Plus V86.29: Shared collision-safe movement + autonomous Smart AI activities.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
@@ -12,6 +12,7 @@
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
   const living=window.OfficeLiving;
+  const smart=window.OfficeSmartAI;
   if(!motion)return;
   // Do not run an independent simulation while waiting for authentication/network.
   motion.enable();
@@ -42,8 +43,15 @@
   }
   function chooseSmartIntent(employee,s,now,snapshot){
     const home=homeFor(employee),work=living?.workFor(employee)||'typing';
-    // Away staff always return to their own assigned desk; don't strand them.
+    // Away staff always return home through real routes, not a renderer snap.
     if(s.room!==home)return {zone:home,action:work,kind:'return'};
+    if(smart){
+      const decision=smart.decide(employee,s,snapshot,now,{
+        hasWork:!!living?.jobKey(employee),available:zone=>zoneHasSpace(snapshot,s,zone)
+      });
+      if(decision?.intent?.zone&&decision.intent.zone!==s.room&&zoneHasSpace(snapshot,s,decision.intent.zone))return decision.intent;
+      if(decision?.intent?.zone===home)return decision.intent;
+    }
     // Desk tasks remain varied, but no avatar should be desk-bound indefinitely.
     // Force a visit to a usable shared area if their last successful walk was too long ago.
     if(now-(Number(s.lastWalkAt)||now)>WALK_OPPORTUNITY_MS){
@@ -69,10 +77,16 @@
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
     const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0,ai:smart?.memory(null,now)};
   }
   function validStaff(a){
-    return Array.isArray(a)&&a.length<=100&&a.every(s=>Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
+    return Array.isArray(a)&&a.length<=100&&a.every(s=>(!s.ai||(
+      s.ai.v===1&&['at','focus','energy','social','curiosity','streak','decisions'].every(k=>Number.isFinite(Number(s.ai[k])))&&
+      ['focus','energy','social','curiosity'].every(k=>Number(s.ai[k])>=0&&Number(s.ai[k])<=1)&&
+      Number(s.ai.streak)>=0&&Number(s.ai.streak)<=12&&Number(s.ai.decisions)>=0&&Number(s.ai.decisions)<=1000000&&
+      (!s.ai.lastZone||['boss','staff','showroom','corridor','pantry','store','prayer'].includes(s.ai.lastZone))&&
+      (!s.ai.lastAction||typeof s.ai.lastAction==='string'&&s.ai.lastAction.length<=24)
+    ))&&Number.isInteger(Number(s.id))&&Number.isFinite(Number(s.nextAt))&&point(s)&&(!s.scene||(
       typeof s.scene.text==='string'&&s.scene.text.length<=80&&Number.isFinite(Number(s.scene.from))&&Number.isFinite(Number(s.scene.until))&&s.scene.until>=s.scene.from&&
       (!s.scene.dialogue||(Array.isArray(s.scene.dialogue)&&s.scene.dialogue.length>=2&&s.scene.dialogue.length<=8&&s.scene.dialogue.every(line=>typeof line==='string'&&line.length<=80)&&
         Number.isInteger(Number(s.scene.speakerId))&&Number.isInteger(Number(s.scene.partnerId))&&s.scene.speakerId!==s.scene.partnerId&&Number(s.scene.turnMs)>=1800&&Number(s.scene.turnMs)<=6000))
@@ -142,7 +156,10 @@
     const original=snapshot.staff.length;
     snapshot.staff=snapshot.staff.filter(s=>known.has(Number(s.id)));
     let changed=snapshot.staff.length!==original;
-    for(const s of snapshot.staff)if(!Number.isFinite(Number(s.lastWalkAt))||s.lastWalkAt==null){s.lastWalkAt=now-((Number(s.id)%4)*16000);changed=true}
+    for(const s of snapshot.staff){
+      if(!Number.isFinite(Number(s.lastWalkAt))||s.lastWalkAt==null){s.lastWalkAt=now-((Number(s.id)%4)*16000);changed=true}
+      if(smart&&!s.ai){s.ai=smart.memory(null,now);changed=true}
+    }
 
     const existing=new Set(snapshot.staff.map(s=>Number(s.id)));
     for(const e of current)if(!existing.has(Number(e.id))){snapshot.staff.push(staffBase(e,now));changed=true}
@@ -279,6 +296,14 @@
     const home=homeFor(employee);
     if(s.room!==home)return [requested]; // Always bring staff back to their own desk.
     const candidates=[requested];
+    if(smart){
+      const preferred=smart.decide(employee,s,snapshot,Date.now(),{
+        hasWork:!!living?.jobKey(employee),available:zone=>zoneHasSpace(snapshot,s,zone)
+      });
+      for(const goal of preferred.candidates||[]){
+        if(goal.zone!==home&&!candidates.some(c=>c.zone===goal.zone)&&zoneHasSpace(snapshot,s,goal.zone))candidates.push(goal);
+      }
+    }
     const order=home==='showroom'?['corridor','pantry','store','prayer']:
       home==='boss'?['showroom','corridor','pantry','store']:
       ['showroom','corridor','pantry','store','prayer'];
@@ -336,6 +361,11 @@
         // Desk / idle animation changes without moving the character through furniture.
         s.action=intent.action==='typing'?'pc-work':intent.action||work;
         if(intent.kind==='meeting')s.scene={kind:'meeting',text:'🗓 Planning at the project desk',from:now,until:now+12500};
+        if(smart){
+          smart.record(s,intent,now);
+          if(s.ai.decisions%4===1&&intent.reason&&!s.scene)
+            s.scene={kind:'activity',text:String(intent.reason).slice(0,80),from:now,until:now+5200};
+        }
         s.nextAt=now+13000+Math.random()*19000;
         changed=true;continue;
       }
@@ -356,6 +386,7 @@
         s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
       }
       s.lastTripZone=selectedIntent.zone;s.lastTripAt=now;
+      if(smart)smart.record(s,selectedIntent,now);
       if(selectedIntent.kind==='break')s.lastBreakAt=now;
       if(selectedIntent.kind==='meeting'){
         s.scene={kind:'meeting',text:'🗓 Reviewing a team project',from:s.walk.endAt,until:s.walk.endAt+13000};
@@ -365,6 +396,10 @@
       }else if(selectedIntent.kind==='break'){
         s.scene={kind:'break',text:living?.breakMessage?.(selectedIntent.zone,Math.random(),selectedIntent.action)||'Taking a short break',from:s.walk.endAt,until:s.walk.endAt+17000};
         s.nextAt=s.walk.endAt+19000;
+      }
+      if(smart&&selectedIntent.reason&&!s.scene){
+        s.scene={kind:'activity',text:String(selectedIntent.reason).slice(0,80),
+          from:s.walk.endAt+550,until:s.walk.endAt+6500};
       }
       walkers++;changed=true;
     }
