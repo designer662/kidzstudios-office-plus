@@ -1,0 +1,27 @@
+{
+  "release": "86.33",
+  "edition": "Office Plus · Unified Pulse",
+  "package": "V86.33 Office Simulator CI stability test repair",
+  "modules": [
+    "office-geometry-guard.js",
+    "office-seating-controller.js",
+    "office-furniture-interactions.js",
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-smart-ai.js",
+    "office-movement-sync.js",
+    "office-3d.js",
+    "office-command-data.js",
+    "office-command.css",
+    "job-command-board.js",
+    "office-quality.js",
+    "office-v86-3-polish.css",
+    "office-pulse-integrated.css",
+    "office-character-studio.js",
+    "office-character-studio.css",
+    "office-online-users.js",
+    "office-online-users.css"
+  ],
+  "check": "Current 3D movement source test replaces retired V86.16 inline helper; V86.31 Job Management and runtime sources preserved"
+}

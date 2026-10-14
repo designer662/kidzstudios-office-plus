@@ -1,0 +1,10 @@
+/* V59: The requested Motion/Mood/Scene and view-toggle controls are removed. */
+#office3dHost{top:14px!important}
+.studio3d-ready #office3dHost{top:14px!important}
+@media(max-width:920px){
+ #office3dHost,.studio3d-ready #office3dHost{top:12px!important}
+ .studio-note{top:auto!important;bottom:14px!important}
+}
+@media(max-width:650px){
+ #office3dHost,.studio3d-ready #office3dHost{top:8px!important}
+}
