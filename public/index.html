@@ -1459,8 +1459,7 @@ body{overscroll-behavior:none;}
   let chatPollTimer=null,chatInitialized=false,chatLastId=0,chatUnreadCount=0,chatOpen=false;
   const EVENTS_API='/api/events';
   const eventClientId=(globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  let eventPollTimer=null,eventInitialized=false,lastEventId=0,notificationOpen=false,notificationUnreadCount=0,notificationToastTimer=null,editingWorkloadId=null,jobAutoTimer=null,jobSyncInFlight=false;
-  let notifications=[];
+  let eventPollTimer=null,eventInitialized=false,lastEventId=0,notificationToastTimer=null,editingWorkloadId=null,jobAutoTimer=null,jobSyncInFlight=false;
   const workloadNoticeIds=new Set();
   const LEGACY_DEMO_JOB_REFS=new Set(['KS-1044','KS-1045','KS-1046','KS-1047','KS-1048','KS-1049','KS-1050','KS-1051','KS-1052']);
   function isLegacyDemoJob(job){return LEGACY_DEMO_JOB_REFS.has(String(job?.ref||job?.jobsheetFiles||'').trim().toUpperCase())}
@@ -1526,23 +1525,11 @@ body{overscroll-behavior:none;}
     if(t.includes('presence')||t.includes('walk')||t.includes('desk')||t.includes('meeting')||t.includes('break'))return'PRESENCE';
     return'OFFICE';
   }
-  function updateLiveClock(){if(liveLabel)liveLabel.textContent=`Live · ${clockTime()}`;renderFeed();renderNotifications();renderOpsSyncMeta()}
+  function updateLiveClock(){if(liveLabel)liveLabel.textContent=`Live · ${clockTime()}`;renderFeed();renderOpsSyncMeta()}
   function maybePushOpsTimeBrief(){const d=new Date(),key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`;if(d.getMinutes()>2||lastOpsBriefHour===key)return;lastOpsBriefHour=key;const overview=window.KSPulseInsights.summarize(jobs,d,categoryForJob),active=overview.active,due=overview.dueToday,overdue=overview.overdue;pushActivity({title:`${clockTime()} · Office checkpoint`,text:`${active} active · ${due} due today · ${overdue} overdue`,avatar:'TM',type:'time_brief'})}
   function startOfficeClock(){updateLiveClock();maybePushOpsTimeBrief();if(clockTimer)clearInterval(clockTimer);clockTimer=setInterval(()=>{updateLiveClock();maybePushOpsTimeBrief()},30000)}
   function eventGlyph(type=''){
     if(type==='workload_updated')return'WL';if(type==='staff_added')return'＋';if(type==='staff_removed')return'−';if(type==='staff_updated')return'ST';if(type.startsWith('job_'))return'JM';if(type==='chat_message')return'CH';if(type.includes('drive'))return'DR';return'UP';
-  }
-  function renderNotifications(){
-    if(!notificationList)return;
-    if(!notifications.length){notificationList.innerHTML='<div class="notification-empty">No new updates yet.</div>';return}
-    notificationList.innerHTML=notifications.slice(0,30).map(n=>`<div class="notification-item"><div class="notification-item-icon">${esc(eventGlyph(n.eventType))}</div><div class="notification-item-copy"><b>${esc(n.title||'Office update')}</b><span>${esc(n.message||'Updated')}</span></div><time><b>${esc(clockTime(n.createdAt))}</b><small>${esc(relativeEventTime(n.createdAt))}</small></time></div>`).join('');
-  }
-  function setNotificationUnread(value){
-    notificationUnreadCount=Math.max(0,Number(value)||0);if(!notificationUnread||!notificationBtn)return;
-    notificationUnread.textContent=String(Math.min(99,notificationUnreadCount));notificationUnread.hidden=notificationUnreadCount===0;notificationBtn.classList.toggle('has-unread',notificationUnreadCount>0);
-  }
-  function setNotificationOpen(open){
-    notificationOpen=Boolean(open);notificationPanel?.classList.toggle('open',notificationOpen);notificationPanel?.setAttribute('aria-hidden',String(!notificationOpen));notificationBtn?.setAttribute('aria-expanded',String(notificationOpen));if(notificationOpen)setNotificationUnread(0);
   }
   function showNotificationToast(event){
     if(!notificationToast)return;notificationToast.textContent=`${clockTime(event.createdAt)} · ${event.title||'Office update'} · ${event.message||'Updated'}`;notificationToast.classList.add('show');clearTimeout(notificationToastTimer);notificationToastTimer=setTimeout(()=>notificationToast.classList.remove('show'),3200);
@@ -1556,14 +1543,9 @@ body{overscroll-behavior:none;}
   async function refreshJobsFromSharedCache(){
     const cached=await readJobCache();if(!cached||Number(cached.version||0)<jobSharedVersion)return;jobs=cached.jobs;opsHasSnapshot=true;jobSharedVersion=Number(cached.version||jobSharedVersion);setOpsSource('live','Job Management',`Job Management update received · ${jobs.length} shared jobs synced.`,cached.savedAt);renderOps();
   }
-  function addNotification(event,{initial=false,local=false}={}){
-    notifications.unshift(event);if(notifications.length>40)notifications.length=40;renderNotifications();
-    if(!initial&&!local){if(!notificationOpen)setNotificationUnread(notificationUnreadCount+1);showNotificationToast(event);window.KSNotificationSound?.play(event.eventType||'update');}
-  }
   function handleOfficeEvent(event,{initial=false,local=false}={}){
     if(!event||!event.id)return;const type=String(event.eventType||'office_update'),empId=Number(event.employeeId)||null,emp=empId?employeeById[empId]:null;
     pushActivity({title:event.title||'Office update',text:event.message||'Updated',avatar:eventGlyph(type),employeeId:empId,createdAt:event.createdAt||Date.now(),type,realtime:true});
-    addNotification(event,{initial,local});
     if(type==='workload_updated'&&empId){if(!initial){markWorkloadNotice(empId);if(emp)showBubble(emp,event.message||workloadBubbleText(emp)||'Workload updated',{kind:'workload',duration:8200})}loadStaffDirectory({seedIfMissing:false});}
     else if(type==='staff_added'||type==='staff_removed'||type==='staff_updated'){loadStaffDirectory({seedIfMissing:false});}
     else if(type==='mood_updated'&&empId){loadStaffDirectory({seedIfMissing:false});if(!initial&&emp){const mood=String(event.metadata?.mood||emp.mood||'');const preset=characterEmojiPresets[mood];if(preset)showBubble(emp,preset.emoji,{kind:'emoji',duration:0});}}
@@ -2609,11 +2591,6 @@ body{overscroll-behavior:none;}
   if(chatSendBtn)chatSendBtn.onclick=sendChat;
   if(chatChangeUser)chatChangeUser.onclick=()=>document.getElementById('tempUserBtn')?.click();
   if(chatInput)chatInput.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}};
-  if(notificationBtn)notificationBtn.onclick=e=>{e.stopPropagation();setNotificationOpen(!notificationOpen)};
-  if(notificationClearBtn)notificationClearBtn.onclick=e=>{e.stopPropagation();notifications=[];setNotificationUnread(0);renderNotifications()};
-  if(notificationPanel)notificationPanel.onclick=e=>e.stopPropagation();
-  if(location.hash==='#notifications')setTimeout(()=>setNotificationOpen(true),180);
-  window.addEventListener('hashchange',()=>{if(location.hash==='#notifications')setNotificationOpen(true)});
   if(workloadEditorClose)workloadEditorClose.onclick=closeWorkloadEditor;
   if(workloadEditorModal)workloadEditorModal.onclick=e=>{if(e.target===workloadEditorModal)closeWorkloadEditor()};
   if(workloadEditorSave)workloadEditorSave.onclick=saveWorkloadOnly;
@@ -2671,8 +2648,7 @@ body{overscroll-behavior:none;}
   livePanelHeader.onclick=e=>{if(e.target.closest('button'))return;toggleLiveExpanded();};
   rotateLeftBtn.onclick=()=>rotateModel(-15);rotateRightBtn.onclick=()=>rotateModel(15);rotationReadout.onclick=()=>animateModelRotation(0);
   $('#zoomIn').onclick=()=>window.office3d?window.office3d.zoomBy(1.16):setScale(cam.scale*1.16);$('#zoomOut').onclick=()=>window.office3d?window.office3d.zoomBy(1/1.16):setScale(cam.scale/1.16);$('#resetView').onclick=resetScene;$('#fullscreenBtn').onclick=()=>document.fullscreenElement?document.exitFullscreen?.():app.requestFullscreen?.();
-  document.onkeydown=e=>{if(!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){if(e.key.toLowerCase()==='q')rotateModel(-15);if(e.key.toLowerCase()==='e')rotateModel(15);if(e.key==='0')resetScene()}if(e.key==='Escape'){if(livePanel.classList.contains('maximized')){livePanel.classList.remove('maximized');maximizeLiveBtn?.setAttribute('aria-pressed','false');if(maximizeLiveBtn)maximizeLiveBtn.textContent='□'}clearEmployeeSelection();contextCard.classList.remove('open');setChatOpen(false);setNotificationOpen(false);closeWorkloadEditor();if(todayPanel?.classList.contains('expanded')){todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false')}}}};
-  document.addEventListener('click',e=>{if(notificationOpen&&!e.target.closest('.notification-wrap'))setNotificationOpen(false)});
+  document.onkeydown=e=>{if(!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){if(e.key.toLowerCase()==='q')rotateModel(-15);if(e.key.toLowerCase()==='e')rotateModel(15);if(e.key==='0')resetScene()}if(e.key==='Escape'){if(livePanel.classList.contains('maximized')){livePanel.classList.remove('maximized');maximizeLiveBtn?.setAttribute('aria-pressed','false');if(maximizeLiveBtn)maximizeLiveBtn.textContent='□'}clearEmployeeSelection();contextCard.classList.remove('open');setChatOpen(false);window.KSSharedNotifications?.setOpen(false);closeWorkloadEditor();if(todayPanel?.classList.contains('expanded')){todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false')}}}};
   // V69 notification audio is unlocked and controlled by the shared sound module.
   svg.onwheel=e=>{e.preventDefault();setScale(cam.scale*(e.deltaY>0?.92:1.085),svgPoint(e.clientX,e.clientY))};
   svg.onpointerdown=e=>{if(e.button!==0)return;const interactive=e.target.closest?.('.employee,.desk-hit');if(interactive)return;stopCameraFollow();dragging=!e.shiftKey;rotateDragging=e.shiftKey;dragMoved=false;lastPointer={x:e.clientX,y:e.clientY};svg.setPointerCapture(e.pointerId);svg.classList.add(rotateDragging?'rotating':'dragging')};

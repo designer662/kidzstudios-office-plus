@@ -1,0 +1,52 @@
+/* V86.51 Job Management reporting model — read-only, shared semantics with KSJobs.stage. */
+(function(root){
+  'use strict';
+  const clean=v=>String(v??'').trim();
+  const amount=v=>{const n=Number(clean(v).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
+  const date=v=>{
+    if(!v)return null;
+    const raw=clean(v),dmy=raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+    let d;if(dmy){let y=Number(dmy[3]);if(y<100)y+=2000;d=new Date(y,Number(dmy[2])-1,Number(dmy[1]));
+      if(d.getFullYear()!==y||d.getMonth()!==Number(dmy[2])-1||d.getDate()!==Number(dmy[1]))return null;
+    }else if(/^\d{4}-\d\d-\d\d$/.test(raw)){
+      const[y,m,day]=raw.split('-').map(Number);d=new Date(y,m-1,day);
+      if(d.getFullYear()!==y||d.getMonth()!==m-1||d.getDate()!==day)return null;
+    }else{d=new Date(raw)}
+    return Number.isFinite(d.getTime())?d:null;
+  };
+  const stage=j=>{if(!root.KSJobs?.stage)throw Error('Job Management rules not loaded');return root.KSJobs.stage(j)};
+  const completed=j=>stage(j)==='completed'||!!date(j.actualComplete2||j.actualComplete1);
+  const overdue=(j,now=new Date())=>{
+    if(completed(j))return false;
+    const due=date(j.deliveryTime||j.due);if(!due)return false;
+    return new Date(due.getFullYear(),due.getMonth(),due.getDate()).getTime()<new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  };
+  function filtered(jobs,{year='all',month='all',stageFilter='all',query=''}={}){
+    const q=clean(query).toLowerCase();
+    return jobs.filter(j=>{
+      const d=date(j.orderDate);
+      if(year!=='all'&&(!d||d.getFullYear()!==Number(year)))return false;
+      if(month!=='all'&&(!d||d.getMonth()!==Number(month)))return false;
+      if(stageFilter!=='all'&&stage(j)!==stageFilter&&(stageFilter!=='overdue'||!overdue(j)))return false;
+      if(q&&!['jobsheetFiles','invoice','customer','item','sales','designer','supplier','productionPic','currentDepartment'].some(k=>clean(j[k]).toLowerCase().includes(q)))return false;
+      return true;
+    });
+  }
+  function summarize(jobs,now=new Date()){
+    const stages={orders:0,artwork:0,production:0,completed:0,unmapped:0};
+    let urgent=0,late=0,invoice=0,paid=0,outstanding=0,undated=0;
+    const months=Array.from({length:12},()=>0);
+    for(const j of jobs){
+      stages[stage(j)]++;if(clean(j.priority).toLowerCase()==='urgent')urgent++;
+      if(overdue(j,now))late++;
+      invoice+=amount(j.invoiceAmount);paid+=amount(j.paid);
+      // Prefer explicitly saved balance, falling back to invoice less paid.
+      outstanding+=clean(j.balance)!==''?amount(j.balance):amount(j.invoiceAmount)-amount(j.paid);
+      const d=date(j.orderDate);if(!d)undated++;else months[d.getMonth()]++;
+    }
+    return {total:jobs.length,stages,urgent,overdue:late,invoice,paid,outstanding,undated,months};
+  }
+  function years(jobs){return [...new Set(jobs.map(j=>date(j.orderDate)?.getFullYear()).filter(Boolean))].sort((a,b)=>b-a)};
+  function safeCSV(v){const raw=clean(v),safe=/^[=+@\-\t\r]/.test(raw)?"'"+raw:raw;return '"'+safe.replace(/"/g,'""')+'"'};
+  root.KSReportModel=Object.freeze({date,amount,stage,completed,overdue,filtered,summarize,years,safeCSV});
+})(typeof window!=='undefined'?window:globalThis);

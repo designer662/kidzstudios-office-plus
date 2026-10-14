@@ -29,3 +29,17 @@
 @media(min-width:701px) and (max-width:1449px){
  .ks-master-header .tool-nav{justify-content:safe center!important}
 }
+
+/* V86.51: balanced navigation, Home as branded pill; desktop widths match the map edge. */
+.ks-master-header .topbar{grid-template-columns:minmax(150px,1fr) minmax(0,max-content) minmax(150px,1fr)!important;max-width:1600px!important;gap:10px!important}
+.ks-master-header .brand{width:auto!important;max-width:100%!important;justify-self:start!important;overflow:visible!important;padding:0!important}
+.ks-master-header .ks-home-pill{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 12px;border:1px solid rgba(225,229,231,.82);border-radius:11px;background:#f8f9f9;color:#606a70;font-size:11px;font-weight:850;text-decoration:none;letter-spacing:-.025em;white-space:nowrap;transition:background .18s,border-color .18s}
+.ks-master-header .ks-home-pill svg{flex:none;color:#d86b36}
+.ks-master-header .ks-home-pill:hover,.ks-master-header .ks-home-pill.active{background:#fff1e8;border-color:rgba(239,123,69,.32);color:#c75c2b}
+.ks-master-header .tool-nav{justify-self:center!important;justify-content:safe center!important;max-width:min(100%,calc(100vw - 365px))!important}
+@media(max-width:1160px){.ks-master-header .topbar{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto!important}.ks-master-header .tool-nav{max-width:100%!important}.ks-master-header .ks-home-pill{padding:0 9px}.ks-master-header .ks-home-pill span{display:none}}
+@media(max-width:700px){.ks-master-header .brand{max-width:38px!important;width:38px!important}.ks-master-header .brand:before{content:none!important}.ks-master-header .ks-home-pill{width:35px;height:35px;padding:0;justify-content:center;border-radius:10px}.ks-master-header .ks-home-pill span{display:none!important}.ks-master-header .topbar{grid-template-columns:38px minmax(0,1fr) auto!important}}
+/* Home/map and tool pages follow the same central axis. */
+#mapShell{margin-left:clamp(8px,1vw,16px)!important;margin-right:clamp(8px,1vw,16px)!important}
+
+@media(min-width:1600px){#mapShell{width:calc(100% - 28px)!important;max-width:1600px!important;margin:0 auto 14px!important}}

@@ -133,70 +133,47 @@
     ['#todayPanel', '#livePanel'].forEach(s => { const r = $(s); if (r) mo.observe(r, { childList: true, subtree: true }); });
   }
 
-  /* ───── 4. Cinematic intro: slow zoom-in + gentle orbit, then slow auto-rotate ───── */
-  let introDone = false;
-  function runIntro() {
-    if (introDone) return;
-    introDone = true;
-    if (reduceMotion) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'ksIntro';
-    overlay.setAttribute('aria-hidden', 'true');
-    overlay.innerHTML = '<div class="vig"></div><div class="bar t"></div><div class="bar b"></div><div class="title"><b>Kidz</b>studios<small>Office Plus</small></div>';
+  /* ───── 4. Non-blocking, one-time entry animation. 3D waits must not hide controls. ───── */
+  let introDone=false;
+  function runIntro(){
+    if(introDone)return;
+    introDone=true;
+    const key='ksIntroShownV8651';
+    try{if(sessionStorage.getItem(key)==='1')return;sessionStorage.setItem(key,'1')}catch(_){}
+    if(reduceMotion)return;
+    // Do not start a camera animation until the scene is ready; never block the dashboard.
+    const overlay=document.createElement('div');overlay.id='ksIntro';overlay.setAttribute('aria-hidden','true');
+    overlay.innerHTML='<div class="vig"></div><div class="bar t"></div><div class="bar b"></div><div class="title"><b>Kidz</b>studios<small>Office Plus</small></div>';
     document.body.append(overlay);
-    html.classList.add('ks-intro');
-    setTimeout(() => { overlay.remove(); html.classList.remove('ks-intro', 'ks-intro-go'); }, 11000); // failsafe: never leave the UI hidden
-
-    const T = 5600, Z0 = 0.7, Z1 = 1.12, A0 = -1.0, A1 = 0;
-    const applied = new WeakMap();
-    let aborted = false, raf = 0, t0 = 0, revealed = false;
-
-    const reveal = () => {
-      if (revealed) return; revealed = true;
+    let closed=false,raf=0;
+    const done=()=>{
+      if(closed)return;closed=true;cancelAnimationFrame(raf);
       overlay.classList.add('go');
-      html.classList.add('ks-intro-go');
-      setTimeout(() => overlay.remove(), 2200);
-      setTimeout(() => html.classList.remove('ks-intro', 'ks-intro-go'), 2600);
+      setTimeout(()=>overlay.remove(),360);
+      removeEventListener('pointerdown',done,true);
+      removeEventListener('keydown',done,true);
+      removeEventListener('wheel',done,true);
+      document.documentElement.classList.remove('ks-intro','ks-intro-go');
     };
-    const finish = userAborted => {
-      cancelAnimationFrame(raf);
-      removeEventListener('pointerdown', onUser, true);
-      removeEventListener('wheel', onUser, true);
-      removeEventListener('keydown', onUser, true);
-      reveal();
-    };
-    const onUser = e => {
-      if (e.target?.closest?.('#ks-auth-gate')) return;
-      aborted = true; finish(true);
-    };
-    addEventListener('pointerdown', onUser, true);
-    addEventListener('wheel', onUser, { capture: true, passive: true });
-    addEventListener('keydown', onUser, true);
-
-    const ease = t => 1 - Math.pow(1 - t, 3);
-    const frame = now => {
-      if (aborted) return;
-      if (!t0) t0 = now;
-      const t = Math.min(1, (now - t0) / T), e = ease(t);
-      const c = window.office3d;
-      if (c) {
-        let s = applied.get(c);
-        if (!s) { s = { z: 1, a: 0 }; applied.set(c, s); }
-        const tz = Z0 + (Z1 - Z0) * e, ta = A0 + (A1 - A0) * e;
-        if (Math.abs(tz / s.z - 1) > 1e-4) { c.zoomBy(tz / s.z); s.z = tz; }
-        if (Math.abs(ta - s.a) > 1e-5) { c.rotateBy(ta - s.a); s.a = ta; }
+    // Dismiss quickly and safely, even if 3D fails or the user interacts.
+    addEventListener('pointerdown',done,true);addEventListener('keydown',done,true);
+    addEventListener('wheel',done,{capture:true,passive:true});
+    setTimeout(done,1700);
+    const start=performance.now();
+    function move(now){
+      if(closed)return;
+      const scene=window.office3d;
+      if(scene&&typeof scene.zoomBy==='function'&&typeof scene.rotateBy==='function'){
+        // A tiny overview movement only; avoid modifying staff or AI navigation state.
+        const ease=Math.max(0,Math.min(1,(now-start)/1500));
+        const wave=(1-Math.cos(ease*Math.PI))/2;
+        if(!move.last)move.last=0;
+        const diff=wave-move.last;move.last=wave;
+        if(diff>0){scene.zoomBy(1+diff*0.055);scene.rotateBy(diff*0.11)}
       }
-      if (!revealed && t > 0.12) reveal();
-      if (t < 1) raf = requestAnimationFrame(frame); else finish(false);
-    };
-    // The 3D scene appears a moment after sign-in; start the camera move when it exists (max 6s wait).
-    const started = performance.now();
-    (function wait(now) {
-      if (aborted) return;
-      if (window.office3d || (now || performance.now()) - started > 6000) raf = requestAnimationFrame(frame);
-      else requestAnimationFrame(wait);
-    })();
+      raf=requestAnimationFrame(move);
+    }
+    raf=requestAnimationFrame(move);
   }
 
   /* ───── boot ───── */

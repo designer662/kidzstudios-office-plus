@@ -30,16 +30,27 @@
   function resetTempUser(){return writeTempUser(browserId)}
   window.KSTempUser={get:readTempUser,set:writeTempUser,reset:resetTempUser,browserId};
 
-  const tools=[...header.querySelectorAll('.tool-nav-btn')];
   const path=(location.pathname.split('/').pop()||'index.html').toLowerCase();
-  const activeMap={
-    'job-management.html':'job-management.html','pricelist-calculator.html':'pricelist-calculator.html','markup-calculator.html':'markup-calculator.html',
-    'orderform1.html':'orderform1.html','orderform2.html':'orderform2.html','commission.html':'commission.html',
-    'file-name-generator.html':'file-name-generator.html','files-compress.html':'files-compress.html'
-  };
-  tools.forEach(a=>{const href=(a.getAttribute('href')||'').split('#')[0].toLowerCase();const active=activeMap[path]===href;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  const nav=header.querySelector('.tool-nav');
   const brand=header.querySelector('.brand');
-  if(brand){brand.setAttribute('role','link');brand.setAttribute('tabindex','0');brand.setAttribute('title','Open Office Dashboard');const go=()=>{if(path!=='index.html'&&path!=='')location.href='index.html'};brand.addEventListener('click',go);brand.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})}
+  const homeIcon='<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>';
+  if(brand){
+    // Brand is a real home link rather than a click handler on a non-interactive div.
+    brand.textContent='';
+    const home=document.createElement('a'); home.href='index.html';home.className='ks-home-pill';
+    home.innerHTML=homeIcon+'<span>Kidzstudios Office</span>';
+    home.setAttribute('aria-label','Kidzstudios Office — Home');
+    if(path==='index.html'){home.classList.add('active');home.setAttribute('aria-current','page')}
+    brand.appendChild(home);
+  }
+  if(nav&&!nav.querySelector('a[href="report.html"]')){
+    const report=document.createElement('a');report.href='report.html';report.className='tool-nav-btn';report.dataset.tool='Reports';
+    report.innerHTML='<span class="nav-tool-icon" aria-hidden="true">▥</span><span>Reports</span>';
+    const job=nav.querySelector('a[href="job-management.html"]');
+    if(job)job.after(report);else nav.prepend(report);
+  }
+  const tools=[...header.querySelectorAll('.tool-nav-btn')];
+  tools.forEach(a=>{const href=(a.getAttribute('href')||'').split('#')[0].toLowerCase();const active=path===href;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
 
   // Browser-local operator identity. This is deliberately NOT a login/account and is never stored as a shared profile.
   const style=document.createElement('style');style.id='ks-temp-user-style';style.textContent=`
@@ -79,102 +90,85 @@
   async function loadStaffSuggestions(){if(!tempSuggestions)return;try{const r=await fetch('/api/state?scope=office%3Astaff',{cache:'no-store',headers:{accept:'application/json'}});if(!r.ok)return;const row=await r.json(),list=Array.isArray(row?.payload?.staff)?row.payload.staff:Array.isArray(row?.payload?.records)?row.payload.records:[];const names=[...new Set(list.map(x=>String(x?.name||'').trim()).filter(Boolean))].slice(0,10);const dl=tempModal.querySelector('#tempUserStaffList');if(dl)dl.innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');tempSuggestions.innerHTML=names.slice(0,6).map(n=>`<button type="button" class="temp-user-suggestion" data-temp-name="${esc(n)}">${esc(n)}</button>`).join('')}catch(_){}}
   updateTempUserUI();
 
-  // Tool pages: ONLY shared Supabase office events, not browser-local UI messages.
-  // Realtime table changes trigger an immediate refresh; polling is a fallback.
-  // Dashboard keeps its own richer notification controller.
-  if(!document.getElementById('officeSvg')){
-    const btn=header.querySelector('#notificationBtn');
-    const panel=header.querySelector('#notificationPanel');
-    const nlist=header.querySelector('#notificationList');
-    const badge=header.querySelector('#notificationUnread');
-    const clear=header.querySelector('#notificationClearBtn');
-    const subheading=panel?.querySelector('.notification-panel-head span');
-    if(subheading)subheading.textContent='Shared live · Supabase';
-    const KEY_SEEN='ksHeaderSeenEvent';
-    const KEY_CLEARED='ksHeaderClearedThrough';
-    const readNumber=key=>{try{return Math.max(0,Number(localStorage.getItem(key)||0)||0)}catch(_){return 0}};
-    const saveNumber=(key,value)=>{try{localStorage.setItem(key,String(value))}catch(_){}};
-    let events=[],seen=readNumber(KEY_SEEN),cleared=readNumber(KEY_CLEARED);
-    let lastSoundEventId=null,loading=false,needsRefresh=false,lastFetch=0;
-    const timeAgo=value=>{const t=new Date(value).getTime();if(!Number.isFinite(t))return'';const s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return'now';if(s<3600)return`${Math.floor(s/60)}m`;if(s<86400)return`${Math.floor(s/3600)}h`;return`${Math.floor(s/86400)}d`};
-    const clock=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'--:--':d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})};
-    const actorFor=event=>String(event?.metadata?.actor?.name||'').trim();
-    const validSharedEvent=event=>Number.isSafeInteger(Number(event?.id))&&Number(event.id)>0&&Boolean(event?.eventType||event?.title);
-    const draw=()=>{
-      if(!nlist)return;
-      const displayed=events.filter(event=>(Number(event.id)||0)>cleared);
-      nlist.innerHTML=displayed.length?[...displayed].reverse().slice(0,10).map(event=>{
-        const actor=actorFor(event);
-        return `<div class="notification-item"><b>${esc(event.title||'Office update')}</b><span>${esc(event.message||'')}${actor?` · by ${esc(actor)}`:''}</span><time>${esc(clock(event.createdAt))} · ${esc(timeAgo(event.createdAt))}</time></div>`;
-      }).join(''):'<div class="notification-empty">No new shared office updates.</div>';
-      const unread=displayed.filter(event=>Number(event.id)>seen).length;
-      if(badge){badge.textContent=String(Math.min(99,unread));badge.hidden=!unread;}
-      btn?.classList.toggle('has-unread',unread>0);
-    };
-    async function pull(){
-      if(loading){needsRefresh=true;return;}
-      loading=true;
-      try{
-        const res=await fetch('/api/events?limit=40',{cache:'no-store',headers:{accept:'application/json'}});
-        if(!res.ok)throw new Error('Shared events unavailable');
-        const data=await res.json();
-        const next=Array.isArray(data.events)?data.events.filter(validSharedEvent):[];
-        const maxId=next.reduce((max,event)=>Math.max(max,Number(event.id)||0),0);
-        // Initial response is historical baseline, so never ring on page load.
-        if(lastSoundEventId===null){
-          lastSoundEventId=maxId;
-          if(!seen){seen=maxId;saveNumber(KEY_SEEN,seen);}
-        }else if(maxId>lastSoundEventId){
-          const fresh=next.filter(event=>Number(event.id)>lastSoundEventId&&
-            Number(event.id)>cleared&&Date.now()-new Date(event.createdAt||0).getTime()<120000);
-          if(!document.hidden&&fresh.length){
-            window.KSNotificationSound?.play(fresh.some(event=>event.eventType==='chat_message')?'chat_message':'update');
-          }
-          lastSoundEventId=maxId;
-        }
-        events=next;
-        lastFetch=Date.now();
-        draw();
-      }catch(_){
-        if(lastSoundEventId===null&&nlist)nlist.innerHTML='<div class="notification-empty">Shared notifications unavailable. Reconnecting…</div>';
-      }finally{
-        loading=false;
-        if(needsRefresh){needsRefresh=false;pull();}
-      }
-    }
-    btn?.addEventListener('click',event=>{
-      event.stopPropagation();
-      const open=!panel.classList.contains('open');
-      panel.classList.toggle('open',open);
-      panel.setAttribute('aria-hidden',String(!open));
-      btn.setAttribute('aria-expanded',String(open));
-      if(open){
-        seen=Math.max(seen,...events.map(event=>Number(event.id)||0));
-        saveNumber(KEY_SEEN,seen);draw();
-        if(Date.now()-lastFetch>3000)pull();
-      }
-    });
-    clear?.addEventListener('click',event=>{
-      event.stopPropagation();
-      // Clears this browser's view, never deletes the shared Supabase event log.
-      cleared=Math.max(cleared,...events.map(event=>Number(event.id)||0));
-      seen=Math.max(seen,cleared);
-      saveNumber(KEY_CLEARED,cleared);saveNumber(KEY_SEEN,seen);
-      draw();
-    });
-    document.addEventListener('pointerdown',event=>{
-      if(panel?.classList.contains('open')&&!header.querySelector('.notification-wrap')?.contains(event.target)){
-        panel.classList.remove('open');panel.setAttribute('aria-hidden','true');btn?.setAttribute('aria-expanded','false');
-      }
-    });
-    // Supabase-bridge dispatches only for actual database table changes.
-    window.addEventListener('ks:supabase-change',event=>{
-      if(event.detail?.table==='ks_office_events'&&!document.hidden)pull();
-    });
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
-    window.addEventListener('focus',()=>{if(Date.now()-lastFetch>5000)pull()});
-    pull();
-    setInterval(()=>{if(!document.hidden)pull()},15000);
+  // One notification controller for ALL HTML pages, including the dashboard.
+  // Feed: authenticated Supabase events; seen/clear state: browser localStorage.
+  // Never mix in browser-only activity or temporary user UI messages.
+  const btn=header.querySelector('#notificationBtn');
+  const panel=header.querySelector('#notificationPanel');
+  const nlist=header.querySelector('#notificationList');
+  const badge=header.querySelector('#notificationUnread');
+  const clear=header.querySelector('#notificationClearBtn');
+  const subheading=panel?.querySelector('.notification-panel-head span');
+  if(subheading)subheading.textContent='Shared office updates';
+  const KEY_SEEN='ksSharedEventSeenV2',KEY_CLEARED='ksSharedEventClearedV2';
+  const readNumber=key=>{try{return Math.max(0,Number(localStorage.getItem(key)||0)||0)}catch(_){return 0}};
+  const saveNumber=(key,value)=>{try{localStorage.setItem(key,String(value))}catch(_){}};
+  let events=[],seen=readNumber(KEY_SEEN),cleared=readNumber(KEY_CLEARED);
+  let baselineId=null,loading=false,needsRefresh=false,lastFetch=0,active=true,open=false;
+  const clock=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'--:--':d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})};
+  const timeAgo=value=>{const t=new Date(value).getTime();if(!Number.isFinite(t))return'';const s=Math.max(0,Math.floor((Date.now()-t)/1000));return s<60?'now':s<3600?`${Math.floor(s/60)}m`:s<86400?`${Math.floor(s/3600)}h`:`${Math.floor(s/86400)}d`};
+  const validEvent=event=>Number.isSafeInteger(Number(event?.id))&&Number(event.id)>0&&Boolean(event?.eventType||event?.title);
+  const latest=()=>events.reduce((max,event)=>Math.max(max,Number(event.id)||0),0);
+  function draw(){
+    if(!nlist)return;
+    const displayed=events.filter(event=>Number(event.id)>cleared);
+    nlist.innerHTML=displayed.length?[...displayed].reverse().slice(0,30).map(event=>{
+      const actor=String(event?.metadata?.actor?.name||'').trim();
+      return `<div class="notification-item"><b>${esc(event.title||'Office update')}</b><span>${esc(event.message||'')}${actor?` · by ${esc(actor)}`:''}</span><time>${esc(clock(event.createdAt))} · ${esc(timeAgo(event.createdAt))}</time></div>`;
+    }).join(''):'<div class="notification-empty">No new shared office updates.</div>';
+    const unread=displayed.filter(event=>Number(event.id)>seen).length;
+    if(badge){badge.textContent=String(Math.min(99,unread));badge.hidden=!unread}
+    btn?.classList.toggle('has-unread',unread>0);
   }
-
+  function setOpen(value){
+    open=Boolean(value);panel?.classList.toggle('open',open);
+    panel?.setAttribute('aria-hidden',String(!open));btn?.setAttribute('aria-expanded',String(open));
+    if(open){seen=Math.max(seen,latest());saveNumber(KEY_SEEN,seen);draw();if(Date.now()-lastFetch>2500)pull()}
+  }
+  async function pull(){
+    if(!active)return;
+    if(loading){needsRefresh=true;return}
+    loading=true;
+    try{
+      const res=await fetch('/api/events?limit=100',{cache:'no-store',headers:{accept:'application/json'}});
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      const next=Array.isArray(data.events)?data.events.filter(validEvent):[];
+      const maxId=next.reduce((max,event)=>Math.max(max,Number(event.id)||0),0);
+      if(baselineId===null){
+        // A newly opened page must not ring for its historical feed.
+        baselineId=maxId;
+        if(!seen){seen=maxId;saveNumber(KEY_SEEN,seen)}
+      }else if(maxId>baselineId){
+        const recent=next.filter(event=>Number(event.id)>baselineId&&Number(event.id)>cleared&&Date.now()-new Date(event.createdAt||0).getTime()<120000);
+        if(recent.length&&!document.hidden)window.KSNotificationSound?.play(recent.some(event=>event.eventType==='chat_message')?'chat_message':'update');
+        baselineId=maxId;
+      }
+      // Event ids are ascending monotonically; keep the snapshot consistent on every page.
+      events=next;lastFetch=Date.now();
+      if(open){seen=Math.max(seen,maxId);saveNumber(KEY_SEEN,seen)}
+      draw();
+    }catch(_){
+      if(baselineId===null&&nlist)nlist.innerHTML='<div class="notification-empty">Shared notifications unavailable. Reconnecting…</div>';
+    }finally{loading=false;if(needsRefresh){needsRefresh=false;pull()}}
+  }
+  btn?.addEventListener('click',event=>{event.stopPropagation();setOpen(!open)});
+  clear?.addEventListener('click',event=>{
+    event.stopPropagation();cleared=Math.max(cleared,latest());seen=Math.max(seen,cleared);
+    saveNumber(KEY_CLEARED,cleared);saveNumber(KEY_SEEN,seen);draw();
+  });
+  document.addEventListener('pointerdown',event=>{if(open&&!header.querySelector('.notification-wrap')?.contains(event.target))setOpen(false)});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&open)setOpen(false)});
+  window.addEventListener('storage',event=>{
+    if(event.key===KEY_SEEN||event.key===KEY_CLEARED){seen=readNumber(KEY_SEEN);cleared=readNumber(KEY_CLEARED);draw()}
+  });
+  window.addEventListener('ks:supabase-change',event=>{if(event.detail?.table==='ks_office_events'&&!document.hidden)pull()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
+  window.addEventListener('focus',()=>{if(Date.now()-lastFetch>5000)pull()});
+  window.addEventListener('pagehide',()=>{active=false},{once:true});
+  window.KSSharedNotifications=Object.freeze({setOpen,refresh:pull});
+  pull();
+  setInterval(()=>{if(!document.hidden)pull()},15000);
+  if(location.hash==='#notifications')setTimeout(()=>setOpen(true),150);
+  window.addEventListener('hashchange',()=>{if(location.hash==='#notifications')setOpen(true)});
 })();

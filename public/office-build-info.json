@@ -1,7 +1,7 @@
 {
-  "release": "86.50",
-  "edition": "Office Plus · Jarvis Dedicated Workstations",
-  "package": "V86.50: unique physical worktables, exclusive staff desk allocation, showroom standing overflow, AI home migration",
+  "release": "86.51",
+  "edition": "Office Plus · Jarvis Office Reports",
+  "package": "V86.51: opening, shared notifications, Job Management reports, centered nav pills; existing classic desks and smart AI preserved",
   "modules": [
     "office-geometry-guard.js",
     "office-workstations.js",
