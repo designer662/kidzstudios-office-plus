@@ -1,0 +1,67 @@
+/* Index header parity: override historical dashboard header CSS only.
+   Source of truth for dimensions: suite-header-minimal.css used by Job Management.
+   Do not load this file on any other page. */
+body.ks-dashboard .ks-master-header{
+  padding:8px clamp(10px,1.4vw,24px)!important;
+  margin:0!important;width:100%!important;max-width:none!important;
+}
+body.ks-dashboard .ks-master-header .topbar{
+  display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;
+  grid-template-rows:44px!important;align-items:center!important;
+  gap:clamp(9px,1vw,20px)!important;
+  min-height:54px!important;height:auto!important;
+  max-width:none!important;width:100%!important;padding:5px 9px!important;
+  border-radius:15px!important;
+}
+body.ks-dashboard .ks-master-header .brand{
+  width:auto!important;min-width:0!important;max-width:none!important;
+  margin:0!important;padding:0!important;overflow:visible!important;
+}
+body.ks-dashboard .ks-master-header .ks-home-pill{min-height:36px!important;padding:0 12px!important}
+body.ks-dashboard .ks-master-header .tool-nav{
+  grid-column:2!important;grid-row:1!important;
+  padding:3px 0!important;gap:3px!important;
+  min-width:0!important;max-width:100%!important;
+  justify-content:safe center!important;
+}
+body.ks-dashboard .ks-master-header .tool-nav-btn{
+  height:35px!important;padding:0 10px!important;font-size:10.5px!important;gap:5px!important;
+}
+body.ks-dashboard .ks-master-header .header-tools{
+  grid-column:3!important;grid-row:1!important;gap:6px!important;
+  align-items:center!important;min-width:0!important;margin:0!important;padding:0!important;
+}
+@media(max-width:1280px){
+  body.ks-dashboard .ks-master-header .topbar{
+    grid-template-columns:minmax(0,1fr) max-content!important;
+    grid-template-rows:38px 40px!important;
+    row-gap:3px!important;
+  }
+  body.ks-dashboard .ks-master-header .brand{grid-column:1!important;grid-row:1!important}
+  body.ks-dashboard .ks-master-header .header-tools{grid-column:2!important;grid-row:1!important}
+  body.ks-dashboard .ks-master-header .tool-nav{
+    grid-column:1/-1!important;grid-row:2!important;justify-content:flex-start!important;
+  }
+}
+@media(max-width:700px){
+  body.ks-dashboard .ks-master-header{padding:6px!important}
+  body.ks-dashboard .ks-master-header .topbar{
+    grid-template-rows:36px 37px!important;gap:3px!important;
+    padding:6px!important;border-radius:12px!important;
+  }
+  body.ks-dashboard .ks-master-header .brand{width:auto!important;max-width:100%!important}
+  body.ks-dashboard .ks-master-header .ks-home-pill{
+    width:auto!important;max-width:calc(100vw - 140px)!important;
+    min-height:33px!important;padding:0 9px!important;
+  }
+  body.ks-dashboard .ks-master-header .brand .ks-home-pill span{
+    display:inline!important;max-width:140px!important;
+  }
+  body.ks-dashboard .ks-master-header .tool-nav{padding:1px 0!important}
+  body.ks-dashboard .ks-master-header .tool-nav-btn{height:33px!important;padding:0 9px!important;font-size:10px!important}
+  body.ks-dashboard .ks-master-header .header-tools{gap:4px!important}
+}
+@media(max-width:395px){
+  body.ks-dashboard .ks-master-header .ks-home-pill span{max-width:100px!important}
+  body.ks-dashboard .ks-master-header .tool-nav-btn{padding:0 8px!important}
+}

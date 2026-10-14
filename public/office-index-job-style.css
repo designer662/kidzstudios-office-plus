@@ -11,31 +11,6 @@ body.ks-dashboard{
 body.ks-dashboard #mapShell{
   background:linear-gradient(145deg,#fbfbfa 0%,#f4f4f1 68%,#f2f2ef 100%)!important;
 }
-/* A small jobs-style title inside the full-viewport simulator, not an extra page row. */
-body.ks-dashboard .ks-home-intro{
-  position:absolute;z-index:12;top:68px;left:clamp(12px,1.2vw,22px);
-  width:max-content;max-width:min(370px,calc(100% - 440px));
-  padding:13px 15px 12px;
-  border:1px solid var(--ks-home-line);border-radius:var(--ks-home-radius);
-  background:rgba(255,255,255,.94);
-  box-shadow:0 6px 24px rgba(36,42,46,.045);
-  color:#262b2e;
-  pointer-events:auto;
-}
-body.ks-dashboard .ks-home-intro .ks-home-eyebrow{
-  display:block;color:#d36a37;font-size:10px;font-weight:850;
-  line-height:1.3;letter-spacing:.11em;text-transform:uppercase;
-}
-body.ks-dashboard .ks-home-intro .ks-home-intro-row{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:3px}
-body.ks-dashboard .ks-home-intro h1{margin:0;font-size:21px;line-height:1.15;font-weight:850;letter-spacing:-.055em;white-space:nowrap}
-body.ks-dashboard .ks-home-intro p{margin:5px 0 0;color:#888f93;font-size:10.5px;line-height:1.4}
-body.ks-dashboard .ks-home-intro .ks-home-jobs-link{
-  display:inline-flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap;
-  color:#c76537;background:var(--ks-home-orange-soft);border:1px solid #f6d9c7;
-  padding:7px 9px;border-radius:9px;font-size:10px;font-weight:800;
-}
-body.ks-dashboard .ks-home-intro .ks-home-jobs-link:hover{background:#ffe5d6;border-color:#eeba9a}
-body.ks-dashboard .ks-home-intro .ks-home-jobs-link:focus-visible{outline:2px solid #df784b;outline-offset:2px}
 /* Operations and activity use the same flat surfaces, borders, radii and type rhythm as Jobs. */
 body.ks-dashboard #todayPanel,
 body.ks-dashboard #livePanel{
@@ -131,14 +106,11 @@ body.ks-dashboard #livePanel .stats-strip .stat-num{font-size:19px;color:#283035
 body.ks-dashboard #livePanel .feed-item{border-radius:9px}
 body.ks-dashboard :is(#todayPanel,#livePanel) :is(button,a):focus-visible{outline:2px solid #df794c;outline-offset:2px}
 @media(max-width:1150px){
-  body.ks-dashboard .ks-home-intro{max-width:300px;top:64px;padding:11px 12px}
-  body.ks-dashboard .ks-home-intro h1{font-size:18px}
   body.ks-dashboard #todayPanel:not(.expanded){width:310px!important;padding:12px!important}
   body.ks-dashboard #livePanel{width:325px!important}
 }
 @media(max-width:760px){
   /* Keep the responsive scene usable rather than piling cards over the characters. */
-  body.ks-dashboard .ks-home-intro{display:none!important}
   body.ks-dashboard #todayPanel:not(.expanded){width:min(285px,calc(100vw - 18px))!important;padding:11px!important}
   body.ks-dashboard #todayPanel .ops-head{padding-bottom:9px;margin-bottom:9px}
   body.ks-dashboard #todayPanel .ops-head strong{font-size:16px}
@@ -159,4 +131,3 @@ body.ks-dashboard :is(#todayPanel,#livePanel) :is(button,a):focus-visible{outlin
   body.ks-dashboard #livePanel .stats-strip .stat{padding:7px 5px;min-height:55px}
   body.ks-dashboard #livePanel .stats-strip .stat-label{font-size:8px}
 }
-@media(prefers-reduced-motion:reduce){body.ks-dashboard .ks-home-intro *{transition:none!important}}

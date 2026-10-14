@@ -1,0 +1,105 @@
+/* V86.53.2: index-only Live Activity redesign. All other pages and data unchanged. */
+body.ks-dashboard #livePanel{
+  --feed-line:#e9eae8;
+  --feed-ink:#283035;
+  --feed-muted:#858e94;
+  --feed-accent:#eb7541;
+  cursor:default;
+}
+body.ks-dashboard #livePanel .live-panel-heading{
+  min-height:42px;display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding-bottom:12px;margin-bottom:0;border-bottom:1px solid var(--feed-line);
+}
+body.ks-dashboard #livePanel .live-heading-identity{display:flex;align-items:center;min-width:0;gap:10px}
+body.ks-dashboard #livePanel .live-heading-mark{
+  width:36px;height:36px;display:grid;place-items:center;flex:none;
+  border:1px solid #f7dcca;border-radius:12px;background:#fff3eb;color:#ce6939;
+}
+body.ks-dashboard #livePanel .live-heading-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+body.ks-dashboard #livePanel .live-eyebrow{font:800 9px/1.2 Inter,system-ui,sans-serif;color:#c96b41;letter-spacing:.10em}
+body.ks-dashboard #livePanel .live-heading-copy .panel-title{font:850 15px/1.15 Inter,system-ui,sans-serif;letter-spacing:-.035em;color:var(--feed-ink)}
+body.ks-dashboard #livePanel .panel-actions{display:flex;gap:4px;align-items:center;flex:none}
+body.ks-dashboard #livePanel .panel-control-btn{width:27px;height:27px;min-width:27px;border-radius:8px;font-size:12px;display:grid;place-items:center}
+body.ks-dashboard #livePanel .panel-control-btn:focus-visible,
+body.ks-dashboard #livePanel .live-feed-filter:focus-visible{outline:2px solid var(--feed-accent);outline-offset:2px}
+body.ks-dashboard #livePanel .live-panel-body{max-height:min(550px,calc(100dvh - 205px));overflow:hidden;min-width:0}
+body.ks-dashboard #livePanel .live-status-bar{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:11px 0 10px}
+body.ks-dashboard #livePanel .live-state{display:inline-flex;align-items:center;gap:7px;min-width:0;font:750 10.5px/1.25 Inter,system-ui,sans-serif;color:#5f6b68}
+body.ks-dashboard #livePanel .live-state .pulse-dot{width:7px;height:7px;flex:none}
+body.ks-dashboard #livePanel .live-presence-slot{display:flex;align-items:center;justify-content:flex-end;min-width:0}
+body.ks-dashboard #livePanel .ks-online-users{
+  display:inline-flex;align-items:center;gap:7px;min-height:27px;
+  border:1px solid #e8ece9;border-radius:9px;padding:4px 9px;
+  background:#f7faf8;color:#67756e;font:750 10.5px/1.2 Inter,system-ui,sans-serif;
+}
+body.ks-dashboard #livePanel .ks-online-label{display:inline!important}
+body.ks-dashboard #livePanel .ks-online-users strong{color:#34463a;font-size:12px}
+body.ks-dashboard #livePanel .live-section-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px}
+body.ks-dashboard #livePanel .live-section-heading span{font:800 10.5px/1.2 Inter,system-ui,sans-serif;color:var(--feed-ink)}
+body.ks-dashboard #livePanel .live-section-heading small{font:650 9.5px/1.2 Inter,system-ui,sans-serif;color:var(--feed-muted)}
+body.ks-dashboard #livePanel .stats-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 13px;padding:0;border:0}
+body.ks-dashboard #livePanel .stats-strip .stat{
+  min-width:0;min-height:62px;display:flex;flex-direction:column;justify-content:center;gap:4px;
+  padding:9px 7px!important;background:#f8f9f8;border:1px solid #eeefed;border-radius:11px;
+  transition:border-color .2s,background .2s;
+}
+body.ks-dashboard #livePanel .stats-strip .stat:hover{background:#f5f7f5;border-color:#dfe5df}
+body.ks-dashboard #livePanel .stats-strip .stat-num{display:block;font:850 19px/1 Inter,system-ui,sans-serif;color:var(--feed-ink);letter-spacing:-.04em}
+body.ks-dashboard #livePanel .stats-strip .stat-label{display:block;font:700 9px/1.25 Inter,system-ui,sans-serif;color:var(--feed-muted);margin:0;white-space:normal}
+body.ks-dashboard #livePanel .live-feed-toolbar{display:flex;justify-content:space-between;align-items:center;gap:5px;padding:10px 0 9px;border-top:1px solid var(--feed-line)}
+body.ks-dashboard #livePanel .live-feed-filters{display:inline-flex;gap:3px;align-items:center;padding:3px;border:1px solid #ecedeb;border-radius:10px;background:#f5f6f5;min-width:0}
+body.ks-dashboard #livePanel .live-feed-filter{appearance:none;border:1px solid transparent;background:transparent;color:#81888d;border-radius:7px;padding:6px 11px;min-height:27px;font:800 10px/1 Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+body.ks-dashboard #livePanel .live-feed-filter:hover{color:#c56332}
+body.ks-dashboard #livePanel .live-feed-filter.active{border-color:#f7d9c8;background:#fff;color:#c26332;box-shadow:0 1px 3px rgba(30,35,35,.045)}
+body.ks-dashboard #livePanel .live-feed-count{flex:none;color:var(--feed-muted);font:700 9.5px/1 Inter,system-ui,sans-serif;white-space:nowrap}
+body.ks-dashboard #livePanel .activity-list{display:grid;gap:3px;max-height:min(238px,28dvh);overflow-y:auto;overscroll-behavior:contain;padding:0 3px 1px 0;scrollbar-width:thin;scrollbar-color:#d9dcda transparent}
+body.ks-dashboard #livePanel .feed-item{position:relative;display:grid;grid-template-columns:31px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 5px 9px 8px;border-radius:10px;background:transparent;border:1px solid transparent;min-height:52px;transition:background .15s,border-color .15s;transform:none}
+body.ks-dashboard #livePanel .feed-item+.feed-item{border-top-color:#f0f1ef}
+body.ks-dashboard #livePanel .feed-item:hover{background:#fafaf9;border-color:#f0e9e4;transform:none}
+body.ks-dashboard #livePanel .feed-avatar{width:31px;height:31px;border:1px solid #e8ece9;border-radius:10px;background:#f1f4f2;color:#587a68;font-size:14px;font-weight:800}
+body.ks-dashboard #livePanel .feed-category-jobs .feed-avatar{background:#fff3e9;border-color:#fbe2d1;color:#cc7644}
+body.ks-dashboard #livePanel .feed-category-other .feed-avatar{background:#f4f3fa;border-color:#e8e7f2;color:#797392}
+body.ks-dashboard #livePanel .feed-copy{min-width:0}
+body.ks-dashboard #livePanel .feed-title-row{display:flex;gap:5px;align-items:center;min-width:0}
+body.ks-dashboard #livePanel .feed-copy b{color:#384045;font:800 10.5px/1.25 Inter,system-ui,sans-serif;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.ks-dashboard #livePanel .feed-copy span{color:#8b9294;font:650 9.5px/1.4 Inter,system-ui,sans-serif;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.ks-dashboard #livePanel .feed-title-row em{font:800 8px/1.2 Inter,system-ui,sans-serif;letter-spacing:.035em;border-radius:5px;background:#fff5ed;padding:3px 5px;color:#c96b40}
+body.ks-dashboard #livePanel .feed-time{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+body.ks-dashboard #livePanel .feed-time b{font:800 9.5px/1 Inter,system-ui,sans-serif;color:#6e767b}
+body.ks-dashboard #livePanel .feed-time small{font:650 8.5px/1 Inter,system-ui,sans-serif;color:#a3a9ab}
+body.ks-dashboard #livePanel .feed-system{opacity:.9}
+body.ks-dashboard #livePanel .live-feed-empty{min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;border:1px dashed #e8eae6;border-radius:11px;background:#fbfbfa;color:#818c8b}
+body.ks-dashboard #livePanel .live-feed-empty>span{font-size:19px;color:#d2aa93}
+body.ks-dashboard #livePanel .live-feed-empty b{font-size:11px;color:#475250}
+body.ks-dashboard #livePanel .live-feed-empty small{font-size:9.5px}
+body.ks-dashboard #livePanel.collapsed .live-panel-body{max-height:0!important;opacity:0;overflow:hidden;padding:0;margin:0}
+body.ks-dashboard #livePanel.collapsed .live-panel-heading{padding-bottom:0;border-bottom:0}
+body.ks-dashboard #livePanel.expanded .live-panel-body{max-height:calc(70dvh - 80px);overflow:auto}
+body.ks-dashboard #livePanel.expanded .activity-list{max-height:min(420px,45dvh)}
+/* Keep expand / maximize / collapse functional despite older index width overrides. */
+body.ks-dashboard #livePanel.expanded:not(.maximized){width:min(530px,calc(100% - 26px))!important;max-width:none!important}
+body.ks-dashboard #livePanel.collapsed:not(.expanded){width:min(270px,calc(100% - 24px))!important}
+body.ks-dashboard #livePanel.maximized{
+  display:flex;flex-direction:column;left:12px!important;right:12px!important;bottom:12px!important;
+  width:calc(100% - 24px)!important;max-width:none!important;height:calc(100% - 24px)!important;
+  max-height:none!important;z-index:65!important;
+}
+body.ks-dashboard #livePanel.maximized .live-panel-body{max-height:calc(100dvh - 180px)}
+body.ks-dashboard #livePanel.maximized .activity-list{max-height:none;overflow-y:auto}
+@media(max-width:920px){
+  body.ks-dashboard.ks-sheet-live #livePanel{max-height:min(72dvh,calc(100dvh - 110px))!important;overflow:auto!important}
+  body.ks-dashboard.ks-sheet-live #livePanel.maximized{top:8px!important;bottom:calc(var(--nav-h,64px) + 8px)!important;left:8px!important;right:8px!important;width:auto!important;height:auto!important;max-height:none!important}
+  body.ks-dashboard #livePanel .live-panel-body{max-height:none}
+  body.ks-dashboard #livePanel .activity-list{max-height:min(240px,25dvh)}
+}
+@media(max-width:650px){
+  body.ks-dashboard.ks-sheet-live #livePanel{width:auto!important;max-width:none!important;left:8px!important;right:8px!important;padding:12px!important}
+  body.ks-dashboard #livePanel .live-heading-mark{width:33px;height:33px}
+  body.ks-dashboard #livePanel .live-heading-copy .panel-title{font-size:14px}
+  body.ks-dashboard #livePanel .live-feed-filter{padding:6px 9px}
+  body.ks-dashboard #livePanel .feed-title-row em{display:none}
+  body.ks-dashboard #livePanel .stats-strip{gap:5px}
+  body.ks-dashboard #livePanel .stats-strip .stat{min-height:56px;padding:7px 5px!important}
+  body.ks-dashboard #livePanel .stats-strip .stat-label{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){body.ks-dashboard #livePanel *{animation:none!important;transition:none!important}}
