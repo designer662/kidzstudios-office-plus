@@ -1,0 +1,162 @@
+/* Index dashboard visual system: adapted from Job Management's compact dashboard.
+   Strictly scoped to index.html. Never load this file on other pages.
+   Keep all existing dashboard controls, simulator state and data handlers intact. */
+body.ks-dashboard{
+  --ks-home-line:#e7e8e7;
+  --ks-home-muted:#8b9295;
+  --ks-home-orange:#ed7440;
+  --ks-home-orange-soft:#fff2eb;
+  --ks-home-radius:16px;
+}
+body.ks-dashboard #mapShell{
+  background:linear-gradient(145deg,#fbfbfa 0%,#f4f4f1 68%,#f2f2ef 100%)!important;
+}
+/* A small jobs-style title inside the full-viewport simulator, not an extra page row. */
+body.ks-dashboard .ks-home-intro{
+  position:absolute;z-index:12;top:68px;left:clamp(12px,1.2vw,22px);
+  width:max-content;max-width:min(370px,calc(100% - 440px));
+  padding:13px 15px 12px;
+  border:1px solid var(--ks-home-line);border-radius:var(--ks-home-radius);
+  background:rgba(255,255,255,.94);
+  box-shadow:0 6px 24px rgba(36,42,46,.045);
+  color:#262b2e;
+  pointer-events:auto;
+}
+body.ks-dashboard .ks-home-intro .ks-home-eyebrow{
+  display:block;color:#d36a37;font-size:10px;font-weight:850;
+  line-height:1.3;letter-spacing:.11em;text-transform:uppercase;
+}
+body.ks-dashboard .ks-home-intro .ks-home-intro-row{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:3px}
+body.ks-dashboard .ks-home-intro h1{margin:0;font-size:21px;line-height:1.15;font-weight:850;letter-spacing:-.055em;white-space:nowrap}
+body.ks-dashboard .ks-home-intro p{margin:5px 0 0;color:#888f93;font-size:10.5px;line-height:1.4}
+body.ks-dashboard .ks-home-intro .ks-home-jobs-link{
+  display:inline-flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap;
+  color:#c76537;background:var(--ks-home-orange-soft);border:1px solid #f6d9c7;
+  padding:7px 9px;border-radius:9px;font-size:10px;font-weight:800;
+}
+body.ks-dashboard .ks-home-intro .ks-home-jobs-link:hover{background:#ffe5d6;border-color:#eeba9a}
+body.ks-dashboard .ks-home-intro .ks-home-jobs-link:focus-visible{outline:2px solid #df784b;outline-offset:2px}
+/* Operations and activity use the same flat surfaces, borders, radii and type rhythm as Jobs. */
+body.ks-dashboard #todayPanel,
+body.ks-dashboard #livePanel{
+  background:rgba(255,255,255,.98)!important;
+  border:1px solid var(--ks-home-line)!important;
+  border-radius:18px!important;
+  box-shadow:0 9px 28px rgba(31,35,38,.07)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body.ks-dashboard #todayPanel:not(.expanded){width:clamp(326px,26vw,390px)!important;max-height:calc(100% - 26px)!important;padding:16px!important}
+body.ks-dashboard #todayPanel.expanded{padding:18px!important}
+body.ks-dashboard #todayPanel .ops-head{
+  align-items:center;margin-bottom:13px;padding-bottom:12px;
+  border-bottom:1px solid #ededeb;
+}
+body.ks-dashboard #todayPanel .today-kicker{color:#d56d39!important;font-weight:850;letter-spacing:.1em;font-size:10px}
+body.ks-dashboard #todayPanel .ops-head strong{font-size:19px;font-weight:850;letter-spacing:-.055em;margin-top:3px;color:#272c30}
+body.ks-dashboard #todayPanel .ops-source button{
+  width:30px;height:30px;border-radius:9px;border-color:#e7e9e8;background:#fff;
+}
+body.ks-dashboard #todayPanel .ops-source button:hover{transform:none;background:#fff1e8}
+body.ks-dashboard #todayPanel .ops-tabs{
+  grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;
+  background:#f6f6f5;border:1px solid #eceeea;border-radius:12px;
+  padding:4px;margin-bottom:12px;
+}
+body.ks-dashboard #todayPanel .ops-tab{min-width:0;height:34px;border:1px solid transparent;border-radius:9px;font-size:10.5px;font-weight:760;color:#6b7479}
+body.ks-dashboard #todayPanel .ops-tab.active{
+  background:var(--ks-home-orange-soft);border-color:#f6d3bb;
+  color:#cf602c;box-shadow:none;
+}
+body.ks-dashboard #todayPanel .ops-tab:focus-visible{outline:2px solid #de7a49;outline-offset:1px}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-metric{
+  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;
+  gap:8px!important;min-height:53px!important;padding:10px 11px!important;
+  border:1px solid var(--ks-home-line)!important;border-radius:12px!important;
+  background:#fff!important;box-shadow:none!important;
+  text-align:left!important;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-metric:before{display:none!important}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-metric:hover{
+  transform:none!important;border-color:#f1bf9d!important;background:#fffaf7!important;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-label{
+  order:1!important;min-width:0;margin:0!important;color:#838b90!important;
+  font-size:10px!important;font-weight:800!important;letter-spacing:.035em;
+  text-transform:uppercase;line-height:1.25;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-number{
+  order:2!important;flex:none;margin:0!important;
+  color:#2d3437;font-size:21px!important;line-height:1!important;font-weight:850!important;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .danger .today-number{color:#d34b4b!important}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .good .today-number{color:#39a270!important}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .ks-pulse-attention{
+  grid-column:1/-1!important;min-height:48px!important;
+  border-color:#efd6c5!important;background:#fffbf8!important;
+}
+body.ks-dashboard #todayPanel .ks-pulse-main-metrics .ks-pulse-attention .today-number{color:#be673c!important}
+body.ks-dashboard #todayPanel .ks-pulse-section-line{
+  margin:14px 0 8px;padding-top:12px;border-top:1px solid #f0f0ee;
+  color:#454a4c;font-size:11px;font-weight:850;
+}
+body.ks-dashboard #todayPanel .ks-pulse-section-line a{font-size:10px;color:#cb693b;font-weight:800}
+body.ks-dashboard #todayPanel .ks-priority-row{border-color:#e9eae8;border-radius:10px;box-shadow:none}
+body.ks-dashboard #todayPanel .ks-pulse-extra{background:#fafaf9;border-color:#e8e8e5}
+body.ks-dashboard #todayPanel .ks-pulse-data-status{border-radius:9px}
+body.ks-dashboard #livePanel{width:clamp(320px,26vw,390px)!important;max-width:calc(100% - 24px)!important;padding:14px 15px!important}
+body.ks-dashboard #livePanel .panel-kicker{
+  display:flex;align-items:center;gap:8px;padding-bottom:10px;margin-bottom:10px;
+  border-bottom:1px solid #eeeeec;
+}
+body.ks-dashboard #livePanel .panel-title{color:#292e32;font-size:13px;font-weight:850;letter-spacing:-.02em}
+body.ks-dashboard #livePanel .panel-control-btn{
+  border:1px solid #e8eae9;background:#fff;border-radius:8px;box-shadow:none;
+}
+body.ks-dashboard #livePanel .panel-control-btn:hover{background:#fff2ec;color:#bd6438}
+body.ks-dashboard #livePanel .stats-strip{
+  margin-top:9px;padding-top:0;border-top:0;gap:6px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+body.ks-dashboard #livePanel .stats-strip .stat{
+  min-width:0;display:flex;flex-direction:column-reverse;
+  justify-content:space-between;gap:4px;min-height:59px;
+  padding:9px 8px;border:1px solid #e8e8e6;border-radius:10px;background:#fff;
+}
+body.ks-dashboard #livePanel .stats-strip .stat-label{margin:0;line-height:1.25;font-size:9px;font-weight:750;color:#8a9296}
+body.ks-dashboard #livePanel .stats-strip .stat-num{font-size:19px;color:#283035;line-height:1.1;font-weight:850}
+body.ks-dashboard #livePanel .feed-item{border-radius:9px}
+body.ks-dashboard :is(#todayPanel,#livePanel) :is(button,a):focus-visible{outline:2px solid #df794c;outline-offset:2px}
+@media(max-width:1150px){
+  body.ks-dashboard .ks-home-intro{max-width:300px;top:64px;padding:11px 12px}
+  body.ks-dashboard .ks-home-intro h1{font-size:18px}
+  body.ks-dashboard #todayPanel:not(.expanded){width:310px!important;padding:12px!important}
+  body.ks-dashboard #livePanel{width:325px!important}
+}
+@media(max-width:760px){
+  /* Keep the responsive scene usable rather than piling cards over the characters. */
+  body.ks-dashboard .ks-home-intro{display:none!important}
+  body.ks-dashboard #todayPanel:not(.expanded){width:min(285px,calc(100vw - 18px))!important;padding:11px!important}
+  body.ks-dashboard #todayPanel .ops-head{padding-bottom:9px;margin-bottom:9px}
+  body.ks-dashboard #todayPanel .ops-head strong{font-size:16px}
+  body.ks-dashboard #todayPanel .ops-tab{font-size:10px;height:31px}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-metric{min-height:45px!important;padding:8px!important}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-label{font-size:9px!important}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-number{font-size:18px!important}
+  body.ks-dashboard #livePanel{width:min(325px,calc(100vw - 18px))!important;padding:10px 11px!important}
+}
+@media(max-width:420px){
+  body.ks-dashboard #todayPanel:not(.expanded){width:min(235px,calc(100vw - 18px))!important}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics{gap:4px}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-metric{flex-direction:column!important;justify-content:center!important;gap:4px!important}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-label{font-size:8px!important}
+  body.ks-dashboard #todayPanel .ks-pulse-main-metrics .today-number{font-size:16px!important}
+  body.ks-dashboard #livePanel{width:min(280px,calc(100vw - 18px))!important}
+  body.ks-dashboard #livePanel .stats-strip{gap:4px}
+  body.ks-dashboard #livePanel .stats-strip .stat{padding:7px 5px;min-height:55px}
+  body.ks-dashboard #livePanel .stats-strip .stat-label{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){body.ks-dashboard .ks-home-intro *{transition:none!important}}
