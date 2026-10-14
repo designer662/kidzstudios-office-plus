@@ -54,7 +54,7 @@ assert.equal(guard.canExitFurnitureStart(wallFrom,world(2,35),SCALE),false,'Stru
 assert.equal(guard.canExitFurnitureStart(start,world(13,50),SCALE),false,'Recovery cannot cross a structural partition');
 const site=src('public/index.html');
 assert(site.includes('office-geometry-guard.js?v=86.39'),'Cache-bust furniture-safe navigation guard');
-assert(site.includes('office-movement-sync.js?v=86.39'),'Cache-bust updated scheduler');
+assert(site.includes('office-movement-sync.js?v=86.44'),'Cache-bust updated scheduler');
 assert(site.includes('office-3d.js?v=86.39'),'Cache-bust recompiled 3D navigation when deployed');
 assert(src('scripts/stability-suite.mjs').includes('test-v86-39-staff-mobility.mjs'),'Add regression to strict CI suite');
 console.log('PASS V86.39 mobility: long-idle goal selection, capacity safety, furniture-start escape, wall protection, 3D follower recovery, and CI wiring.');

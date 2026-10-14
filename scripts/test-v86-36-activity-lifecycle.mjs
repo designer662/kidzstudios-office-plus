@@ -94,6 +94,6 @@ assert.equal(timeline.phaseAt(second,now+100).phase,'waiting');
 const manifest=read('scripts/stability-suite.mjs');
 const page=read('public/index.html');
 assert(manifest.includes('test-v86-36-activity-lifecycle.mjs'),'Regression test must run in CI');
-assert(page.includes('office-movement-sync.js?v=86.39'),'Updated lifecycle must be cache-busted');
+assert(page.includes('office-movement-sync.js?v=86.44'),'Updated lifecycle must be cache-busted');
 assert(page.includes('office-furniture-interactions.js?v=86.36'));
 console.log('PASS V86.36 lifecycle: deterministic phases, arrival-only interaction, finished reservation release, valid schema, active-scene safety, retry recovery, accessible feedback and CI wiring.');

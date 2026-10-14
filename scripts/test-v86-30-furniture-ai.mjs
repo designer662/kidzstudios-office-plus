@@ -11,7 +11,7 @@ const bridge=get('source/src/suite-bridge.ts');
 const character=get('source/src/office-character.ts');
 const workflow=get('.github/workflows/deploy-pages.yml');
 assert(html.includes('office-furniture-interactions.js?v=86.36'));
-assert(html.indexOf('office-furniture-interactions.js?v=86.36')<html.indexOf('office-movement-sync.js?v=86.39'));
+assert(html.indexOf('office-furniture-interactions.js?v=86.36')<html.indexOf('office-movement-sync.js?v=86.44'));
 assert(html.includes('office-3d.js?v=86.39'));
 const w={};
 vm.runInNewContext(geometry,{window:w},{filename:'office-geometry-guard.js'});

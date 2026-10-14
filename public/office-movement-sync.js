@@ -1,10 +1,11 @@
-/* Office Plus V86.29: Shared collision-safe movement + autonomous Smart AI activities.
+/* Office Plus V86.44: Recoverable shared collision-safe Smart AI movement.
  * Uses existing authenticated /api/state endpoint + ks_shared_state realtime signals.
  * No per-frame network writes and no changes to local camera controls.
  */
 (()=>{
   'use strict';
   const SCOPE='office:movement:v1';
+  const ENGINE_REVISION=2, STALL_LIMIT_MS=180000, FORCE_WALK_AFTER_MS=115000;
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
   // Office floor-plan units: roughly two units per world-space metre.
   const MIN_STAFF_GAP=1.85, MIN_PARKED_DESK_GAP=1.45, CHECK_MS=140, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
@@ -27,7 +28,7 @@
   // All reservations are committed by the timeline leader and replayed by viewers.
   const ZONE_CAPACITY=Object.freeze({corridor:2,pantry:2,store:2,prayer:2,'toilet-a':1,'toilet-b':1,showroom:3});
   const BREAK_COOLDOWN_MS=90000, REPEAT_ZONE_MS=150000;
-  const WALK_OPPORTUNITY_MS=115000; // At least attempt a walk periodically, including after business hours.
+  const WALK_OPPORTUNITY_MS=FORCE_WALK_AFTER_MS; // At least attempt a walk periodically, including after business hours.
   const WALK_RETRY_MS=9000;
 
   const homeFor=e=>['boss','staff','showroom'].includes(e?.homeRoom)?e.homeRoom:'staff';
@@ -92,7 +93,7 @@
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
     const work=living?.workFor(e)||'typing';
-    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0,ai:smart?.memory(null,now)};
+    return {id:Number(e.id),x:clamp(x,0,23),y:clamp(y,0,70),room:e.visualRoomId||e.roomId||'staff',action:work,jobKey:living?.jobKey(e)||'',socialAt:0,nextAt:now+8000+Number(e.id)*1200+Math.random()*11000,lastWalkAt:now-(Number(e.id)%4)*16000,failedRoutes:0,waitingSince:0,walk:null,lastTripZone:null,lastTripAt:0,lastBreakAt:0,ai:smart?.memory(null,now)};
   }
   function validStaff(a){
     return Array.isArray(a)&&a.length<=100&&a.every(s=>(!s.ai||(
@@ -120,7 +121,87 @@
     )));
   }
   function validPayload(p){return p&&p.schema===1&&typeof p.owner==='string'&&Number.isFinite(Number(p.leaseUntil))&&validStaff(p.staff)}
-  function seed(now){return {schema:1,owner:id,leaseUntil:now+LEASE_MS,updatedAt:now,staff:livePeople().map(e=>staffBase(e,now))}}
+  function seed(now){return {schema:1,aiEngineVersion:ENGINE_REVISION,owner:id,leaseUntil:now+LEASE_MS,updatedAt:now,staff:livePeople().map(e=>staffBase(e,now))}}
+  // Rebuild SIMULATION coordinates from the real roster desks, never a stale
+  // visualX / visualRoomId inherited from an old server movement timeline.
+  function homeBase(e,now){
+    const fresh={...e,visualX:Number.isFinite(+e.deskX)?+e.deskX:e.x,
+      visualY:Number.isFinite(+e.deskY)?+e.deskY:e.y,visualRoomId:homeFor(e)};
+    const s=staffBase(fresh,now);
+    s.room=homeFor(e);s.walk=null;s.scene=null;
+    s.nextAt=now+1200+Number(e.id)*300;
+    s.lastWalkAt=now-WALK_OPPORTUNITY_MS-20000;
+    return s;
+  }
+  // Reset only the movement/AI timeline. Never change the staff roster, jobs,
+  // personal appearance, salary records or any other Supabase scope.
+  function rebuildStaff(snapshot,ids,now){
+    const directory=new Map(livePeople().map(e=>[Number(e.id),e]));
+    let changed=false;
+    snapshot.staff=snapshot.staff.map(s=>{
+      const employee=directory.get(Number(s.id));
+      if(!employee||!ids.has(Number(s.id)))return s;
+      changed=true;return homeBase(employee,now);
+    });
+    for(const employee of directory.values()){
+      if(ids.has(Number(employee.id))&&!snapshot.staff.some(s=>Number(s.id)===Number(employee.id))){
+        snapshot.staff.push(homeBase(employee,now));changed=true;
+      }
+    }
+    if(changed)snapshot.aiEngineVersion=ENGINE_REVISION;
+    return changed;
+  }
+  function priorityStaffIds(){
+    const byName=livePeople().filter(e=>/^(afiq|boss)$/i.test(String(e.name||'').trim())).map(e=>Number(e.id));
+    return new Set(byName);
+  }
+  function repairStaleTimeline(snapshot,now){
+    let changed=false;
+    // One-time migration from V86.43: reset Afiq and Boss' movement memory,
+    // without altering any colleagues' state. If the names were customized,
+    // the other state is preserved rather than guessing an identity.
+    if(Number(snapshot.aiEngineVersion||0)<ENGINE_REVISION&&priorityStaffIds().size){
+      changed=rebuildStaff(snapshot,priorityStaffIds(),now)||changed;
+      snapshot.aiEngineVersion=ENGINE_REVISION;changed=true;
+    }
+    const workers=new Map(livePeople().map(e=>[Number(e.id),e]));
+    for(const s of snapshot.staff){
+      // A narrow doorway can become cyclically blocked by other idle avatars.
+      // After several unsuccessful reservations, perform one authoritative
+      // re-seating at the worker's OWN assigned desk (never mid-walk). This is
+      // an explicit AI state recovery, not a physical route through a wall.
+      const failed=Number(s.failedRoutes)||0,waitingSince=Number(s.waitingSince)||0;
+      const employee=workers.get(Number(s.id));
+      if(employee&&!s.walk&&s.action==='waiting'&&failed>=6&&
+        waitingSince>0&&now-waitingSince>=35000&&
+        now-(Number(s.lastRecoveredAt)||0)>=120000){
+        const attempts=Math.min(100,(Number(s.recoveryCount)||0)+1);
+        Object.assign(s,homeBase(employee,now),{
+          lastRecoveredAt:now,recoveryCount:attempts,lastWalkAt:now,
+          nextAt:now+16000+Number(s.id)*400,
+          scene:{kind:'activity',text:'↩ Reconnected to workstation',from:now,until:now+4500}
+        });
+        changed=true;continue;
+      }
+      if(s.walk&&(s.walk.startedAt>now+MAX_DEPARTURE_WAIT_MS+20000||
+        s.walk.endAt>now+STALL_LIMIT_MS||s.walk.endAt<s.walk.startedAt)){
+        // An impossible/future reservation must not hold a character forever.
+        // Keep the last committed safe position and let the planner retry.
+        s.walk=null;s.scene=null;s.action='waiting';s.nextAt=now+500;
+        s.waitingSince=now;s.failedRoutes=0;changed=true;
+      }
+      if(!s.walk&&s.nextAt>now+STALL_LIMIT_MS){
+        s.nextAt=now+500;s.scene=null;changed=true;
+      }
+      if(!s.walk&&s.action==='waiting'&&Number.isFinite(+s.waitingSince)&&
+        s.waitingSince>0&&now-s.waitingSince>STALL_LIMIT_MS){
+        // Preserve location; do not teleport through furniture or office walls.
+        s.failedRoutes=0;s.waitingSince=0;s.nextAt=now+300;
+        s.lastWalkAt=now-WALK_OPPORTUNITY_MS-20000;changed=true;
+      }
+    }
+    return changed;
+  }
   function movementAt(s,now){
     const w=s.walk;
     const scene=s.scene&&now>=s.scene.from&&now<s.scene.until?s.scene:null;
@@ -383,13 +464,18 @@
       }
       return detours;
     }
-    const candidates=[requested];
+    const failed=Number(s.failedRoutes)||0;
+    // After repeated failed reservations don't insist on exactly the same
+    // busy fixture/doorway. Prefer a free corridor before retrying the goal.
+    const candidates=failed>=2?[]:[requested];
+    if(failed>=2&&zoneHasSpace(snapshot,s,'corridor')&&home!=='corridor')
+      candidates.push({zone:'corridor',action:'chat',kind:'roam',reason:'🚶 Finding an alternate clear route'});
     if(smart){
       const preferred=smart.decide(employee,s,snapshot,now,{
         hasWork:!!living?.jobKey(employee),available:zone=>zoneHasSpace(snapshot,s,zone)
       });
       for(const goal of preferred.candidates||[]){
-        if(goal.zone!==home&&!candidates.some(c=>c.zone===goal.zone)&&zoneHasSpace(snapshot,s,goal.zone))candidates.push(goal);
+        if(goal.zone!==home&&!candidates.some(c=>c.zone===goal.zone)&&zoneHasSpace(snapshot,s,goal.zone)&&!(failed>=2&&goal.zone===requested.zone))candidates.push(goal);
       }
     }
     const order=home==='showroom'?['corridor','pantry','store','prayer']:
@@ -402,10 +488,12 @@
       candidates.push({zone,action:zone==='pantry'?'drink':zone==='store'?'stocking':
         zone==='prayer'?'reading':zone==='showroom'?'meeting':'chat',kind:'roam'});
     }
+    if(failed>=2&&!candidates.some(c=>c.zone===requested.zone))candidates.push(requested);
     return candidates;
   }
   function evolve(snapshot,now){
     let changed=reconciled(snapshot,now);
+    changed=repairStaleTimeline(snapshot,now)||changed;
     const people=new Map(livePeople().map(p=>[Number(p.id),p]));
     // React only when genuine job/workload data changes, not to guessed jobs.
     for(const s of snapshot.staff){
@@ -448,6 +536,7 @@
       const work=living?.workFor(employee)||'typing';
       if(intent.zone===((['boss','staff','showroom'].includes(employee.homeRoom))?employee.homeRoom:'staff')&&s.room===intent.zone&&!furniture?.forIntent(intent,employee)){
         // Desk / idle animation changes without moving the character through furniture.
+        s.failedRoutes=0;s.waitingSince=0;
         s.action=intent.action==='typing'?'pc-work':intent.action||work;
         if(intent.kind==='meeting')s.scene={kind:'meeting',text:'🗓 Planning at the project desk',from:now,until:now+12500};
         if(smart){
@@ -488,8 +577,12 @@
       if(!walked){
         uiWaitUntil=now+2000;furniture?.status?.('waiting');
         s.action='waiting'; // Schema-1 action field doubles as follower-visible retry state.
-        s.nextAt=now+WALK_RETRY_MS+Math.random()*3000;changed=true;continue;
+        s.failedRoutes=Math.min(12,Number(s.failedRoutes||0)+1);
+        if(!s.waitingSince)s.waitingSince=now;
+        s.nextAt=now+(s.failedRoutes>=3?4500:WALK_RETRY_MS)+Math.random()*1600;
+        changed=true;continue;
       }
+      s.failedRoutes=0;s.waitingSince=0;
       s.lastTripZone=selectedIntent.zone;s.lastTripAt=now;
       if(smart)smart.record(s,selectedIntent,now);
       if(selectedIntent.kind==='break')s.lastBreakAt=now;
@@ -528,6 +621,19 @@
     state=clone(row.payload);version=nextVersion;
     leader=state.owner===id&&state.leaseUntil>Date.now();
     beginAnimation();return true;
+  }
+  async function resetSmartAI(requestedIds){
+    if(!authorized||stopped)return {ok:false,message:'Sign in to reset Smart AI'};
+    if(writing||reading)return {ok:false,message:'AI is syncing. Please try again'};
+    await refresh();
+    if(!state)return {ok:false,message:'Shared AI timeline unavailable. Try again online'};
+    const ids=requestedIds==='all'?new Set(livePeople().map(e=>Number(e.id))):priorityStaffIds();
+    if(!ids.size)return {ok:false,message:'Afiq/Boss not found in the staff roster'};
+    const next=clone(state),now=Date.now();
+    if(!rebuildStaff(next,ids,now))return {ok:false,message:'Staff timeline not available'};
+    const ok=await save(next,version);
+    return {ok,message:ok?'Movement restarted for '+(requestedIds==='all'?'all staff':'Afiq and Boss'):
+      'Reset was not saved. Retry after synchronization'};
   }
   async function save(payload,expectedVersion){
     if(writing||!authorized||stopped)return false;
@@ -589,6 +695,14 @@
     if(refreshTimer)clearInterval(refreshTimer);if(heartbeatTimer)clearInterval(heartbeatTimer);
     if(signalTimer)clearTimeout(signalTimer);if(frame!==null)cancelAnimationFrame(frame);
   }
+  // Explicit reset from the dashboard. The expectedVersion compare-and-swap
+  // prevents stale browsers from overwriting another leader's movement plan.
+  window.addEventListener('ks:smart-ai-reset-request',async event=>{
+    let outcome;
+    try{outcome=await resetSmartAI(event.detail?.target==='all'?'all':'priority')}
+    catch{outcome={ok:false,message:'Unable to reset Smart AI while offline'}}
+    window.dispatchEvent(new CustomEvent('ks:smart-ai-reset-result',{detail:outcome}));
+  });
   window.addEventListener('ks:auth-ready',start);
   window.addEventListener('ks:supabase-change',event=>{
     if(event.detail?.table==='ks_shared_state')queueRefresh(220);
@@ -600,5 +714,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,headingAt,phaseAt,validPayload,chooseSmartIntent,movementOpportunity,routeHasClearance,alternateIntents,evolve};
+  window.OfficeMovementTimeline={movementAt,headingAt,phaseAt,validPayload,chooseSmartIntent,movementOpportunity,routeHasClearance,alternateIntents,evolve,repairStaleTimeline,rebuildStaff,resetSmartAI};
 })();

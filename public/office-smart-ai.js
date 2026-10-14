@@ -1,4 +1,4 @@
-/* KIDZSTUDIOS Office Plus V86.29: deterministic, furniture/route-aware autonomous staff decisions.
+/* KIDZSTUDIOS Office Plus V86.44: deterministic, furniture/route-aware autonomous staff decisions.
  * Goal-based SIMULATION, not an LLM or a judgement about actual employee behaviour.
  * Only the elected movement leader calls decide/record; followers replay shared actions.
  */
@@ -132,8 +132,34 @@
   const parent=host.parentElement;
   if(typeof getComputedStyle==='function'&&getComputedStyle(parent).position==='static')parent.style.position='relative';
   parent.appendChild(label);
+  const controls=document.createElement('div');controls.id='ksSmartAIControls';
+  controls.style.cssText='position:absolute;bottom:42px;left:12px;z-index:9;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 24px);';
+  for(const [target,caption] of [['priority','Reset Afiq/Boss'],['all','Reset All AI']]){
+   const button=document.createElement('button');button.type='button';
+   button.textContent=caption;button.dataset.target=target;
+   button.setAttribute('aria-label',caption+' movement simulation');
+   button.style.cssText='border:1px solid #b9d8cb;border-radius:9px;padding:5px 8px;background:#fff;color:#225a47;cursor:pointer;font:600 11px system-ui,sans-serif;box-shadow:0 2px 8px #0001';
+   button.addEventListener('click',()=>{
+    if(target==='all'&&!window.confirm('Reset movement and AI activity for ALL staff? Job records and staff profiles will remain unchanged.'))return;
+    for(const btn of controls.querySelectorAll('button'))btn.disabled=true;
+    label.textContent='🧠 Resetting Smart AI…';
+    window.dispatchEvent(new CustomEvent('ks:smart-ai-reset-request',{detail:{target}}));
+   });
+   controls.appendChild(button);
+  }
+  const notice=document.createElement('span');notice.id='ksSmartAIResetMessage';
+  notice.style.cssText='font:600 11px/1.4 system-ui,sans-serif;color:#225a47;background:#fffffff5;padding:5px 8px;border:1px solid #b9d8cb;border-radius:8px;display:none';
+  controls.appendChild(notice);
+  parent.appendChild(controls);
+  let noticeTimeout;
+  window.addEventListener('ks:smart-ai-reset-result',event=>{
+   for(const btn of controls.querySelectorAll('button'))btn.disabled=false;
+   const message=(event.detail?.ok?'✅ ':'⚠️ ')+(event.detail?.message||'Smart AI reset finished');
+   label.textContent=message;notice.textContent=message;notice.style.display='inline-block';
+   clearTimeout(noticeTimeout);noticeTimeout=setTimeout(()=>{notice.style.display='none'},8000);
+  });
   window.OfficeFurnitureInteractions?.status?.('loading');
  }
- window.OfficeSmartAI={version:'86.29',roleFor,memory,evolved,decide,record,initUI};
+ window.OfficeSmartAI={version:'86.44',roleFor,memory,evolved,decide,record,initUI};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initUI,{once:true});else initUI();
 })();

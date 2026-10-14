@@ -1,7 +1,7 @@
 {
-  "release": "86.43",
-  "edition": "Office Plus · Audit, Debug & Optimization",
-  "package": "V86.43: login retry safety, sync polling efficiency, 3D O(1) label/staff lookups, unload safeguards",
+  "release": "86.44",
+  "edition": "Office Plus · Smart AI Movement Recovery",
+  "package": "V86.44: Boss/Afiq Smart AI state rebuild, CAS-scoped reset, deadlock recovery and fair route retries",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
@@ -23,5 +23,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "Runtime sync uses optimistic version checks, preserves inflight edits, prompts on conflicts and prevents HTML injection; 3D must be rebuilt in CI and production backend smoke-tested before rollout."
+  "check": "Shared Smart AI recovery uses versioned optimistic writes without modifying staff/jobs. Production 3D build and real browser/WebGL plus Supabase smoke tests are still required before rollout."
 }

@@ -63,7 +63,23 @@ try{
   await page.evaluate(()=>{testStaff.find(p=>p.id===2).appearance={model:'semi-casual',glasses:true};});
   await page.waitForFunction(()=>office3d.getDiagnostics().staff.filter(p=>p.phase==='seated').length===6,null,{timeout:45000});
   assert.equal(await page.evaluate(()=>KSOfficeSeating.chairs.length),11);
+  // V86.44 production gate: verify the *actual WebGL avatars* for Afiq and
+  // Boss can stand up and advance toward navigable shared timeline targets.
+  const origin=await page.evaluate(()=>Object.fromEntries(office3d.getDiagnostics().staff
+    .filter(p=>p.id===1||p.id===3).map(p=>[p.id,p.root])));
+  await page.evaluate(()=>{
+    for(const person of testStaff){
+      const destination=person.id===1?[16.0,44.6]:person.id===3?[18.0,17.5]:null;
+      if(!destination)continue;
+      person.visualX=destination[0];person.visualY=destination[1];
+      person.motionWalking=true;person.motionAction='walking';
+    }
+  });
+  await page.waitForFunction(positions=>[1,3].every(id=>{
+    const current=office3d.getDiagnostics().staff.find(p=>p.id===id)?.root;
+    return current&&Math.hypot(current.x-positions[id].x,current.z-positions[id].z)>.20;
+  }),origin,{timeout:30000});
   assert.deepEqual(errors,[],'No initialization or animation errors');
   if(process.env.SIM_SCREENSHOT_DIR){mkdirSync(process.env.SIM_SCREENSHOT_DIR,{recursive:true});await page.evaluate(()=>{office3d.setRotating(false);office3d.focusPerson(3);});await page.waitForTimeout(2000);await page.screenshot({path:path.join(process.env.SIM_SCREENSHOT_DIR,'office-v86-22.png')});}
-  console.log('PASS V86.22 WebGL: actual live roster, six correct seats, two standing staff, strict pause, rise-before-walk, no departure snap, return-to-seat, wheel zoom, appearance rebuild, zero runtime errors.');
+  console.log('PASS V86.22 WebGL: actual live roster, six correct seats, two standing staff, strict pause, rise-before-walk, no departure snap, return-to-seat, wheel zoom, appearance rebuild, Boss/Afiq walking, zero runtime errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

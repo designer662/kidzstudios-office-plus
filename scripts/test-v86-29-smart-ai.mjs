@@ -5,7 +5,7 @@ const brainSource=readFileSync('public/office-smart-ai.js','utf8');
 const syncSource=readFileSync('public/office-movement-sync.js','utf8');
 const page=readFileSync('public/index.html','utf8');
 const workflow=readFileSync('.github/workflows/deploy-pages.yml','utf8');
-assert(page.indexOf('office-smart-ai.js?v=86.29')<page.indexOf('office-movement-sync.js?v=86.39')&&page.includes('office-smart-ai.js?v=86.29'),'The decision engine must be available before timeline initialization');
+assert(page.indexOf('office-smart-ai.js?v=86.44')<page.indexOf('office-movement-sync.js?v=86.44')&&page.includes('office-smart-ai.js?v=86.44'),'The decision engine must be available before timeline initialization');
 const stabilityManifest=readFileSync('scripts/stability-suite.mjs','utf8');
 assert(workflow.includes('node scripts/run-stability-suite.mjs'), 'CI must execute the strict simulator suite');
 assert(stabilityManifest.includes('test-v86-29-smart-ai.mjs'), 'CI must guard autonomous behavior through the simulator suite');
@@ -14,7 +14,7 @@ const fakeDocument={readyState:'loading',addEventListener(){}};
 const shared={};
 vm.runInNewContext(brainSource,{window:shared,document:fakeDocument,Math,Date,Number,String,Object,Set}, {filename:'office-smart-ai.js'});
 const ai=shared.OfficeSmartAI;
-assert.equal(ai.version,'86.29');
+assert.equal(ai.version,'86.44');
 const now=1_800_000_000_000;
 const people=[
   {id:1,homeRoom:'boss',position:'Managing Director'},
