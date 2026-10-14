@@ -9,6 +9,23 @@ export function followSceneTarget(rig,dt,geometry,scale=1.5){
   if(distance<1e-6)return;
   let waypoint=target;
   if(!geometry.worldClear(position,target,scale)){
+    // A legitimate seated start can be inside a worktop's padded collision
+    // rectangle. A* rejects such a start, freezing the 3D avatar forever even
+    // though its shared 2D route is valid. Follow small, wall-safe exit steps
+    // only while the shared timeline explicitly says the worker is walking.
+    if(rig.person.status==='walking'&&geometry.canExitFurnitureStart?.(position,target,scale)){
+      const dx=target.x-position.x,dz=target.z-position.z;
+      const gap=Math.hypot(dx,dz),step=Math.min(Math.max(0,dt),.05);
+      const travel=Math.min(gap*(1-Math.exp(-30*step)),2.8*step);
+      if(gap>0&&travel>0){
+        const next={x:position.x+dx/gap*travel,z:position.z+dz/gap*travel};
+        if(geometry.canExitFurnitureStart(position,next,scale)){
+          position.x=next.x;position.z=next.z;rig.routeRecovery=null;
+          rig.targetRotation=Math.atan2(dx,dz);
+          return;
+        }
+      }
+    }
     let recovery=rig.routeRecovery;
     if(!recovery||Math.hypot(recovery.x-target.x,recovery.z-target.z)>.65){
       const points=geometry.findWorldPath(position,target,scale);

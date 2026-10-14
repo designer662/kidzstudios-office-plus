@@ -79,6 +79,44 @@
   }
   return true;
  }
+ // Escape only a furniture-covered *starting point* (for example a desk
+ // chair). The leader still supplies the route; this does not generate a new
+ // path, bypass a partition, or accept an arbitrary target through furniture.
+ function canExitFurnitureStart(from,to,scale=1.5){
+  if(!from||!to||!Number.isFinite(scale)||scale<=0)return false;
+  const a=worldToPlan(from,scale),b=worldToPlan(to,scale);
+  if(![a.x,a.y,b.x,b.y].every(Number.isFinite)||
+      !pointInFloor(a.x,a.y)||!pointInFloor(b.x,b.y)||
+      blocked(a.x,a.y)||blocked(b.x,b.y)||!navBlocked(a.x,a.y)||
+      !clearLine(a,b)||Math.hypot(a.x-b.x,a.y-b.y)<.0001)return false;
+  const bounds=o=>({l:o.x-.3,r:o.x+o.w+.3,t:o.y-.3,b:o.y+o.h+.3});
+  const inside=(p,r)=>p.x>=r.l&&p.x<=r.r&&p.y>=r.t&&p.y<=r.b;
+  const crosses=(p,q,r)=>{
+   let lo=0,hi=1;
+   for(const [start,delta,min,max] of [[p.x,q.x-p.x,r.l,r.r],[p.y,q.y-p.y,r.t,r.b]]){
+    if(Math.abs(delta)<1e-12){if(start<min||start>max)return false;}
+    else{const u=(min-start)/delta,v=(max-start)/delta;lo=Math.max(lo,Math.min(u,v));hi=Math.min(hi,Math.max(u,v));if(lo>hi)return false;}
+   }
+   return true;
+  };
+  let escaping=false;
+  for(const obstacle of obstacles){
+   const rect=bounds(obstacle);
+   if(!inside(a,rect)){
+    // Never enter a second worktop while leaving the first one.
+    if(crosses(a,b,rect))return false;
+    continue;
+   }
+   // The target must move toward an exit boundary, not deeper into the
+   // worktop or sideways. Allow incremental progress while still obstructed.
+   const dx=b.x-a.x,dy=b.y-a.y;
+   const exitTime=p=>Math.min(dx>0?(rect.r-p.x)/dx:dx<0?(p.x-rect.l)/-dx:Infinity,
+                              dy>0?(rect.b-p.y)/dy:dy<0?(p.y-rect.t)/-dy:Infinity);
+   if(inside(b,rect)&&!(exitTime(b)<exitTime(a)-1e-8))return false;
+   escaping=true;
+  }
+  return escaping;
+ }
  function worldToPlan(p,scale=1.5){return toPlan(p.x/scale,p.z/scale);}
  function planToWorld(p,scale=1.5){return {x:(p.x/2-SX)*scale,z:(p.y/2-SZ)*scale};}
  function worldClear(a,b,scale=1.5){return navClearLine(worldToPlan(a,scale),worldToPlan(b,scale));}
@@ -121,7 +159,7 @@
   return result;
  }
  const API=Object.freeze({walls,footprint,obstacles,blocked,clearLine,pointInFloor,constrainWorldSegment,toPlan,
-  navBlocked,navClearLine,worldToPlan,planToWorld,worldClear,findWorldPath});
+  navBlocked,navClearLine,canExitFurnitureStart,worldToPlan,planToWorld,worldClear,findWorldPath});
  root.KSOfficeGeometry=API;
  if(typeof module==='object'&&module.exports)module.exports=API;
 })(typeof window!=='undefined'?window:globalThis);

@@ -7,7 +7,7 @@
   const SCOPE='office:movement:v1';
   const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
   // Office floor-plan units: roughly two units per world-space metre.
-  const MIN_STAFF_GAP=1.85, CHECK_MS=140, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
+  const MIN_STAFF_GAP=1.85, MIN_PARKED_DESK_GAP=1.45, CHECK_MS=140, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
   const MAX_ACTIVE_WALKERS=3, ESCAPE_GRACE_MS=3600;
   const id=globalThis.crypto?.randomUUID?.()||`office-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const motion=window.OfficeSuite?.sharedMovement;
@@ -51,18 +51,16 @@
         hasWork:!!living?.jobKey(employee),available:zone=>zoneHasSpace(snapshot,s,zone)
       });
       if(decision?.intent?.zone&&decision.intent.zone!==s.room&&zoneHasSpace(snapshot,s,decision.intent.zone))return decision.intent;
-      if(decision?.intent?.zone===home)return decision.intent;
-    }
-    // Desk tasks remain varied, but no avatar should be desk-bound indefinitely.
-    // Force a visit to a usable shared area if their last successful walk was too long ago.
-    if(now-(Number(s.lastWalkAt)||now)>WALK_OPPORTUNITY_MS){
-      const destinations=home==='showroom'?['corridor','pantry','staff']:['corridor','showroom','pantry'];
-      const offset=(Number(s.id)+Math.floor(now/90000))%destinations.length;
-      for(let i=0;i<destinations.length;i++){
-        const zone=destinations[(offset+i)%destinations.length];
-        if(zone!==home&&zoneHasSpace(snapshot,s,zone))return {zone,action:zone==='pantry'?'drink':'chat',kind:'roam'};
+      // A desk-preferred decision must not shadow the mobility watchdog.
+      // Once an eligible worker has stayed at their desk too long, offer a
+      // *real*, capacity-checked destination before settling for desk work.
+      if(decision?.intent?.zone===home){
+        const opportunity=movementOpportunity(employee,s,now,snapshot);
+        return opportunity||decision.intent;
       }
     }
+    const opportunity=movementOpportunity(employee,s,now,snapshot);
+    if(opportunity)return opportunity;
     const proposed=living?.chooseIntent(employee,s.room,now)||{zone:home,action:work,kind:'work'};
     const intent={...proposed};
     if(!intent.zone||!['boss','staff','showroom','corridor','pantry','store','prayer','toilet-a','toilet-b'].includes(intent.zone))
@@ -74,6 +72,22 @@
     if(coolingBreak||repeatRoom||!zoneHasSpace(snapshot,s,intent.zone))
       return {zone:home,action:work==='typing'?'pc-work':work,kind:'work'};
     return intent;
+  }
+  // No extra timer or movement writer: this is evaluated only by the leader
+  // when the existing nextAt scheduler makes a worker eligible again.
+  function movementOpportunity(employee,s,now,snapshot){
+    const home=homeFor(employee),last=Number(s.lastWalkAt);
+    if(s.room!==home||!Number.isFinite(last)||now-last<WALK_OPPORTUNITY_MS)return null;
+    const destinations=home==='showroom'?['corridor','pantry','store']:
+      home==='boss'?['corridor','showroom','pantry','store']:
+      ['corridor','showroom','pantry','store','prayer'];
+    const offset=(Number(s.id)+Math.floor(now/90000))%destinations.length;
+    for(let i=0;i<destinations.length;i++){
+      const zone=destinations[(offset+i)%destinations.length];
+      if(zone!==home&&zoneHasSpace(snapshot,s,zone))
+        return {zone,action:zone==='pantry'?'drink':zone==='store'?'stocking':zone==='prayer'?'reading':zone==='showroom'?'meeting':'chat',kind:'roam',reason:'🚶 Visiting a shared work area'};
+    }
+    return null; // Never force movement into an occupied room.
   }
   function staffBase(e,now){
     const x=Number(e.visualX??e.x),y=Number(e.visualY??e.y);
@@ -237,17 +251,28 @@
     // Grant an *outbound only* clearance grace for an idle neighbor. The moving
     // employee may leave the overlap, but may never approach more closely.
     // Moving neighbors, new overlaps and destination overlaps stay forbidden.
+    const directory=new Map(livePeople().map(employee=>[Number(employee.id),employee]));
     const baselines=others.map(other=>{
       const beside=movementAt(other,walk.startedAt);
       const distance=Math.hypot(launch.x-beside.x,launch.y-beside.y);
-      return {other,distance,canEscape:distance<MIN_STAFF_GAP&&(!other.walk||other.walk.endAt<=now)};
+      const employee=directory.get(Number(other.id));
+      // A parked colleague inside their assigned desk clearance is not a
+      // second moving pedestrian. The route is already checked against wall
+      // and furniture geometry by the planner. Using the full walking gap
+      // around every desk permanently trapped showroom and admin characters.
+      const parked=Boolean(employee&&other.room===homeFor(employee)&&
+        Number.isFinite(Number(employee.deskX))&&Number.isFinite(Number(employee.deskY))&&
+        Math.hypot(beside.x-Number(employee.deskX),beside.y-Number(employee.deskY))<.65&&
+        (!other.walk||other.walk.endAt<=now));
+      const clearance=parked?MIN_PARKED_DESK_GAP:MIN_STAFF_GAP;
+      return {other,distance,clearance,canEscape:distance<clearance&&(!other.walk||other.walk.endAt<=now)};
     });
     const isSafe=(time)=>{
       const here=movementAt(candidate,time);
-      for(const {other,distance,canEscape} of baselines){
+      for(const {other,distance,clearance,canEscape} of baselines){
         const there=movementAt(other,time);
         const gap=Math.hypot(here.x-there.x,here.y-there.y);
-        if(gap>=MIN_STAFF_GAP)continue;
+        if(gap>=clearance)continue;
         const waiting=time<=walk.startedAt;
         const elapsed=time-walk.startedAt;
         // Only tolerate an overlap which existed before this reservation,
@@ -341,7 +366,23 @@
   }
   function alternateIntents(employee,s,requested,snapshot,now=Date.now()){
     const home=homeFor(employee);
-    if(s.room!==home)return [requested]; // Always bring staff back to their own desk.
+    if(s.room!==home){
+      // Going home is always the first attempt. If a busy doorway makes that
+      // route impossible, give the character a limited safe detour instead of
+      // waiting indefinitely at the same spot and blocking everyone else.
+      // The next scheduling cycle still tries home first, via the same planner.
+      const detours=[requested];
+      const zones=s.room==='corridor'?['pantry','showroom','store']:
+        ['corridor','showroom','pantry','store','prayer'];
+      for(const zone of zones){
+        if(zone===home||zone===s.room||!zoneHasSpace(snapshot,s,zone))continue;
+        if(s.lastTripZone===zone&&Number.isFinite(s.lastTripAt)&&now-s.lastTripAt<30000)continue;
+        detours.push({zone,action:zone==='pantry'?'drink':zone==='store'?'stocking':
+          zone==='prayer'?'reading':zone==='showroom'?'meeting':'chat',kind:'roam',reason:'🚶 Clearing a busy route'});
+        if(detours.length>=4)break;
+      }
+      return detours;
+    }
     const candidates=[requested];
     if(smart){
       const preferred=smart.decide(employee,s,snapshot,now,{
@@ -559,5 +600,5 @@
   window.addEventListener('pagehide',stop,{once:true});
   if(document.documentElement.dataset.ksAuth==='ok')start();
   // Pure functions exposed for regression tests; no credentials or controls.
-  window.OfficeMovementTimeline={movementAt,headingAt,phaseAt,validPayload,chooseSmartIntent,routeHasClearance,alternateIntents,evolve};
+  window.OfficeMovementTimeline={movementAt,headingAt,phaseAt,validPayload,chooseSmartIntent,movementOpportunity,routeHasClearance,alternateIntents,evolve};
 })();
