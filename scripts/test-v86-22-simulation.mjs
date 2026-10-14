@@ -80,7 +80,10 @@ for(const [start,end] of [[{x:10,y:49.2},{x:14,y:49.2}],[{x:8.5,y:10.1},{x:17.9,
   for(let i=0;i<6000&&rig.root.position.distanceTo(rig.targetPosition)>.01;i++){
     const before=rig.root.position.clone();followSceneTarget(rig,1/60,geometry);
     assert(geometry.worldClear(before,rig.root.position),'No renderer frame crosses a wall or worktop');
-    assert(before.distanceTo(rig.root.position)<=2.4/60+1e-8,'Catch-up cannot teleport');
+    // V86.28 permits adaptive, wall-swept catch-up up to 7.2 units/s,
+    // replacing V86.22's obsolete 2.4 units/s fixed-speed limit.
+    // Keep a strict per-frame displacement cap to prevent teleporting.
+    assert(before.distanceTo(rig.root.position)<=7.2/60+1e-8,'Catch-up cannot teleport');
   }
   assert(rig.root.position.distanceTo(rig.targetPosition)<.01,'Follower must route around the partition, not stay stuck');
 }
