@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
+import {checkTypescriptScene} from './check-typescript-scene.mjs';
 const require=createRequire(import.meta.url);
 const read=file=>readFileSync(file,'utf8');
 const html=read('public/index.html');
@@ -103,7 +104,6 @@ assert(scene.includes('lastGlowAt>=800'),'Scene glow is not recalculated every G
 assert(scene.includes('lastCanvasAt<32'),'Eco mode caps GPU frames');
 assert(html.indexOf('office-ai-routine.js?v=86.49')<html.indexOf('office-smart-ai.js?v=86.49'));
 assert(html.indexOf('office-smart-ai.js?v=86.49')<html.indexOf('office-movement-sync.js?v=86.49'));
-const ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript');
-const result=ts.transpileModule(scene,{fileName:'office-scene.ts',reportDiagnostics:true,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}});
-assert.equal(result.diagnostics?.length||0,0,'3D scene must be syntactically valid TypeScript');
-console.log(`PASS V86.45–49 Jarvis: fair contention, deterministic office routines, CAS safe force move (${planned.ok?'planned':'safely declined'}), AI diagnostics, IK props and adaptive 3D source.`);
+const compiler=checkTypescriptScene(scene);
+assert.throws(()=>checkTypescriptScene('const = ;','broken-scene.ts'),'Compiler must reject malformed TypeScript');
+console.log(`PASS V86.45–49 Jarvis: fair contention, deterministic office routines, CAS safe force move (${planned.ok?'planned':'safely declined'}), AI diagnostics, IK props and adaptive 3D source (${compiler}).`);
