@@ -1,7 +1,7 @@
 {
-  "release": "86.33",
+  "release": "86.35",
   "edition": "Office Plus · Unified Pulse",
-  "package": "V86.33 Office Simulator CI stability test repair",
+  "package": "V86.35 consolidated dashboard + Job Management and CI fixes",
   "modules": [
     "office-geometry-guard.js",
     "office-seating-controller.js",
@@ -23,5 +23,5 @@
     "office-online-users.js",
     "office-online-users.css"
   ],
-  "check": "Current 3D movement source test replaces retired V86.16 inline helper; V86.31 Job Management and runtime sources preserved"
+  "check": "V86.30 furniture dashboard wiring restored; all eight strict simulator tests registered in CI; V86.34 Node and Supabase security checks retained. Browser and production verification required."
 }
