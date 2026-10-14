@@ -1590,15 +1590,17 @@ body{overscroll-behavior:none;}
     }catch(_){}
   }
   function startEventStream(){
-    pullOfficeEvents({initial:true});if(eventPollTimer)clearInterval(eventPollTimer);eventPollTimer=setInterval(()=>{if(!document.hidden)pullOfficeEvents()},2000);
+    pullOfficeEvents({initial:true});if(eventPollTimer)clearInterval(eventPollTimer);let lastEventPoll=Date.now();eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
     window.addEventListener('ks:supabase-change',ev=>{
       if(document.hidden)return;
       const table=ev.detail?.table;
       if(table==='ks_office_events')pullOfficeEvents();
       else if(table==='ks_office_chat')pullChat();
       else if(table==='ks_shared_state'){
-        if(!staffEditorModal?.classList.contains('open'))loadStaffDirectory({seedIfMissing:false});
-        refreshJobsFromSharedCache();
+        const scope=ev.detail?.payload?.data?.record?.scope;
+        // Older Realtime payloads may omit record details; retain the safe fallback.
+        if((!scope||scope===STAFF_DIRECTORY_SCOPE)&&!staffEditorModal?.classList.contains('open'))loadStaffDirectory({seedIfMissing:false});
+        if(!scope||scope==='dashboard:jobs')refreshJobsFromSharedCache();
       }
     });
   }
@@ -1888,7 +1890,7 @@ body{overscroll-behavior:none;}
       if(!background)opsRefreshBtn?.classList.remove('loading');
     }
   }
-  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);jobAutoTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadJobsFromManagement({background:true})},3500)}
+  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);let lastJobPoll=Date.now();jobAutoTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:3500;if(now-lastJobPoll>=every){lastJobPoll=now;loadJobsFromManagement({background:true})}},3500)}
 
   const DEPARTMENTS=['Creative Department','Sales and Marketing','Management','Production Management','Finance Department'];
   function normalizeDepartment(value,position=''){
@@ -1984,7 +1986,7 @@ body{overscroll-behavior:none;}
     workloadEditorSave.disabled=true;workloadEditorStatus.className='staff-editor-status';workloadEditorStatus.textContent='Saving workload to server…';try{const records=serializeStaffDirectory(),at=records.findIndex(r=>Number(r.id)===emp.id);if(at<0)throw new Error('Staff not found');records[at]={...records[at],workload:next};await saveStaffDirectory(records);const summary=next.length?`${next[0]}${next.length>1?` +${next.length-1} more`:''}`:'Workload cleared';await postOfficeEvent({eventType:'workload_updated',title:`${emp.name} · Workload updated`,message:summary,employeeId:emp.id,metadata:{workload:next,count:next.length},dedupeKey:`workload:${emp.id}:${hashString(JSON.stringify(next))}:${Date.now()}`});workloadEditorStatus.className='staff-editor-status ok';workloadEditorStatus.textContent='Saved. Character notification, Live Activity and other browsers updated.';setTimeout(closeWorkloadEditor,650)}catch(err){workloadEditorStatus.className='staff-editor-status error';workloadEditorStatus.textContent=err.message||'Could not save workload.'}finally{workloadEditorSave.disabled=false}
   }
   function startStaffDirectorySync(){
-    loadStaffDirectory({seedIfMissing:true});if(staffPollTimer)clearInterval(staffPollTimer);staffPollTimer=setInterval(()=>{if(!document.hidden&&!staffEditorModal?.classList.contains('open')&&!workloadEditorModal?.classList.contains('open'))loadStaffDirectory({seedIfMissing:false})},2500);
+    loadStaffDirectory({seedIfMissing:true});if(staffPollTimer)clearInterval(staffPollTimer);let lastStaffPoll=Date.now();staffPollTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2500;if(now-lastStaffPoll>=every){lastStaffPoll=now;loadStaffDirectory({seedIfMissing:false})}},2500);
   }
 
   function polygonBounds(points){const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)}}
@@ -2319,7 +2321,7 @@ body{overscroll-behavior:none;}
       await postOfficeEvent({eventType:'chat_cleared',title:'Office chat cleared',message:'Shared chat history was cleared',dedupeKey:`chat-clear:${Date.now()}`});
     }catch(_){alert('Could not clear chat. Please try again.')}finally{chatClearBtn.disabled=false}
   }
-  function startChat(){renderChatSenders();pullChat({initial:true});if(chatPollTimer)clearInterval(chatPollTimer);chatPollTimer=setInterval(()=>{if(!document.hidden)pullChat()},3500)}
+  function startChat(){renderChatSenders();pullChat({initial:true});if(chatPollTimer)clearInterval(chatPollTimer);let lastChatPoll=Date.now();chatPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?20000:3500;if(now-lastChatPoll>=every){lastChatPoll=now;pullChat()}},3500)}
 
   function syncFollowChip(){const emp=followEmployeeId?employeeById[followEmployeeId]:null;if(!followChip)return;followChip.classList.toggle('show',Boolean(emp));followChip.setAttribute('aria-hidden',String(!emp));if(followChipName)followChipName.textContent=emp?.name||''}
   function collapseOpsPanel(){if(!todayPanel?.classList.contains('expanded'))return;todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false');opsExpandBtn.setAttribute('title','Expand Office Pulse')}}
@@ -2983,183 +2985,7 @@ body{overscroll-behavior:none;}
   window.dispatchEvent(new CustomEvent('ks:suite-ready'));
 })();
 </script>
-<script id="ks-sync-js">
-(() => {
-  'use strict';
-  const API = '/api/state';
-  const basename = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  const page = basename.replace(/\.html?$/, '') || 'index';
-  const scope = `page:${page}`;
-  const clientId = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  const skipIds = new Set(['clientSearch','search','wa_target_number']);
-  const skipTypes = new Set(['file','password','button','submit','reset','hidden','image']);
-  let applying = false;
-  let saving = false;
-  let dirty = false;
-  let saveTimer = null;
-  let lastVersion = 0;
-  let lastHash = '';
-  let started = false;
-
-  const GLOBAL_CONFIG_SCOPE='config:global';
-  const DEFAULT_GOOGLE_DRIVE_URL='https://drive.google.com/drive/u/1/folders/1YRobFB1O2BKBFn9VEOYOwQE2VUlFXR8B';
-  let globalConfigVersion=0;
-  function applyGlobalConfig(payload={}){
-    const driveUrl=String(payload.googleDriveUrl||DEFAULT_GOOGLE_DRIVE_URL).trim();
-    if(/^https?:\/\//i.test(driveUrl)){
-      document.querySelectorAll('a[data-shared-drive],a[data-tool="Google Drive"]').forEach(a=>{a.href=driveUrl;a.target='_blank';a.rel='noopener noreferrer'});
-      window.dispatchEvent(new CustomEvent('ks:google-drive-url',{detail:{url:driveUrl}}));
-    }
-  }
-  async function pullGlobalConfig(){
-    try{
-      const res=await fetch(`${API}?scope=${encodeURIComponent(GLOBAL_CONFIG_SCOPE)}`,{cache:'no-store',headers:{accept:'application/json'}});
-      if(res.status===404){applyGlobalConfig({});return}
-      if(!res.ok)return;
-      const row=await res.json(),version=Number(row.version||0);
-      if(version>=globalConfigVersion){globalConfigVersion=version;applyGlobalConfig(row.payload||{})}
-    }catch(_){}
-  }
-
-  function statusNode(){
-    let el=document.getElementById('ksSharedStatus');
-    if(el) return el;
-    el=document.createElement('div');
-    el.id='ksSharedStatus';
-    el.className='ks-shared-status';
-    el.innerHTML='<i></i><span>Shared · Connecting</span>';
-    document.body.appendChild(el);
-    return el;
-  }
-  function setStatus(mode,text){
-    const el=statusNode();
-    el.dataset.mode=mode;
-    el.querySelector('span').textContent=text;
-  }
-  function keyFor(el){
-    if(el.dataset.syncKey) return el.dataset.syncKey;
-    if(el.id) return `id:${el.id}`;
-    if(el.name) return `name:${el.name}`;
-    return null;
-  }
-  function isSyncable(el){
-    if(!(el instanceof HTMLElement)) return false;
-    if(el.closest('[data-sync-ignore],.no-sync,.modal-overlay')) return false;
-    if(skipIds.has(el.id)) return false;
-    if(el.matches('input') && skipTypes.has((el.type||'text').toLowerCase())) return false;
-    if(el.matches('input,select,textarea,[contenteditable="true"]')) return Boolean(keyFor(el));
-    return false;
-  }
-  function readValue(el){
-    if(el instanceof HTMLInputElement){
-      const type=(el.type||'text').toLowerCase();
-      if(type==='checkbox') return {t:'checkbox',v:el.checked};
-      if(type==='radio') return {t:'radio',v:el.checked?el.value:null};
-      return {t:type,v:el.value};
-    }
-    if(el instanceof HTMLSelectElement) return {t:'select',v:el.value};
-    if(el instanceof HTMLTextAreaElement) return {t:'textarea',v:el.value};
-    if(el.isContentEditable) return {t:'contenteditable',v:el.innerHTML};
-    return null;
-  }
-  function capture(){
-    const fields={};
-    document.querySelectorAll('input,select,textarea,[contenteditable="true"]').forEach(el=>{
-      if(!isSyncable(el)) return;
-      const k=keyFor(el), val=readValue(el);
-      if(k&&val) fields[k]=val;
-    });
-    return {fields};
-  }
-  function stableHash(payload){
-    try{return JSON.stringify(payload)}catch(_){return ''}
-  }
-  function apply(payload){
-    if(!payload?.fields) return;
-    applying=true;
-    try{
-      for(const [key,item] of Object.entries(payload.fields)){
-        let el=null;
-        if(key.startsWith('id:')) el=document.getElementById(key.slice(3));
-        else if(key.startsWith('name:')) el=document.querySelector(`[name="${CSS.escape(key.slice(5))}"]`);
-        else el=document.querySelector(`[data-sync-key="${CSS.escape(key)}"]`);
-        if(!el || !isSyncable(el)) continue;
-        if(document.activeElement===el) continue;
-        if(el instanceof HTMLInputElement){
-          if(item.t==='checkbox') el.checked=Boolean(item.v);
-          else if(item.t==='radio') el.checked=el.value===item.v;
-          else el.value=item.v ?? '';
-        }else if(el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement){
-          el.value=item.v ?? '';
-        }else if(el.isContentEditable){
-          el.innerHTML=item.v ?? '';
-        }
-        el.dispatchEvent(new Event('input',{bubbles:true}));
-        el.dispatchEvent(new Event('change',{bubbles:true}));
-      }
-    }finally{applying=false}
-  }
-  async function pull({initial=false}={}){
-    try{
-      const res=await fetch(`${API}?scope=${encodeURIComponent(scope)}`,{cache:'no-store',headers:{'accept':'application/json'}});
-      if(res.status===404){
-        if(initial) await save(true);
-        return;
-      }
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const row=await res.json();
-      if(Number(row.version||0)>lastVersion && row.payload){
-        apply(row.payload);
-        lastVersion=Number(row.version||0);
-        lastHash=stableHash(row.payload);
-        dirty=false;
-      }
-      setStatus('live','Shared · Live');
-    }catch(err){
-      setStatus('offline',location.protocol==='file:'?'Local mode · deploy to sync':'Shared · Offline');
-    }
-  }
-  async function save(force=false){
-    if(saving || applying) return;
-    const payload=capture(), hash=stableHash(payload);
-    if(!force && hash===lastHash){dirty=false;return}
-    saving=true;
-    try{
-      setStatus('saving','Shared · Saving');
-      const res=await fetch(API,{method:'PUT',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({scope,payload,clientId})});
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const row=await res.json();
-      lastVersion=Number(row.version||lastVersion);
-      lastHash=hash;
-      dirty=false;
-      setStatus('live','Shared · Saved');
-    }catch(err){
-      setStatus('offline',location.protocol==='file:'?'Local mode · deploy to sync':'Shared · Save failed');
-    }finally{saving=false}
-  }
-  function queueSave(){
-    if(applying) return;
-    dirty=true;
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>save(false),650);
-  }
-  function start(){
-    if(started) return; started=true;
-    statusNode();
-    document.addEventListener('input',e=>{if(isSyncable(e.target)) queueSave()},{passive:true});
-    document.addEventListener('change',e=>{if(isSyncable(e.target)) queueSave()},{passive:true});
-    document.addEventListener('focusout',e=>{if(isSyncable(e.target) && dirty) queueSave()});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty) save(false)}else pull()});
-    window.addEventListener('online',()=>pull());
-    window.addEventListener('beforeunload',()=>{if(dirty && navigator.sendBeacon){try{navigator.sendBeacon(API,new Blob([JSON.stringify({scope,payload:capture(),clientId})],{type:'application/json'}))}catch(_){}}});
-    pullGlobalConfig();
-    pull({initial:true});
-    setInterval(()=>{if(!document.hidden&&!saving){pull();pullGlobalConfig()}},3500);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(start,450),{once:true});
-  else setTimeout(start,450);
-})();
-</script>
+<script src="shared-sync.js?v=86.43" defer></script>
 
 <script id="ks-index-boot-guard">
 (()=>{
@@ -3196,7 +3022,7 @@ body{overscroll-behavior:none;}
   },4000);
 })();
 </script>
-<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.40 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
+<footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.43 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>
 <script src="office-smart-labels.js?v=80.0" defer></script>

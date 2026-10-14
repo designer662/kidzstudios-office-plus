@@ -339,7 +339,8 @@
     });
   }
   async function init() {
-    makeGate();
+    // Network retries reuse the original gate; otherwise each retry leaves an overlay behind.
+    if (!gate) makeGate();
     if(!configured){displayGate('Setup needed: configure your Supabase URL and publishable key in GitHub repository variables, then redeploy.');gate.querySelector('#ks-auth-form').hidden=true;return;}
     displayGate('Checking your saved session...');
     setSession(savedSession());

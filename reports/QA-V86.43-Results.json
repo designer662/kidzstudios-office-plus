@@ -1,0 +1,152 @@
+{
+  "release": "86.43",
+  "tested": "2026-10-14T15:05:49.541922+00:00",
+  "passed": 24,
+  "total": 24,
+  "tests": [
+    {
+      "script": "scripts/test-deployment-setup.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS deployment setup: root files, package lock alignment, cache-independent setup-node and Pages artifact path."
+    },
+    {
+      "script": "scripts/test-public-config.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.3,
+      "output": "PASS config security: publishable + anon allowed; privileged/malformed keys rejected without exposure or overwrite."
+    },
+    {
+      "script": "scripts/test-build-integrity.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS source/bundle 3D integrity: clean build and three negative cases."
+    },
+    {
+      "script": "scripts/test-version-stamping.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.1,
+      "output": "PASS release stamping: all local CSS/JS cache busting, footer version, external URLs preserved, idempotent."
+    },
+    {
+      "script": "scripts/test-stability-runner.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS simulator runner: failures aggregated, subsequent tests executed, CI exit remains strict."
+    },
+    {
+      "script": "scripts/check-repo.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.72,
+      "output": "Checked 10 HTML pages, all shipped JS and inline scripts, SQL schema; 0 error(s)."
+    },
+    {
+      "script": "scripts/audit-runtime-wiring.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS office-geometry-guard.js: referenced by dashboard\nPASS office-seating-controller.js: referenced by dashboard\nPASS office-living-office.js: referenced by dashboard\nPASS office-smart-ai.js: referenced by dashboard\nPASS office-furniture-interactions.js: referenced by dashboard\nPASS office-movement-sync.js: referenced by dashboard\nPASS office-3d.js: referenced by dashboard\nRuntime wiring audit: 0 blocker(s). Static links pass; browser validation remains required."
+    },
+    {
+      "script": "scripts/test-v86-41-code-cleanup.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS V86.41 cleanup: shared sync behavior, local Job Management links, unsaved-edit guard, no duplicate assets or element IDs, 10 pages with valid scripts, aligned releases"
+    },
+    {
+      "script": "scripts/test-shared-sync-production.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS production shared sync: CAS, inflight changes persisted, stale overwrite blocked, explicit conflict UI, stored HTML never injected."
+    },
+    {
+      "script": "scripts/test-v86-43-sync-optimization.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS V86.43 sync optimization: config fetched 3 times vs 19 legacy calls; scoped realtime, in-flight coalescing guard, unsaved-close warning."
+    },
+    {
+      "script": "scripts/test-v86-43-3d-index.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.37,
+      "output": "PASS V86.43 3D optimization: O(1) staff/label indices, no repeated ID scans; syntax checked"
+    },
+    {
+      "script": "scripts/test-v86-43-dashboard-polling.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS V86.43 dashboard polling: 4 realtime-aware loops, immediate offline fallback, filtered staff/job events, legacy events retained."
+    },
+    {
+      "script": "scripts/test-job-data.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS job-data: CSV/TSV, dates, column mapping, JSON restore, safe URL validation and CSV escaping"
+    },
+    {
+      "script": "scripts/test-workbook.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.04,
+      "output": "PASS: 10 headers, Excel controls, valid ZIP signatures, 28-column workbook, escaped/safe values"
+    },
+    {
+      "script": "scripts/test-job-rules.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS: Shared job stage classification, unique references, 501-record validation and size calculation"
+    },
+    {
+      "script": "scripts/test-job-validation.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS: Required fields, Production entry gate, legacy production-job editing"
+    },
+    {
+      "script": "scripts/test-job-saving.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS: 501 jobs saved without truncation, expectedVersion sent, conflict rejected, oversized save blocked"
+    },
+    {
+      "script": "scripts/test-job-ui-v86-31.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS V86.31: shared header fix, real workbook controls, field focus/ARIA, mobile modal sizing, safe CSV and save guards"
+    },
+    {
+      "script": "scripts/test-delete-modal.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS delete-confirmation stacking: editor z=10000, confirm z=10020, focus and Escape behavior present"
+    },
+    {
+      "script": "scripts/test-outside-close.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.04,
+      "output": "PASS click-away tests: modal priority, field protection, dropdowns, shared panels, pointerup raycast priority and empty canvas dismissal, preview cleanup, 10 pages."
+    },
+    {
+      "script": "scripts/test-v86-37-action-queue.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.04,
+      "output": "PASS V86.37 Action Queue: all-history priority, reasons, filters, validation, no mutation, UI wiring"
+    },
+    {
+      "script": "scripts/test-v86-38-office-pulse.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.06,
+      "output": "PASS: V86.38 Office Pulse KPIs, timezone, priorities, targeted navigation, 520 records, no Sheets overwrite, CI integration"
+    },
+    {
+      "script": "scripts/test-v86-40-office-pulse-source.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.03,
+      "output": "PASS: Office Pulse has no editable Sheet source, synchronizes only Job Management jobs, preserves stale data and current version, and restores after network failure"
+    },
+    {
+      "script": "scripts/test-bridge-mock.mjs",
+      "status": "PASS",
+      "elapsed_seconds": 0.05,
+      "output": "PASS: saved authenticated session accepted by membership check\nPASS: state GET/PUT, chat POST and events GET route to Supabase REST\nPASS: page content is revealed only after authentication\nPASS: API response shape and status codes are compatible with V57 UI"
+    }
+  ]
+}
