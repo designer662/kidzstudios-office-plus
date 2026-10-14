@@ -1,0 +1,27 @@
+{
+  "release": "86.31",
+  "edition": "Office Plus · Unified Pulse",
+  "package": "V86.31 Job Management Full Upgrade + Shared Header CI Repair",
+  "modules": [
+    "office-geometry-guard.js",
+    "office-seating-controller.js",
+    "office-furniture-interactions.js",
+    "office-ambience-audio.js",
+    "office-living-office.js",
+    "office-notification-sound.js",
+    "office-smart-ai.js",
+    "office-movement-sync.js",
+    "office-3d.js",
+    "office-command-data.js",
+    "office-command.css",
+    "job-command-board.js",
+    "office-quality.js",
+    "office-v86-3-polish.css",
+    "office-pulse-integrated.css",
+    "office-character-studio.js",
+    "office-character-studio.css",
+    "office-online-users.js",
+    "office-online-users.css"
+  ],
+  "check": "Job Management V2+ XLSX workflows, safe CSV export, accessible mobile forms; V86.30 Smart AI unchanged"
+}
