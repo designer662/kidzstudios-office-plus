@@ -68,6 +68,7 @@ jobs:
           node scripts/test-v86-53-markup-redesign.mjs
           node scripts/test-v86-53-markup-inline.mjs
           node scripts/test-v86-53-pricelist-redesign.mjs
+          node scripts/test-v86-53-operations-upgrade.mjs
           node scripts/test-v86-53-controls-layout.mjs
           node scripts/test-v86-53-pulse-workload.mjs
           node scripts/test-index-job-style.mjs
@@ -95,6 +96,8 @@ jobs:
         run: node scripts/test-v86-43-auth-browser.mjs
       - name: Test Excel import and download in Chromium
         run: node scripts/test-v86-53-excel-browser.mjs
+      - name: Test Job Management data exports
+        run: node scripts/test-v86-53-export-browser.mjs
       - name: Test rebuilt 3D in WebGL
         run: node scripts/test-v86-22-browser.mjs
       - name: Stamp current build version

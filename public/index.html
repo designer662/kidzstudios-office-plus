@@ -1049,7 +1049,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.2"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
+<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.3"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
 <body class="ks-dashboard">
 <div class="app" id="app" data-theme="light">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -1127,9 +1127,21 @@ body{overscroll-behavior:none;}
         <button type="button" class="live-feed-filter" data-live-filter="team" aria-pressed="false">Team</button>
         <button type="button" class="live-feed-filter" data-live-filter="jobs" aria-pressed="false">Jobs</button>
       </div>
-      <span class="live-feed-count" id="liveFeedCount" aria-live="off">0 updates</span>
+      <span class="live-feed-count" id="liveFeedCount" aria-live="polite">0 updates</span>
     </div>
+    <div class="live-feed-actions">
+      <input type="search" id="liveFeedSearch" class="live-feed-search" placeholder="Find an update…" aria-label="Search live office updates">
+      <button id="liveFeedPause" type="button" aria-pressed="false" title="Pause live feed display">Pause</button>
+      <button id="liveFeedRefresh" type="button" title="Check for new shared office updates">Refresh</button>
+      <button id="liveFeedMore" type="button" aria-expanded="false" title="Show additional activity">More</button>
+    </div>
+    <div id="liveFeedFeedback" class="live-feed-feedback" role="status" aria-live="polite"></div>
     <div class="activity-list" id="activityList" aria-label="Recent office updates"></div>
+    <section id="liveFeedDetail" class="live-feed-detail" aria-label="Activity details" hidden>
+      <div class="live-feed-detail-head"><strong id="liveDetailTitle">Activity</strong><button type="button" id="liveDetailClose" aria-label="Close activity details">×</button></div>
+      <p id="liveDetailMessage"></p><small id="liveDetailTime"></small>
+      <button type="button" id="liveDetailStaff" hidden>View staff member</button>
+    </section>
   </div>
 </section>
 <button class="live-reopen-tab" id="liveReopenBtn" aria-label="Open live activity"><i class="pulse-dot"></i><span>Live Activity</span></button>
@@ -1575,8 +1587,8 @@ body{overscroll-behavior:none;}
       const res=await fetch(`${EVENTS_API}?after=${initial?0:lastEventId}&limit=${initial?24:60}`,{cache:'no-store',headers:{accept:'application/json'}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json(),list=Array.isArray(data.events)?data.events:[];
       if(initial&&!eventInitialized){list.forEach(ev=>handleOfficeEvent(ev,{initial:true,local:ev.sourceClient===eventClientId}));}
       else list.filter(ev=>(Number(ev.id)||0)>lastEventId).forEach(ev=>handleOfficeEvent(ev,{initial:false,local:ev.sourceClient===eventClientId}));
-      if(list.length)lastEventId=Math.max(lastEventId,...list.map(ev=>Number(ev.id)||0));eventInitialized=true;
-    }catch(_){}
+      if(list.length)lastEventId=Math.max(lastEventId,...list.map(ev=>Number(ev.id)||0));eventInitialized=true;return true;
+    }catch(_){return false}
   }
   function startEventStream(){
     pullOfficeEvents({initial:true});if(eventPollTimer)clearInterval(eventPollTimer);let lastEventPoll=Date.now();eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
@@ -2253,37 +2265,69 @@ body{overscroll-behavior:none;}
   function updateStats(){const list=activeDept==='All'?employees:employees.filter(e=>e.department===activeDept),counts=countStatuses(list);$$('.stat-num').forEach(n=>animateNum(n,counts[n.dataset.stat]||0))}
   function activityFeedGlyph(type=''){const t=String(type||'').toLowerCase();if(t.includes('chat'))return'✦';if(t.includes('workload'))return'≡';if(t.includes('job_sync'))return'↻';if(t.includes('job'))return'▦';if(t.includes('artwork')||t.includes('design'))return'◇';if(t.includes('production'))return'▣';if(t.includes('order'))return'＋';if(t.includes('staff'))return'●';if(t.includes('presence'))return'↝';if(t.includes('time_brief'))return'◷';return'•'}
   function groupedActivityFeed(){const out=[];for(const a of activityFeed){const key=`${a.type||''}|${a.employeeId||''}|${a.title||''}|${a.text||''}`,prev=out.find(x=>x._key===key&&Math.abs((x.createdAt||0)-(a.createdAt||0))<10*60000);if(prev){prev.groupCount=(prev.groupCount||1)+1;prev.createdAt=Math.max(prev.createdAt||0,a.createdAt||0)}else out.push({...a,_key:key,groupCount:1})}return out}
-  // Each update keeps its existing Supabase-backed source; filters only change the presentation.
-  let liveFeedFilter='all';
-  const liveFeedCount=$('#liveFeedCount');
+  // Live Activity tools are local presentation controls. They never modify shared events.
+  let liveFeedFilter='all',liveFeedSearch='',liveFeedPaused=false,liveFeedShowAll=false;
+  let livePausedSnapshot=[],liveVisibleRows=[];
+  const liveFeedCount=$('#liveFeedCount'),liveFeedFeedback=$('#liveFeedFeedback');
+  const liveFeedDetail=$('#liveFeedDetail');
   function liveFeedCategory(a){
     const type=String(a.type||a.eventType||'').toLowerCase();
     if(/job|order|artwork|design|approval|production|delivery|invoice|payment|time_brief/.test(type))return'jobs';
     if(/staff|workload|mood|presence|walk|desk|meeting|break|chat|roam|social/.test(type))return'team';
     return'other';
   }
+  function closeLiveFeedDetail(){liveFeedDetail.hidden=true;$('#liveDetailStaff').hidden=true}
+  function openLiveFeedDetail(index){
+    const row=liveVisibleRows[index];if(!row)return;
+    $('#liveDetailTitle').textContent=String(row.title||'Office activity');
+    $('#liveDetailMessage').textContent=String(row.text||'No additional details available.');
+    $('#liveDetailTime').textContent=new Date(row.createdAt||Date.now()).toLocaleString('en-MY');
+    const staff=$('#liveDetailStaff'),emp=employeeById[Number(row.employeeId)];
+    staff.hidden=!emp;staff.onclick=()=>{if(!emp)return;closeLiveFeedDetail();openEmployee(emp);focusEmployee(emp)};
+    liveFeedDetail.hidden=false;$('#liveDetailClose').focus();
+  }
+  $('#liveDetailClose').addEventListener('click',closeLiveFeedDetail);
   $$('#livePanel [data-live-filter]').forEach(btn=>btn.addEventListener('click',()=>{
     liveFeedFilter=btn.dataset.liveFilter;
-    $$('#livePanel [data-live-filter]').forEach(b=>{
-      const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
-    });
-    renderFeed();
+    $$('#livePanel [data-live-filter]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});
+    closeLiveFeedDetail();renderFeed();
   }));
+  $('#liveFeedSearch').addEventListener('input',event=>{liveFeedSearch=event.target.value.trim().toLocaleLowerCase();closeLiveFeedDetail();renderFeed()});
+  $('#liveFeedPause').addEventListener('click',()=>{
+    liveFeedPaused=!liveFeedPaused;
+    livePausedSnapshot=liveFeedPaused?groupedActivityFeed():[];
+    $('#liveFeedPause').textContent=liveFeedPaused?'Resume':'Pause';
+    $('#liveFeedPause').setAttribute('aria-pressed',String(liveFeedPaused));
+    liveFeedFeedback.textContent=liveFeedPaused?'Feed display paused. New updates are still received.':'Live updates resumed.';
+    closeLiveFeedDetail();renderFeed();
+  });
+  $('#liveFeedMore').addEventListener('click',()=>{
+    liveFeedShowAll=!liveFeedShowAll;
+    $('#liveFeedMore').textContent=liveFeedShowAll?'Less':'More';
+    $('#liveFeedMore').setAttribute('aria-expanded',String(liveFeedShowAll));
+    closeLiveFeedDetail();renderFeed();
+  });
+  $('#liveFeedRefresh').addEventListener('click',async()=>{
+    const button=$('#liveFeedRefresh');button.disabled=true;liveFeedFeedback.textContent='Checking for new office updates…';
+    try{const ok=await pullOfficeEvents();liveFeedFeedback.textContent=ok?'Activity checked.':'Unable to refresh activity. Existing updates are retained.';renderFeed()}
+    finally{button.disabled=false}
+  });
   function renderFeed(){
     if(!activityList)return;
-    const feed=groupedActivityFeed().filter(a=>liveFeedFilter==='all'||liveFeedCategory(a)===liveFeedFilter);
-    const count=livePanel&&livePanel.classList.contains('expanded')?feed.length:4;
-    if(liveFeedCount)liveFeedCount.textContent=`${feed.length} update${feed.length===1?'':'s'}`;
+    const base=liveFeedPaused?livePausedSnapshot:groupedActivityFeed();
+    const feed=base.filter(a=>(liveFeedFilter==='all'||liveFeedCategory(a)===liveFeedFilter)&&(!liveFeedSearch||`${a.title||''} ${a.text||''} ${a.type||''}`.toLocaleLowerCase().includes(liveFeedSearch)));
+    const count=liveFeedShowAll||livePanel&&livePanel.classList.contains('expanded')?feed.length:4;
+    liveVisibleRows=feed.slice(0,count);
+    if(liveFeedCount)liveFeedCount.textContent=`${feed.length} update${feed.length===1?'':'s'}${liveFeedPaused?' · paused':''}`;
     if(!feed.length){
-      const label=liveFeedFilter==='all'?'No office activity yet.':`No ${liveFeedFilter==='team'?'team':'job'} updates yet.`;
+      const label=liveFeedSearch?'No updates match this search.':liveFeedFilter==='all'?'No office activity yet.':`No ${liveFeedFilter==='team'?'team':'job'} updates yet.`;
       activityList.innerHTML=`<div class="live-feed-empty"><span aria-hidden="true">◷</span><b>All caught up</b><small>${label}</small></div>`;
       return;
     }
-    activityList.innerHTML=feed.slice(0,count).map(a=>{
+    activityList.innerHTML=liveVisibleRows.map((a,i)=>{
       const at=a.createdAt||Date.now(),kind=activityTypeLabel(a.type||a.eventType||'office');
-      const category=liveFeedCategory(a);
-      const system=String(a.type||'').includes('sync');
-      return `<div class="feed-item feed-category-${category}${a.employeeId?' feed-clickable':''}${a.realtime?' realtime':''}${system?' feed-system':''}" ${a.employeeId?`data-employee-id="${a.employeeId}" role="button" tabindex="0"`:''} title="${esc(new Date(at).toLocaleString('en-MY'))}"><div class="feed-avatar feed-glyph">${activityFeedGlyph(a.type)}</div><div class="feed-copy"><div class="feed-title-row"><b>${esc(a.title)}${a.groupCount>1?` <small>×${a.groupCount}</small>`:''}</b><em>${esc(kind)}</em></div><span>${esc(a.text)}</span></div><span class="feed-time"><b>${esc(clockTime(at))}</b><small>${esc(relativeEventTime(at))}</small></span></div>`;
+      const category=liveFeedCategory(a),system=String(a.type||'').includes('sync');
+      return `<button type="button" class="feed-item feed-category-${category}${a.realtime?' realtime':''}${system?' feed-system':''}" data-activity-index="${i}" title="View update details · ${esc(new Date(at).toLocaleString('en-MY'))}"><span class="feed-avatar feed-glyph">${activityFeedGlyph(a.type)}</span><span class="feed-copy"><span class="feed-title-row"><b>${esc(a.title)}${a.groupCount>1?` <small>×${a.groupCount}</small>`:''}</b><em>${esc(kind)}</em></span><span>${esc(a.text)}</span></span><span class="feed-time"><b>${esc(clockTime(at))}</b><small>${esc(relativeEventTime(at))}</small></span></button>`;
     }).join('');
   }
   function positionBubbleForEmployee(fo,emp){if(!fo||!emp)return;const p=iso(emp.visualX??emp.x,emp.visualY??emp.y);const w=Number(fo.getAttribute('width'))||190;fo.setAttribute('x',p.x-w/2);fo.setAttribute('y',p.y-96)}
@@ -2608,9 +2652,9 @@ body{overscroll-behavior:none;}
   furnitureLayer.onpointermove=e=>{if(e.target.closest('.desk-hit')&&tooltip.classList.contains('show'))positionTip(e)};
   furnitureLayer.onpointerout=e=>{if(e.target.closest('.desk-hit'))tooltip.classList.remove('show')};
   furnitureLayer.onclick=e=>{if(performance.now()<suppressClickUntil)return;const hit=e.target.closest('.desk-hit');if(!hit)return;e.stopPropagation();const emp=employeeById[Number(hit.dataset.employeeId)]||null;if(emp){openEmployee(emp);focusEmployee(emp)}else{pushActivity({title:`${hit.dataset.deskId||'Workstation'} · Available`,text:'No staff assigned',avatar:'DS'})}};
-  activityList.onclick=e=>{const row=e.target.closest('[data-employee-id]');if(!row)return;const emp=employeeById[Number(row.dataset.employeeId)];if(emp){openEmployee(emp);focusEmployee(emp);showBubble(emp,emp.currentJob)}};
-  activityList.onkeydown=e=>{if(e.key!=='Enter'&&e.key!==' ')return;const row=e.target.closest('[data-employee-id]');if(!row)return;e.preventDefault();const emp=employeeById[Number(row.dataset.employeeId)];if(emp){openEmployee(emp);focusEmployee(emp)}};
+  activityList.onclick=e=>{const row=e.target.closest('[data-activity-index]');if(row)openLiveFeedDetail(Number(row.dataset.activityIndex))};
   if(opsExpandBtn)opsExpandBtn.onclick=e=>{e.stopPropagation();const expanding=!todayPanel.classList.contains('expanded');if(expanding){clearEmployeeSelection();contextCard.classList.remove('open')}const expanded=todayPanel.classList.toggle('expanded');opsExpandBtn.textContent=expanded?'⤡':'⤢';opsExpandBtn.setAttribute('aria-expanded',String(expanded));opsExpandBtn.setAttribute('title',expanded?'Collapse Office Pulse':'Expand Office Pulse')};
+  liveFeedDetail.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeLiveFeedDetail();$('#liveFeedSearch').focus()}});
   if(chatLauncher)chatLauncher.onclick=()=>setChatOpen(!chatOpen);
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;

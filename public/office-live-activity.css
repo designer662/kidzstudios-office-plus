@@ -103,3 +103,25 @@ body.ks-dashboard #livePanel.maximized .activity-list{max-height:none;overflow-y
   body.ks-dashboard #livePanel .stats-strip .stat-label{font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){body.ks-dashboard #livePanel *{animation:none!important;transition:none!important}}
+
+/* Live Activity interactive utilities: accessible, no shared-data writes. */
+body.ks-dashboard #livePanel .live-feed-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;align-items:center;margin:0 0 7px}
+body.ks-dashboard #livePanel .live-feed-actions .live-feed-search{grid-column:1/-1}
+body.ks-dashboard #livePanel .live-feed-search{height:32px;min-width:0;border:1px solid #e0e7e1;border-radius:8px;background:#fff;padding:6px 9px;color:#37473c;font:650 11px Inter,system-ui,sans-serif}
+body.ks-dashboard #livePanel .live-feed-actions button{min-height:32px;border:1px solid #e1e7e0;border-radius:8px;background:#fff;color:#53645a;padding:5px 9px;font:750 10px Inter,system-ui,sans-serif;cursor:pointer}
+body.ks-dashboard #livePanel .live-feed-actions button[aria-pressed="true"]{background:#fff2e8;border-color:#ebbe9d;color:#af572a}
+body.ks-dashboard #livePanel .live-feed-feedback{font:650 10px/1.3 Inter,system-ui,sans-serif;color:#66766a}
+body.ks-dashboard #livePanel .live-feed-feedback:empty{display:none}
+body.ks-dashboard #livePanel .feed-item{width:100%;text-align:left;cursor:pointer;font:inherit}
+body.ks-dashboard #livePanel .feed-item:focus-visible,body.ks-dashboard #livePanel .live-feed-actions button:focus-visible,body.ks-dashboard #livePanel .live-feed-search:focus-visible{outline:2px solid #d57a43;outline-offset:2px}
+body.ks-dashboard #livePanel .live-feed-detail{margin-top:7px;padding:11px;border:1px solid #e3e9e3;border-radius:11px;background:#fff;overflow-wrap:anywhere}
+body.ks-dashboard #livePanel .live-feed-detail[hidden]{display:none!important}
+body.ks-dashboard #livePanel .live-feed-detail-head{display:flex;justify-content:space-between;gap:9px;align-items:center;font-size:11px}
+body.ks-dashboard #livePanel .live-feed-detail-head button{border:0;background:#f4f6f3;border-radius:7px;width:26px;height:26px;cursor:pointer}
+body.ks-dashboard #livePanel .live-feed-detail p{margin:7px 0;color:#536158;font:600 11px/1.5 Inter,system-ui,sans-serif;white-space:pre-wrap}
+body.ks-dashboard #livePanel .live-feed-detail small{display:block;color:#84918b;font-size:9px}
+body.ks-dashboard #livePanel #liveDetailStaff{margin-top:8px;border:1px solid #e6bd9d;background:#fff4ec;border-radius:8px;padding:8px 10px;color:#a45c32;font-size:10px;font-weight:800;cursor:pointer}
+@media(max-width:650px){body.ks-dashboard #livePanel .live-feed-actions{grid-template-columns:repeat(3,minmax(0,1fr))}body.ks-dashboard #livePanel .live-feed-actions button{padding:5px 7px;font-size:9px}body.ks-dashboard #livePanel .live-feed-search{font-size:10px}}
+@media(max-width:350px){body.ks-dashboard #livePanel .live-feed-actions{grid-template-columns:repeat(3,minmax(0,1fr))}body.ks-dashboard #livePanel .live-feed-search{grid-column:1/-1}}
+
+@media(min-width:921px){body.ks-dashboard #livePanel.expanded .live-feed-actions,body.ks-dashboard #livePanel.maximized .live-feed-actions{grid-template-columns:minmax(0,1fr) repeat(3,auto)}body.ks-dashboard #livePanel.expanded .live-feed-actions .live-feed-search,body.ks-dashboard #livePanel.maximized .live-feed-actions .live-feed-search{grid-column:auto}}
