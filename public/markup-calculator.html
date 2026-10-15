@@ -841,7 +841,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 <script src="ks-motion.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
-<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="markup-calculator-redesign.css?v=86.53.pricing1">
+<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="markup-calculator-redesign.css?v=86.53.pricing1"><link rel="stylesheet" href="markup-calculator-floating.css?v=86.53.float1">
 </head>
 <body data-ks-ui="v2" data-ks-page="simple-markup-calculator">
 
@@ -1023,10 +1023,11 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
             </section>
 
             <aside class="pricing-sidebar" aria-label="Pricing results and quick calculator">
-              <section class="calculator-card result-card" id="pricingResults" aria-label="Live pricing results">
-                <div class="result-card-heading">
+              <section class="calculator-card result-card" id="pricingResults" aria-label="Live pricing results" aria-labelledby="pricingFloatTitle">
+                <div class="result-card-heading ks-float-handle" data-float-handle="quote">
+                  <button class="ks-float-close" type="button" data-close-float="quote" aria-label="Close quotation snapshot" title="Close">×</button>
                   <span class="result-card-eyebrow"><span class="live-indicator" aria-hidden="true"></span> LIVE PRICING</span>
-                  <h2>Quotation snapshot</h2>
+                  <h2 id="pricingFloatTitle">Quotation snapshot</h2>
                   <p>Every cost, margin and profit figure in one place.</p>
                 </div>
                 <div class="job-dashboard">
@@ -1079,15 +1080,16 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
               </section>
 
             <!-- Basic Calculator -->
-            <div class="calculator-card basic-card">
-                <div class="basic-calc-header">
+            <section class="calculator-card basic-card" id="basicCalculatorPanel" aria-labelledby="basicFloatTitle">
+                <div class="basic-calc-header ks-float-handle" data-float-handle="basic">
+                    <button class="ks-float-close" type="button" data-close-float="basic" aria-label="Close basic calculator" title="Close">×</button>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
                         <rect x="4" y="2" width="16" height="20" rx="2"></rect>
                         <line x1="8" y1="6" x2="16" y2="6"></line>
                         <line x1="8" y1="10" x2="16" y2="10"></line>
                         <line x1="8" y1="14" x2="12" y2="14"></line>
                     </svg>
-                    <h2>Basic Calculator</h2>
+                    <h2 id="basicFloatTitle">Basic Calculator</h2>
                 </div>
                 <div class="calculator-display">
                     <div class="expression-line" id="expressionLine"></div>
@@ -1115,11 +1117,15 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <button class="calc-btn equals" id="btnEquals">=</button>
                     <div></div>
                 </div>
-            </div>
+            </section>
             </aside>
         </div>
     </main>
 
+    <nav class="ks-floating-dock no-print" id="pricingFloatDock" aria-label="Floating calculator tools">
+      <button type="button" id="toggleQuotationFloat" class="ks-float-trigger" aria-controls="pricingResults" aria-expanded="false"><span aria-hidden="true">▤</span> Quotation</button>
+      <button type="button" id="toggleBasicFloat" class="ks-float-trigger" aria-controls="basicCalculatorPanel" aria-expanded="false"><span aria-hidden="true">⌗</span> Calculator</button>
+    </nav>
     <div class="toast" id="toast"></div>
 
     <script>
@@ -1611,6 +1617,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 })();
 </script>
 
+<script src="markup-calculator-floating.js?v=86.53.float1" defer></script>
 <script src="shared-sync.js" defer></script>
 
 <footer class="ks-version-footer no-print" aria-label="Build version">v86.41</footer>

@@ -1,0 +1,86 @@
+/* KIDZSTUDIOS floating quotation and basic calculator. Visual only: no pricing formulas changed. */
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready .calculator-container{
+  grid-template-columns:minmax(0,1fr)!important;max-width:850px!important;
+}
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready .pricing-sidebar{display:none!important}
+@media(min-width:1200px){
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .calculator-container{
+    max-width:min(850px,calc(100vw - 460px))!important;margin-left:max(12px,calc((100vw - 1400px)/2))!important;margin-right:auto!important;
+  }
+}
+body[data-ks-page="simple-markup-calculator"] .ks-floating-dock{display:none}
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-floating-dock{
+  display:flex!important;gap:8px;position:fixed;z-index:7000;
+  right:clamp(12px,2vw,26px);bottom:calc(16px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.94);border:1px solid #e4e8e2;
+  padding:7px;border-radius:999px;box-shadow:0 15px 48px rgba(23,35,29,.16);
+  backdrop-filter:blur(18px);max-width:calc(100vw - 24px);
+}
+body[data-ks-page="simple-markup-calculator"] .ks-float-trigger{
+  border:0;border-radius:999px;background:transparent;color:#445148;
+  font:800 12px/1.2 Inter,system-ui,sans-serif;padding:11px 16px;
+  min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;white-space:nowrap;
+}
+body[data-ks-page="simple-markup-calculator"] .ks-float-trigger span{color:#e96732;font-size:20px;line-height:0}
+body[data-ks-page="simple-markup-calculator"] .ks-float-trigger[aria-expanded="true"]{background:#263229;color:#fff}
+body[data-ks-page="simple-markup-calculator"] .ks-float-trigger[aria-expanded="true"] span{color:#ffb38c}
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-float-window{
+  position:fixed!important;z-index:6800!important;right:20px;top:94px;
+  width:min(385px,calc(100vw - 28px))!important;
+  max-height:calc(100dvh - 180px);overflow-y:auto;overscroll-behavior:contain;
+  margin:0!important;box-shadow:0 23px 75px rgba(21,33,25,.20)!important;
+  border:1px solid #e1e8df!important;border-radius:20px!important;
+}
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready #basicCalculatorPanel.ks-float-window{width:min(320px,calc(100vw - 28px))!important;right:420px;top:132px}
+body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-float-window[hidden]{display:none!important}
+body[data-ks-page="simple-markup-calculator"] .ks-float-handle{cursor:grab;touch-action:none;position:relative;user-select:none}
+body[data-ks-page="simple-markup-calculator"] .ks-float-handle:active{cursor:grabbing}
+body[data-ks-page="simple-markup-calculator"] .ks-float-close{
+  position:absolute;right:12px;top:12px;z-index:3;width:30px;height:30px;
+  display:grid;place-items:center;border-radius:50%;border:1px solid #e5e9e2;
+  background:#fff;color:#536055;font:750 20px/1 system-ui,sans-serif;cursor:pointer;
+}
+body[data-ks-page="simple-markup-calculator"] .result-card-heading{padding-right:49px}
+body[data-ks-page="simple-markup-calculator"] .basic-calc-header{padding-right:40px;min-height:34px}
+body[data-ks-page="simple-markup-calculator"] .ks-float-trigger:focus-visible,
+body[data-ks-page="simple-markup-calculator"] .ks-float-close:focus-visible{outline:3px solid #f59b65;outline-offset:2px}
+@media(max-width:1199px){
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-float-window{
+    left:auto!important;right:14px!important;top:84px!important;
+    width:min(390px,calc(100vw - 28px))!important;max-height:calc(100dvh - 164px);
+  }
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #basicCalculatorPanel.ks-float-window{
+    left:auto!important;right:14px!important;top:84px!important;
+    width:min(340px,calc(100vw - 28px))!important;
+  }
+}
+@media(max-width:600px){
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-float-window,
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #basicCalculatorPanel.ks-float-window{
+    left:10px!important;right:10px!important;top:auto!important;
+    bottom:calc(88px + env(safe-area-inset-bottom))!important;
+    width:calc(100vw - 20px)!important;max-height:min(72dvh,690px)!important;
+    border-radius:18px!important;
+  }
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-floating-dock{
+    left:50%;right:auto;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));
+    width:max-content;justify-content:center;
+  }
+  body[data-ks-page="simple-markup-calculator"] .ks-float-trigger{padding:10px 13px;font-size:11px;min-height:38px}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #pricingResults.ks-float-window{padding:12px!important}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #basicCalculatorPanel.ks-float-window{padding:14px!important}
+  body[data-ks-page="simple-markup-calculator"] .ks-float-handle{cursor:default;touch-action:auto}
+  body[data-ks-page="simple-markup-calculator"] .result-card-heading{padding:17px 44px 16px 15px}
+}
+@media print{
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-floating-dock{display:none!important}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .pricing-sidebar{display:block!important;position:static!important}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready .ks-float-window{position:static!important;width:100%!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:1px solid #ccc!important}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #pricingResults[hidden]{display:block!important}
+  body[data-ks-page="simple-markup-calculator"].ks-floating-ready #basicCalculatorPanel{display:none!important}
+  body[data-ks-page="simple-markup-calculator"] .ks-float-close{display:none!important}
+}
+/* If scripts are blocked, retain the original inline results without inert close controls. */
+body[data-ks-page="simple-markup-calculator"]:not(.ks-floating-ready) .ks-float-close{display:none!important}
+body[data-ks-page="simple-markup-calculator"]:not(.ks-floating-ready) .ks-float-handle{cursor:default;touch-action:auto}
