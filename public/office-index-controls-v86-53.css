@@ -1,0 +1,94 @@
+/* KIDZSTUDIOS V86.53 UI patch: office controls only. No simulation changes. */
+/* Reset AI, fullscreen and camera controls share one pill-style upper toolbar. */
+body.ks-dashboard #mapShell .ks-living-controls{
+  z-index:42!important;top:12px!important;left:clamp(10px,1.2vw,22px)!important;
+  max-width:calc(100% - 24px)!important;display:flex!important;flex-wrap:wrap!important;
+  align-items:center!important;gap:6px!important;pointer-events:none;
+}
+body.ks-dashboard #mapShell .ks-living-controls > :is(button,.ks-living-camera-tools){pointer-events:auto}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen{
+  min-height:32px!important;height:32px!important;display:inline-flex!important;
+  justify-content:center;align-items:center;gap:6px;
+  border-radius:999px!important;border:1px solid #e5e6e2!important;
+  background:rgba(255,255,255,.96)!important;color:#656d6b!important;
+  box-shadow:0 3px 14px rgba(35,44,37,.06)!important;
+  font:750 11px/1.2 Inter,Arial,sans-serif!important;padding:5px 12px!important;
+  white-space:nowrap;flex-shrink:0;cursor:pointer;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen:hover,
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen:focus-visible{
+  background:#fff8f2!important;color:#bc6330!important;border-color:#eebc9b!important;
+}
+/* Move existing zoom + rotate buttons as a single compact pill group. */
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools{
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  gap:2px!important;padding:3px!important;flex-shrink:0;
+  background:rgba(255,255,255,.96)!important;
+  border:1px solid #e5e6e2!important;border-radius:999px!important;
+  box-shadow:0 3px 14px rgba(35,44,37,.06)!important;
+  backdrop-filter:blur(8px);overflow:visible!important;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools .tool-btn{
+  display:grid!important;place-items:center!important;flex:0 0 30px!important;
+  width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;
+  border:0!important;border-radius:999px!important;background:transparent!important;
+  box-shadow:none!important;padding:0!important;color:#59636b!important;
+  font-size:19px!important;line-height:1!important;cursor:pointer;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools .tool-btn:hover,
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools .tool-btn:focus-visible{
+  background:#fff2e8!important;color:#bb6233!important;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools .ks-quick-rotate{font-size:18px!important}
+/* The original camera rotation bar remains in the DOM for the 3D readout,
+   but is no longer a second visible set of controls. Quality remains below. */
+body.ks-dashboard #mapShell .map-tools .rotation-control{display:none!important}
+body.ks-dashboard #mapShell .map-tools{
+  right:12px!important;left:auto!important;bottom:12px!important;top:auto!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  width:auto!important;max-width:calc(100% - 24px)!important;transform:none!important;
+}
+/* Chat is centered along the bottom of the scene instead of right-docked. */
+@media(min-width:921px){
+  body.ks-dashboard #mapShell #chatLauncher{
+    left:50%!important;right:auto!important;bottom:14px!important;top:auto!important;
+    translate:-50% 0!important;transform:none;
+  }
+  body.ks-dashboard #mapShell #officeChat{
+    left:50%!important;right:auto!important;bottom:68px!important;
+    translate:-50% 10px!important;
+    width:min(370px,calc(100% - 28px))!important;
+  }
+  body.ks-dashboard #mapShell #officeChat.open{translate:-50% 0!important}
+}
+/* Keep the Following notification centered near the top of the office. */
+body.ks-dashboard #mapShell #followChip{
+  position:absolute!important;left:50%!important;right:auto!important;
+  top:58px!important;bottom:auto!important;
+  translate:-50% -6px!important;z-index:40!important;
+  max-width:min(280px,calc(100% - 20px))!important;
+}
+body.ks-dashboard #mapShell #followChip.show{translate:-50% 0!important}
+@media(max-width:920px){
+  body.ks-dashboard #mapShell .ks-living-controls{
+    top:8px!important;left:8px!important;right:8px!important;
+    max-width:calc(100% - 16px)!important;gap:4px!important;
+  }
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen{
+    min-width:33px!important;width:33px!important;height:32px!important;
+    padding:4px!important;font-size:16px!important;
+  }
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen span{display:none!important}
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-camera-tools .tool-btn{
+    flex-basis:30px!important;width:30px!important;min-width:30px!important;
+    height:30px!important;min-height:30px!important;
+  }
+  body.ks-dashboard #mapShell #followChip{top:94px!important}
+  /* Mobile already has its own Chat tab; do not create a competing launcher. */
+  body.ks-dashboard #mapShell #chatLauncher{display:none!important}
+}
+@media(max-width:360px){
+  body.ks-dashboard #mapShell #followChip{top:100px!important}
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-reset{padding:5px 8px!important}
+}
+@media print{body.ks-dashboard #mapShell .ks-living-controls{display:none!important}}
