@@ -93,6 +93,8 @@ jobs:
         run: npm exec --prefix source -- playwright install --with-deps chromium
       - name: Test auth recovery in Chromium
         run: node scripts/test-v86-43-auth-browser.mjs
+      - name: Test Excel import and download in Chromium
+        run: node scripts/test-v86-53-excel-browser.mjs
       - name: Test rebuilt 3D in WebGL
         run: node scripts/test-v86-22-browser.mjs
       - name: Stamp current build version

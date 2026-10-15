@@ -165,8 +165,8 @@
   <script src="office-command-data.js"></script>
   <script src="job-attention-queue.js"></script>
   <script src="office-pulse-insights.js?v=86.38"></script>
-  <script src="job-data.js"></script>
-  <script src="office-workbook.js"></script>
+  <script src="job-data.js?v=86.53.excel2"></script>
+  <script src="office-workbook.js?v=86.53.excel2"></script>
 <script src="ks-motion.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
@@ -197,7 +197,7 @@
     <div class="hero-actions v44-actions">
       <details class="tools-menu"><summary class="btn">Tools <span>⌄</span></summary><div class="tools-popover">
         <button class="tools-action" id="importExcelBtn" type="button"><b>▧</b><span>Import Excel Workbook<small>XLSX preview, backup and replace</small></span></button>
-        <input id="importExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Choose Excel job workbook">
+
         <button class="tools-action" id="importLocalBtn" type="button"><b>▤</b><span>Import CSV / TSV / JSON<small>Preview and back up before replacing</small></span></button>
         <input id="importLocalFile" type="file" accept=".csv,.tsv,.json,text/csv,application/json" hidden aria-label="Select job data file">
         <button class="tools-action" id="importBtn"><b>⇩</b><span>Import Google Sheet<small>Replace shared jobs from Sheet</small></span></button>
@@ -205,6 +205,9 @@
         <button class="tools-action" id="exportBtn"><b>⇧</b><span>Export Data<small>CSV, yearly summary or JSON backup</small></span></button>
         <button class="tools-action" id="manageOptionsBtn"><b>⚙</b><span>Dropdown Settings<small>Edit, add or remove shared options</small></span></button>
       </div></details>
+      <button class="btn" id="importExcelQuick" type="button" title="Preview an Excel job workbook before replacement">Import Excel</button>
+      <button class="btn" id="downloadExcelQuick" type="button" title="Download all jobs as an Excel workbook">Download Excel</button>
+      <input id="importExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Choose Excel job workbook">
       <button class="btn primary" id="addBtn">＋ Add Job</button>
     </div>
   </section>
@@ -770,14 +773,24 @@ async function importLocalFile(file){
 let excelPreview=null;
 function closeExcelImport(){if($('#excelImportConfirm').disabled&&excelPreview?.saving)return;excelPreview=null;$('#excelImportModal').classList.remove('open');$('#excelImportModal').setAttribute('aria-hidden','true')}
 function exportExcel(list,name){
- const headers=FIELDS.map(([label])=>label),rows=list.map(j=>FIELDS.map(([,key])=>j[key]??''));
- const workbook=window.KSOfficeWorkbook.makeXlsx(headers,rows,{sheetName:'Job Management'});
- downloadBlob(workbook,name);toast(`${list.length} rows exported to Excel`);
+ try{
+  if(!window.KSOfficeWorkbook?.makeXlsx)throw Error('Excel tools are unavailable. Reload Job Management and retry.');
+  const headers=FIELDS.map(([label])=>label),rows=list.map(j=>FIELDS.map(([,key])=>j[key]??''));
+  const workbook=window.KSOfficeWorkbook.makeXlsx(headers,rows,{sheetName:'Job Management'});
+  downloadBlob(workbook,name);
+  toast(list.length?`${list.length} jobs downloaded as Excel`:'Blank Excel template downloaded');
+  return true;
+ }catch(error){
+  setJobWarning(`Excel download failed: ${error.message||'Unable to create workbook'}`);
+  toast('Excel download failed. See the warning above.');return false;
+ }
 }
 async function previewExcel(file){
  if(!file)return;
  excelPreview=null;$('#importExcelBtn').disabled=true;
  try{
+  if(!/\.xlsx$/i.test(file.name||''))throw Error('Select an .xlsx workbook, not .xls or .csv.');
+  if(!window.KSOfficeWorkbook?.readXlsx||!window.KSJobData?.recordsFromGrid)throw Error('Excel tools did not load. Reload Job Management and retry.');
   const book=await window.KSOfficeWorkbook.readXlsx(file);
   const list=window.KSJobData.recordsFromGrid(book.headers,book.rows,FIELDS,{date1904:book.date1904});
   if(!list.length)throw Error('Excel workbook has no valid job records');
@@ -805,7 +818,15 @@ async function confirmExcelImport(){
  }finally{preview.saving=false;$('#excelImportConfirm').disabled=false;$('#excelImportConfirm').textContent='Backup & Replace'}
 }
 function csvValue(v){return window.KSJobData.csvValue(v)}
-function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
+function downloadBlob(blob,name){
+ if(!(blob instanceof Blob)||blob.size===0)throw Error('The download file is empty');
+ const u=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=u;a.download=name;a.rel='noopener';a.style.display='none';
+ document.body.appendChild(a);
+ // Give browsers time to start saving before releasing the Blob URL.
+ try{a.click()}catch(error){URL.revokeObjectURL(u);a.remove();throw error}
+ setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},60000);
+}
 function exportRowsCsv(list,name){const head=FIELDS.map(x=>x[0]);const csv=[head.map(csvValue).join(','),...list.map(j=>FIELDS.map(([,k])=>csvValue(j[k])).join(','))].join('\r\n');downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),name);toast(`${list.length} jobs exported`)}
 function exportAllCsv(){exportRowsCsv(jobs,'kidzstudios-jobs-all.csv')}
 function exportCurrent(){exportRowsCsv(filtered().map(x=>x.j),`kidzstudios-current-view-${selectedYear}-${selectedMonth==='all'?'all-months':String(Number(selectedMonth)+1).padStart(2,'0')}.csv`)}function exportPeriod(){exportRowsCsv(periodJobs(),`kidzstudios-${selectedMonth==='all'?'year':MONTHS[Number(selectedMonth)].toLowerCase()}-${selectedYear}.csv`)}function exportYear(){exportRowsCsv(jobsForYear(selectedYear),`kidzstudios-full-year-${selectedYear}.csv`)}
@@ -825,7 +846,7 @@ $('#resetOptionsBtn').onclick=()=>{optionDraft[optionActiveField]=cleanOptionLis
 $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'').trim();if(!v)return;collectOptionRows();optionDraft[optionActiveField]=cleanOptionList([...(optionDraft[optionActiveField]||[]),v]);markOptionsDirty(`Added “${v}”`);renderOptionManagerField()};
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
-$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const idx=editingIndex,j=jobs[idx];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{if(version!==editorBaseVersion){setJobWarning('Data changed. Reopen the job before deleting.');return}const next=jobs.filter((_,i)=>i!==idx);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=importSheet;$('#importExcelBtn').onclick=()=>$('#importExcelFile').click();$('#importExcelFile').addEventListener('change',e=>previewExcel(e.target.files?.[0]));$('#excelImportClose').onclick=$('#excelImportCancel').onclick=closeExcelImport;$('#excelImportConfirm').onclick=confirmExcelImport;$('#importLocalBtn').onclick=()=>$('#importLocalFile').click();$('#importLocalFile').addEventListener('change',e=>importLocalFile(e.target.files?.[0]));$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=Number(e.target.value);selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportCsvAll').onclick=()=>{exportAllCsv();closeExport()};$('#exportCurrent').onclick=()=>{exportCurrent();closeExport()};$('#exportPeriod').onclick=()=>{exportPeriod();closeExport()};$('#exportYear').onclick=()=>{exportYear();closeExport()};$('#exportSummary').onclick=()=>{exportSummary();closeExport()};$('#exportBackup').onclick=()=>{exportBackup();closeExport()};$('#exportExcelCurrent').onclick=()=>{exportExcel(filtered().map(x=>x.j),'kidzstudios-jobs-current.xlsx');closeExport()};$('#exportExcelAll').onclick=()=>{exportExcel(jobs,'kidzstudios-jobs-all.xlsx');closeExport()};$('#exportExcelTemplate').onclick=()=>{exportExcel([],'kidzstudios-jobs-template.xlsx');closeExport()};
+$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const idx=editingIndex,j=jobs[idx];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{if(version!==editorBaseVersion){setJobWarning('Data changed. Reopen the job before deleting.');return}const next=jobs.filter((_,i)=>i!==idx);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=importSheet;$('#importExcelBtn').onclick=$('#importExcelQuick').onclick=()=>$('#importExcelFile').click();$('#downloadExcelQuick').onclick=()=>exportExcel(jobs,jobs.length?'kidzstudios-jobs-all.xlsx':'kidzstudios-jobs-template.xlsx');$('#importExcelFile').addEventListener('change',e=>previewExcel(e.target.files?.[0]));$('#excelImportClose').onclick=$('#excelImportCancel').onclick=closeExcelImport;$('#excelImportConfirm').onclick=confirmExcelImport;$('#importLocalBtn').onclick=()=>$('#importLocalFile').click();$('#importLocalFile').addEventListener('change',e=>importLocalFile(e.target.files?.[0]));$('#exportBtn').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=Number(e.target.value);selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;$('#exportCsvAll').onclick=()=>{exportAllCsv();closeExport()};$('#exportCurrent').onclick=()=>{exportCurrent();closeExport()};$('#exportPeriod').onclick=()=>{exportPeriod();closeExport()};$('#exportYear').onclick=()=>{exportYear();closeExport()};$('#exportSummary').onclick=()=>{exportSummary();closeExport()};$('#exportBackup').onclick=()=>{exportBackup();closeExport()};$('#exportExcelCurrent').onclick=()=>{exportExcel(filtered().map(x=>x.j),'kidzstudios-jobs-current.xlsx');closeExport()};$('#exportExcelAll').onclick=()=>{exportExcel(jobs,'kidzstudios-jobs-all.xlsx');closeExport()};$('#exportExcelTemplate').onclick=()=>{exportExcel([],'kidzstudios-jobs-template.xlsx');closeExport()};
 $('#jobViewTable').addEventListener('click',()=>showJobView('table'));
 $('#jobViewQueue').addEventListener('click',()=>showJobView('queue'));
 $('#attentionCategory').addEventListener('change',renderActionQueue);

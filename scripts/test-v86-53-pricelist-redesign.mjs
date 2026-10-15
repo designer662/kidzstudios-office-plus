@@ -4,10 +4,11 @@ import { readFileSync, existsSync } from 'node:fs';
 const html=readFileSync('public/pricelist-calculator.html','utf8');
 const css=readFileSync('public/pricelist-redesign-v86-53.css','utf8');
 
-assert.match(html,/pricelist-redesign-v86-53\.css\?v=86\.53\.p1/,'New stylesheet is versioned for GitHub Pages cache');
+assert.match(html,/pricelist-redesign-v86-53\.css\?v=86\.53\.p2/,'New stylesheet is versioned for GitHub Pages cache');
 assert.match(html,/<div class="ks-price-hero"/,'New pricing heading remains inline, not floating');
 assert.match(html,/Price List &amp; Quotation/);
-assert.match(html,/class="ks-price-flow"/);
+assert.doesNotMatch(html,/class="ks-price-flow"/,'Remove decorative workflow step badges');
+assert.match(html,/pricelist-clean-v86-53\.css\?v=86\.53\.clean1/,'Clean theme loads after existing pricing styles');
 assert.match(css,/\.layout-wrapper\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/,'Balanced two-column workspace');
 assert.match(css,/@media\(max-width:650px\)/,'Responsive compact layout');
 assert.match(css,/@media\(max-width:350px\)/,'Narrow phone support');

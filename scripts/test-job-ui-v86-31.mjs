@@ -10,7 +10,7 @@ for(const [name,page] of [['index.html',index],['job-management.html',html]]){
 for(const id of ['importExcelBtn','importExcelFile','excelImportModal','excelImportConfirm','excelImportSummary','exportExcelCurrent','exportExcelAll','exportExcelTemplate','importLocalBtn','importLocalFile']){
  assert(html.includes(`id="${id}"`),`Missing functional control: ${id}`);
 }
-for(const src of ['job-data.js','office-workbook.js','job-rules.js'])assert(html.includes(`src="${src}"`),`Missing reusable dependency ${src}`);
+for(const src of ['job-data.js','office-workbook.js','job-rules.js'])assert(new RegExp(`src="${src.replaceAll('.', '\\.').replaceAll('-', '-')}(?:\\?[^"]+)?"`).test(html),`Missing reusable dependency ${src}`);
 for(const id of ['fJobsheetFiles','fCustomer','fOrderDate','fQuantity','fArtworkLink','fInvoiceAmount'])assert(html.includes(`for="${id}"`),`Accessible label missing ${id}`);
 assert(html.includes('aria-invalid'), 'Form fields must expose invalid states');
 assert(html.includes('100dvh - 16px'),'Editor must be viewport/keyboard height aware');

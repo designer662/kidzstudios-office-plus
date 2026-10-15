@@ -79,8 +79,13 @@
       const entry=files.get(name);if(!entry)return null;
       if(entry.method===0)return dec.decode(entry.raw);
       if(entry.method!==8)throw Error('Unsupported Excel compression method');
-      if(!('DecompressionStream' in window))throw Error('Your browser cannot decompress XLSX files; use the latest Chrome or Edge');
-      const raw=await new Response(new Blob([entry.raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+      if(!('DecompressionStream' in window))throw Error('This browser cannot read compressed Excel files. Try an updated Chrome or Edge.');
+      let stream;
+      try { stream=new DecompressionStream('deflate-raw'); }
+      catch { throw Error('This browser does not support Excel ZIP compression. Try an updated Chrome or Edge.'); }
+      let raw;
+      try { raw=await new Response(new Blob([entry.raw]).stream().pipeThrough(stream)).arrayBuffer(); }
+      catch { throw Error('Excel file is damaged or uses unsupported compression. Export the workbook again as XLSX.'); }
       if(raw.byteLength>32_000_000)throw Error('Excel worksheet too large');
       return dec.decode(raw);
     };
@@ -88,6 +93,7 @@
   }
   const pathJoin=(base,target)=>{
     if(target.startsWith('/'))return target.slice(1);
+    if(target.startsWith('xl/'))return target;
     const segments=[...base.split('/').slice(0,-1),...target.split('/')],parts=[];
     for(const s of segments){if(s==='..')parts.pop();else if(s&&s!=='.')parts.push(s)}return parts.join('/');
   };
@@ -101,7 +107,7 @@
     const sheets=byName(wb,'sheet');
     if(!sheets.length)throw Error('Workbook has no worksheets');
     let firstValid=null;
-    for(let sheetIndex=0;sheetIndex<Math.min(8,sheets.length);sheetIndex++){
+    for(let sheetIndex=0;sheetIndex<Math.min(20,sheets.length);sheetIndex++){
       const sh=sheets[sheetIndex];const rid=sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
       const target=relations.get(rid)||`worksheets/sheet${sheetIndex+1}.xml`,name=pathJoin('xl/workbook.xml',target),sheetXml=await archive.get(name);
       if(!sheetXml)continue;
