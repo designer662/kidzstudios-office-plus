@@ -1049,7 +1049,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.3"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
+<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.4"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
 <body class="ks-dashboard">
 <div class="app" id="app" data-theme="light">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -1129,13 +1129,6 @@ body{overscroll-behavior:none;}
       </div>
       <span class="live-feed-count" id="liveFeedCount" aria-live="polite">0 updates</span>
     </div>
-    <div class="live-feed-actions">
-      <input type="search" id="liveFeedSearch" class="live-feed-search" placeholder="Find an update…" aria-label="Search live office updates">
-      <button id="liveFeedPause" type="button" aria-pressed="false" title="Pause live feed display">Pause</button>
-      <button id="liveFeedRefresh" type="button" title="Check for new shared office updates">Refresh</button>
-      <button id="liveFeedMore" type="button" aria-expanded="false" title="Show additional activity">More</button>
-    </div>
-    <div id="liveFeedFeedback" class="live-feed-feedback" role="status" aria-live="polite"></div>
     <div class="activity-list" id="activityList" aria-label="Recent office updates"></div>
     <section id="liveFeedDetail" class="live-feed-detail" aria-label="Activity details" hidden>
       <div class="live-feed-detail-head"><strong id="liveDetailTitle">Activity</strong><button type="button" id="liveDetailClose" aria-label="Close activity details">×</button></div>
@@ -2265,10 +2258,10 @@ body{overscroll-behavior:none;}
   function updateStats(){const list=activeDept==='All'?employees:employees.filter(e=>e.department===activeDept),counts=countStatuses(list);$$('.stat-num').forEach(n=>animateNum(n,counts[n.dataset.stat]||0))}
   function activityFeedGlyph(type=''){const t=String(type||'').toLowerCase();if(t.includes('chat'))return'✦';if(t.includes('workload'))return'≡';if(t.includes('job_sync'))return'↻';if(t.includes('job'))return'▦';if(t.includes('artwork')||t.includes('design'))return'◇';if(t.includes('production'))return'▣';if(t.includes('order'))return'＋';if(t.includes('staff'))return'●';if(t.includes('presence'))return'↝';if(t.includes('time_brief'))return'◷';return'•'}
   function groupedActivityFeed(){const out=[];for(const a of activityFeed){const key=`${a.type||''}|${a.employeeId||''}|${a.title||''}|${a.text||''}`,prev=out.find(x=>x._key===key&&Math.abs((x.createdAt||0)-(a.createdAt||0))<10*60000);if(prev){prev.groupCount=(prev.groupCount||1)+1;prev.createdAt=Math.max(prev.createdAt||0,a.createdAt||0)}else out.push({...a,_key:key,groupCount:1})}return out}
-  // Live Activity tools are local presentation controls. They never modify shared events.
-  let liveFeedFilter='all',liveFeedSearch='',liveFeedPaused=false,liveFeedShowAll=false;
-  let livePausedSnapshot=[],liveVisibleRows=[];
-  const liveFeedCount=$('#liveFeedCount'),liveFeedFeedback=$('#liveFeedFeedback');
+  // Live Activity updates automatically. Category filters and event details remain interactive.
+  let liveFeedFilter='all';
+  let liveVisibleRows=[];
+  const liveFeedCount=$('#liveFeedCount');
   const liveFeedDetail=$('#liveFeedDetail');
   function liveFeedCategory(a){
     const type=String(a.type||a.eventType||'').toLowerCase();
@@ -2292,35 +2285,14 @@ body{overscroll-behavior:none;}
     $$('#livePanel [data-live-filter]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});
     closeLiveFeedDetail();renderFeed();
   }));
-  $('#liveFeedSearch').addEventListener('input',event=>{liveFeedSearch=event.target.value.trim().toLocaleLowerCase();closeLiveFeedDetail();renderFeed()});
-  $('#liveFeedPause').addEventListener('click',()=>{
-    liveFeedPaused=!liveFeedPaused;
-    livePausedSnapshot=liveFeedPaused?groupedActivityFeed():[];
-    $('#liveFeedPause').textContent=liveFeedPaused?'Resume':'Pause';
-    $('#liveFeedPause').setAttribute('aria-pressed',String(liveFeedPaused));
-    liveFeedFeedback.textContent=liveFeedPaused?'Feed display paused. New updates are still received.':'Live updates resumed.';
-    closeLiveFeedDetail();renderFeed();
-  });
-  $('#liveFeedMore').addEventListener('click',()=>{
-    liveFeedShowAll=!liveFeedShowAll;
-    $('#liveFeedMore').textContent=liveFeedShowAll?'Less':'More';
-    $('#liveFeedMore').setAttribute('aria-expanded',String(liveFeedShowAll));
-    closeLiveFeedDetail();renderFeed();
-  });
-  $('#liveFeedRefresh').addEventListener('click',async()=>{
-    const button=$('#liveFeedRefresh');button.disabled=true;liveFeedFeedback.textContent='Checking for new office updates…';
-    try{const ok=await pullOfficeEvents();liveFeedFeedback.textContent=ok?'Activity checked.':'Unable to refresh activity. Existing updates are retained.';renderFeed()}
-    finally{button.disabled=false}
-  });
   function renderFeed(){
     if(!activityList)return;
-    const base=liveFeedPaused?livePausedSnapshot:groupedActivityFeed();
-    const feed=base.filter(a=>(liveFeedFilter==='all'||liveFeedCategory(a)===liveFeedFilter)&&(!liveFeedSearch||`${a.title||''} ${a.text||''} ${a.type||''}`.toLocaleLowerCase().includes(liveFeedSearch)));
-    const count=liveFeedShowAll||livePanel&&livePanel.classList.contains('expanded')?feed.length:4;
+    const feed=groupedActivityFeed().filter(a=>liveFeedFilter==='all'||liveFeedCategory(a)===liveFeedFilter);
+    const count=livePanel&&livePanel.classList.contains('expanded')?feed.length:4;
     liveVisibleRows=feed.slice(0,count);
-    if(liveFeedCount)liveFeedCount.textContent=`${feed.length} update${feed.length===1?'':'s'}${liveFeedPaused?' · paused':''}`;
+    if(liveFeedCount)liveFeedCount.textContent=`${feed.length} update${feed.length===1?'':'s'}`;
     if(!feed.length){
-      const label=liveFeedSearch?'No updates match this search.':liveFeedFilter==='all'?'No office activity yet.':`No ${liveFeedFilter==='team'?'team':'job'} updates yet.`;
+      const label=liveFeedFilter==='all'?'No office activity yet.':`No ${liveFeedFilter==='team'?'team':'job'} updates yet.`;
       activityList.innerHTML=`<div class="live-feed-empty"><span aria-hidden="true">◷</span><b>All caught up</b><small>${label}</small></div>`;
       return;
     }
@@ -2654,7 +2626,7 @@ body{overscroll-behavior:none;}
   furnitureLayer.onclick=e=>{if(performance.now()<suppressClickUntil)return;const hit=e.target.closest('.desk-hit');if(!hit)return;e.stopPropagation();const emp=employeeById[Number(hit.dataset.employeeId)]||null;if(emp){openEmployee(emp);focusEmployee(emp)}else{pushActivity({title:`${hit.dataset.deskId||'Workstation'} · Available`,text:'No staff assigned',avatar:'DS'})}};
   activityList.onclick=e=>{const row=e.target.closest('[data-activity-index]');if(row)openLiveFeedDetail(Number(row.dataset.activityIndex))};
   if(opsExpandBtn)opsExpandBtn.onclick=e=>{e.stopPropagation();const expanding=!todayPanel.classList.contains('expanded');if(expanding){clearEmployeeSelection();contextCard.classList.remove('open')}const expanded=todayPanel.classList.toggle('expanded');opsExpandBtn.textContent=expanded?'⤡':'⤢';opsExpandBtn.setAttribute('aria-expanded',String(expanded));opsExpandBtn.setAttribute('title',expanded?'Collapse Office Pulse':'Expand Office Pulse')};
-  liveFeedDetail.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeLiveFeedDetail();$('#liveFeedSearch').focus()}});
+  liveFeedDetail.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeLiveFeedDetail();activityList.querySelector('.feed-item')?.focus()}});
   if(chatLauncher)chatLauncher.onclick=()=>setChatOpen(!chatOpen);
   if(chatCloseBtn)chatCloseBtn.onclick=()=>setChatOpen(false);
   if(chatClearBtn)chatClearBtn.onclick=clearOfficeChat;

@@ -17,11 +17,13 @@ assert.match(price,/pricelist-markup-workspace\.css\?v=86\.53\.parity1/,'Price L
 assert.match(style,/\.layout-wrapper\{grid-template-columns:/);
 assert.match(style,/@media\(max-width:580px\)/);
 for(const id of ['comm_type','comm_value','cart-items-container','out_item_total','out_cart_grand','out_cart_deposit'])assert.match(price,new RegExp(`id="${id}"`),`Preserve quote calculation ${id}`);
-for(const id of ['liveFeedSearch','liveFeedPause','liveFeedRefresh','liveFeedMore','liveFeedDetail','liveDetailClose','liveDetailStaff'])assert.match(home,new RegExp(`id="${id}"`),`Live Activity ${id} missing`);
-assert.match(home,/liveFeedPaused\?livePausedSnapshot:groupedActivityFeed\(\)/,'Paused feed must keep a display snapshot');
-assert.match(home,/liveFeedSearch=.*toLocaleLowerCase/,'Search must be normalized');
+for(const id of ['liveFeedDetail','liveDetailClose','liveDetailStaff','liveFeedCount','activityList'])assert.match(home,new RegExp(`id="${id}"`),`Live Activity ${id} missing`);
+for(const id of ['liveFeedSearch','liveFeedPause','liveFeedRefresh','liveFeedMore','liveFeedFeedback'])assert.doesNotMatch(home,new RegExp(`id="${id}"`),`Removed toolbar ${id} must stay absent`);
+for(const fn of ['liveFeedPaused','liveFeedShowAll','livePausedSnapshot'])assert.doesNotMatch(home,new RegExp(fn),`Removed toolbar state ${fn} must stay absent`);
 assert.match(home,/function openLiveFeedDetail\(index\)/,'Rows must expose activity details');
 assert.match(home,/liveFeedDetail\.hidden=false/);
-assert.match(feedCss,/\.live-feed-actions\{/);
+assert.match(home,/groupedActivityFeed\(\)\.filter\(a=>liveFeedFilter===/,'Feed stays live and category filters work');
+assert.match(home,/data-live-filter="jobs"/,'Category filters remain visible');
+assert.doesNotMatch(feedCss,/\.live-feed-actions\{/,'Removed toolbar CSS must not be shipped');
 assert.match(workflow,/test-v86-53-operations-upgrade\.mjs/,'CI must test the upgrade');
-console.log('PASS V86.53 operations upgrade: export feedback, pricelist parity and interactive live feed');
+console.log('PASS V86.53 operations upgrade: export feedback, pricelist parity and live feed without extra toolbar');
