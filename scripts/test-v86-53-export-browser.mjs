@@ -85,14 +85,12 @@ try {
   assert.match(csvText, /TEST-260/, 'Last job must be in CSV');
   assert.equal(csvText.trim().split(/\r?\n/).length, 261, 'CSV must contain a header and 260 rows');
 
-  await page.locator('#exportQuick').click();
   const backupEvent = page.waitForEvent('download');
   await page.locator('#exportBackup').click();
   const backup = JSON.parse(readFileSync(await (await backupEvent).path(), 'utf8'));
   assert.equal(backup.jobs.length, 260, 'JSON backup must contain all shared jobs');
   assert.equal(backup.jobs.at(-1).jobsheetFiles, 'TEST-260');
 
-  await page.locator('#exportQuick').click();
   const xlsxEvent = page.waitForEvent('download');
   await page.locator('#exportExcelAll').click();
   const workbook = await xlsxEvent;
@@ -101,7 +99,6 @@ try {
   assert.equal(xlsxBytes.subarray(0, 4).toString('hex'), '504b0304', 'XLSX should contain a ZIP workbook');
   assert.ok(xlsxBytes.byteLength > 1000, 'XLSX should not be empty');
 
-  await page.locator('#exportQuick').click();
   await page.evaluate(() => {
     window.KSOfficeWorkbook = {makeXlsx() {throw new Error('TEST-XLSX-FAILURE')}};
   });

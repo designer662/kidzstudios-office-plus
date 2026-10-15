@@ -163,6 +163,28 @@
 .export-status{margin:14px 16px 0;padding:10px 12px;border:1px solid #e3e6e3;border-radius:10px;background:#f7f8f7;color:#58635e;font-size:11px;line-height:1.4}
 .export-status[data-state='error']{background:#fff4f2;border-color:#f2c6bd;color:#a43f32}
 .export-status[data-state='success']{background:#eff8f2;border-color:#bfe3cc;color:#267244}
+
+/* V86.53 Data Hub: one source of truth for file exchange and current month. */
+.period-today{height:34px;min-width:96px;border-radius:9px;background:#fff;border:1px solid var(--line);font-size:10px;white-space:nowrap}
+.data-hub-dialog{width:min(720px,100%);max-height:min(90dvh,880px);overflow:auto}
+.data-hub-tabs{display:flex;gap:6px;padding:12px 16px 3px}
+.data-hub-tabs button{flex:1;min-height:42px;background:#f7f7f6;border:1px solid var(--line);color:#636870;font-weight:750;font-size:12px;border-radius:10px;cursor:pointer}
+.data-hub-tabs button[aria-selected="true"]{background:#fff1e8;color:#a94716;border-color:#efc5ab}
+.data-hub-panel[hidden]{display:none!important}
+.data-hub-section-head{display:grid;gap:3px;margin:10px 16px 0;font-size:12px}
+.data-hub-section-head span{font-size:11px;color:var(--muted)}
+.data-hub-dialog .export-grid{padding:10px 16px 14px}
+.data-hub-dialog .export-card{min-height:64px}
+.data-hub-dialog .export-card.featured{background:#fff5ec;border-color:#e8c4a5}
+.data-hub-dialog .export-card.featured b{color:#9b421a}
+.data-hub-import-actions{padding:13px 16px;display:flex;flex-wrap:wrap;gap:9px}
+.data-hub-import-actions>.btn{min-height:42px;height:auto;text-align:center}
+.data-hub-safety{margin:2px 16px 16px;padding:13px;background:#f7f8f7;border:1px solid var(--line);border-radius:11px;font-size:11px;line-height:1.55}
+.data-hub-safety p{margin:5px 0 0;color:#646b70}
+.data-hub-import-mode{padding:10px 16px;display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;gap:9px;font-size:11px;font-weight:750}
+.data-hub-impact{margin:0 16px 12px;background:#f4f6f5;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#505b58;font-size:11px;line-height:1.5}
+.data-hub-dialog .export-foot{padding-bottom:18px}
+@media(max-width:640px){.data-hub-tabs{padding:10px}.data-hub-dialog .export-grid{padding:10px}.data-hub-import-actions{padding:10px}.data-hub-import-mode{grid-template-columns:1fr}.period-today{min-width:82px}.data-hub-tabs button{font-size:11px}}
 </style>
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
@@ -200,20 +222,11 @@
   <section class="hero v44-hero">
     <div><div class="eyebrow">Job Management</div><h1>Jobs</h1><p>Simple daily view with shared editable dropdowns. Full 28-field record remains inside each job.</p></div>
     <div class="hero-actions v44-actions">
-      <details class="tools-menu"><summary class="btn">Tools <span>⌄</span></summary><div class="tools-popover">
-        <button class="tools-action" id="importExcelBtn" type="button"><b>▧</b><span>Import Excel Workbook<small>XLSX preview, backup and replace</small></span></button>
-
-        <button class="tools-action" id="importLocalBtn" type="button"><b>▤</b><span>Import CSV / TSV / JSON<small>Preview and back up before replacing</small></span></button>
-        <input id="importLocalFile" type="file" accept=".csv,.tsv,.json,text/csv,application/json" hidden aria-label="Select job data file">
-        <button class="tools-action" id="importBtn"><b>⇩</b><span>Import Google Sheet<small>Replace shared jobs from Sheet</small></span></button>
+      <details class="tools-menu"><summary class="btn" type="button">Tools <span>⌄</span></summary><div class="tools-popover">
         <a class="tools-action" id="openSheetBtn" href="#" target="_blank" rel="noopener noreferrer"><b>↗</b><span>Open Google Sheet<small>Open original data source</small></span></a>
-        <button class="tools-action" id="exportBtn"><b>⇧</b><span>Export Data<small>CSV, yearly summary or JSON backup</small></span></button>
-        <button class="tools-action" id="manageOptionsBtn"><b>⚙</b><span>Dropdown Settings<small>Edit, add or remove shared options</small></span></button>
+        <button class="tools-action" id="manageOptionsBtn" type="button"><b>⚙</b><span>Dropdown Settings<small>Edit shared dropdown options</small></span></button>
       </div></details>
-      <button class="btn" id="importExcelQuick" type="button" title="Preview an Excel job workbook before replacement">Import Excel</button>
-      <button class="btn" id="downloadExcelQuick" type="button" title="Download all jobs as an Excel workbook">Download Excel</button>
-      <button class="btn" id="exportQuick" type="button" title="Export CSV, Excel, summary or complete JSON backup">Export Data</button>
-      <input id="importExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Choose Excel job workbook">
+      <button class="btn soft" id="exportQuick" type="button" title="Download, export, import and merge shared jobs">⇩⇧ Data Hub · Import / Export</button>
       <button class="btn primary" id="addBtn">＋ Add Job</button>
     </div>
   </section>
@@ -224,6 +237,7 @@
       <div class="period-title"><span>Period</span><b id="periodLabel">All Months</b></div>
       <select class="period-year" id="yearFilter" aria-label="Job year"></select>
       <select class="period-year month-select" id="monthFilter" aria-label="Job month"></select>
+      <button class="btn period-today" id="currentMonthBtn" type="button" title="Jump to the current month">This Month</button>
       <div class="period-note"><span id="periodSummary">0 jobs in selected period</span><span id="undatedSummary">0 undated</span></div>
     </div>
   </section>
@@ -326,28 +340,51 @@
   <div class="dialog-foot"><div class="save-state" id="editorState" role="status" aria-live="polite">Dropdown suggestions are available, but every text field can still accept a manual custom value.</div><div class="form-actions"><button class="btn danger" id="deleteBtn" hidden>Delete</button><button class="btn" id="duplicateBtn" hidden>Duplicate</button><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="saveBtn">Save Job</button></div></div>
 </div></div>
 <div class="modal" id="confirmModal" aria-hidden="true" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmCopy"><div class="dialog" style="width:min(470px,100%)"><div class="dialog-head"><div><span>Confirm</span><h2 id="confirmTitle">Replace jobs?</h2></div><button class="close" id="confirmClose">×</button></div><div class="confirm-copy" id="confirmCopy"></div><div class="dialog-foot"><span></span><div class="form-actions"><button class="btn" id="confirmCancel">Cancel</button><button class="btn primary" id="confirmYes">Continue</button></div></div></div></div>
-<div class="modal" id="exportModal" aria-hidden="true"><div class="dialog" style="width:min(620px,100%)" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
-  <div class="dialog-head"><div><span>Export Job Management</span><h2 id="exportTitle">Export Data</h2></div><button class="close" id="exportClose">×</button></div>
-  <div id="exportStatus" class="export-status" role="status" aria-live="polite">Choose a file format to download.</div>
-  <div class="export-grid">
-    <button class="export-card" id="exportCurrent"><b>Current View · CSV</b><span>Exports the exact 28 Excel columns for the current month and filters.</span></button>
-    <button class="export-card" id="exportPeriod"><b>Selected Period · CSV</b><span>Exports all jobs in the selected month, or all 12 months for the selected year.</span></button>
-    <button class="export-card" id="exportYear"><b>Full Year · CSV</b><span>Exports all dated jobs for the selected year using the original Excel column order.</span></button>
-    <button class="export-card" id="exportSummary"><b>12-Month Summary · CSV</b><span>Month-by-month Orders, Design, Production, Closed, Urgent, Overdue and Total.</span></button>
-    <button class="export-card" id="exportExcelCurrent"><b>Current View · XLSX</b><span>Download the filtered 28-column Excel workbook.</span></button>
-    <button class="export-card" id="exportCsvAll"><b>All Shared Jobs · CSV</b><span>Download the full 28-column job register, including undated records.</span></button>
-    <button class="export-card" id="exportExcelAll"><b>All Shared Jobs · XLSX</b><span>Download all dated and undated jobs.</span></button>
-    <button class="export-card" id="exportExcelTemplate"><b>Blank Excel Template · XLSX</b><span>Get the 28-column Excel import template.</span></button>
-    <button class="export-card full" id="exportBackup"><b>Full Database Backup · JSON</b><span>Exports every shared job with all 28 fields and compatibility metadata.</span></button>
+<div class="modal" id="exportModal" aria-hidden="true"><div class="dialog data-hub-dialog" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+  <div class="dialog-head"><div><span>Shared Job Management · Data Hub</span><h2 id="exportTitle">Import, Export &amp; Download</h2></div><button class="close" id="exportClose" type="button" aria-label="Close Data Hub">×</button></div>
+  <div class="data-hub-tabs" role="tablist" aria-label="Data management actions">
+    <button id="dataHubExportTab" type="button" role="tab" aria-controls="dataHubExportPanel" aria-selected="true">⇩ Download / Export</button>
+    <button id="dataHubImportTab" type="button" role="tab" aria-controls="dataHubImportPanel" aria-selected="false">⇧ Import / Merge</button>
   </div>
-  <div class="export-foot" id="exportFoot">Exports are generated locally from the shared data currently loaded in this browser.</div>
+  <div id="exportStatus" class="export-status" role="status" aria-live="polite">Choose a file format to download.</div>
+  <section id="dataHubExportPanel" class="data-hub-panel" role="tabpanel" aria-labelledby="dataHubExportTab">
+    <div class="data-hub-section-head"><b>Download jobs</b><span>Choose current view, selected month, full database or template</span></div>
+    <div class="export-grid">
+      <button class="export-card featured" id="downloadExcelQuick" type="button"><b>↓ Download Excel · All Jobs</b><span>Complete job register as a 28-column XLSX workbook.</span></button>
+      <button class="export-card" id="exportExcelCurrent" type="button"><b>Current View · XLSX</b><span>Only the jobs shown by the selected month and filters.</span></button>
+      <button class="export-card" id="exportCurrent" type="button"><b>Current View · CSV</b><span>Current month, search and filters.</span></button>
+      <button class="export-card" id="exportPeriod" type="button"><b>Selected Month / Period · CSV</b><span>All jobs from the selected month, ignoring text filters.</span></button>
+      <button class="export-card" id="exportYear" type="button"><b>Full Year · CSV</b><span>All dated jobs for the selected year.</span></button>
+      <button class="export-card" id="exportSummary" type="button"><b>12-Month Summary · CSV</b><span>Monthly workflow and job counts.</span></button>
+      <button class="export-card" id="exportCsvAll" type="button"><b>All Shared Jobs · CSV</b><span>Every loaded job, including undated records.</span></button>
+      <button class="export-card" id="exportExcelAll" type="button"><b>All Shared Jobs · XLSX</b><span>Same full 28-column data as the Download Excel action.</span></button>
+      <button class="export-card" id="exportExcelTemplate" type="button"><b>Blank Excel Template · XLSX</b><span>Official import format for new jobs.</span></button>
+      <button class="export-card full" id="exportBackup" type="button"><b>Full JSON Backup · Restore Compatible</b><span>Includes job metadata, source version and undated records.</span></button>
+    </div>
+  </section>
+  <section id="dataHubImportPanel" class="data-hub-panel" role="tabpanel" aria-labelledby="dataHubImportTab" hidden>
+    <div class="data-hub-section-head"><b>Import &amp; merge</b><span>Preview changes before writing to the shared database</span></div>
+    <div class="data-hub-import-actions">
+      <button class="btn primary" id="importExcelQuick" type="button">↑ Choose Excel / CSV / JSON</button>
+      <button class="btn" id="importExcelBtn" type="button">Import Excel XLSX</button>
+      <button class="btn" id="importLocalBtn" type="button">Import CSV / TSV / JSON</button>
+      <button class="btn" id="importBtn" type="button">Import Google Sheet</button>
+    </div>
+    <input id="importExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Choose Excel job workbook">
+    <input id="importLocalFile" type="file" accept=".csv,.tsv,.json,text/csv,application/json" hidden aria-label="Select CSV TSV or JSON job file">
+    <input id="importUnifiedFile" type="file" accept=".xlsx,.csv,.tsv,.json" hidden aria-label="Choose jobs file to merge or restore">
+    <div class="data-hub-safety"><b>Import safely</b><p><strong>Merge (default):</strong> update matching JOBSHEET/FILES and add new references, keeping unrelated jobs. <strong>Replace all:</strong> restore exactly the imported dataset. Both modes download a JSON backup first and require confirmation.</p></div>
+  </section>
+  <div class="export-foot" id="exportFoot">Exports are generated from the shared jobs loaded in this browser.</div>
 </div></div>
 
 <div class="modal" id="excelImportModal" aria-hidden="true"><div class="dialog" style="width:min(570px,100%)" role="dialog" aria-modal="true" aria-labelledby="excelImportTitle">
   <div class="dialog-head"><div><span>Excel import preview</span><h2 id="excelImportTitle">Review Before Replacing</h2></div><button class="close" id="excelImportClose" type="button" aria-label="Cancel Excel import">×</button></div>
   <div class="confirm-copy" id="excelImportSummary" role="status" aria-live="polite">Select a workbook to review.</div>
+  <div class="data-hub-import-mode"><label for="excelImportMode">Import action</label><select id="excelImportMode" class="select"><option value="merge">Merge by JOBSHEET/FILES (recommended)</option><option value="replace">Replace every shared job (restore)</option></select></div>
+  <div id="excelImportImpact" class="data-hub-impact" role="status" aria-live="polite"></div>
   <div class="excel-import-preview" id="excelImportRows"></div>
-  <div class="dialog-foot"><span class="save-state">Import replaces shared jobs, with a full JSON backup downloaded first.</span><div class="form-actions"><button class="btn" id="excelImportCancel" type="button">Cancel</button><button class="btn primary" id="excelImportConfirm" type="button">Backup &amp; Replace</button></div></div>
+  <div class="dialog-foot"><span class="save-state">A complete JSON backup downloads before any import writes to shared jobs.</span><div class="form-actions"><button class="btn" id="excelImportCancel" type="button">Cancel</button><button class="btn primary" id="excelImportConfirm" type="button">Backup &amp; Replace</button></div></div>
 </div></div>
 <div class="modal" id="optionsModal" aria-hidden="true"><div class="dialog" style="width:min(760px,100%)" role="dialog" aria-modal="true" aria-labelledby="optionsTitle">
   <div class="dialog-head"><div><span>Shared Dropdown Settings</span><h2 id="optionsTitle">Manage Dropdown Options</h2></div><button class="close" id="optionsClose">×</button></div>
@@ -412,7 +449,9 @@ const DEFAULT_DROPDOWN_OPTIONS={
 };
 
 let queueLoadState='loading',queueError='',jobsEverLoaded=false,activeJobView='table';
-let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear=new Date().getFullYear(),selectedMonth='all',dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0,editorBaseVersion=0,editorOriginalRef="",optionsConflict=false;
+const initialJobPeriod=new Date();
+let periodUserSelected=false;
+let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear=initialJobPeriod.getFullYear(),selectedMonth=String(initialJobPeriod.getMonth()),dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0,editorBaseVersion=0,editorOriginalRef="",optionsConflict=false;
 const clientId=window.KSTempUser?.get?.().browserId||crypto.randomUUID?.()||`jm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function currentActor(){const p=window.KSTempUser?.get?.();return p?{name:String(p.name||p.browserId||'This PC'),browserId:String(p.browserId||clientId)}:{name:'This PC',browserId:clientId}}
 function normalize(v=''){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
@@ -743,86 +782,97 @@ async function importSheet(){
   const list=window.KSJobData.recordsFromGrid(grid.headers,grid.rows,FIELDS);
   if(!list.length)throw Error('No usable job rows. Download the Excel template for the correct columns.');
   const invalid=window.KSJobs.validateUniqueRefs(list);if(invalid)throw Error(invalid);
-  const previewVersion=version;
-  ask('Replace shared jobs?',`${grid.sheetName}: ${list.length} imported rows. ${jobs.length} existing jobs will be replaced. A complete JSON backup downloads before saving.`,async()=>{
-   if(version!==previewVersion){setJobWarning('Shared jobs changed since the preview. Refresh and import again.');return}
-   exportBackup();
-   if(await saveAll(`imported ${list.length} rows from Google Sheet`,list))toast(`${list.length} jobs imported`);
-  },'Backup & Import');
+  previewImportJobs(list,`Google Sheet · ${grid.sheetName}`,grid.sheetName);
  }catch(e){setJobWarning(`Google Sheet import not applied: ${e.message}`);toast(e.message||'Google Sheet import failed')}
- finally{$('#importBtn').disabled=false}
+ finally{$('#importBtn').disabled=false;if(jobsEverLoaded&&!saving)setSync('live','Shared · Live',`${jobs.length} jobs · Office Pulse synced`)}
 }
-async function importLocalFile(file){
- if(!file)return;
- if(file.size>8*1024*1024){toast('File too large (8 MB maximum)');return}
- $('#importLocalBtn').disabled=true;
- try{
-  const text=await file.text();if(!text.trim())throw Error('Selected file is empty');
-  const isJSON=/\.json$/i.test(file.name);
-  const raw=isJSON?window.KSJobData.readBackup(text):(()=>{
-   const parsed=window.KSJobData.parseDelimited(text);
-   return window.KSJobData.recordsFromGrid(parsed.headers,parsed.rows,FIELDS);
-  })();
-  if(!raw.length)throw Error('No valid job rows found');
-  const invalid=window.KSJobs.validateUniqueRefs(raw);
-  if(invalid)throw Error(invalid);
-  const previewVersion=version;
-  ask('Import local jobs?',`${file.name}: ${raw.length} jobs found. This will REPLACE ${jobs.length} shared jobs, including any not in this file. A full JSON backup download starts before the save. Confirm you can safely keep that backup.`,async()=>{
-   if(version!==previewVersion){toast('Another staff member updated jobs. Refresh and preview again.');return}
-   exportBackup();
-   const ok=await saveAll(`imported ${raw.length} rows from ${file.name}`,raw);
-   if(ok)toast(`${raw.length} jobs imported from ${file.name}`);
-  },'Backup & Replace');
- }catch(e){setJobWarning(`Import not applied: ${e.message}`);toast(e.message||'Import failed')}
- finally{$('#importLocalBtn').disabled=false;$('#importLocalFile').value=''}
-}
-// Existing offline workbook bridge: no CDN, no upload, no formula execution.
+// Unified file import: preview, merge by reference (default), or guarded full restore.
 let excelPreview=null;
-function closeExcelImport(){if($('#excelImportConfirm').disabled&&excelPreview?.saving)return;excelPreview=null;$('#excelImportModal').classList.remove('open');$('#excelImportModal').setAttribute('aria-hidden','true')}
+function closeExcelImport(){if(excelPreview?.saving)return;excelPreview=null;$('#excelImportModal').classList.remove('open');$('#excelImportModal').setAttribute('aria-hidden','true')}
 function exportExcel(list,name){
  try{
-  if(!window.KSOfficeWorkbook?.makeXlsx)throw Error('Excel tools are unavailable. Reload Job Management and retry.');
+  if(!window.KSOfficeWorkbook?.makeXlsx)throw Error('Excel tools unavailable. Reload Job Management.');
   const headers=FIELDS.map(([label])=>label),rows=list.map(j=>FIELDS.map(([,key])=>j[key]??''));
   const workbook=window.KSOfficeWorkbook.makeXlsx(headers,rows,{sheetName:'Job Management'});
   downloadBlob(workbook,name);
-  toast(list.length?`${list.length} jobs downloaded as Excel`:'Blank Excel template downloaded');
+  toast(list.length?`${list.length} jobs prepared as Excel`:'Blank Excel template prepared');
   return true;
  }catch(error){
-  setJobWarning(`Excel download failed: ${error.message||'Unable to create workbook'}`);
-  toast('Excel download failed. See the warning above.');return false;
+  setJobWarning(`Excel export failed: ${error.message||'Unable to create workbook'}`);toast('Excel export failed. See warning.');return false;
  }
 }
-async function previewExcel(file){
+function mergeImportedJobs(existing,incoming){
+ const index=new Map(existing.map((job,i)=>[normalize(job.jobsheetFiles),i]));
+ const result=existing.map(job=>({...job}));let updated=0,added=0;
+ for(const imported of incoming){
+  const ref=normalize(imported.jobsheetFiles||imported.ref);
+  if(!ref)throw Error('Every imported job needs a JOBSHEET/FILES reference to merge safely.');
+  if(index.has(ref)){
+   const i=index.get(ref),old=result[i];
+   result[i]={...old,...imported,jobMeta:imported.jobMeta&&Object.keys(imported.jobMeta).length?{...(old.jobMeta||{}),...imported.jobMeta}:old.jobMeta};
+   updated++;
+  }else{index.set(ref,result.length);result.push(imported);added++}
+ }
+ return{list:result,updated,added};
+}
+function refreshImportImpact(){
+ if(!excelPreview)return;
+ const mode=$('#excelImportMode').value;
+ const target=mode==='replace'?{list:excelPreview.list,updated:0,added:excelPreview.list.length}:mergeImportedJobs(jobs,excelPreview.list);
+ const impact=mode==='merge'?`${target.updated} matching jobs will be updated · ${target.added} new jobs will be added · ${jobs.length-target.updated} unrelated shared jobs will remain.`:`ALL ${jobs.length} current shared jobs will be replaced by ${excelPreview.list.length} imported jobs. Jobs not in the import will be deleted.`;
+ $('#excelImportImpact').textContent=impact;
+ $('#excelImportConfirm').textContent=mode==='merge'?'Backup & Merge':'Backup & Replace';
+ return target;
+}
+function previewImportJobs(list,fileName,sheetName='File'){
+ if(!jobsEverLoaded||queueLoadState==='error')throw Error('Shared jobs are not loaded. Refresh before importing so a backup and merge are safe.');
+ if(!list.length)throw Error('No valid job records found');
+ const invalid=window.KSJobs.validateUniqueRefs(list);if(invalid)throw Error(invalid);
+ excelPreview={list,fileName,baseVersion:version,saving:false};
+ $('#excelImportMode').value='merge';
+ $('#excelImportSummary').textContent=`${fileName} · ${sheetName}: ${list.length} jobs ready. Review how they will affect ${jobs.length} shared jobs.`;
+ const body=$('#excelImportRows');body.replaceChildren();
+ for(const job of list.slice(0,5)){const line=document.createElement('div');line.textContent=`${job.jobsheetFiles||job.ref||'No reference'} · ${job.customer||'No customer'} · ${job.item||job.typeOfPrinting||'Item pending'}`;body.appendChild(line)}
+ if(list.length>5){const line=document.createElement('div');line.textContent=`…and ${list.length-5} more records`;body.appendChild(line)}
+ refreshImportImpact();$('#excelImportConfirm').disabled=false;
+ $('#excelImportModal').classList.add('open');$('#excelImportModal').setAttribute('aria-hidden','false');$('#excelImportCancel').focus();
+}
+async function previewImportFile(file){
  if(!file)return;
- excelPreview=null;$('#importExcelBtn').disabled=true;
+ excelPreview=null;
+ if(file.size>12_000_000){setJobWarning('Import blocked: file larger than 12 MB');return}
+ $('#importExcelBtn').disabled=true;$('#importLocalBtn').disabled=true;$('#importExcelQuick').disabled=true;
  try{
-  if(!/\.xlsx$/i.test(file.name||''))throw Error('Select an .xlsx workbook, not .xls or .csv.');
-  if(!window.KSOfficeWorkbook?.readXlsx||!window.KSJobData?.recordsFromGrid)throw Error('Excel tools did not load. Reload Job Management and retry.');
-  const book=await window.KSOfficeWorkbook.readXlsx(file);
-  const list=window.KSJobData.recordsFromGrid(book.headers,book.rows,FIELDS,{date1904:book.date1904});
-  if(!list.length)throw Error('Excel workbook has no valid job records');
-  const err=window.KSJobs.validateUniqueRefs(list);if(err)throw Error(err);
-  excelPreview={list,fileName:file.name,baseVersion:version,saving:false};
-  $('#excelImportSummary').textContent=`${file.name} · ${book.sheetName}: ${list.length} jobs ready. ${jobs.length} shared jobs will be replaced after backup. Only the standard 28 Excel fields are imported; extra jobMeta data on replaced jobs will not be retained unless restored from the JSON backup.`;
-  const body=$('#excelImportRows');body.replaceChildren();
-  for(const job of list.slice(0,5)){
-   const line=document.createElement('div');line.textContent=`${job.jobsheetFiles||'No reference'} · ${job.customer||'No customer'} · ${job.item||job.typeOfPrinting||'Item pending'}`;body.appendChild(line);
-  }
-  if(list.length>5){const extra=document.createElement('div');extra.textContent=`…and ${list.length-5} more rows`;body.appendChild(extra)}
-  $('#excelImportConfirm').disabled=false;
-  $('#excelImportModal').classList.add('open');$('#excelImportModal').setAttribute('aria-hidden','false');$('#excelImportCancel').focus();
- }catch(e){setJobWarning(`Excel import blocked: ${e.message}`);toast(e.message||'Cannot import workbook')}
- finally{$('#importExcelBtn').disabled=false;$('#importExcelFile').value=''}
+  let list,sheetName='File';
+  if(/\.xlsx$/i.test(file.name)){
+   if(!window.KSOfficeWorkbook?.readXlsx)throw Error('Excel reader unavailable. Reload the page.');
+   const book=await window.KSOfficeWorkbook.readXlsx(file);
+   list=window.KSJobData.recordsFromGrid(book.headers,book.rows,FIELDS,{date1904:book.date1904});sheetName=book.sheetName;
+  }else if(/\.json$/i.test(file.name)){
+   list=window.KSJobData.readBackup(await file.text());sheetName='JSON backup';
+  }else if(/\.(?:csv|tsv)$/i.test(file.name)){
+   const grid=window.KSJobData.parseDelimited(await file.text());
+   list=window.KSJobData.recordsFromGrid(grid.headers,grid.rows,FIELDS);sheetName='Delimited job data';
+  }else throw Error('Choose an XLSX, CSV, TSV or JSON jobs file.');
+  previewImportJobs(list,file.name,sheetName);
+ }catch(e){setJobWarning(`Import blocked: ${e.message}`);toast(e.message||'Unable to preview import')}
+ finally{$('#importExcelBtn').disabled=false;$('#importLocalBtn').disabled=false;$('#importExcelQuick').disabled=false;for(const id of ['importExcelFile','importLocalFile','importUnifiedFile'])$('#'+id).value=''}
 }
 async function confirmExcelImport(){
  if(!excelPreview||excelPreview.saving)return;
- if(version!==excelPreview.baseVersion){$('#excelImportSummary').textContent='Jobs changed since preview. Cancel, refresh and review a new import.';$('#excelImportConfirm').disabled=true;return}
- const preview=excelPreview;preview.saving=true;$('#excelImportConfirm').disabled=true;$('#excelImportConfirm').textContent='Saving…';
+ if(version!==excelPreview.baseVersion){$('#excelImportSummary').textContent='Shared jobs changed since preview. Close, refresh and preview again.';$('#excelImportConfirm').disabled=true;return}
+ const preview=excelPreview,mode=$('#excelImportMode').value;
+ preview.saving=true;$('#excelImportConfirm').disabled=true;$('#excelImportConfirm').textContent='Backing up…';
  try{
-  exportBackup();const ok=await saveAll(`Excel import from ${preview.fileName}`,preview.list);
-  if(ok){preview.saving=false;closeExcelImport();toast(`${preview.list.length} Excel jobs saved`)}
-  else{$('#excelImportSummary').textContent='Import not applied. Your existing jobs remain on the server. Check the Job Management warning, then cancel and preview again.'}
- }finally{preview.saving=false;$('#excelImportConfirm').disabled=false;$('#excelImportConfirm').textContent='Backup & Replace'}
+  const target=mode==='merge'?mergeImportedJobs(jobs,preview.list):{list:preview.list,added:preview.list.length,updated:0};
+  const valid=window.KSJobs.validateUniqueRefs(target.list);if(valid)throw Error(valid);
+  if(!exportBackup())throw Error('Could not download the backup. Nothing was imported.');
+  $('#excelImportConfirm').textContent='Saving to shared database…';
+  const ok=await saveAll(`${mode==='merge'?'merged':'restored'} ${preview.list.length} jobs from ${preview.fileName}`,target.list);
+  if(ok){preview.saving=false;closeExcelImport();toast(`Imported ${preview.list.length} jobs (${mode})`);openDataHub('export')}
+  else{$('#excelImportSummary').textContent='Import not saved. Existing records remain unchanged. Review the warning before trying again.'}
+ }catch(e){setJobWarning(`Import blocked: ${e.message}`);$('#excelImportSummary').textContent=`Import not saved: ${e.message}`}
+ finally{preview.saving=false;$('#excelImportConfirm').disabled=false;$('#excelImportConfirm').textContent=mode==='merge'?'Backup & Merge':'Backup & Replace'}
 }
 function csvValue(v){return window.KSJobData.csvValue(v)}
 function downloadBlob(blob,name){
@@ -839,14 +889,16 @@ function exportAllCsv(){exportRowsCsv(jobs,'kidzstudios-jobs-all.csv')}
 function exportCurrent(){exportRowsCsv(filtered().map(x=>x.j),`kidzstudios-current-view-${selectedYear}-${selectedMonth==='all'?'all-months':String(Number(selectedMonth)+1).padStart(2,'0')}.csv`)}function exportPeriod(){exportRowsCsv(periodJobs(),`kidzstudios-${selectedMonth==='all'?'year':MONTHS[Number(selectedMonth)].toLowerCase()}-${selectedYear}.csv`)}function exportYear(){exportRowsCsv(jobsForYear(selectedYear),`kidzstudios-full-year-${selectedYear}.csv`)}
 function exportSummary(){const rows=MONTHS.map((name,m)=>{const list=jobsForYear(selectedYear).filter(j=>jobMonth(j)===m),c=counts(list);return[name,selectedYear,list.length,c.orders,c.artwork,c.production,c.completed,c.urgent,c.overdue,c.unmapped]});const head=['Month','Year','Total Jobs','Orders','Design','Production','Closed','Urgent','Overdue','Unmapped'];const csv=[head.map(csvValue).join(','),...rows.map(r=>r.map(csvValue).join(','))].join('\r\n');downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),`kidzstudios-12-month-summary-${selectedYear}.csv`);toast(`12-month summary ${selectedYear} exported`);return true}
 function exportBackup(){const payload={format:'kidzstudios-job-management-backup',schemaVersion:3,schema:'JOB MANAGEMENT.xlsx · 28 columns · automatic days left',exportedAt:new Date().toISOString(),exportedBy:currentActor(),selectedYear,jobCount:jobs.length,version,savedAt,jobs};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),`kidzstudios-job-management-backup-${new Date().toISOString().slice(0,10)}.json`);toast('Full database backup exported');return true}
-function runExportAction(action){
+function runExportAction(action,{template=false}={}){
  const status=$('#exportStatus');
  try{
+  if(!template&&!jobsEverLoaded)throw Error('Shared jobs have not loaded yet. Wait for the sync indicator or refresh the page.');
+  if(!template&&queueLoadState==='error')throw Error('Shared job data is unavailable. Refresh before exporting.');
   status.textContent='Preparing download…';status.dataset.state='loading';
   const ok=action();
   if(ok===false){status.textContent='Download failed. Check the warning above and try again.';status.dataset.state='error';return false}
-  status.textContent='Download started. Check your browser downloads.';status.dataset.state='success';
-  closeExport();return true;
+  status.textContent='File prepared. Check your browser Downloads folder. You can export another format here.';status.dataset.state='success';
+  return true;
  }catch(error){
   const message=error?.message||'Unable to generate the file';
   status.textContent=`Export failed: ${message}`;status.dataset.state='error';
@@ -854,7 +906,24 @@ function runExportAction(action){
   return false;
  }
 }
-function openExport(){const current=filtered().length,period=periodJobs().length,year=jobsForYear(selectedYear).length;$('#exportCurrent').disabled=current===0;$('#exportPeriod').disabled=period===0;$('#exportYear').disabled=year===0;$('#exportSummary').disabled=year===0;$('#exportFoot').textContent=`Current view: ${current} · Selected period: ${period} · ${selectedYear}: ${year} · Shared total: ${jobs.length}`;$('#exportStatus').dataset.state='ready';$('#exportStatus').textContent=jobs.length?'Select a format. Every export uses the jobs loaded in this browser.':'No jobs loaded. Blank Excel template or JSON backup can still be downloaded.';$('#exportModal').classList.add('open');$('#exportModal').setAttribute('aria-hidden','false')}function closeExport(){$('#exportModal').classList.remove('open');$('#exportModal').setAttribute('aria-hidden','true')}
+function showDataHubTab(tab){
+ const importing=tab==='import';
+ $('#dataHubExportPanel').hidden=importing;$('#dataHubImportPanel').hidden=!importing;
+ $('#dataHubExportTab').setAttribute('aria-selected',String(!importing));
+ $('#dataHubImportTab').setAttribute('aria-selected',String(importing));
+}
+function openDataHub(tab='export'){
+ const current=filtered().length,period=periodJobs().length,year=jobsForYear(selectedYear).length;
+ $('#exportCurrent').disabled=current===0;$('#exportPeriod').disabled=period===0;$('#exportYear').disabled=year===0;$('#exportSummary').disabled=year===0;
+ $('#exportExcelCurrent').disabled=current===0;
+ $('#exportFoot').textContent=`Current view: ${current} · Selected period: ${period} · ${selectedYear}: ${year} · Shared total: ${jobs.length} · ${savedAt?'Last shared save: '+new Date(savedAt).toLocaleString('en-MY'):'No shared save yet'}`;
+ $('#exportStatus').dataset.state='ready';
+ $('#exportStatus').textContent=!jobsEverLoaded?'Loading shared jobs. Wait before exporting/importing.':queueLoadState==='error'?'Shared data unavailable. Refresh before exporting/importing.':`Shared records loaded: ${jobs.length}. Choose a download or import action.`;
+ showDataHubTab(tab);$('#exportModal').classList.add('open');$('#exportModal').setAttribute('aria-hidden','false');
+}
+function openExport(){openDataHub('export')}
+function closeExport(){$('#exportModal').classList.remove('open');$('#exportModal').setAttribute('aria-hidden','true')}
+
 function recalcBalance(){if(document.activeElement===F.balance)return;const inv=money(F.invoiceAmount.value),paid=money(F.paid.value);if(F.invoiceAmount.value||F.paid.value)F.balance.value=(inv-paid).toFixed(2)}
 F.invoiceAmount.addEventListener('input',recalcBalance);F.paid.addEventListener('input',recalcBalance);[F.deliveryTime,F.actualComplete1,F.actualComplete2,F.currentDepartment].forEach(el=>{el?.addEventListener('input',syncEditorDaysLeft);el?.addEventListener('change',syncEditorDaysLeft)});
 $('#addBtn').onclick=()=>openEditor();
@@ -868,8 +937,17 @@ $('#resetOptionsBtn').onclick=()=>{optionDraft[optionActiveField]=cleanOptionLis
 $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'').trim();if(!v)return;collectOptionRows();optionDraft[optionActiveField]=cleanOptionList([...(optionDraft[optionActiveField]||[]),v]);markOptionsDirty(`Added “${v}”`);renderOptionManagerField()};
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
-$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const idx=editingIndex,j=jobs[idx];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{if(version!==editorBaseVersion){setJobWarning('Data changed. Reopen the job before deleting.');return}const next=jobs.filter((_,i)=>i!==idx);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=importSheet;$('#importExcelBtn').onclick=$('#importExcelQuick').onclick=()=>$('#importExcelFile').click();$('#downloadExcelQuick').onclick=()=>exportExcel(jobs,jobs.length?'kidzstudios-jobs-all.xlsx':'kidzstudios-jobs-template.xlsx');$('#importExcelFile').addEventListener('change',e=>previewExcel(e.target.files?.[0]));$('#excelImportClose').onclick=$('#excelImportCancel').onclick=closeExcelImport;$('#excelImportConfirm').onclick=confirmExcelImport;$('#importLocalBtn').onclick=()=>$('#importLocalFile').click();$('#importLocalFile').addEventListener('change',e=>importLocalFile(e.target.files?.[0]));$('#exportBtn').onclick=$('#exportQuick').onclick=openExport;$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{selectedYear=Number(e.target.value);selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{selectedMonth=e.target.value;render()});$('#exportClose').onclick=closeExport;
-[['exportCsvAll',exportAllCsv],['exportCurrent',exportCurrent],['exportPeriod',exportPeriod],['exportYear',exportYear],['exportSummary',exportSummary],['exportBackup',exportBackup],['exportExcelCurrent',()=>exportExcel(filtered().map(x=>x.j),'kidzstudios-jobs-current.xlsx')],['exportExcelAll',()=>exportExcel(jobs,'kidzstudios-jobs-all.xlsx')],['exportExcelTemplate',()=>exportExcel([],'kidzstudios-jobs-template.xlsx')]].forEach(([id,action])=>{$('#'+id).onclick=()=>runExportAction(action)});
+$('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const idx=editingIndex,j=jobs[idx];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{if(version!==editorBaseVersion){setJobWarning('Data changed. Reopen the job before deleting.');return}const next=jobs.filter((_,i)=>i!==idx);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=importSheet;
+$('#importExcelBtn').onclick=()=>$('#importExcelFile').click();
+$('#importExcelQuick').onclick=()=>$('#importUnifiedFile').click();
+$('#importLocalBtn').onclick=()=>$('#importLocalFile').click();
+$('#downloadExcelQuick').onclick=()=>runExportAction(()=>exportExcel(jobs,jobs.length?'kidzstudios-jobs-all.xlsx':'kidzstudios-jobs-template.xlsx'),{template:jobsEverLoaded&&jobs.length===0});
+['importExcelFile','importLocalFile','importUnifiedFile'].forEach(id=>$('#'+id).addEventListener('change',e=>previewImportFile(e.target.files?.[0])));
+$('#excelImportMode').addEventListener('change',refreshImportImpact);
+$('#excelImportClose').onclick=$('#excelImportCancel').onclick=closeExcelImport;$('#excelImportConfirm').onclick=confirmExcelImport;
+$('#exportQuick').onclick=openExport;
+$('#dataHubExportTab').onclick=()=>showDataHubTab('export');$('#dataHubImportTab').onclick=()=>showDataHubTab('import');$('#refreshBtn').onclick=()=>pull();['searchInput','stageFilter','priorityFilter','salesFilter','designerFilter'].forEach(id=>$('#'+id).addEventListener(id==='searchInput'?'input':'change',render));$('#yearFilter').addEventListener('change',e=>{periodUserSelected=true;selectedYear=Number(e.target.value);selectedMonth='all';render()});$('#monthFilter').addEventListener('change',e=>{periodUserSelected=true;selectedMonth=e.target.value;render()});$('#currentMonthBtn').onclick=()=>{const now=new Date();selectedYear=now.getFullYear();selectedMonth=String(now.getMonth());periodUserSelected=false;render()};$('#exportClose').onclick=closeExport;
+[['exportCsvAll',exportAllCsv],['exportCurrent',exportCurrent],['exportPeriod',exportPeriod],['exportYear',exportYear],['exportSummary',exportSummary],['exportBackup',exportBackup],['exportExcelCurrent',()=>exportExcel(filtered().map(x=>x.j),'kidzstudios-jobs-current.xlsx')],['exportExcelAll',()=>exportExcel(jobs,'kidzstudios-jobs-all.xlsx')],['exportExcelTemplate',()=>exportExcel([],'kidzstudios-jobs-template.xlsx')]].forEach(([id,action])=>{$('#'+id).onclick=()=>runExportAction(action,{template:id==='exportExcelTemplate'})});
 $('#jobViewTable').addEventListener('click',()=>showJobView('table'));
 $('#jobViewQueue').addEventListener('click',()=>showJobView('queue'));
 $('#attentionCategory').addEventListener('change',renderActionQueue);
@@ -887,7 +965,7 @@ document.querySelectorAll('#editor .form-field input, #editor .form-field select
 $('#editor').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&!saving){e.preventDefault();saveEditor()}});
 decorateHybridCombos();
 let daysLeftDateStamp=dateInput(new Date());
-setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;jobs=jobs.map(normalizeJob);render();}},60000);
+setInterval(()=>{const stamp=dateInput(new Date());if(stamp!==daysLeftDateStamp){daysLeftDateStamp=stamp;if(!periodUserSelected){const now=new Date();selectedYear=now.getFullYear();selectedMonth=String(now.getMonth())}jobs=jobs.map(normalizeJob);render();}},60000);
 Promise.all([loadConfig(),loadStaff()]).then(()=>pull()).then(()=>{openIncomingPulseJob();return loadDropdownOptions()}).then(()=>{render();clearInterval(pollTimer);let optionPoll=0;pollTimer=setInterval(async()=>{if(document.hidden||$('#editor').classList.contains('open')||$('#optionsModal').classList.contains('open')||saving)return;await pull({quiet:true});optionPoll++;if(optionPoll%4===0){try{const row=await getState(OPTIONS_SCOPE);if(row&&Number(row.version)>optionsVersion){dropdownOptions=sanitizeDropdownOptions(row.payload?.options);optionsVersion=Number(row.version||0);optionsSavedAt=Number(row.payload?.savedAt)||new Date(row.updatedAt||Date.now()).getTime();optionsLoaded=true;renderSmartOptions()}}catch(_){}}},3500)});
 })();
 </script>

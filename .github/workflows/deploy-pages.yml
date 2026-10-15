@@ -81,6 +81,7 @@ jobs:
           node scripts/test-job-validation.mjs
           node scripts/test-job-saving.mjs
           node scripts/test-job-ui-v86-31.mjs
+          node scripts/test-v86-53-job-data-hub.mjs
           node scripts/test-delete-modal.mjs
           node scripts/test-outside-close.mjs
           node scripts/test-v86-37-action-queue.mjs
@@ -98,6 +99,8 @@ jobs:
         run: node scripts/test-v86-53-excel-browser.mjs
       - name: Test Job Management data exports
         run: node scripts/test-v86-53-export-browser.mjs
+      - name: Test Job Data Hub imports and exports in Chromium
+        run: node scripts/test-v86-53-job-data-hub-browser.mjs
       - name: Test rebuilt 3D in WebGL
         run: node scripts/test-v86-22-browser.mjs
       - name: Stamp current build version
