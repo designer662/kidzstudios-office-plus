@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {chromium} from '../source/node_modules/playwright/index.mjs';
 const read=name=>readFileSync('public/'+name,'utf8');
-const excluded=new Set(['supabase-bridge.js','suite-header.js','office-outside-close.js']);
+const excluded=new Set(['supabase-bridge.js','suite-header.js']);
 const initial=[
  {jobsheetFiles:'OCT-001',customer:'October job',orderDate:'2026-10-08',item:'Shirt'},
  {jobsheetFiles:'SEP-001',customer:'September job',orderDate:'2026-09-14',item:'Bag'},
@@ -42,6 +42,7 @@ try{
  assert.equal(await page.locator('#monthFilter').inputValue(),expectedMonth);
  assert.equal(await page.locator('#yearFilter').inputValue(),expectedYear);
  await page.locator('#exportQuick').click();
+ assert.equal(await page.evaluate(() => window.KSOutsideClose?.frontModal()?.id), 'exportModal', 'Real outside-click guard must be loaded');
  assert.match(await page.locator('#exportFoot').innerText(),/Shared total: 3/);
  let event=page.waitForEvent('download');await page.locator('#downloadExcelQuick').click();
  let downloaded=await event;

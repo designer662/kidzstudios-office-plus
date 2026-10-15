@@ -6,7 +6,7 @@ import { chromium } from '../source/node_modules/playwright/index.mjs';
 
 const publicRoot = 'public/';
 const read = name => readFileSync(publicRoot + name, 'utf8');
-const excluded = new Set(['supabase-bridge.js', 'suite-header.js', 'office-outside-close.js']);
+const excluded = new Set(['supabase-bridge.js', 'suite-header.js']);
 const sourceHtml = read('job-management.html');
 
 // Regression guard: test setup must not depend on a lexical variable inside
@@ -75,6 +75,7 @@ try {
   );
 
   await page.locator('#exportQuick').click();
+ assert.equal(await page.evaluate(() => window.KSOutsideClose?.frontModal()?.id), 'exportModal', 'Real outside-click guard must be loaded');
   assert.match(await page.locator('#exportFoot').innerText(), /Shared total: 260/);
 
   const csvEvent = page.waitForEvent('download');

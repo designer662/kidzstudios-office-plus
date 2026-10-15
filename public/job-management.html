@@ -879,7 +879,12 @@ function downloadBlob(blob,name){
  if(!(blob instanceof Blob)||blob.size===0)throw Error('The download file is empty');
  const u=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=u;a.download=name;a.rel='noopener';a.style.display='none';
- document.body.appendChild(a);
+ // V86.53-CLICK-GUARD-FIX: the page-wide outside-click listener cancels
+ // synthetic Blob-link clicks if the link is appended outside an open dialog.
+ const host=window.KSOutsideClose?.frontModal?.()?.element?.querySelector('.dialog')
+  ||document.querySelector('#excelImportModal.open .dialog, #exportModal.open .dialog')
+  ||document.body;
+ host.appendChild(a);
  // Give browsers time to start saving before releasing the Blob URL.
  try{a.click()}catch(error){URL.revokeObjectURL(u);a.remove();throw error}
  setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},60000);
