@@ -62,5 +62,27 @@
   }
   function years(jobs){return [...new Set(jobs.map(j=>date(j.orderDate)?.getFullYear()).filter(Boolean))].sort((a,b)=>b-a)};
   function safeCSV(v){const raw=clean(v),safe=/^[=+@\-\t\r]/.test(raw)?"'"+raw:raw;return '"'+safe.replace(/"/g,'""')+'"'};
-  root.KSReportModel=Object.freeze({date,amount,stage,completed,overdue,filtered,summarize,years,safeCSV});
+  function balanceFor(job){return clean(job.balance)!==''?amount(job.balance):amount(job.invoiceAmount)-amount(job.paid)}
+  function pageSlice(records,page=1,pageSize=25){
+    const size=[25,50,100].includes(Number(pageSize))?Number(pageSize):25;
+    const total=Array.isArray(records)?records.length:0;
+    const pages=Math.max(1,Math.ceil(total/size));
+    const requested=Number.isFinite(Number(page))?Math.floor(Number(page)):1;
+    const current=Math.min(pages,Math.max(1,requested));
+    const start=(current-1)*size;
+    return {items:records.slice(start,start+size),page:current,pages,pageSize:size,total,from:total?start+1:0,to:Math.min(total,start+size)};
+  }
+  const exportColumns=[
+    ['Reference',j=>j.jobsheetFiles||j.ref||''],['Invoice',j=>j.invoice],['Customer',j=>j.customer],
+    ['Priority',j=>j.priority],['Item',j=>j.item||j.jobType||''],['Stage',j=>stage(j)],
+    ['Designer',j=>j.designer],['Sales',j=>j.sales],['Order date',j=>j.orderDate],
+    ['Delivery date',j=>j.deliveryTime||j.due],['Invoice amount',j=>amount(j.invoiceAmount).toFixed(2)],
+    ['Paid',j=>amount(j.paid).toFixed(2)],['Balance',j=>balanceFor(j).toFixed(2)]
+  ];
+  function exportCSV(records){
+    const lines=[exportColumns.map(([label])=>safeCSV(label)).join(',')];
+    for(const job of records)lines.push(exportColumns.map(([,get])=>safeCSV(get(job))).join(','));
+    return '\ufeff'+lines.join('\r\n');
+  }
+  root.KSReportModel=Object.freeze({date,amount,stage,completed,overdue,filtered,summarize,years,safeCSV,balanceFor,pageSlice,exportCSV});
 })(typeof window!=='undefined'?window:globalThis);

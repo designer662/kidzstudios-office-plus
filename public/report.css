@@ -29,3 +29,20 @@
 @media(max-width:1050px){.report-extended-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.report-insights-grid{grid-template-columns:1fr}}
 @media(max-width:500px){.report-extended-kpis{gap:8px}.report-micro-kpi{padding:13px}.report-micro-kpi strong{font-size:22px}.report-health-grid{gap:7px}.health-cell{padding:10px}}
 @media print{.report-micro-kpi,.health-cell,.report-insights-grid .report-card{break-inside:avoid;background:#fff!important}}
+
+/* V86.53 Reports upgrade: paginate the actual job register without hiding records. */
+.report-register-controls{display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin:0 0 12px}
+.report-page-size{flex:0 0 125px;min-width:110px}
+.report-page-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.report-page-controls output{font-size:12px;font-weight:750;color:#536066;min-width:85px;text-align:center}
+.report-page-btn{border:1px solid #e2e6e6;border-radius:10px;background:#fff;color:#505b5f;padding:10px 12px;font-weight:750;font-size:11px}
+.report-page-btn:hover:not(:disabled){border-color:#efaa86;background:#fff9f5}
+.report-page-btn:disabled{opacity:.4;cursor:not-allowed}
+.report-job-link{color:#bc6335;text-decoration:underline;text-underline-offset:3px;font-weight:800;overflow-wrap:anywhere}
+.report-job-link:hover,.report-job-link:focus-visible{color:#973d16}
+.report-btn:disabled{opacity:.65;cursor:progress}
+.report-state[data-state="stale"] i{background:#e4a852}
+.report-state[data-state="empty"] i{background:#909b9f}
+@media(max-width:600px){.report-register-controls{align-items:stretch}.report-page-controls{width:100%;justify-content:space-between}.report-page-btn{padding:10px 9px}.report-page-controls output{min-width:0}}
+@media print{.report-register-controls{display:none!important}.report-table a{text-decoration:none!important;color:inherit!important}}
+.report-state[data-state="syncing"] i{background:#daa969}
