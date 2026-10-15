@@ -445,6 +445,9 @@ button,input{font:inherit}.top-shell{padding:16px 20px 9px;z-index:30}.topbar{ma
 .workload-copy{min-width:0}.workload-copy b{display:block;font-size:10px}.workload-copy span{display:block;color:var(--muted);font-size:10px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .workload-count{min-width:28px;text-align:center;padding:4px 6px;border-radius:999px;background:var(--bg);font-size:10px;font-weight:780}
 .workload-count.hot{background:rgba(203,74,74,.08);color:#c65353}.workload-count.busy{background:rgba(212,154,54,.10);color:#ad7923}
+.workload-row{grid-template-columns:28px minmax(0,1fr) auto;align-items:center;column-gap:8px}
+.workload-copy{min-width:0;padding-right:4px}.workload-copy b,.workload-copy span{max-width:100%}
+.workload-count{justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-width:48px;max-width:68px;min-height:22px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:4px 8px;border-radius:999px}
 .job-row{display:grid;grid-template-columns:1fr auto;gap:7px;padding:7px 8px;border:1px solid var(--line);background:rgba(255,255,255,.34);border-radius:10px;cursor:pointer;transition:.18s var(--ease)}
 
 .job-row:hover{border-color:rgba(239,123,69,.24);background:var(--bg);transform:translateX(-1px)}
@@ -459,7 +462,8 @@ button,input{font:inherit}.top-shell{padding:16px 20px 9px;z-index:30}.topbar{ma
 .profile-job-actions{display:flex;gap:6px;margin-top:7px}.profile-job-action{flex:1;height:29px;border-radius:9px;border:1px solid var(--line);background:var(--solid);color:var(--muted);font-size:10px;font-weight:760;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center}.profile-job-action:hover{color:var(--orange2);border-color:rgba(239,123,69,.25)}
 @media(max-width:1180px){.today-panel.ops-panel{width:230px}.workload-list,.recent-jobs{max-height:220px}}
 @media(max-width:920px){.today-panel.ops-panel{width:214px}.ops-tab{font-size:10px}.workload-list,.recent-jobs{max-height:185px}}
-@media(max-width:650px){.today-panel.ops-panel{width:176px;max-height:43vh}.ops-head strong{font-size:10px}.ops-source span{display:none}.ops-tabs{gap:2px}.ops-tab{font-size:10px}.workload-list,.recent-jobs{max-height:145px}.workload-row{grid-template-columns:22px 1fr auto;padding:5px;gap:5px}.workload-avatar{width:22px;height:22px}.job-row{padding:6px}.autocomplete{width:min(370px,calc(100vw - 24px))}}
+@media(max-width:650px){.today-panel.ops-panel{width:176px;max-height:43vh}.ops-head strong{font-size:10px}.ops-source span{display:none}.ops-tabs{gap:2px}.ops-tab{font-size:10px}.workload-list,.recent-jobs{max-height:145px}.workload-row{grid-template-columns:22px minmax(0,1fr) auto;padding:6px;gap:6px}.workload-avatar{width:22px;height:22px}.workload-count{min-width:44px;max-width:56px;padding:3px 7px;font-size:9px}.job-row{padding:6px}.autocomplete{width:min(370px,calc(100vw - 24px))}}
+@media(max-width:420px){.workload-row{grid-template-columns:22px minmax(0,1fr);align-items:start}.workload-copy{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name badge" "meta badge";align-items:center;column-gap:6px;row-gap:2px;padding-right:0}.workload-copy b{grid-area:name}.workload-copy span{grid-area:meta}.workload-count{grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:center;min-width:50px;max-width:58px}}
 
 /* Shared state status */
 .ks-shared-status{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(20,24,28,.08);box-shadow:0 8px 24px rgba(15,23,42,.08);backdrop-filter:blur(12px);font:700 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#64748b;pointer-events:none}.ks-shared-status i{width:7px;height:7px;border-radius:50%;background:#94a3b8}.ks-shared-status[data-mode="live"] i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}.ks-shared-status[data-mode="saving"] i{background:#f59e0b}.ks-shared-status[data-mode="offline"] i{background:#ef4444}@media(max-width:640px){.ks-shared-status{left:8px;bottom:8px;font-size:10px;padding:6px 8px}}
@@ -1045,7 +1049,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.2"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui3"></head>
+<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.2"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui4"></head>
 <body class="ks-dashboard">
 <div class="app" id="app" data-theme="light">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -3031,7 +3035,7 @@ body{overscroll-behavior:none;}
 <script src="office-3d.js?v=86.49" defer></script>
 <script src="office-quality.js?v=86.49" defer></script>
 <script src="office-ambience-audio.js?v=86.4" defer></script>
-<script src="office-living-office.js?v=86.53.ui3" defer></script>
+<script src="office-living-office.js?v=86.53.ui4" defer></script>
 <script src="office-ai-routine.js?v=86.49" defer></script>
 <script src="office-smart-ai.js?v=86.49" defer></script>
 <script src="office-movement-sync.js?v=86.49" defer></script>

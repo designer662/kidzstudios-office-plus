@@ -5,7 +5,7 @@ body.ks-dashboard #mapShell .ks-living-controls{
   max-width:calc(100% - 24px)!important;display:flex!important;flex-wrap:wrap!important;
   align-items:center!important;gap:6px!important;pointer-events:none;
 }
-body.ks-dashboard #mapShell .ks-living-controls > button{pointer-events:auto}
+body.ks-dashboard #mapShell .ks-living-controls > *{pointer-events:auto}
 body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen,
 body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini{
   min-height:32px!important;height:32px!important;display:inline-flex!important;
@@ -33,6 +33,7 @@ body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini select{
   max-width:70px!important;background:transparent!important;color:#454b50!important;
   border:0!important;outline:none!important;cursor:pointer!important;
   font:750 11px/1.2 Inter,Arial,sans-serif!important;padding-right:2px;
+  pointer-events:auto!important;touch-action:auto!important;-webkit-appearance:none;appearance:none;
 }
 /* Keep the legacy rotation readout available to the 3D bridge, but hide
    its old toolbar. Cinematic auto-rotate runs independently of UI buttons. */
