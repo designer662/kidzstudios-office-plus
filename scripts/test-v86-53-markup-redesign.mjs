@@ -7,7 +7,7 @@ const once=(id)=>{
   const found=[...html.matchAll(new RegExp(`\\bid="${id}"`,'g'))];
   assert.equal(found.length,1,`Exactly one #${id} must exist after the UI redesign`);
 };
-assert.match(html,/markup-calculator-redesign\.css\?v=86\.53\.pricing1/,'Load the dedicated redesigned stylesheet after shared styles');
+assert.match(html,/markup-calculator-redesign\.css\?v=86\.53\.pricing2/,'Load the dedicated redesigned stylesheet after shared styles');
 assert.match(html,/class="pricing-hero"/,'Include a clear sales pricing introduction');
 assert.match(html,/class="pricing-sidebar"/,'Separate the results from the pricing inputs');
 assert.match(html,/<section[^>]*id="markupCard"/,'Preserve input workspace');

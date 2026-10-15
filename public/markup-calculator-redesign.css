@@ -162,3 +162,92 @@ body[data-ks-page="simple-markup-calculator"] .mode-btn:focus-visible{outline:3p
   body[data-ks-page="simple-markup-calculator"] .calculator-container{grid-template-columns:1fr 1fr;max-width:none;gap:10px}
   body[data-ks-page="simple-markup-calculator"] .calculator-card{box-shadow:none!important}
 }
+
+/* V86.53 Inline Workspace V2: no floating panels; preserve original calculation IDs. */
+body[data-ks-page="simple-markup-calculator"] .main-content{gap:15px;padding:18px clamp(12px,3vw,40px) 55px}
+body[data-ks-page="simple-markup-calculator"] .pricing-hero{max-width:1270px;gap:14px;align-items:center;padding:10px 3px 4px}
+body[data-ks-page="simple-markup-calculator"] .pricing-hero h1{font-size:clamp(28px,3vw,40px);line-height:1.15}
+body[data-ks-page="simple-markup-calculator"] .pricing-hero p{font-size:12px;line-height:1.55;max-width:520px;margin-top:8px}
+body[data-ks-page="simple-markup-calculator"] .pricing-eyebrow{margin-bottom:7px}
+body[data-ks-page="simple-markup-calculator"] .pricing-hero-meta{gap:6px}
+body[data-ks-page="simple-markup-calculator"] .pricing-hero-meta span{padding:7px 11px}
+body[data-ks-page="simple-markup-calculator"] .pricing-jump{display:inline-flex;gap:7px;align-items:center;margin-top:10px;color:#c15727;font-size:11px;font-weight:800;text-decoration:none}
+body[data-ks-page="simple-markup-calculator"] .pricing-jump:hover{text-decoration:underline}
+body[data-ks-page="simple-markup-calculator"] .pricing-jump:focus-visible{outline:3px solid #f6b58c;outline-offset:3px}
+body[data-ks-page="simple-markup-calculator"] .calculator-container{max-width:1270px;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:16px}
+body[data-ks-page="simple-markup-calculator"] .calculator-card{border-radius:18px!important;padding:22px}
+body[data-ks-page="simple-markup-calculator"] #markupCard{padding:24px}
+body[data-ks-page="simple-markup-calculator"] .card-header{margin-bottom:19px;padding-bottom:15px}
+body[data-ks-page="simple-markup-calculator"] .card-header .icon-wrapper{height:44px;width:44px}
+body[data-ks-page="simple-markup-calculator"] .card-header h2{font-size:18px}
+body[data-ks-page="simple-markup-calculator"] .section-label{margin:18px 0 12px;padding-top:16px}
+body[data-ks-page="simple-markup-calculator"] .input-group{margin-bottom:8px}
+body[data-ks-page="simple-markup-calculator"] .pricing-sidebar{position:sticky;top:80px;display:grid;gap:12px;min-width:0;align-self:start}
+body[data-ks-page="simple-markup-calculator"] .result-card{padding:13px!important;min-width:0}
+body[data-ks-page="simple-markup-calculator"] .result-card-heading{padding:15px 17px;border-radius:13px}
+body[data-ks-page="simple-markup-calculator"] .result-card-heading h2{font-size:17px;margin-top:6px}
+body[data-ks-page="simple-markup-calculator"] .result-card-heading p{font-size:10px;margin-top:4px}
+body[data-ks-page="simple-markup-calculator"] .job-dashboard{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
+body[data-ks-page="simple-markup-calculator"] .metric-card{padding:11px 9px;border-radius:11px}
+body[data-ks-page="simple-markup-calculator"] .metric-card.selling{grid-column:1/-1;padding:16px 17px;min-height:90px}
+body[data-ks-page="simple-markup-calculator"] .metric-card.selling .metric-value{font-size:clamp(28px,2.5vw,35px);letter-spacing:-.06em}
+body[data-ks-page="simple-markup-calculator"] .metric-card .metric-value{font-size:clamp(12px,1.12vw,16px);line-height:1.2}
+body[data-ks-page="simple-markup-calculator"] .metric-card.profit .metric-value{font-size:clamp(13px,1.25vw,17px)}
+body[data-ks-page="simple-markup-calculator"] .metric-label{font-size:9px}
+body[data-ks-page="simple-markup-calculator"] .metric-sub{font-size:9px;line-height:1.2;max-width:100%;overflow-wrap:anywhere;margin-top:5px}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-margin{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#546158;margin-top:12px}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-margin .margin-badge{flex:0 0 auto}
+body[data-ks-page="simple-markup-calculator"] .profit-detail{margin-top:8px;padding:9px 11px;font-size:10px}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown{border:1px solid #e7ebe5;border-radius:12px;margin-top:10px;overflow:hidden;background:#fff}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown > summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;list-style:none;gap:10px;min-height:42px;padding:12px 14px;color:#546159;font:800 11px/1.3 Inter,system-ui,sans-serif}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown > summary::-webkit-details-marker{display:none}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown[open] > summary{border-bottom:1px solid #edf1ed}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown[open] > summary span{transform:rotate(180deg)}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown .order-summary{border:0;border-radius:0}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown .order-summary-head{padding:8px 14px;background:#fbfcfa;font-size:10px}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown .order-summary-body{padding:4px 14px 8px}
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown .summary-row{padding:7px 0}
+body[data-ks-page="simple-markup-calculator"] .button-row{margin-top:10px}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator{display:block;border:1px solid #e6eae6;border-radius:17px;background:#fff;box-shadow:var(--price-shadow);overflow:hidden}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 15px;min-height:60px;color:#263229;font:850 12px/1.3 Inter,system-ui,sans-serif}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator > summary::-webkit-details-marker{display:none}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator > summary small{display:block;color:#879289;font:600 10px/1.4 Inter,system-ui,sans-serif;margin-top:3px}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator-icon{background:#fff2e8;color:#d96030;width:32px;height:32px;flex:0 0 32px;border-radius:10px;display:grid;place-items:center;font-size:22px}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator-chevron{margin-left:auto;color:#9aa49b;font-size:17px}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator[open] .ks-inline-calculator-chevron{transform:rotate(180deg)}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator .basic-card{border:0!important;box-shadow:none!important;border-top:1px solid #edf0ec!important;border-radius:0!important;padding:14px!important}
+body[data-ks-page="simple-markup-calculator"] .basic-calc-header{margin-bottom:9px}
+body[data-ks-page="simple-markup-calculator"] .basic-calc-header h2{font-size:12px}
+body[data-ks-page="simple-markup-calculator"] .calculator-display{padding:9px 12px;min-height:57px;margin-bottom:9px}
+body[data-ks-page="simple-markup-calculator"] .calc-btn{min-height:40px}
+body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator > summary:focus-visible,
+body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown > summary:focus-visible{outline:3px solid #f6b58c;outline-offset:-3px}
+@media(max-width:850px){
+  body[data-ks-page="simple-markup-calculator"] .calculator-container{grid-template-columns:minmax(0,1fr);max-width:690px}
+  body[data-ks-page="simple-markup-calculator"] .pricing-sidebar{position:static;max-width:100%}
+  body[data-ks-page="simple-markup-calculator"] .pricing-hero{max-width:690px;align-items:flex-start}
+}
+@media(max-width:550px){
+  body[data-ks-page="simple-markup-calculator"] .main-content{padding:12px 10px 44px;gap:12px}
+  body[data-ks-page="simple-markup-calculator"] .pricing-hero{gap:6px;padding:6px 3px 0}
+  body[data-ks-page="simple-markup-calculator"] .pricing-hero h1{font-size:30px}
+  body[data-ks-page="simple-markup-calculator"] .pricing-hero p{font-size:11px}
+  body[data-ks-page="simple-markup-calculator"] .pricing-hero-meta{display:none}
+  body[data-ks-page="simple-markup-calculator"] .calculator-card,body[data-ks-page="simple-markup-calculator"] #markupCard{padding:16px;border-radius:16px!important}
+  body[data-ks-page="simple-markup-calculator"] .field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-ks-page="simple-markup-calculator"] .input-wrapper input{height:44px}
+  body[data-ks-page="simple-markup-calculator"] .result-card{padding:11px!important}
+  body[data-ks-page="simple-markup-calculator"] .metric-card .metric-value{font-size:clamp(11px,3vw,16px)}
+  body[data-ks-page="simple-markup-calculator"] .metric-card.profit .metric-value{font-size:clamp(11px,3vw,16px)}
+  body[data-ks-page="simple-markup-calculator"] .metric-card.selling .metric-value{font-size:30px}
+}
+@media(max-width:370px){
+  body[data-ks-page="simple-markup-calculator"] .field-grid{grid-template-columns:1fr}
+  body[data-ks-page="simple-markup-calculator"] .job-dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-ks-page="simple-markup-calculator"] .metric-card.profit{grid-column:1/-1}
+}
+@media print{
+  body[data-ks-page="simple-markup-calculator"] .ks-inline-calculator{display:none!important}
+  body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown .order-summary{display:block!important}
+  body[data-ks-page="simple-markup-calculator"] .ks-quote-breakdown > summary{display:none!important}
+}

@@ -841,7 +841,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 <script src="ks-motion.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
-<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="markup-calculator-redesign.css?v=86.53.pricing1"><link rel="stylesheet" href="markup-calculator-floating.css?v=86.53.float1">
+<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="markup-calculator-redesign.css?v=86.53.pricing2">
 </head>
 <body data-ks-ui="v2" data-ks-page="simple-markup-calculator">
 
@@ -877,10 +877,11 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
           <div class="pricing-hero-copy">
             <div class="pricing-eyebrow"><span class="pricing-eyebrow-dot" aria-hidden="true"></span> KIDZSTUDIOS / SALES WORKSPACE</div>
             <h1>Markup <span>&amp;</span> Margin</h1>
-            <p>Build confident quotations. Capture your true cost, choose your pricing method, and see the profit before sending a price.</p>
+            <p>Calculate true job cost, set the right selling price, and check your profit instantly.</p>
+            <a class="pricing-jump" href="#pricingResults" aria-label="Jump to live quotation summary">View live quotation <span aria-hidden="true">↘</span></a>
           </div>
           <div class="pricing-hero-meta" aria-label="Calculator information">
-            <span>MYR <b>RM</b></span><span>Instant calculation</span><span>Local to this page</span>
+            <span>Currency <b>MYR</b></span><span>Live pricing</span>
           </div>
         </section>
         <div class="calculator-container">
@@ -1024,11 +1025,10 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 
             <aside class="pricing-sidebar" aria-label="Pricing results and quick calculator">
               <section class="calculator-card result-card" id="pricingResults" aria-label="Live pricing results" aria-labelledby="pricingFloatTitle">
-                <div class="result-card-heading ks-float-handle" data-float-handle="quote">
-                  <button class="ks-float-close" type="button" data-close-float="quote" aria-label="Close quotation snapshot" title="Close">×</button>
-                  <span class="result-card-eyebrow"><span class="live-indicator" aria-hidden="true"></span> LIVE PRICING</span>
-                  <h2 id="pricingFloatTitle">Quotation snapshot</h2>
-                  <p>Every cost, margin and profit figure in one place.</p>
+                <div class="result-card-heading">
+                  <span class="result-card-eyebrow"><span class="live-indicator" aria-hidden="true"></span> LIVE QUOTATION</span>
+                  <h2 id="pricingFloatTitle">Price summary</h2>
+                  <p>Updates automatically as you enter costs and pricing.</p>
                 </div>
                 <div class="job-dashboard">
                     <div class="metric-card selling">
@@ -1053,16 +1053,16 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     </div>
                 </div>
 
+                <div class="ks-quote-margin"><span>Profit margin</span><span class="margin-badge neutral" id="marginBadge">Margin 0.00%</span></div>
                 <div class="profit-detail neutral" id="profitDetail">
                     <span class="dot"></span>
                     <span id="profitDetailText">Enter job costs and pricing to see profitability</span>
                 </div>
 
-                <div class="order-summary">
-                    <div class="order-summary-head">
-                        <span>Order Summary</span>
-                        <span class="margin-badge neutral" id="marginBadge">Margin 0.00%</span>
-                    </div>
+                <details class="ks-quote-breakdown" id="quoteCostBreakdown">
+                  <summary>View cost breakdown <span aria-hidden="true">▾</span></summary>
+                  <div class="order-summary">
+                    <div class="order-summary-head"><span>Order Summary</span></div>
                     <div class="order-summary-body">
                         <div class="summary-row"><span>Quantity</span><strong id="summaryQuantity">1 pcs</strong></div>
                         <div class="summary-row"><span>All-in Cost / Unit</span><strong id="summaryAllInUnitCost">RM 0.00</strong></div>
@@ -1071,7 +1071,8 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                         <div class="summary-row"><span>Total Income</span><strong id="summaryTotalIncome">RM 0.00</strong></div>
                         <div class="summary-row"><span>Total Profit</span><strong id="summaryTotalProfit">RM 0.00</strong></div>
                     </div>
-                </div>
+                  </div>
+                </details>
 
                 <div class="button-row">
                     <button class="btn btn-reset" id="resetBtn">Reset</button>
@@ -1079,17 +1080,18 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 </div>
               </section>
 
-            <!-- Basic Calculator -->
-            <section class="calculator-card basic-card" id="basicCalculatorPanel" aria-labelledby="basicFloatTitle">
-                <div class="basic-calc-header ks-float-handle" data-float-handle="basic">
-                    <button class="ks-float-close" type="button" data-close-float="basic" aria-label="Close basic calculator" title="Close">×</button>
+            <!-- Basic Calculator: optional inline tool, never floating -->
+            <details class="ks-inline-calculator" id="basicCalcDisclosure">
+              <summary id="basicFloatTitle"><span class="ks-inline-calculator-icon" aria-hidden="true">⌗</span><span>Basic Calculator <small>Open when you need quick arithmetic</small></span><span class="ks-inline-calculator-chevron" aria-hidden="true">▾</span></summary>
+              <section class="calculator-card basic-card" id="basicCalculatorPanel" aria-labelledby="basicFloatTitle">
+                <div class="basic-calc-header">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
                         <rect x="4" y="2" width="16" height="20" rx="2"></rect>
                         <line x1="8" y1="6" x2="16" y2="6"></line>
                         <line x1="8" y1="10" x2="16" y2="10"></line>
                         <line x1="8" y1="14" x2="12" y2="14"></line>
                     </svg>
-                    <h2 id="basicFloatTitle">Basic Calculator</h2>
+                    <h2>Quick calculations</h2>
                 </div>
                 <div class="calculator-display">
                     <div class="expression-line" id="expressionLine"></div>
@@ -1117,15 +1119,11 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <button class="calc-btn equals" id="btnEquals">=</button>
                     <div></div>
                 </div>
-            </section>
+              </section>
+            </details>
             </aside>
         </div>
     </main>
-
-    <nav class="ks-floating-dock no-print" id="pricingFloatDock" aria-label="Floating calculator tools">
-      <button type="button" id="toggleQuotationFloat" class="ks-float-trigger" aria-controls="pricingResults" aria-expanded="false"><span aria-hidden="true">▤</span> Quotation</button>
-      <button type="button" id="toggleBasicFloat" class="ks-float-trigger" aria-controls="basicCalculatorPanel" aria-expanded="false"><span aria-hidden="true">⌗</span> Calculator</button>
-    </nav>
     <div class="toast" id="toast"></div>
 
     <script>
@@ -1617,7 +1615,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 })();
 </script>
 
-<script src="markup-calculator-floating.js?v=86.53.float1" defer></script>
+
 <script src="shared-sync.js" defer></script>
 
 <footer class="ks-version-footer no-print" aria-label="Build version">v86.41</footer>
