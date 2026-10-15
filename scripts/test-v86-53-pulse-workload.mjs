@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const home=readFileSync('public/index.html','utf8');
+const css=readFileSync('public/office-index-controls-v86-53.css','utf8');
+assert.match(home,/id="opsStaffLoad" class="ops-staff-load"/,'Must use the actual Office Pulse team workload component');
+assert.match(home,/class="ops-load-copy"/,'Render a dedicated shrinkable text column in Team Workload cards');
+assert.match(css,/#todayPanel \.ops-staff-load > button\s*\{[^}]*display:grid!important/,'Override the later flex rule with an explicit grid on the correct cards');
+assert.match(css,/#todayPanel \.ops-staff-load > button > \.ops-load-copy\s*\{[^}]*min-width:0/,'The text column must be shrinkable');
+assert.match(css,/#todayPanel \.ops-staff-load > button > em\s*\{[^}]*justify-self:end/,'Status badge must remain inside the card');
+assert.match(css,/@container\s*\(max-width:\s*240px\)/,'Very narrow panel layout must put status badges on their own row');
+console.log('PASS V86.53 Team Workload: proper three-column grid, narrow container fallback, shrinkable details and badges');

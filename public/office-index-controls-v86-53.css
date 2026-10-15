@@ -90,4 +90,43 @@ body.ks-dashboard #mapShell #followChip.show{transform:translateX(-50%) translat
   body.ks-dashboard #mapShell #followChip{top:90px!important}
   body.ks-dashboard #mapShell .ks-living-controls .ks-living-reset{padding:5px 8px!important}
 }
+
+/* V86.53 Team Workload: this is #opsStaffLoad, not the separate Workload tab.
+   office-plus.css changes its cards to flex, which lets the description push
+   the Busy/Normal pill outside the card. Restore a constrained grid. */
+#todayPanel .ops-staff-load{container-type:inline-size;min-width:0}
+#todayPanel .ops-staff-load > button{
+  display:grid!important;
+  grid-template-columns:38px minmax(0,1fr) max-content!important;
+  align-items:center!important;
+  column-gap:10px!important;
+  width:100%!important;min-width:0!important;
+  padding:9px 10px!important;
+  text-align:left;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy{
+  min-width:0;width:100%;overflow:hidden;display:block;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy b{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy small{
+  display:block;max-width:100%;white-space:normal;
+  overflow-wrap:break-word;line-height:1.35;
+}
+#todayPanel .ops-staff-load > button > em{
+  grid-column:3;justify-self:end;min-width:0;max-width:100%;
+  white-space:nowrap;line-height:1.1;
+}
+/* At genuinely narrow Pulse panel widths, give the status its own row. */
+@container (max-width:240px){
+  #todayPanel .ops-staff-load > button{
+    grid-template-columns:32px minmax(0,1fr)!important;
+    row-gap:5px!important;column-gap:8px!important;
+  }
+  #todayPanel .ops-staff-load > button > .ops-load-avatar{grid-column:1;grid-row:1 / span 2;width:32px;height:32px}
+  #todayPanel .ops-staff-load > button > .ops-load-copy{grid-column:2;grid-row:1}
+  #todayPanel .ops-staff-load > button > em{grid-column:2;grid-row:2;justify-self:start}
+}
+
 @media print{body.ks-dashboard #mapShell .ks-living-controls{display:none!important}}
