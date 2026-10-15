@@ -225,6 +225,11 @@
     fullscreen.classList.add('ks-living-fullscreen');
     controls.appendChild(fullscreen);
   }
+  const qualityControl=document.getElementById('ksVisualQuality')?.closest('.ks-quality-mini');
+  if(qualityControl){
+    qualityControl.classList.add('ks-living-quality');
+    controls.appendChild(qualityControl);
+  }
   host.parentElement.appendChild(controls);
   syncButton();updateSoundStatus(enabled?'tap-to-start':'off');applyLighting(null,null,null,null,null);
  }

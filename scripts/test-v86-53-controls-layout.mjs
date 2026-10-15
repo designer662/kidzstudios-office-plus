@@ -8,8 +8,8 @@ const full=read('public/office-fullscreen.js');
 const bridge=read('source/src/suite-bridge.ts');
 const scene=read('source/src/office-scene.ts');
 
-assert.match(home,/office-index-controls-v86-53\.css\?v=86\.53\.ui2/,'Camera pill removal must refresh the stylesheet cache');
-assert.match(home,/office-living-office\.js\?v=86\.53\.ui2/,'Updated top controls must bypass the previous JS cache');
+assert.match(home,/office-index-controls-v86-53\.css\?v=86\.53\.ui3/,'Updated control layout must refresh the stylesheet cache');
+assert.match(home,/office-living-office\.js\?v=86\.53\.ui3/,'Updated top controls must bypass the previous JS cache');
 for(const id of ['ksOfficeFullscreen','chatLauncher','followChip']){
  assert.equal((home.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,`${id} appears exactly once`);
 }
@@ -22,9 +22,11 @@ assert.doesNotMatch(living,/viewTools|ks-living-camera-tools/,'Do not recreate t
 assert.doesNotMatch(styles,/ks-living-camera-tools/,'Do not retain camera pill styling');
 assert.match(living,/controls\.append\(badge,btn,resetAI\)/,'Keep original Reset AI and sound controls');
 assert.match(living,/document\.getElementById\('ksOfficeFullscreen'\)/,'Keep fullscreen beside Reset AI');
+assert.match(living,/document\.getElementById\('ksVisualQuality'\)\?\.closest\('\.ks-quality-mini'\)/,'Move the 3D quality control beside Fullscreen');
 assert.match(full,/document\.getElementById\('ksOfficeFullscreen'\)/,'Fullscreen remains connected to the existing handler');
-assert.match(styles,/#chatLauncher\{[\s\S]*?left:50%!important/,'Keep Chat centered on desktop');
-assert.match(styles,/#followChip\{[\s\S]*?top:58px!important/,'Keep Following chip top centered');
+assert.match(styles,/#chatLauncher\{[\s\S]*?position:fixed!important[\s\S]*?left:50vw!important/,'Keep Chat centered to the viewport on desktop');
+assert.match(styles,/\.ks-living-controls \.ks-quality-mini\{[\s\S]*?display:inline-flex!important/,'Style the 3D quality control like the other top pills');
+assert.match(styles,/#followChip\{[\s\S]*?position:fixed!important[\s\S]*?left:50vw!important/,'Keep Following chip top centered in the viewport');
 // Test the 3D engine's existing cinematic behavior, which is independent of
 // the UI controls. Respect the operating system's reduced-motion preference.
 assert.match(bridge,/controller\.setRotating\(!paused\)/,'Cinematic auto rotation defaults to on when motion is allowed');
