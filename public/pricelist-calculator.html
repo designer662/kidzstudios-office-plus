@@ -617,6 +617,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 @media(max-width:650px){.ks-master-header{padding:8px 8px 4px}.ks-master-header .topbar{border-radius:18px}.ks-master-header .tool-nav-btn{height:36px;font-size:10px;padding:0 9px}.ks-master-header .nav-tool-icon{width:18px;height:18px;border-radius:6px}.ks-master-header .notification-panel{position:fixed;left:8px;right:8px;top:66px;width:auto;max-height:60vh}}
 @media print{.ks-master-header,.ks-header-mobile-sheet{display:none!important}}
 </style>
+  <link rel="stylesheet" href="pricelist-redesign-v86-53.css?v=86.53.p1">
   <script src="supabase-config.js"></script>
   <script src="supabase-bridge.js"></script>
 <script src="ks-motion.js?v=58.1" defer></script>
@@ -655,6 +656,18 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 </div></header>
 
   <main class="main-content">
+    <div class="ks-price-hero" aria-label="Quotation workspace">
+      <div>
+        <span class="ks-price-eyebrow">KIDZSTUDIOS · PRICING STUDIO</span>
+        <h1>Price List &amp; Quotation</h1>
+        <p>Choose a product, build its specifications, and prepare an accurate customer quotation.</p>
+      </div>
+      <div class="ks-price-flow" aria-label="Quotation workflow">
+        <span><i>1</i> Select product</span>
+        <span><i>2</i> Configure</span>
+        <span><i>3</i> Build quote</span>
+      </div>
+    </div>
     <div class="layout-wrapper">
       
       <div class="left-panel">
@@ -663,35 +676,35 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
         </div>
 
         <div class="category-grid">
-          <div class="category-card active" data-category="sublimation" onclick="switchCategory('sublimation')">
+          <div class="category-card active" data-category="sublimation" role="button" tabindex="0" aria-pressed="true" onclick="switchCategory('sublimation')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
             <span class="cat-name">Sublimation</span>
           </div>
-          <div class="category-card" data-category="silkscreen" onclick="switchCategory('silkscreen')">
+          <div class="category-card" data-category="silkscreen" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('silkscreen')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
             <span class="cat-name">Silkscreen</span>
           </div>
-          <div class="category-card" data-category="dtf_shirt" onclick="switchCategory('dtf_shirt')">
+          <div class="category-card" data-category="dtf_shirt" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('dtf_shirt')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
             <span class="cat-name">DTF Shirt</span>
           </div>
-          <div class="category-card" data-category="lanyard" onclick="switchCategory('lanyard')">
+          <div class="category-card" data-category="lanyard" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('lanyard')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4M12 2v4M8 6h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM9 10h6M9 14h4"/></svg></div>
             <span class="cat-name">Lanyard</span>
           </div>
-          <div class="category-card" data-category="apron" onclick="switchCategory('apron')">
+          <div class="category-card" data-category="apron" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('apron')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8v4M6 6h12l1.5 16H4.5L6 6zM9 12h6v5H9z"/></svg></div>
             <span class="cat-name">Apron</span>
           </div>
-          <div class="category-card" data-category="cap" onclick="switchCategory('cap')">
+          <div class="category-card" data-category="cap" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('cap')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h14"/><path d="M6 16a6 6 0 0 1 12 0"/><path d="M18 16c2 0 3 1 4 2"/><circle cx="12" cy="9" r="1"/></svg></div>
             <span class="cat-name">Cap</span>
           </div>
-          <div class="category-card" data-category="bunting" onclick="switchCategory('bunting')">
+          <div class="category-card" data-category="bunting" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('bunting')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="12" rx="1"/><path d="M12 16v6M9 22h6M12 4V2"/></svg></div>
             <span class="cat-name">Bunting</span>
           </div>
-          <div class="category-card" data-category="banner" onclick="switchCategory('banner')">
+          <div class="category-card" data-category="banner" role="button" tabindex="0" aria-pressed="false" onclick="switchCategory('banner')">
             <div class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="8" rx="1"/><path d="M4 4v16M20 4v16"/></svg></div>
             <span class="cat-name">Banner</span>
           </div>
@@ -1189,12 +1202,23 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 
     function switchCategory(cat) {
       currentCategory = cat;
-      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
-      document.querySelector(`.category-card[data-category="${cat}"]`).classList.add('active');
+      document.querySelectorAll('.category-card').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+      const selectedCard = document.querySelector(`.category-card[data-category="${cat}"]`);
+      selectedCard.classList.add('active'); selectedCard.setAttribute('aria-pressed', 'true');
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.getElementById('panel-' + cat).classList.add('active');
       calculateCurrentItem();
     }
+
+    // Keyboard support for existing category tiles (Enter / Space).
+    document.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          switchCategory(card.dataset.category);
+        }
+      });
+    });
 
     // --- Data Matrices ---
     const shirtSizeConfig = [

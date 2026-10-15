@@ -1,0 +1,267 @@
+/* KIDZSTUDIOS V86.53 Price List visual refresh.
+ * Scoped to this page; preserves all price rules, input IDs, event handlers,
+ * quotation/cart/output markup, print document and exporting functions. */
+body[data-ks-page="calculator"]{
+  --price-ink:#25282b;--price-muted:#7a8083;--price-orange:#e66f36;
+  --price-line:#e8e8e5;--price-light:#fff5ee;
+  --accent-color:#e66f36;--bg-input:#f8f8f6;--border-input:#e7e7e3;
+  --border-main:#e9e9e6;--text-primary:#25282b;--text-secondary:#7c8286;
+  background:#f6f6f4!important;color:var(--price-ink)!important;
+}
+body[data-ks-page="calculator"] .main-content{
+  width:100%;max-width:1600px;margin:0 auto;padding:26px 28px 56px;
+  min-width:0;
+}
+body[data-ks-page="calculator"] .ks-price-hero{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:24px;margin-bottom:22px;padding:0 3px;
+}
+body[data-ks-page="calculator"] .ks-price-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;color:var(--price-orange);
+  font-weight:850;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+}
+body[data-ks-page="calculator"] .ks-price-eyebrow:before{content:"";width:7px;height:7px;background:#e66f36;border-radius:50%;box-shadow:0 0 0 4px rgba(230,111,54,.11)}
+body[data-ks-page="calculator"] .ks-price-hero h1{
+  font-size:clamp(27px,3vw,39px);font-weight:850;line-height:1.13;
+  letter-spacing:-.055em;margin:9px 0 7px;color:#242629;
+}
+body[data-ks-page="calculator"] .ks-price-hero p{
+  color:#82878a;font-size:12px;line-height:1.6;max-width:650px;font-weight:500;
+}
+body[data-ks-page="calculator"] .ks-price-flow{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;
+  color:#848a8d;font-size:10px;font-weight:750;max-width:480px;
+}
+body[data-ks-page="calculator"] .ks-price-flow span{
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  border:1px solid #e9e9e5;border-radius:999px;padding:9px 11px;
+  background:#fff;box-shadow:0 2px 8px rgba(29,32,34,.025);
+}
+body[data-ks-page="calculator"] .ks-price-flow i{
+  display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;
+  color:var(--price-orange);background:var(--price-light);font:850 10px/1 inherit;
+  font-style:normal;
+}
+body[data-ks-page="calculator"] .layout-wrapper{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,360px);
+  gap:20px;max-width:none;align-items:start;min-width:0;
+}
+body[data-ks-page="calculator"] .layout-wrapper > *{min-width:0}
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box{
+  background:#fff!important;border:1px solid var(--price-line)!important;
+  border-radius:23px!important;box-shadow:0 12px 38px rgba(29,32,34,.035)!important;
+}
+body[data-ks-page="calculator"] .left-panel{padding:26px!important}
+body[data-ks-page="calculator"] .right-panel{
+  position:sticky;top:18px;display:flex;flex-direction:column;gap:13px;min-width:0;
+}
+body[data-ks-page="calculator"] .right-box{padding:20px!important;min-width:0}
+body[data-ks-page="calculator"] .right-box:first-child{border-top:3px solid var(--price-orange)!important}
+body[data-ks-page="calculator"] .header-flex{
+  margin:0 0 14px;padding-bottom:13px;border-bottom:1px solid #f0f0ee;
+}
+body[data-ks-page="calculator"] .brand-subtitle{
+  color:#33363a;font-size:13px;font-weight:800;letter-spacing:-.02em;
+}
+body[data-ks-page="calculator"] .brand-subtitle:before{content:"01";margin-right:9px;font-size:10px;letter-spacing:0;color:var(--price-orange)}
+body[data-ks-page="calculator"] .category-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:22px;
+}
+body[data-ks-page="calculator"] .category-card{
+  min-width:0;min-height:79px;display:flex;flex-direction:column;gap:8px;
+  justify-content:center;align-items:center;padding:11px 8px;
+  border:1px solid #e9e9e6!important;border-radius:14px;
+  background:#fff;color:#777e81;
+  box-shadow:none;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s;
+}
+body[data-ks-page="calculator"] .category-card .cat-icon{
+  margin:0;color:#7b8184;width:29px;height:29px;border-radius:9px;
+  background:#f7f7f5;display:grid;place-items:center;
+}
+body[data-ks-page="calculator"] .category-card .cat-icon svg{width:19px;height:19px}
+body[data-ks-page="calculator"] .category-card .cat-name{
+  font-size:10px;font-weight:750;line-height:1.2;text-align:center;color:#737a7d;
+}
+body[data-ks-page="calculator"] .category-card:hover{
+  transform:translateY(-1px);background:#fff8f3;border-color:#f5c5a9!important;
+  box-shadow:0 4px 15px rgba(230,111,54,.07);
+}
+body[data-ks-page="calculator"] .category-card.active{
+  background:var(--price-light)!important;border-color:#f1aa83!important;
+  box-shadow:inset 0 0 0 1px rgba(230,111,54,.10)!important;
+}
+body[data-ks-page="calculator"] .category-card.active .cat-icon{background:#ffe6d8;color:#da6734}
+body[data-ks-page="calculator"] .category-card.active .cat-name{color:#be5625!important}
+body[data-ks-page="calculator"] .category-card:focus-visible{
+  outline:3px solid rgba(230,111,54,.26);outline-offset:3px;
+}
+body[data-ks-page="calculator"] .panel-banner{
+  height:auto;min-height:66px;margin:0 0 15px;padding:14px 16px;
+  background:linear-gradient(115deg,#fff2e9,#fffaf6 72%);
+  border:1px solid #f5e5d9;border-radius:15px;gap:11px;
+}
+body[data-ks-page="calculator"] .panel-banner svg{width:29px;height:29px;flex-shrink:0;color:#d66a37;opacity:1}
+body[data-ks-page="calculator"] .panel-banner h2{
+  font-size:16px;line-height:1.25;letter-spacing:-.035em;font-weight:850;color:#353638;
+}
+body[data-ks-page="calculator"] .grid-layout{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0;
+}
+body[data-ks-page="calculator"] .grid-layout > *{min-width:0}
+body[data-ks-page="calculator"] .form-group{
+  padding:19px!important;margin:0!important;border-radius:17px;
+  background:#fdfdfc;border:1px solid #ebebe8;
+}
+body[data-ks-page="calculator"] .section-title{
+  font-size:13px!important;font-weight:800!important;letter-spacing:-.025em;
+  color:#343739;margin-bottom:14px;line-height:1.3;
+}
+body[data-ks-page="calculator"] .section-title .pill-tag{
+  border-radius:999px;font-size:10px!important;padding:5px 8px;
+  border:1px solid #eeeae6;
+}
+body[data-ks-page="calculator"] label.field-label{
+  font-weight:700;font-size:11px;color:#7c8286;margin-top:12px;margin-bottom:6px;
+}
+body[data-ks-page="calculator"] .input-field,
+body[data-ks-page="calculator"] .select-field{
+  border-radius:11px;border:1px solid #e5e6e2;background:#f8f8f7;
+  min-width:0;max-width:100%;font-size:12px;line-height:1.4;
+  padding:10px 12px;min-height:40px;margin-bottom:3px;
+}
+body[data-ks-page="calculator"] .select-field{padding-right:32px;background-position:right 12px center}
+body[data-ks-page="calculator"] .input-field:focus,
+body[data-ks-page="calculator"] .select-field:focus{
+  border-color:#eca57f;background:#fff;box-shadow:0 0 0 3px rgba(230,111,54,.10);
+}
+body[data-ks-page="calculator"] .size-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;
+}
+body[data-ks-page="calculator"] .size-item{
+  padding:10px 6px;border:1px solid #e8e9e6;background:#fff;
+  border-radius:11px;min-width:0;
+}
+body[data-ks-page="calculator"] .size-item label{font-size:11px;color:#34383a;margin-bottom:3px}
+body[data-ks-page="calculator"] .surcharge-badge{font-size:9px;color:#d36a37;margin-bottom:6px;height:10px}
+body[data-ks-page="calculator"] .stepper-wrapper{
+  border-radius:9px;border-color:#e9e8e5;min-width:0;
+}
+body[data-ks-page="calculator"] .stepper-btn{
+  width:26px;min-width:23px;height:32px;color:#d96936;
+}
+body[data-ks-page="calculator"] .size-input{font-size:12px;padding:4px 0}
+body[data-ks-page="calculator"] .general-stepper{border-radius:11px}
+body[data-ks-page="calculator"] .addon-row{gap:9px}
+body[data-ks-page="calculator"] .addon-label{font-size:12px}
+body[data-ks-page="calculator"] .addon-price{color:#d56a39}
+body[data-ks-page="calculator"] .custom-size-box{
+  background:#fff7f2;border-color:#f0ba9a;border-radius:13px;
+}
+body[data-ks-page="calculator"] .checkbox-label{font-size:12px}
+body[data-ks-page="calculator"] .checkbox-label input{accent-color:#e66f36}
+/* The original pricing side column remains inline and sticky: no floating tools. */
+body[data-ks-page="calculator"] .right-box:first-child > div:first-child > div:first-child,
+body[data-ks-page="calculator"] .right-box:nth-child(2) > div:first-child > div:first-child{
+  font-size:11px!important;letter-spacing:.06em!important;color:#df6b35!important;
+}
+body[data-ks-page="calculator"] .right-panel .price-breakdown{
+  margin-bottom:12px;gap:8px;text-align:left;font-size:11px;line-height:1.4;
+}
+body[data-ks-page="calculator"] .right-panel .price-breakdown strong{
+  font-size:13px;font-weight:800;color:#313438;
+}
+body[data-ks-page="calculator"] .right-panel .total-price{
+  padding:17px 16px!important;border:1px solid #f0e6df!important;
+  background:linear-gradient(135deg,#fff4ec,#fff9f5);
+  border-radius:15px;text-align:left;color:#956b53;
+  font-size:11px!important;font-weight:800;
+  text-transform:uppercase;letter-spacing:.07em;
+}
+body[data-ks-page="calculator"] .right-panel .total-price span{
+  display:block;color:#24272a!important;font-size:clamp(24px,2.4vw,32px)!important;
+  letter-spacing:-.055em!important;font-weight:850;margin-top:5px;overflow-wrap:anywhere;
+}
+body[data-ks-page="calculator"] #breakdown-list{
+  padding:11px 12px;background:#f8f8f6!important;border-radius:12px;
+  border:1px solid #ededea;max-height:220px;overflow:auto;
+}
+body[data-ks-page="calculator"] .right-panel .action-btn,
+body[data-ks-page="calculator"] .right-panel .wa-btn{
+  min-height:42px;border-radius:12px;font-weight:800;font-size:12px!important;
+}
+body[data-ks-page="calculator"] .right-panel .wa-btn{
+  box-shadow:none!important;
+}
+body[data-ks-page="calculator"] .right-panel .right-box:first-child .wa-btn{
+  background:#e66f36!important;color:#fff!important;
+}
+body[data-ks-page="calculator"] .right-panel .right-box:first-child .wa-btn:hover{background:#d6602a!important}
+body[data-ks-page="calculator"] #cart-items-container{
+  max-height:220px!important;background:#fdfdfc;
+  border:1px solid #f0f0ed;border-radius:12px;padding:10px!important;
+  margin-bottom:13px!important;
+}
+body[data-ks-page="calculator"] .deposit-terms{
+  border-radius:12px;gap:8px;
+}
+body[data-ks-page="calculator"] .right-panel .right-box:nth-child(2) > .wa-btn{
+  background:#2a8d65!important;color:#fff!important;min-height:46px;
+}
+body[data-ks-page="calculator"] .modal-overlay .modal-content{
+  border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.18);
+}
+body[data-ks-page="calculator"] .modal-content .wa-btn{border-radius:11px;min-height:45px}
+body[data-ks-page="calculator"] .plain-footer{border-color:#ededeb!important;background:#fff!important}
+@media(max-width:1180px){
+  body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:minmax(0,1fr) minmax(286px,325px);gap:14px}
+  body[data-ks-page="calculator"] .main-content{padding:22px 18px 45px}
+  body[data-ks-page="calculator"] .left-panel{padding:20px!important}
+  body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+  body[data-ks-page="calculator"] .size-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:minmax(0,1fr)}
+  body[data-ks-page="calculator"] .right-panel{position:static;top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  body[data-ks-page="calculator"] .right-panel > *{min-width:0}
+  body[data-ks-page="calculator"] .ks-price-hero{align-items:flex-start}
+  body[data-ks-page="calculator"] .ks-price-flow{max-width:260px}
+}
+@media(max-width:650px){
+  body[data-ks-page="calculator"] .main-content{padding:17px 12px 38px}
+  body[data-ks-page="calculator"] .ks-price-hero{display:block;margin-bottom:15px}
+  body[data-ks-page="calculator"] .ks-price-hero h1{font-size:27px;letter-spacing:-.05em}
+  body[data-ks-page="calculator"] .ks-price-hero p{font-size:11px}
+  body[data-ks-page="calculator"] .ks-price-flow{margin-top:13px;justify-content:flex-start;max-width:none;gap:5px}
+  body[data-ks-page="calculator"] .ks-price-flow span{font-size:9px;padding:7px 8px}
+  body[data-ks-page="calculator"] .left-panel{padding:14px!important;border-radius:17px!important}
+  body[data-ks-page="calculator"] .right-panel{grid-template-columns:minmax(0,1fr)}
+  body[data-ks-page="calculator"] .right-box{padding:15px!important;border-radius:17px!important}
+  body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:16px}
+  body[data-ks-page="calculator"] .category-card{min-height:72px;padding:9px 3px;border-radius:11px;gap:6px}
+  body[data-ks-page="calculator"] .category-card .cat-icon{width:26px;height:26px}
+  body[data-ks-page="calculator"] .category-card .cat-icon svg{width:17px;height:17px}
+  body[data-ks-page="calculator"] .category-card .cat-name{font-size:9px}
+  body[data-ks-page="calculator"] .panel-banner{min-height:60px;padding:12px;margin-bottom:11px}
+  body[data-ks-page="calculator"] .panel-banner h2{font-size:14px}
+  body[data-ks-page="calculator"] .grid-layout{grid-template-columns:minmax(0,1fr);gap:10px}
+  body[data-ks-page="calculator"] .form-group{padding:14px!important}
+  body[data-ks-page="calculator"] .size-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  body[data-ks-page="calculator"] .right-panel .total-price span{font-size:30px!important}
+}
+@media(max-width:350px){
+  body[data-ks-page="calculator"] .main-content{padding:12px 8px 30px}
+  body[data-ks-page="calculator"] .left-panel{padding:10px!important}
+  body[data-ks-page="calculator"] .category-card .cat-name{font-size:8px}
+  body[data-ks-page="calculator"] .size-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-ks-page="calculator"] .category-card{transition:none}
+  body[data-ks-page="calculator"] .panel.active{animation:none}
+}
+@media print{
+  body[data-ks-page="calculator"] .ks-price-hero,
+  body[data-ks-page="calculator"] .main-content,
+  body[data-ks-page="calculator"] .ks-master-header{display:none!important}
+  /* Quotation PDF document is generated from its original element. */
+}
