@@ -216,19 +216,14 @@
     resetAI.title=event.detail?.message||'Reset all staff AI movement';
     window.setTimeout(()=>{resetAI.textContent='↻ Reset AI'},2600);
   });
-  // V86.53 UI: relocate the existing fullscreen and camera buttons beside Reset AI.
-  // Moving the same DOM nodes preserves their listeners in the main controller
-  // and in office-fullscreen.js; no duplicate fullscreen or camera handlers.
+  // V86.53 UI revision: keep Fullscreen beside Reset AI. Camera zoom/rotate
+  // uses the existing pointer/scroll gestures; cinematic auto-rotation stays
+  // enabled by the 3D bridge at startup (subject to reduced-motion settings).
   controls.append(badge,btn,resetAI);
   const fullscreen=document.getElementById('ksOfficeFullscreen');
   if(fullscreen){
     fullscreen.classList.add('ks-living-fullscreen');
     controls.appendChild(fullscreen);
-  }
-  const viewTools=document.querySelector('#mapShell .map-tools .tool-group');
-  if(viewTools){
-    viewTools.classList.add('ks-living-camera-tools');
-    controls.appendChild(viewTools);
   }
   host.parentElement.appendChild(controls);
   syncButton();updateSoundStatus(enabled?'tap-to-start':'off');applyLighting(null,null,null,null,null);

@@ -5,23 +5,31 @@ const home=read('public/index.html');
 const living=read('public/office-living-office.js');
 const styles=read('public/office-index-controls-v86-53.css');
 const full=read('public/office-fullscreen.js');
-assert.match(home,/office-index-controls-v86-53\.css\?v=86\.53\.ui1/,'New controls CSS is loaded last');
-assert.match(home,/office-living-office\.js\?v=86\.53\.ui1/,'Relocation code cache must refresh');
-assert.equal((home.match(/id="ksOfficeFullscreen"/g)||[]).length,1,'One fullscreen control');
-for(const id of ['zoomOut','zoomIn','rotateView','chatLauncher','followChip']){
+const bridge=read('source/src/suite-bridge.ts');
+const scene=read('source/src/office-scene.ts');
+
+assert.match(home,/office-index-controls-v86-53\.css\?v=86\.53\.ui2/,'Camera pill removal must refresh the stylesheet cache');
+assert.match(home,/office-living-office\.js\?v=86\.53\.ui2/,'Updated top controls must bypass the previous JS cache');
+for(const id of ['ksOfficeFullscreen','chatLauncher','followChip']){
  assert.equal((home.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,`${id} appears exactly once`);
 }
-assert.ok(!home.includes('id="fullscreenBtn"'),'Remove duplicate fullscreen button');
-assert.ok(!home.includes('id="resetView"'),'Old camera home button must be replaced by Rotate');
-assert.match(home,/\$\('#rotateView'\)\.onclick=\(\)=>rotateModel\(15\)/,'Rotate button should rotate existing model');
-assert.match(living,/controls\.append\(badge,btn,resetAI\)/,'Retain Reset AI and sound controls');
-assert.match(living,/document\.getElementById\('ksOfficeFullscreen'\)/,'Relocate original fullscreen DOM node');
-assert.match(living,/document\.querySelector\('#mapShell \.map-tools \.tool-group'\)/,'Relocate the original camera control buttons');
-assert.match(living,/controls\.appendChild\(viewTools\)/,'Place controls alongside Reset AI');
-assert.match(full,/document\.getElementById\('ksOfficeFullscreen'\)/,'Keep existing real fullscreen binding');
-assert.match(styles,/\#chatLauncher\{[\s\S]*?left:50%!important/,'Center Chat launcher on desktop');
-assert.match(styles,/\#followChip\{[\s\S]*?top:58px!important/,'Following chip centered near top');
-assert.match(styles,/\.ks-living-camera-tools/,'Retain camera pill styling');
-assert.match(styles,/\.ks-living-fullscreen/,'Match fullscreen to Reset AI pill');
-assert.match(styles,/\.map-tools \.rotation-control\{display:none!important/,'Hide duplicate rotate controls');
-console.log('PASS V86.53 UI: Chat centered, Fullscreen/Zoom/Rotate grouped with Reset AI, Following top-centered and handlers preserved');
+for(const id of ['zoomOut','zoomIn','rotateView']){
+ assert.doesNotMatch(home,new RegExp(`id="${id}"`),`Remove ${id} from the page`);
+ assert.doesNotMatch(home,new RegExp(`\\$\\('#${id}'\\)\\.onclick`),`Remove stale ${id} handler`);
+}
+assert.doesNotMatch(home,/<div class="tool-group" aria-label="Zoom and view controls">/,'No camera control pill in markup');
+assert.doesNotMatch(living,/viewTools|ks-living-camera-tools/,'Do not recreate the camera pill by moving its DOM nodes');
+assert.doesNotMatch(styles,/ks-living-camera-tools/,'Do not retain camera pill styling');
+assert.match(living,/controls\.append\(badge,btn,resetAI\)/,'Keep original Reset AI and sound controls');
+assert.match(living,/document\.getElementById\('ksOfficeFullscreen'\)/,'Keep fullscreen beside Reset AI');
+assert.match(full,/document\.getElementById\('ksOfficeFullscreen'\)/,'Fullscreen remains connected to the existing handler');
+assert.match(styles,/#chatLauncher\{[\s\S]*?left:50%!important/,'Keep Chat centered on desktop');
+assert.match(styles,/#followChip\{[\s\S]*?top:58px!important/,'Keep Following chip top centered');
+// Test the 3D engine's existing cinematic behavior, which is independent of
+// the UI controls. Respect the operating system's reduced-motion preference.
+assert.match(bridge,/controller\.setRotating\(!paused\)/,'Cinematic auto rotation defaults to on when motion is allowed');
+assert.match(bridge,/controller\?\.setRotating\(!paused\)/,'Reset restores the default cinematic rotation');
+assert.match(scene,/controls\.autoRotateSpeed=\.24/,'Preserve the slow cinematic orbit rate');
+assert.match(scene,/controls\.autoRotate=rotating&&!paused&&!reducedMotion\.matches&&view==='isometric'/,'Animation loop keeps automatic orbit independent of deleted controls');
+assert.match(scene,/setRotating\(v\)\{rotating=v\}/,'Retain the 3D rotation API');
+console.log('PASS V86.53 cinematic UI: camera control pill removed; fullscreen, Chat, Following and default auto-rotation retained');
