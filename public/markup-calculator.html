@@ -841,7 +841,8 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 <script src="ks-motion.js?v=58.1" defer></script>
 <link rel="stylesheet" href="office-ux.css?v=58.1">
 <link rel="stylesheet" href="suite-header-v61.css?v=66.0">
-<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"></head>
+<link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="markup-calculator-redesign.css?v=86.53.pricing1">
+</head>
 <body data-ks-ui="v2" data-ks-page="simple-markup-calculator">
 
     <!-- Glass Header -->
@@ -872,9 +873,19 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
 </div></header>
 
     <main class="main-content">
+        <section class="pricing-hero" aria-label="Pricing workspace introduction">
+          <div class="pricing-hero-copy">
+            <div class="pricing-eyebrow"><span class="pricing-eyebrow-dot" aria-hidden="true"></span> KIDZSTUDIOS / SALES WORKSPACE</div>
+            <h1>Markup <span>&amp;</span> Margin</h1>
+            <p>Build confident quotations. Capture your true cost, choose your pricing method, and see the profit before sending a price.</p>
+          </div>
+          <div class="pricing-hero-meta" aria-label="Calculator information">
+            <span>MYR <b>RM</b></span><span>Instant calculation</span><span>Local to this page</span>
+          </div>
+        </section>
         <div class="calculator-container">
             <!-- Job Profit Calculator -->
-            <div class="calculator-card" id="markupCard">
+            <section class="calculator-card" id="markupCard" aria-label="Pricing inputs">
                 <div class="card-header">
                     <div class="icon-wrapper">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -882,19 +893,19 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                             <path d="M7 16l4-5 4 3 5-7"></path>
                         </svg>
                     </div>
-                    <h1 id="calcTitle">Job Profit Calculator</h1>
+                    <h2 id="calcTitle">Build your selling price</h2>
                     <p class="subtitle" id="calcSubtitle">Price smarter. See the full job profit before quoting.</p>
                 </div>
 
                 <div class="mode-toggle">
-                    <button class="mode-btn active" id="btnMarkupMode">Build Selling Price</button>
-                    <button class="mode-btn" id="btnMarginMode">Reverse Margin</button>
+                    <button class="mode-btn active" id="btnMarkupMode" aria-pressed="true">Build Selling Price</button>
+                    <button class="mode-btn" id="btnMarginMode" aria-pressed="false">Reverse Margin</button>
                 </div>
 
                 <div class="section-label"><span>1. Job Setup</span><span class="optional-badge">live calculation</span></div>
                 <div class="field-grid">
                     <div class="input-group">
-                        <label>Quantity</label>
+                        <label for="quantityInput">Quantity</label>
                         <div class="input-wrapper">
                             <input type="number" id="quantityInput" placeholder="1" min="1" step="1" value="1">
                         </div>
@@ -908,7 +919,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Base Cost / Unit (RM)</label>
+                        <label for="costPrice">Base Cost / Unit (RM)</label>
                         <div class="input-wrapper">
                             <span class="currency-symbol">RM</span>
                             <input type="number" id="costPrice" class="currency-input" placeholder="0.00" min="0" step="0.01">
@@ -921,19 +932,19 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 <div class="extra-costs">
                     <div class="field-grid">
                         <div class="input-group">
-                            <label>Printing</label>
+                            <label for="printingCost">Printing</label>
                             <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="printingCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
                         </div>
                         <div class="input-group">
-                            <label>Packaging</label>
+                            <label for="packagingCost">Packaging</label>
                             <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="packagingCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
                         </div>
                         <div class="input-group">
-                            <label>Design</label>
+                            <label for="designCost">Design</label>
                             <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="designCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
                         </div>
                         <div class="input-group">
-                            <label>Commission / Other</label>
+                            <label for="commissionCost">Commission / Other</label>
                             <div class="input-wrapper"><span class="currency-symbol">RM</span><input type="number" id="commissionCost" class="currency-input" placeholder="0.00" min="0" step="0.01"></div>
                         </div>
                     </div>
@@ -942,7 +953,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 <div class="section-label"><span>3. Delivery</span><span class="optional-badge">optional</span></div>
                 <div class="field-grid">
                     <div class="input-group">
-                        <label>Delivery Cost (RM)</label>
+                        <label for="deliveryCost">Delivery Cost (RM)</label>
                         <div class="input-wrapper">
                             <span class="currency-symbol">RM</span>
                             <input type="number" id="deliveryCost" class="currency-input" placeholder="0.00" min="0" step="0.01">
@@ -951,8 +962,8 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <div class="input-group">
                         <label>How is delivery charged?</label>
                         <div class="delivery-mode-toggle">
-                            <button class="delivery-mode-btn active" id="deliveryPerOrder">Per Order</button>
-                            <button class="delivery-mode-btn" id="deliveryPerUnit">Per Unit</button>
+                            <button class="delivery-mode-btn active" id="deliveryPerOrder" aria-pressed="true">Per Order</button>
+                            <button class="delivery-mode-btn" id="deliveryPerUnit" aria-pressed="false">Per Unit</button>
                         </div>
                         <div class="helper-text" id="deliveryHelp">RM delivery is counted once for the whole order.</div>
                     </div>
@@ -961,24 +972,24 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 <div class="markup-section visible" id="markupSection">
                     <div class="section-label"><span>4. Pricing Method</span></div>
                     <div class="pricing-mode-toggle">
-                        <button class="pricing-mode-btn active" id="btnMarkupSubMode">Markup %</button>
-                        <button class="pricing-mode-btn" id="btnMultiplierSubMode">Multiplier</button>
-                        <button class="pricing-mode-btn" id="btnTargetMarginSubMode">Target Margin</button>
+                        <button class="pricing-mode-btn active" id="btnMarkupSubMode" aria-pressed="true">Markup %</button>
+                        <button class="pricing-mode-btn" id="btnMultiplierSubMode" aria-pressed="false">Multiplier</button>
+                        <button class="pricing-mode-btn" id="btnTargetMarginSubMode" aria-pressed="false">Target Margin</button>
                     </div>
 
                     <div class="input-group" id="markupPercentGroup">
-                        <label>Markup (%)</label>
+                        <label for="markupPercent">Markup (%)</label>
                         <div class="input-wrapper">
                             <input type="number" id="markupPercent" class="percent-input" placeholder="0" min="0" step="0.01">
                             <span class="percent-symbol">%</span>
                         </div>
                     </div>
                     <div class="input-group" id="multiplierGroup" style="display:none;">
-                        <label>Multiplier (Selling Price ÷ All-in Cost)</label>
+                        <label for="multiplierInput">Multiplier (Selling Price ÷ All-in Cost)</label>
                         <div class="input-wrapper"><input type="number" id="multiplierInput" placeholder="1.50" min="0" step="0.01"></div>
                     </div>
                     <div class="input-group" id="targetMarginGroup" style="display:none;">
-                        <label>Target Margin (%)</label>
+                        <label for="targetMarginInput">Target Margin (%)</label>
                         <div class="input-wrapper">
                             <input type="number" id="targetMarginInput" class="percent-input" placeholder="30" min="0" max="99.99" step="0.01">
                             <span class="percent-symbol">%</span>
@@ -990,7 +1001,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 <div class="margin-section" id="marginSection">
                     <div class="section-label"><span>4. Selling Price</span></div>
                     <div class="input-group">
-                        <label>Selling Price / Unit (RM)</label>
+                        <label for="sellingPriceInput">Selling Price / Unit (RM)</label>
                         <div class="input-wrapper">
                             <span class="currency-symbol">RM</span>
                             <input type="number" id="sellingPriceInput" class="currency-input" placeholder="0.00" min="0" step="0.01">
@@ -1009,6 +1020,15 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <div class="override-note" id="overrideNote">Rounded price applied. Change any pricing input to return to automatic calculation.</div>
                 </div>
 
+            </section>
+
+            <aside class="pricing-sidebar" aria-label="Pricing results and quick calculator">
+              <section class="calculator-card result-card" id="pricingResults" aria-label="Live pricing results">
+                <div class="result-card-heading">
+                  <span class="result-card-eyebrow"><span class="live-indicator" aria-hidden="true"></span> LIVE PRICING</span>
+                  <h2>Quotation snapshot</h2>
+                  <p>Every cost, margin and profit figure in one place.</p>
+                </div>
                 <div class="job-dashboard">
                     <div class="metric-card selling">
                         <div class="metric-label">Selling / Unit</div>
@@ -1027,7 +1047,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     </div>
                     <div class="metric-card profit">
                         <div class="metric-label">Total Profit</div>
-                        <div class="metric-value" id="metricProfit">RM 0.00</div>
+                        <div class="metric-value" id="metricProfit" aria-live="polite">RM 0.00</div>
                         <div class="metric-sub" id="profitFormula">Profit / unit: RM 0.00</div>
                     </div>
                 </div>
@@ -1056,7 +1076,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <button class="btn btn-reset" id="resetBtn">Reset</button>
                     <button class="btn btn-copy" id="copyBtn">Copy Quotation Summary</button>
                 </div>
-            </div>
+              </section>
 
             <!-- Basic Calculator -->
             <div class="calculator-card basic-card">
@@ -1096,6 +1116,7 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                     <div></div>
                 </div>
             </div>
+            </aside>
         </div>
     </main>
 
@@ -1387,6 +1408,9 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 btnMarkupSub.classList.toggle('active', mode === 'markup');
                 btnMultiplierSub.classList.toggle('active', mode === 'multiplier');
                 btnTargetMarginSub.classList.toggle('active', mode === 'target');
+                btnMarkupSub.setAttribute('aria-pressed', String(mode === 'markup'));
+                btnMultiplierSub.setAttribute('aria-pressed', String(mode === 'multiplier'));
+                btnTargetMarginSub.setAttribute('aria-pressed', String(mode === 'target'));
                 markupPercentGroup.style.display = mode === 'markup' ? 'block' : 'none';
                 multiplierGroup.style.display = mode === 'multiplier' ? 'block' : 'none';
                 targetMarginGroup.style.display = mode === 'target' ? 'block' : 'none';
@@ -1397,6 +1421,8 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 const isMarkup = mode === 'markup';
                 btnMarkup.classList.toggle('active', isMarkup);
                 btnMargin.classList.toggle('active', !isMarkup);
+                btnMarkup.setAttribute('aria-pressed', String(isMarkup));
+                btnMargin.setAttribute('aria-pressed', String(!isMarkup));
                 markupSection.classList.toggle('visible', isMarkup);
                 marginSection.classList.toggle('visible', !isMarkup);
                 calcTitle.textContent = isMarkup ? 'Job Profit Calculator' : 'Reverse Margin Calculator';
@@ -1409,6 +1435,8 @@ body :where(.left-panel,.right-box,.calculator-card,.commission-form,.container,
                 deliveryMode = mode;
                 deliveryPerOrderBtn.classList.toggle('active', mode === 'order');
                 deliveryPerUnitBtn.classList.toggle('active', mode === 'unit');
+                deliveryPerOrderBtn.setAttribute('aria-pressed', String(mode === 'order'));
+                deliveryPerUnitBtn.setAttribute('aria-pressed', String(mode === 'unit'));
                 deliveryHelp.textContent = mode === 'order'
                     ? 'RM delivery is counted once for the whole order.'
                     : 'RM delivery is multiplied by quantity.';
