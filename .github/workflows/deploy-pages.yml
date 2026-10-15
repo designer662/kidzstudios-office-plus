@@ -64,6 +64,7 @@ jobs:
           node scripts/test-v86-51-reports-navigation.mjs
           node scripts/test-v86-52-layout-import.mjs
           node scripts/test-v86-53-dashboard-report.mjs
+          node scripts/test-v86-53-controls-layout.mjs
           node scripts/test-index-job-style.mjs
           node scripts/test-v86-54-header-parity.mjs
       - name: Test job data and workbook tools
