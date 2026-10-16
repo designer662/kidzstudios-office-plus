@@ -114,3 +114,9 @@ body.ks-dashboard #livePanel .live-feed-detail-head button{border:0;background:#
 body.ks-dashboard #livePanel .live-feed-detail p{margin:7px 0;color:#536158;font:600 11px/1.5 Inter,system-ui,sans-serif;white-space:pre-wrap}
 body.ks-dashboard #livePanel .live-feed-detail small{display:block;color:#84918b;font-size:9px}
 body.ks-dashboard #livePanel #liveDetailStaff{margin-top:8px;border:1px solid #e6bd9d;background:#fff4ec;border-radius:8px;padding:8px 10px;color:#a45c32;font-size:10px;font-weight:800;cursor:pointer}
+
+/* V86.53 Index Stability: real event-sync status, no new toolbar controls. */
+body.ks-dashboard #livePanel[data-sync-state="connecting"] .live-state .pulse-dot,
+body.ks-dashboard #livePanel[data-sync-state="reconnecting"] .live-state .pulse-dot{background:#d69d4b;animation:none}
+body.ks-dashboard #livePanel[data-sync-state="offline"] .live-state{color:#9a5650}
+body.ks-dashboard #livePanel[data-sync-state="offline"] .live-state .pulse-dot{background:#b96b60;animation:none}

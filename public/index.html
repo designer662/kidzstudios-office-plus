@@ -1049,7 +1049,7 @@ body{overscroll-behavior:none;}
 <link rel="stylesheet" href="office-v86-3-polish.css?v=86.4">
 <link rel="stylesheet" href="office-character-studio.css?v=86.9">
 <link rel="stylesheet" href="office-online-users.css?v=86.25">
-<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.4"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
+<link rel="stylesheet" href="office-layout-v86-52.css?v=86.52.1"><link rel="stylesheet" href="suite-header-minimal.css?v=86.53"><link rel="stylesheet" href="office-fullscreen.css?v=86.53"><link rel="stylesheet" href="office-index-job-style.css?v=86.53.1"><link rel="stylesheet" href="office-live-activity.css?v=86.53.4.health1"><link rel="stylesheet" href="office-index-header-parity.css?v=86.54.1"><link rel="stylesheet" href="office-index-controls-v86-53.css?v=86.53.ui5"></head>
 <body class="ks-dashboard">
 <div class="app" id="app" data-theme="light">
 <header class="top-shell ks-master-header no-print"><div class="topbar topbar-tools">
@@ -1103,7 +1103,7 @@ body{overscroll-behavior:none;}
 <g id="camera"><g id="modelRotator"><g id="officeBase"></g><g id="roomsLayer"></g><g id="furnitureLayer"></g><g id="wallsLayer"></g><g id="labelsLayer"></g><g id="employeesLayer"></g><g id="bubblesLayer"></g></g></g>
 </svg>
 
-<section class="live-panel panel" id="livePanel" aria-label="Live office activity">
+<section class="live-panel panel" id="livePanel" data-sync-state="connecting" aria-label="Live office activity">
   <div class="panel-kicker live-panel-heading" id="livePanelHeader">
     <div class="live-heading-identity">
       <span class="live-heading-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-6 4 12 3-6h4"/></svg></span>
@@ -1118,7 +1118,7 @@ body{overscroll-behavior:none;}
   </div>
   <div class="live-panel-body" id="livePanelBody">
     <div class="live-status-bar">
-      <div class="live-state"><i class="pulse-dot" aria-hidden="true"></i><span id="liveLabel">Live</span></div>
+      <div class="live-state" role="status" aria-live="polite" aria-atomic="true"><i class="pulse-dot" aria-hidden="true"></i><span id="liveLabel">Connecting…</span></div>
       <div id="livePresenceSlot" class="live-presence-slot" aria-label="Online browser sessions"></div>
     </div>
     <div class="live-feed-toolbar">
@@ -1290,6 +1290,43 @@ body{overscroll-behavior:none;}
 <script src="office-command-data.js?v=86.38"></script>
 <script src="job-attention-queue.js?v=86.37"></script>
 <script src="office-pulse-insights.js?v=86.38"></script>
+<script id="ks-index-boot-guard">
+(()=>{
+  // Bind before the inline dashboard controller. Retry performs a fresh navigation,
+  // not another set of polling loops or Supabase subscriptions in this page.
+  let ready=false,warning=null,watchdog=null,rejectionCount=0;
+  const dismiss=()=>{warning?.remove();warning=null};
+  function warn(){
+    if(ready||warning)return;
+    const box=document.createElement('div');box.id='ksBootFallback';box.setAttribute('role','alert');
+    box.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;display:flex;align-items:center;gap:10px;background:#fff7f2;color:#9a4a21;border:1px solid rgba(239,123,69,.3);box-shadow:0 12px 34px rgba(30,33,35,.12);border-radius:12px;padding:10px 12px;font:700 12px/1.4 Inter,Arial,sans-serif;max-width:min(520px,calc(100vw - 24px))';
+    const label=document.createElement('span');label.textContent='The dashboard could not finish starting. Some features may be unavailable.';
+    const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';retry.style.cssText='background:#a94e26;color:#fff;border:0;border-radius:8px;padding:7px 11px;cursor:pointer;font:inherit';retry.onclick=()=>location.reload();
+    const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Dismiss');close.style.cssText='background:transparent;border:0;font-size:20px;cursor:pointer;color:inherit';close.onclick=dismiss;
+    box.append(label,retry,close);warning=box;document.body.append(box);
+  }
+  window.addEventListener('ks:suite-ready',()=>{ready=true;window.__ksDashboardReady=true;clearTimeout(watchdog);dismiss()});
+  window.addEventListener('error',e=>{
+    if(ready)return;
+    const msg=String(e?.message||'');
+    if(!msg||/ResizeObserver loop|Script error\.?$/i.test(msg))return;
+    // Only errors in the dashboard document are proof that its main controller failed.
+    const scriptName=String(e.filename||'').split('/').pop();
+    if(!scriptName||scriptName.startsWith('index.html'))warn();
+  });
+  window.addEventListener('unhandledrejection',e=>{
+    if(ready)return;
+    const msg=String(e?.reason?.message||e?.reason||'');
+    if(/Sign in required|Failed to fetch|NetworkError|Load failed/i.test(msg))return;
+    // An isolated optional-module rejection should not masquerade as a boot crash.
+    if(++rejectionCount>=2||/dashboard (?:startup|initialization) failed/i.test(msg))warn();
+  });
+  const inspect=()=>{if(!ready&&document.documentElement.dataset.ksAuth==='ok')warn()};
+  const startWatchdog=()=>{watchdog=setTimeout(inspect,12000)};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startWatchdog,{once:true});
+  else startWatchdog();
+})();
+</script>
 <script id="ks-main-js">
 (() => {
   'use strict';
@@ -1542,7 +1579,18 @@ body{overscroll-behavior:none;}
     if(t.includes('presence')||t.includes('walk')||t.includes('desk')||t.includes('meeting')||t.includes('break'))return'PRESENCE';
     return'OFFICE';
   }
-  function updateLiveClock(){if(liveLabel)liveLabel.textContent=`Live · ${clockTime()}`;renderFeed();renderOpsSyncMeta()}
+  // A healthy event response, including an empty one, is the only evidence of a live feed.
+  let eventHealth='connecting',eventFailureCount=0,eventLastSuccess=0,eventPullPromise=null;
+  function renderEventHealth(){
+    if(livePanel)livePanel.dataset.syncState=eventHealth;
+    const captions={connecting:'Connecting…',live:'Live',reconnecting:'Reconnecting…',offline:'Offline'};
+    if(liveLabel)liveLabel.textContent=`${captions[eventHealth]}${eventLastSuccess?' · '+clockTime(eventLastSuccess):''}`;
+  }
+  function setEventHealth(next){
+    if(eventHealth===next){renderEventHealth();return;}
+    eventHealth=next;renderEventHealth();renderFeed();
+  }
+  function updateLiveClock(){renderEventHealth();renderFeed();renderOpsSyncMeta()}
   function maybePushOpsTimeBrief(){const d=new Date(),key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`;if(d.getMinutes()>2||lastOpsBriefHour===key)return;lastOpsBriefHour=key;const overview=window.KSPulseInsights.summarize(jobs,d,categoryForJob),active=overview.active,due=overview.dueToday,overdue=overview.overdue;pushActivity({title:`${clockTime()} · Office checkpoint`,text:`${active} active · ${due} due today · ${overdue} overdue`,avatar:'TM',type:'time_brief'})}
   function startOfficeClock(){updateLiveClock();maybePushOpsTimeBrief();if(clockTimer)clearInterval(clockTimer);clockTimer=setInterval(()=>{updateLiveClock();maybePushOpsTimeBrief()},30000)}
   function eventGlyph(type=''){
@@ -1572,19 +1620,51 @@ body{overscroll-behavior:none;}
   }
   async function postOfficeEvent({eventType,title,message='',employeeId=null,metadata={},dedupeKey=''},options={}){
     try{
-      const res=await fetch(EVENTS_API,{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({eventType,title,message,employeeId,metadata,dedupeKey,sourceClient:eventClientId})});if(!res.ok)throw new Error(`HTTP ${res.status}`);const row=await res.json(),event=row.event;if(event){const id=Number(event.id)||0,isLocal=event.sourceClient===eventClientId;if(id>lastEventId||isLocal){lastEventId=Math.max(lastEventId,id);handleOfficeEvent(event,{local:isLocal,...options})}}return event;
+      const res=await fetch(EVENTS_API,{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({eventType,title,message,employeeId,metadata,dedupeKey,sourceClient:eventClientId})});
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const row=await res.json(),event=row?.event;
+      if(!event?.id)return null;
+      const id=Number(event.id)||0,isLocal=event.sourceClient===eventClientId;
+      if(id>lastEventId||isLocal){lastEventId=Math.max(lastEventId,id);handleOfficeEvent(event,{local:isLocal,...options})}
+      return event;
     }catch(_){return null}
   }
+  const EVENT_DELIVERY_WARNING='Changes saved, but the activity notification could not be sent.';
+  function warnEventDelivery(){showNotificationToast({title:'Update saved',message:EVENT_DELIVERY_WARNING,createdAt:Date.now()})}
   async function pullOfficeEvents({initial=false}={}){
-    try{
-      const res=await fetch(`${EVENTS_API}?after=${initial?0:lastEventId}&limit=${initial?24:60}`,{cache:'no-store',headers:{accept:'application/json'}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json(),list=Array.isArray(data.events)?data.events:[];
-      if(initial&&!eventInitialized){list.forEach(ev=>handleOfficeEvent(ev,{initial:true,local:ev.sourceClient===eventClientId}));}
-      else list.filter(ev=>(Number(ev.id)||0)>lastEventId).forEach(ev=>handleOfficeEvent(ev,{initial:false,local:ev.sourceClient===eventClientId}));
-      if(list.length)lastEventId=Math.max(lastEventId,...list.map(ev=>Number(ev.id)||0));eventInitialized=true;return true;
-    }catch(_){return false}
+    // Realtime pushes, resume and polling share one request to avoid overlapping updates.
+    if(eventPullPromise)return eventPullPromise;
+    eventPullPromise=(async()=>{
+      if(navigator.onLine===false){setEventHealth('offline');return false}
+      try{
+        const res=await fetch(`${EVENTS_API}?after=${initial?0:lastEventId}&limit=${initial?24:60}`,{cache:'no-store',headers:{accept:'application/json'}});
+        if(!res.ok)throw new Error(`HTTP ${res.status}`);
+        const data=await res.json();
+        if(!Array.isArray(data.events))throw new Error('Invalid event response');
+        const list=data.events;
+        if(initial&&!eventInitialized){list.forEach(ev=>handleOfficeEvent(ev,{initial:true,local:ev.sourceClient===eventClientId}));}
+        else list.filter(ev=>(Number(ev.id)||0)>lastEventId).forEach(ev=>handleOfficeEvent(ev,{initial:false,local:ev.sourceClient===eventClientId}));
+        if(list.length)lastEventId=Math.max(lastEventId,...list.map(ev=>Number(ev.id)||0));
+        eventInitialized=true;eventFailureCount=0;eventLastSuccess=Date.now();setEventHealth('live');return true;
+      }catch(_){
+        eventFailureCount++;
+        setEventHealth(navigator.onLine===false||eventFailureCount>=3?'offline':'reconnecting');
+        return false;
+      }
+    })();
+    try{return await eventPullPromise}finally{eventPullPromise=null}
   }
   function startEventStream(){
-    pullOfficeEvents({initial:true});if(eventPollTimer)clearInterval(eventPollTimer);let lastEventPoll=Date.now();eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
+    setEventHealth(navigator.onLine===false?'offline':'connecting');
+    pullOfficeEvents({initial:true});
+    if(eventPollTimer)clearInterval(eventPollTimer);
+    let lastEventPoll=Date.now();
+    eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
+    window.addEventListener('offline',()=>setEventHealth('offline'));
+    window.addEventListener('online',()=>{setEventHealth('reconnecting');if(!document.hidden)pullOfficeEvents()});
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden){setEventHealth(navigator.onLine===false?'offline':'reconnecting');pullOfficeEvents()}
+    });
     window.addEventListener('ks:supabase-change',ev=>{
       if(document.hidden)return;
       const table=ev.detail?.table;
@@ -1592,7 +1672,6 @@ body{overscroll-behavior:none;}
       else if(table==='ks_office_chat')pullChat();
       else if(table==='ks_shared_state'){
         const scope=ev.detail?.payload?.data?.record?.scope;
-        // Older Realtime payloads may omit record details; retain the safe fallback.
         if((!scope||scope===STAFF_DIRECTORY_SCOPE)&&!staffEditorModal?.classList.contains('open'))loadStaffDirectory({seedIfMissing:false});
         if(!scope||scope==='dashboard:jobs')refreshJobsFromSharedCache();
       }
@@ -1627,7 +1706,7 @@ body{overscroll-behavior:none;}
     const parsed=parseHttpUrl(value,'Google Drive link');if(!parsed.ok)throw new Error(parsed.error);
     const current=await readGlobalConfig();const payload={...current,googleDriveUrl:parsed.url,googleDriveUpdatedAt:Date.now()};
     const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({scope:GLOBAL_CONFIG_SCOPE,payload,clientId:'dashboard-drive-editor'})});
-    if(!res.ok)throw new Error(`Save failed (${res.status})`);applyGoogleDriveUrl(parsed.url);await postOfficeEvent({eventType:'drive_link_updated',title:'Google Drive link updated',message:'Shared Google Drive folder link changed',metadata:{url:parsed.url},dedupeKey:`drive-link:${hashString(parsed.url)}:${Date.now()}`});return parsed;
+    if(!res.ok)throw new Error(`Save failed (${res.status})`);applyGoogleDriveUrl(parsed.url);const delivered=await postOfficeEvent({eventType:'drive_link_updated',title:'Google Drive link updated',message:'Shared Google Drive folder link changed',metadata:{url:parsed.url},dedupeKey:`drive-link:${hashString(parsed.url)}:${Date.now()}`});if(!delivered)warnEventDelivery();return {...parsed,activityDelivered:!!delivered};
   }
   function openDriveLinkEditor(){if(!driveLinkModal)return;driveLinkInput.value=googleDriveUrl;driveLinkHelp.className='job-link-help';driveLinkHelp.textContent='This link is shared through Supabase and will load for everyone.';driveLinkModal.classList.add('open');driveLinkModal.setAttribute('aria-hidden','false');setTimeout(()=>driveLinkInput.focus(),40)}
   function closeDriveLinkEditor(){if(!driveLinkModal)return;driveLinkModal.classList.remove('open');driveLinkModal.setAttribute('aria-hidden','true')}
@@ -1967,10 +2046,10 @@ body{overscroll-behavior:none;}
   async function saveStaffEditor(){
     const name=staffNameInput.value.trim(),position=staffRoleInput.value.trim(),department=staffDepartmentInput.value,gender=normalizeGender(staffGenderInput.value);if(!name){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Staff name is required.';staffNameInput.focus();return}if(!position){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent='Position / role is required.';staffRoleInput.focus();return}
     const records=serializeStaffDirectory(),existing=editingStaffId?employeeById[Number(editingStaffId)]:null,isNew=!existing;const record={id:editingStaffId||Math.max(0,...records.map(r=>Number(r.id)||0))+1,name,position,department,gender,appearance:window.KSCharacterStudio.read(),mood:existing?.mood||'',workload:workloadLines(existing?.workload||[])};const at=records.findIndex(r=>Number(r.id)===Number(editingStaffId));if(at>=0)records[at]=record;else records.push(record);
-    staffSaveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Saving to server…';try{await saveStaffDirectory(records);await postOfficeEvent({eventType:isNew?'staff_added':'staff_updated',title:isNew?`${name} · Staff added`:`${name} · Staff updated`,message:isNew?`${position} added to the shared office`:`Staff details updated · ${position}`,employeeId:record.id,metadata:{name,position,department,gender},dedupeKey:`staff:${isNew?'add':'edit'}:${record.id}:${hashString(`${name}|${position}|${department}|${gender}|${Date.now()}`)}`});staffEditorStatus.className='staff-editor-status ok';staffEditorStatus.textContent='Saved. Live Activity and everyone online will receive this update.';setTimeout(closeStaffEditor,520)}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not save staff.'}finally{staffSaveBtn.disabled=false}
+    staffSaveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Saving to server…';try{await saveStaffDirectory(records);const delivered=await postOfficeEvent({eventType:isNew?'staff_added':'staff_updated',title:isNew?`${name} · Staff added`:`${name} · Staff updated`,message:isNew?`${position} added to the shared office`:`Staff details updated · ${position}`,employeeId:record.id,metadata:{name,position,department,gender},dedupeKey:`staff:${isNew?'add':'edit'}:${record.id}:${hashString(`${name}|${position}|${department}|${gender}|${Date.now()}`)}`});staffEditorStatus.className='staff-editor-status ok';staffEditorStatus.textContent=delivered?'Saved. Live Activity was updated.':EVENT_DELIVERY_WARNING;if(delivered)setTimeout(closeStaffEditor,520)}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not save staff.'}finally{staffSaveBtn.disabled=false}
   }
   async function removeStaffEditor(){
-    const emp=employeeById[Number(editingStaffId)];if(!emp)return;if(!confirm(`Remove ${emp.name} from the shared staff directory?`))return;staffRemoveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Removing from server…';try{const removed={id:emp.id,name:emp.name,position:emp.position};const records=serializeStaffDirectory().filter(r=>Number(r.id)!==Number(editingStaffId));await saveStaffDirectory(records);await postOfficeEvent({eventType:'staff_removed',title:`${removed.name} · Staff removed`,message:`${removed.position} removed from the shared office`,employeeId:removed.id,metadata:removed,dedupeKey:`staff:remove:${removed.id}:${Date.now()}`});closeStaffEditor()}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not remove staff.'}finally{staffRemoveBtn.disabled=false}
+    const emp=employeeById[Number(editingStaffId)];if(!emp)return;if(!confirm(`Remove ${emp.name} from the shared staff directory?`))return;staffRemoveBtn.disabled=true;staffEditorStatus.className='staff-editor-status';staffEditorStatus.textContent='Removing from server…';try{const removed={id:emp.id,name:emp.name,position:emp.position};const records=serializeStaffDirectory().filter(r=>Number(r.id)!==Number(editingStaffId));await saveStaffDirectory(records);const delivered=await postOfficeEvent({eventType:'staff_removed',title:`${removed.name} · Staff removed`,message:`${removed.position} removed from the shared office`,employeeId:removed.id,metadata:removed,dedupeKey:`staff:remove:${removed.id}:${Date.now()}`});closeStaffEditor();if(!delivered)warnEventDelivery()}catch(err){staffEditorStatus.className='staff-editor-status error';staffEditorStatus.textContent=err.message||'Could not remove staff.'}finally{staffRemoveBtn.disabled=false}
   }
   function openWorkloadEditor(emp){
     if(!workloadEditorModal||!emp)return;editingWorkloadId=Number(emp.id);workloadEditorTitle.textContent='Update Workload';workloadEditorAvatar.textContent=initials(emp.name);workloadEditorName.textContent=emp.name;workloadEditorRole.textContent=`${emp.position} · ${emp.department}`;workloadEditorInput.value=workloadLines(emp.workload).join('\n');workloadEditorStatus.className='staff-editor-status';workloadEditorStatus.textContent='Workload only. Add/remove staff remains in the Staff tab.';workloadEditorModal.classList.add('open');workloadEditorModal.setAttribute('aria-hidden','false');setTimeout(()=>workloadEditorInput.focus(),40);
@@ -1978,7 +2057,7 @@ body{overscroll-behavior:none;}
   function closeWorkloadEditor(){if(!workloadEditorModal)return;workloadEditorModal.classList.remove('open');workloadEditorModal.setAttribute('aria-hidden','true');editingWorkloadId=null}
   async function saveWorkloadOnly(){
     const emp=employeeById[Number(editingWorkloadId)];if(!emp)return;const next=workloadLines(workloadEditorInput.value),before=workloadLines(emp.workload);if(JSON.stringify(next)===JSON.stringify(before)){workloadEditorStatus.className='staff-editor-status ok';workloadEditorStatus.textContent='No workload changes to save.';setTimeout(closeWorkloadEditor,420);return}
-    workloadEditorSave.disabled=true;workloadEditorStatus.className='staff-editor-status';workloadEditorStatus.textContent='Saving workload to server…';try{const records=serializeStaffDirectory(),at=records.findIndex(r=>Number(r.id)===emp.id);if(at<0)throw new Error('Staff not found');records[at]={...records[at],workload:next};await saveStaffDirectory(records);const summary=next.length?`${next[0]}${next.length>1?` +${next.length-1} more`:''}`:'Workload cleared';await postOfficeEvent({eventType:'workload_updated',title:`${emp.name} · Workload updated`,message:summary,employeeId:emp.id,metadata:{workload:next,count:next.length},dedupeKey:`workload:${emp.id}:${hashString(JSON.stringify(next))}:${Date.now()}`});workloadEditorStatus.className='staff-editor-status ok';workloadEditorStatus.textContent='Saved. Character notification, Live Activity and other browsers updated.';setTimeout(closeWorkloadEditor,650)}catch(err){workloadEditorStatus.className='staff-editor-status error';workloadEditorStatus.textContent=err.message||'Could not save workload.'}finally{workloadEditorSave.disabled=false}
+    workloadEditorSave.disabled=true;workloadEditorStatus.className='staff-editor-status';workloadEditorStatus.textContent='Saving workload to server…';try{const records=serializeStaffDirectory(),at=records.findIndex(r=>Number(r.id)===emp.id);if(at<0)throw new Error('Staff not found');records[at]={...records[at],workload:next};await saveStaffDirectory(records);const summary=next.length?`${next[0]}${next.length>1?` +${next.length-1} more`:''}`:'Workload cleared';const delivered=await postOfficeEvent({eventType:'workload_updated',title:`${emp.name} · Workload updated`,message:summary,employeeId:emp.id,metadata:{workload:next,count:next.length},dedupeKey:`workload:${emp.id}:${hashString(JSON.stringify(next))}:${Date.now()}`});workloadEditorStatus.className='staff-editor-status ok';workloadEditorStatus.textContent=delivered?'Saved. Live Activity was updated.':EVENT_DELIVERY_WARNING;if(delivered)setTimeout(closeWorkloadEditor,650)}catch(err){workloadEditorStatus.className='staff-editor-status error';workloadEditorStatus.textContent=err.message||'Could not save workload.'}finally{workloadEditorSave.disabled=false}
   }
   function startStaffDirectorySync(){
     loadStaffDirectory({seedIfMissing:true});if(staffPollTimer)clearInterval(staffPollTimer);let lastStaffPoll=Date.now();staffPollTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2500;if(now-lastStaffPoll>=every){lastStaffPoll=now;loadStaffDirectory({seedIfMissing:false})}},2500);
@@ -2293,7 +2372,10 @@ body{overscroll-behavior:none;}
     if(liveFeedCount)liveFeedCount.textContent=`${feed.length} update${feed.length===1?'':'s'}`;
     if(!feed.length){
       const label=liveFeedFilter==='all'?'No office activity yet.':`No ${liveFeedFilter==='team'?'team':'job'} updates yet.`;
-      activityList.innerHTML=`<div class="live-feed-empty"><span aria-hidden="true">◷</span><b>All caught up</b><small>${label}</small></div>`;
+      const waiting=!eventInitialized;
+      const heading=waiting?(eventHealth==='offline'?'Activity unavailable':eventHealth==='reconnecting'?'Reconnecting to updates':'Connecting to updates'):'All caught up';
+      const detail=waiting?(eventHealth==='offline'?'Check your connection.':'Waiting for the first successful event sync.'):label;
+      activityList.innerHTML=`<div class="live-feed-empty"><span aria-hidden="true">◷</span><b>${heading}</b><small>${detail}</small></div>`;
       return;
     }
     activityList.innerHTML=liveVisibleRows.map((a,i)=>{
@@ -2489,7 +2571,7 @@ body{overscroll-behavior:none;}
     drawEmployees();
     try{
       await saveCharacterMood(emp,'');
-      await postOfficeEvent({eventType:'mood_cleared',title:`${emp.name} · Mood cleared`,message:'Mood reset',employeeId:emp.id,metadata:{mood:''},dedupeKey:`mood-clear:${emp.id}:${Date.now()}`});
+      const delivered=await postOfficeEvent({eventType:'mood_cleared',title:`${emp.name} · Mood cleared`,message:'Mood reset',employeeId:emp.id,metadata:{mood:''},dedupeKey:`mood-clear:${emp.id}:${Date.now()}`});if(!delivered)warnEventDelivery();
     }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
     closeCharacterEmojiPicker();
   }
@@ -2503,7 +2585,7 @@ body{overscroll-behavior:none;}
     pushActivity({title:`${emp.name} reaction`,text:`${preset.label} ${preset.emoji}`,avatar:initials(emp.name),type:'mood_reaction',employeeId:emp.id});
     try{
       await saveCharacterMood(emp,mood);
-      await postOfficeEvent({eventType:'mood_updated',title:`${emp.name} · Mood updated`,message:`${preset.label} ${preset.emoji}`,employeeId:emp.id,metadata:{mood,emoji:preset.emoji,label:preset.label},dedupeKey:`mood:${emp.id}:${mood}:${Date.now()}`});
+      const delivered=await postOfficeEvent({eventType:'mood_updated',title:`${emp.name} · Mood updated`,message:`${preset.label} ${preset.emoji}`,employeeId:emp.id,metadata:{mood,emoji:preset.emoji,label:preset.label},dedupeKey:`mood:${emp.id}:${mood}:${Date.now()}`});if(!delivered)warnEventDelivery();
     }catch(err){emp.mood=previousMood;syncMoodBubble(emp);showNotificationToast({title:'Mood not saved',message:err.message||'Please try again.',createdAt:Date.now()})}
     closeCharacterEmojiPicker();
   }
@@ -3007,41 +3089,7 @@ body{overscroll-behavior:none;}
 </script>
 <script src="shared-sync.js?v=86.43" defer></script>
 
-<script id="ks-index-boot-guard">
-(()=>{
-  let hideTimer=null,count=0;
-  const showFallback=(message)=>{
-    let box=document.getElementById('ksBootFallback');
-    if(!box){
-      box=document.createElement('div');box.id='ksBootFallback';box.setAttribute('role','alert');
-      box.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;display:flex;align-items:center;gap:10px;background:#fff7f2;color:#9a4a21;border:1px solid rgba(239,123,69,.3);box-shadow:0 12px 34px rgba(30,33,35,.12);border-radius:14px;padding:10px 12px 10px 14px;font:700 12px/1.4 Inter,Arial,sans-serif;max-width:min(520px,calc(100vw - 24px))';
-      const text=document.createElement('span');text.id='ksBootFallbackText';
-      const close=document.createElement('button');close.type='button';close.textContent='\u00d7';close.setAttribute('aria-label','Dismiss');
-      close.style.cssText='border:0;background:transparent;color:inherit;font-size:20px;line-height:1;cursor:pointer;min-width:32px;min-height:32px';
-      close.onclick=()=>box.remove();
-      box.append(text,close);document.body.appendChild(box);
-    }
-    box.querySelector('#ksBootFallbackText').textContent=message;
-    clearTimeout(hideTimer);hideTimer=setTimeout(()=>box.remove(),12000);
-  };
-  // Only react to genuine script errors that repeat; a single stray rejection is not a broken dashboard.
-  const note=()=>{if(++count>=2)showFallback('Something went wrong. Some live features may be unavailable \u2014 reload if the office view looks wrong.')};
-  window.addEventListener('error',e=>{
-    const msg=String(e?.message||'').trim();
-    if(msg && !/ResizeObserver loop|Script error\.?$/i.test(msg)) note();
-  });
-  window.addEventListener('unhandledrejection',e=>{
-    const m=String(e?.reason?.message||e?.reason||'');
-    if(/Sign in required|Failed to fetch|NetworkError|Load failed/i.test(m)) return;
-    note();
-  });
-  setTimeout(()=>{
-    if(document.documentElement.dataset.ksAuth!=='ok') return; // still on the sign-in screen
-    const svg=document.getElementById('officeSvg'),app=document.getElementById('app'),host=document.getElementById('office3dHost');
-    if(!(svg||host)||!app) showFallback('Dashboard fallback active. Reload the page if the office view does not appear.');
-  },4000);
-})();
-</script>
+
 <footer class="ks-version-footer no-print" aria-label="Build version and synchronization"><span class="ks-build-label">v86.53 · 3D</span><span class="ks-footer-divider" aria-hidden="true"></span><span id="opsLastSync" class="ks-footer-last-sync" role="status">Last sync: waiting</span></footer>
 <script src="office-notification-sound.js?v=69.0"></script>
 <script src="suite-header.js"></script>

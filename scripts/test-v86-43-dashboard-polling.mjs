@@ -6,7 +6,7 @@ function between(begin,end){const start=html.indexOf(`  function ${begin}(`),sto
 function exercise(name,source,tickMs,connectedPeriod,offlinePeriod,initialRead=true){
  let now=1_000_000,connected=true,requests=0,timer=null,onEvent=null;
  const fakeDate=class extends Date{static now(){return now}};
- const deps={Date:fakeDate,document:{hidden:false},window:{OfficeSupabase:{realtimeConnected:()=>connected},addEventListener:(n,fn)=>{if(n==='ks:supabase-change')onEvent=fn}},
+ const deps={Date:fakeDate,navigator:{onLine:true},document:{hidden:false,addEventListener(){}},setEventHealth(){},window:{OfficeSupabase:{realtimeConnected:()=>connected},addEventListener:(n,fn)=>{if(n==='ks:supabase-change')onEvent=fn}},
   eventPollTimer:null,chatPollTimer:null,jobAutoTimer:null,staffPollTimer:null,
   staffEditorModal:{classList:{contains:()=>false}},workloadEditorModal:{classList:{contains:()=>false}},
   renderChatSenders(){},pullOfficeEvents(){requests++},pullChat(){requests++},loadJobsFromManagement(){requests++},loadStaffDirectory(){requests++},

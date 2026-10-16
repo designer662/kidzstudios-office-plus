@@ -69,6 +69,8 @@ jobs:
           node scripts/test-v86-53-markup-inline.mjs
           node scripts/test-v86-53-pricelist-redesign.mjs
           node scripts/test-v86-53-operations-upgrade.mjs
+          node scripts/test-live-activity-ui.mjs
+          node scripts/test-v86-53-index-stability.mjs
           node scripts/test-v86-53-controls-layout.mjs
           node scripts/test-v86-53-pulse-workload.mjs
           node scripts/test-index-job-style.mjs

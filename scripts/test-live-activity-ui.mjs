@@ -39,12 +39,12 @@ const entries=[
   {type:'time_brief',title:'Checkpoint',text:'Tasks',createdAt:5000},
   {type:'misc',title:'General',text:'Other update',createdAt:6000}
 ];
-const start=html.indexOf('  // Each update keeps its existing Supabase-backed source;');
+const start=html.indexOf("  let liveFeedFilter='all';");
 const end=html.indexOf('  function positionBubbleForEmployee',start);
 assert.ok(start!==-1&&end>start,'Cannot locate actual activity filtering and rendering implementation');
 const context=vm.createContext({
-  activityList:dom,livePanel:{classList:{contains:()=>false}},
-  $:s=>s==='#liveFeedCount'?counter:null,
+  activityList:dom,livePanel:{classList:{contains:()=>false}},eventInitialized:true,eventHealth:'live',
+  $:s=>s==='#liveFeedCount'?counter:s==='#liveFeedDetail'?{hidden:true,addEventListener(){}}:s==='#liveDetailClose'?{addEventListener(){}}:s==='#liveDetailStaff'?{hidden:true}:null,
   $$:()=>buttons,
   groupedActivityFeed:()=>entries,
   activityTypeLabel:type=>type.toUpperCase(),
