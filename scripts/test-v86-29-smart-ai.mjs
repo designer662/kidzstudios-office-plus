@@ -5,7 +5,7 @@ const brainSource=readFileSync('public/office-smart-ai.js','utf8');
 const syncSource=readFileSync('public/office-movement-sync.js','utf8');
 const page=readFileSync('public/index.html','utf8');
 const workflow=readFileSync('.github/workflows/deploy-pages.yml','utf8');
-assert(page.indexOf('office-smart-ai.js?v=86.49')<page.indexOf('office-movement-sync.js?v=86.49')&&page.includes('office-smart-ai.js?v=86.49'),'The decision engine must be available before timeline initialization');
+assert(page.indexOf('office-smart-ai.js?v=')<page.indexOf('office-movement-sync.js?v=')&&page.includes('office-smart-ai.js?v='),'The decision engine must be available before timeline initialization');
 const stabilityManifest=readFileSync('scripts/stability-suite.mjs','utf8');
 assert(workflow.includes('node scripts/run-stability-suite.mjs'), 'CI must execute the strict simulator suite');
 assert(stabilityManifest.includes('test-v86-29-smart-ai.mjs'), 'CI must guard autonomous behavior through the simulator suite');

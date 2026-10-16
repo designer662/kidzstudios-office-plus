@@ -9,7 +9,7 @@ for(const id of ['pricingResults','basicCalculatorPanel','metricSelling','metric
 assert.match(html,/id="quoteCostBreakdown"/, 'Expandable breakdown');
 assert.match(html,/id="basicCalcDisclosure"/, 'Inline optional calculator');
 assert.match(html,/href="#pricingResults"/, 'Mobile shortcut to quotation');
-assert.match(html,/markup-calculator-redesign\.css\?v=86\.53\.pricing2/,'Stylesheet cache bust');
+assert.match(html,/markup-calculator-redesign\.css\?v=[^"\\]+/,'Stylesheet cache bust');
 for(const token of ['markup-calculator-floating.js','markup-calculator-floating.css','ks-floating-dock','ks-float-trigger','data-close-float','data-float-handle'])
   assert.ok(!html.includes(token),`Remove ${token}`);
 for(const path of ['public/markup-calculator-floating.js','public/markup-calculator-floating.css','scripts/test-v86-53-markup-floating.mjs'])

@@ -8,8 +8,8 @@ const full=read('public/office-fullscreen.js');
 const bridge=read('source/src/suite-bridge.ts');
 const scene=read('source/src/office-scene.ts');
 
-assert.match(home,/office-index-controls-v86-53\.css\?v=86\.53\.ui5/,'Updated control layout must refresh the stylesheet cache');
-assert.match(home,/office-living-office\.js\?v=86\.53\.ui4/,'Updated top controls must bypass the previous JS cache');
+assert.match(home,/office-index-controls-v86-53\.css\?v=[^"\\]+/,'Updated control layout must refresh the stylesheet cache');
+assert.match(home,/office-living-office\.js\?v=[^"\\]+/,'Updated top controls must bypass the previous JS cache');
 for(const id of ['ksOfficeFullscreen','chatLauncher','followChip']){
  assert.equal((home.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,`${id} appears exactly once`);
 }

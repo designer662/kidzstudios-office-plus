@@ -1,0 +1,53 @@
+// V86.54 integrated release contract. No production database connections.
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+const read=name=>readFileSync(name,'utf8');
+const version=JSON.parse(read('office-release.json'));
+assert.equal(String(version.release),'86.54');
+assert.equal(String(version.version),'86.54');
+assert.equal(JSON.parse(read('source/package.json')).version,'86.54.0');
+assert.equal(JSON.parse(read('source/package-lock.json')).version,'86.54.0');
+const workflow=read('.github/workflows/deploy-pages.yml');
+assert.match(workflow,/node scripts\/test-v86-54-all-in-one\.mjs/);
+assert.match(workflow,/Test Reports CSV and XLSX in Chromium/);
+assert.match(workflow,/KidzStudios_OfficePlus_V86\.54_Production_Website/);
+const jobs=read('public/job-management.html');
+for(const token of ['let exportInFlight=false','exportInFlight=true','exportInFlight=false;buttons.forEach','runExportAction','saveFile(backup.blob,backup.name,{strict:true})','exactSavedCopy(blob,savedFile)','sheetImportUrl','rememberSheetImportLink','mergeImportedJobs','selectedMonth=String(initialJobPeriod.getMonth())'])assert.ok(jobs.includes(token),`Data Hub invariant: ${token}`);
+const index=read('public/index.html');
+for(const token of ['function startEventStream()','startEventStream._listenersBound','setEventHealth','pullOfficeEvents','EVENT_DELIVERY_WARNING','opsLastSyncAt=Date.now()'])assert.ok(index.includes(token),`Dashboard invariant: ${token}`);
+for(const missing of ['id="liveFeedSearch"','id="liveFeedPause"','id="liveFeedRefresh"','id="liveFeedMore"'])assert.ok(!index.includes(missing),`Removed toolbar must remain removed: ${missing}`);
+const ai=read('public/office-smart-ai.js');
+assert.match(ai,/moveGuardTimer=setTimeout/);
+assert.match(ai,/resetGuardTimer=setTimeout/);
+assert.match(ai,/clearTimeout\(moveGuardTimer\)/);
+assert.match(ai,/clearTimeout\(resetGuardTimer\)/);
+const price=read('public/pricelist-calculator.html');
+assert.doesNotMatch(price,/toast\.innerHTML\s*=/,'Notifications must not render untrusted text as HTML');
+assert.match(price,/label\.textContent = String\(msg/);
+for(const id of ['sublimation','silkscreen','dtf_shirt','lanyard','apron','cap','bunting','banner'])assert.ok(price.includes(`data-category="${id}"`));
+const markup=read('public/markup-calculator.html');
+assert.match(markup,/copied = document\.execCommand\('copy'\) === true/);
+assert.match(markup,/Copy unavailable/);
+const report=read('public/report.js'),html=read('public/report.html');
+assert.match(report,/function downloadReport\(format,button\)/);
+assert.match(report,/KSOfficeWorkbook\.makeXlsx/);
+assert.match(report,/Report export failed/);
+assert.match(html,/id="exportReportExcel"/);
+assert.match(html,/office-workbook\.js\?v=86\.54/);
+const context={window:{}};
+runInNewContext(read('public/job-rules.js'),context);
+runInNewContext(read('public/report-data.js'),context);
+const model=context.window.KSReportModel;
+const samples=[
+ {jobsheetFiles:'KS-1',customer:'Alpha',item:'Jersey',orderDate:'2026-10-01',invoiceAmount:'200',paid:'120'},
+ {jobsheetFiles:'KS-2',customer:'=DANGEROUS',item:'Mug',orderDate:'2026-09-10',invoiceAmount:'50',paid:'50'}
+];
+const table=model.exportTable(samples);
+assert.equal(table.headers.length,13);
+assert.equal(table.rows.length,2);
+assert.equal(table.rows[0][0],'KS-1');
+assert.equal(table.rows[1][4],'Mug');
+assert.equal(table.rows[0].length,table.headers.length);
+assert.ok(model.exportCSV(samples).includes("'=DANGEROUS"),'CSV injection protection preserved');
+console.log('PASS V86.54 all-in-one: release, CI, Data Hub, dashboard, Office Pulse, Smart AI, pricing, security, markup, reports (13-column XLSX contract), safe CSV');

@@ -137,6 +137,7 @@
   parent.appendChild(label);
   const controls=document.createElement('div');controls.id='ksSmartAIControls';
   controls.style.cssText='position:absolute;bottom:42px;left:12px;z-index:9;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 24px);';
+  let resetGuardTimer=null;
   for(const [target,caption] of [['all','Reset All AI']]){
    const button=document.createElement('button');button.type='button';
    button.textContent=caption;button.dataset.target=target;
@@ -144,8 +145,10 @@
    button.style.cssText='border:1px solid #b9d8cb;border-radius:9px;padding:5px 8px;background:#fff;color:#225a47;cursor:pointer;font:600 11px system-ui,sans-serif;box-shadow:0 2px 8px #0001';
    button.addEventListener('click',()=>{
     if(target==='all'&&!window.confirm('Reset movement and AI activity for ALL staff? Job records and staff profiles will remain unchanged.'))return;
-    for(const btn of controls.querySelectorAll('button'))btn.disabled=true;
+    for(const btn of controls.querySelectorAll('button[data-target]'))btn.disabled=true;
     label.textContent='🧠 Resetting Smart AI…';
+    clearTimeout(resetGuardTimer);
+    resetGuardTimer=setTimeout(()=>{for(const btn of controls.querySelectorAll('button[data-target]'))btn.disabled=false;label.textContent='AI reset response delayed. Check staff state before retrying.';},15000);
     window.dispatchEvent(new CustomEvent('ks:smart-ai-reset-request',{detail:{target}}));
    });
    controls.appendChild(button);
@@ -190,12 +193,16 @@
   };
   toggle.addEventListener('click',()=>{monitor.hidden=!monitor.hidden;toggle.setAttribute('aria-expanded',String(!monitor.hidden));redraw()});
   picker.addEventListener('change',redraw);
+  let moveGuardTimer=null;
   move.addEventListener('click',()=>{
    const staffId=Number(picker.value);if(!Number.isInteger(staffId))return;
    move.disabled=true;result.textContent='Checking safe movement route…';
+   clearTimeout(moveGuardTimer);
+   moveGuardTimer=setTimeout(()=>{move.disabled=false;result.textContent='Movement request timed out. You can retry safely.';},12000);
    window.dispatchEvent(new CustomEvent('ks:smart-ai-force-move',{detail:{id:staffId,zone:zonePicker.value}}));
   });
   window.addEventListener('ks:smart-ai-force-result',event=>{
+   clearTimeout(moveGuardTimer);moveGuardTimer=null;
    move.disabled=false;result.textContent=(event.detail?.ok?'✓ ':'⚠ ')+(event.detail?.message||'Command finished');
   });
   window.addEventListener('ks:ai-diagnostics',event=>{
@@ -211,7 +218,8 @@
   });
   let noticeTimeout;
   window.addEventListener('ks:smart-ai-reset-result',event=>{
-   for(const btn of controls.querySelectorAll('button'))btn.disabled=false;
+   clearTimeout(resetGuardTimer);resetGuardTimer=null;
+   for(const btn of controls.querySelectorAll('button[data-target]'))btn.disabled=false;
    const message=(event.detail?.ok?'✅ ':'⚠️ ')+(event.detail?.message||'Smart AI reset finished');
    label.textContent=message;notice.textContent=message;notice.style.display='inline-block';
    clearTimeout(noticeTimeout);noticeTimeout=setTimeout(()=>{notice.style.display='none'},8000);

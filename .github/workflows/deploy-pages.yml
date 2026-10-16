@@ -73,6 +73,7 @@ jobs:
           node scripts/test-v86-53-index-stability.mjs
           node scripts/test-v86-53-controls-layout.mjs
           node scripts/test-v86-53-pulse-workload.mjs
+          node scripts/test-v86-54-all-in-one.mjs
           node scripts/test-index-job-style.mjs
           node scripts/test-v86-54-header-parity.mjs
       - name: Test job data and workbook tools
@@ -105,6 +106,8 @@ jobs:
         run: node scripts/test-v86-53-job-data-hub-browser.mjs
       - name: Test editable Google Sheet import link in Chromium
         run: node scripts/test-v86-53-editable-import-link.mjs
+      - name: Test Reports CSV and XLSX in Chromium
+        run: node scripts/test-v86-51-report-browser.mjs
       - name: Test rebuilt 3D in WebGL
         run: node scripts/test-v86-22-browser.mjs
       - name: Stamp current build version
@@ -120,7 +123,7 @@ jobs:
       - name: Publish verified website ZIP for download
         uses: actions/upload-artifact@v4
         with:
-          name: KidzStudios_OfficePlus_V86.53_Production_Website
+          name: KidzStudios_OfficePlus_V86.54_Production_Website
           path: public/
           include-hidden-files: true
           if-no-files-found: error

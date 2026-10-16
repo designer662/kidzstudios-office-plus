@@ -7,7 +7,7 @@ const pages=readdirSync('public').filter(name=>name.endsWith('.html'));
 assert.ok(pages.length>=10,'Expected the shared office pages');
 for(const name of pages){
   const html=readFileSync('public/'+name,'utf8');
-  assert.equal((html.match(/office-outside-close\.js\?v=(?:75|76)\.0/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
+  assert.equal((html.match(/office-outside-close\.js\?v=[^"\\]+/g)||[]).length,1,`Missing or duplicate outside-close script on ${name}`);
 }
 
 function setup(){

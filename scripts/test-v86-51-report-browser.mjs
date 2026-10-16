@@ -22,7 +22,7 @@ try{
   ];
   window.fetch=async url=>new Response(JSON.stringify(String(url).includes('events')?{events:[{id:3,title:'Saved',message:'Job data updated',eventType:'job_management_updated',createdAt:new Date().toISOString()}]}:{version:2,payload:{savedAt:Date.now(),jobs}}),{status:200,headers:{'Content-Type':'application/json'}});
  });
- for(const name of ['job-rules.js','report-data.js','suite-header.js','report.js'])await page.addScriptTag({content:get(name)});
+ for(const name of ['job-rules.js','office-workbook.js','report-data.js','suite-header.js','report.js'])await page.addScriptTag({content:get(name)});
  await page.waitForFunction(()=>document.querySelector('#kpiTotal')?.textContent==='3');
  assert.equal(await page.locator('#kpiInvoice').innerText(),'RM 420.00');
  assert.equal(await page.locator('.ks-home-pill').count(),1);
@@ -40,6 +40,11 @@ try{
  const promise=page.waitForEvent('download');await page.locator('#exportReport').click();
  const download=await promise;assert.match(download.suggestedFilename(),/kidzstudios-job-report/);
  const {readFileSync:read}=await import('node:fs');assert.match(read(await download.path(),'utf8'),/'=INJECT/);
+ const excelEvent=page.waitForEvent('download');await page.locator('#exportReportExcel').click();
+ const xlsx=await excelEvent;assert.match(xlsx.suggestedFilename(),/kidzstudios-job-report-.*\.xlsx$/);
+ const workbook=readFileSync(await xlsx.path());assert.equal(workbook.readUInt32LE(0),0x04034b50,'Excel report must be a real XLSX ZIP workbook');
+ assert.ok(workbook.length>1500,'Excel report must not be an empty placeholder');
+ assert.match(await page.locator('#reportStatusText').innerText(),/XLSX download requested/);
  await page.setViewportSize({width:390,height:844});
  const dims=await page.evaluate(()=>({width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
  assert.ok(dims.width<=dims.client+1,`Mobile horizontal overflow: ${JSON.stringify(dims)}`);

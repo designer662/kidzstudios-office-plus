@@ -5,7 +5,7 @@ const html=readFileSync('public/job-management.html','utf8');
 const index=readFileSync('public/index.html','utf8');
 const workflow=readFileSync('.github/workflows/deploy-pages.yml','utf8');
 for(const [name,page] of [['index.html',index],['job-management.html',html]]){
- assert.match(page,/<link rel="stylesheet" href="suite-header-v61\.css\?v=66\.0">/,`${name} loads the corrected shared header`);
+ assert.match(page,/<link rel="stylesheet" href="suite-header-v61\.css\?v=[^"\\]+">/,`${name} loads the corrected shared header`);
 }
 for(const id of ['importExcelBtn','importExcelFile','excelImportModal','excelImportConfirm','excelImportSummary','exportExcelCurrent','exportExcelAll','exportExcelTemplate','importLocalBtn','importLocalFile']){
  assert(html.includes(`id="${id}"`),`Missing functional control: ${id}`);

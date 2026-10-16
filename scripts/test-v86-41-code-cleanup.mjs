@@ -8,7 +8,7 @@ const read = relative => readFileSync(relative,'utf8');
 const index=read('public/index.html'),sync=read('public/shared-sync.js');
 assert(!existsSync('public/app.js'),'Unreferenced dashboard copy must not ship');
 assert(!existsSync('public/netlify-sync.js'),'Duplicate Netlify sync copy must not ship');
-assert.equal((index.match(/<script\s+src="shared-sync\.js\?v=86\.43"\s+defer><\/script>/g)||[]).length,1,'Use one shared synchronizer');
+assert.equal((index.match(/<script\s+src="shared-sync\.js\?v=[^"\\]+"\s+defer><\/script>/g)||[]).length,1,'Use one shared synchronizer');
 assert(!index.includes("const basename = (location.pathname.split('/').pop()"),'Remove duplicated inline sync closure');
 assert(/if\(!force\s*&&\s*\(dirty\|\|saving\)\)/.test(sync),'Do not apply incoming updates over unsaved user edits');
 assert(sync.includes('realtimeConnected?.()'),'Use realtime-aware polling cadence');

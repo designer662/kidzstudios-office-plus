@@ -76,12 +76,33 @@
   $('reportNextPage').addEventListener('click',()=>{page++;render()});
   $('refreshReport').addEventListener('click',()=>pull());
   $('printReport').addEventListener('click',()=>window.print());
-  $('exportReport').addEventListener('click',()=>{
-    // Export every filtered record, not merely the visible page.
-    const contents=M.exportCSV(current);
-    const url=URL.createObjectURL(new Blob([contents],{type:'text/csv;charset=utf-8'}));
-    const a=document.createElement('a');a.href=url;a.download='kidzstudios-job-report-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
-  });
+  function downloadReport(format,button){
+    // Both formats contain every filtered record, never just the visible page.
+    if(!hasSnapshot){state('error','Report export unavailable until shared jobs have loaded.');return}
+    if(format==='xlsx'&&!window.KSOfficeWorkbook?.makeXlsx){state('error','Excel workbook tools unavailable. Refresh and retry.');return}
+    // One report export at a time, regardless of which format is selected.
+    if(reportExporting)return;reportExporting=true;
+    for(const id of ['exportReport','exportReportExcel'])$(id).disabled=true;
+    button.setAttribute('aria-busy','true');
+    const caption=button.textContent;button.textContent='Preparing '+format.toUpperCase()+'…';
+    try{
+      const book=M.exportTable(current);
+      const blob=format==='xlsx'
+        ?window.KSOfficeWorkbook.makeXlsx(book.headers,book.rows,{sheetName:'Job Report'})
+        :new Blob([M.exportCSV(current)],{type:'text/csv;charset=utf-8'});
+      if(!blob.size)throw Error('No report file generated.');
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='kidzstudios-job-report-'+new Date().toISOString().slice(0,10)+'.'+format;
+      (document.querySelector('#reportPage')||document.body).appendChild(a);
+      try{a.click()}finally{setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},60000)}
+      // Browser fallback has no confirmed-save event. Do not claim the file was saved.
+      state('live',`${format.toUpperCase()} download requested: ${current.length} filtered jobs. Check your Downloads folder.`);
+    }catch(error){state('error',`Report export failed: ${error.message}`)}
+    finally{reportExporting=false;for(const id of ['exportReport','exportReportExcel'])$(id).disabled=false;button.removeAttribute('aria-busy');button.textContent=caption}
+  }
+  let reportExporting=false;
+  $('exportReport').addEventListener('click',()=>downloadReport('csv',$('exportReport')));
+  $('exportReportExcel').addEventListener('click',()=>downloadReport('xlsx',$('exportReportExcel')));
   window.addEventListener('ks:supabase-change',event=>{
     if(event.detail?.table!=='ks_shared_state')return;
     const scope=event.detail?.payload?.data?.record?.scope;

@@ -84,5 +84,6 @@
     for(const job of records)lines.push(exportColumns.map(([,get])=>safeCSV(get(job))).join(','));
     return '\ufeff'+lines.join('\r\n');
   }
-  root.KSReportModel=Object.freeze({date,amount,stage,completed,overdue,filtered,summarize,years,safeCSV,balanceFor,pageSlice,exportCSV});
+  function exportTable(records){return {headers:exportColumns.map(([name])=>name),rows:records.map(job=>exportColumns.map(([,get])=>String(get(job)??'')))}}
+  root.KSReportModel=Object.freeze({date,amount,stage,completed,overdue,filtered,summarize,years,safeCSV,balanceFor,pageSlice,exportCSV,exportTable});
 })(typeof window!=='undefined'?window:globalThis);

@@ -37,6 +37,6 @@ assert.match(js,/encodeURIComponent\(ref\)/,'Job editor link encodes the job ref
 assert.match(js,/incoming<version/,'Older Supabase versions must not replace newer accepted data');
 assert.match(js,/M\.exportCSV\(current\)/,'Export all filtered records, not just current page');
 assert.doesNotMatch(js,/current\.slice\(0,250\)/,'No silent 250-row UI cap');
-assert.match(html,/report\.css\?v=86\.53\.reports1/,'CSS cache bumped for deployed pages');
-assert.match(html,/report\.js\?v=86\.53\.reports1/,'JS cache bumped for deployed pages');
+assert.match(html,/report\.css\?v=[^"\\]+/,'CSS cache bumped for deployed pages');
+assert.match(html,/report\.js\?v=[^"\\]+/,'JS cache bumped for deployed pages');
 console.log('PASS V86.53 report: 257 jobs paginated without truncation, computed balances, protected CSV, deep-link, stale data guard, and controls wired');

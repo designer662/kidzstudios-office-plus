@@ -44,7 +44,7 @@ assert(source.includes('Classic V86.49 worktable'),'The classic worktable style 
 assert(source.includes('box(world,.85,1.12,-10.7,2.85,.14,7.25,wood,true)'),'Original continuous island tabletop geometry must be restored');
 assert(source.includes("box(world,.85,1.35,-10.7,.06,.36,7,'#8c968e')"),'Original central divider must be restored');
 assert(!source.includes('Six individual worktables'),'The V86.50 split-table visual must not return');
-assert(html.includes('office-workstations.js?v=86.50'));
+assert(/office-workstations\.js\?v=86\.54/.test(html), 'Current-version workstations dependency must load');
 assert(html.includes('window.KSOfficeWorkstations.allocate(next,window.KSOfficeGeometry)'));
 assert(html.includes("employees.find(e=>e.deskId===d.deskId)"),'2D clickable desk is assigned from the actual roster');
 for(const key of ['B02','A01'])assert(html.includes(`{deskId:'${key}',`),'2D needs real rear counter desks for every character');

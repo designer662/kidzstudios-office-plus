@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const html=readFileSync('public/job-management.html','utf8');
 const workflow=readFileSync('.github/workflows/deploy-pages.yml','utf8');
 for(const file of ['job-rules.js','office-command-data.js','job-attention-queue.js']){
-  assert(html.includes(`src="${file}"`),`Missing Action Queue dependency: ${file}`);
+  assert(new RegExp(`src="${file.replaceAll('.', '\\.')}(?:\\?v=[^"]+)?"`).test(html),`Missing Action Queue dependency: ${file}`);
 }
 for(const id of ['jobViewTable','jobViewQueue','jobTableView','actionQueueView','attentionCategory','attentionItems','attentionStatus','attentionRefresh']){
   assert(html.includes(`id="${id}"`),`Missing Action Queue control ${id}`);

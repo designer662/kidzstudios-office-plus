@@ -9,7 +9,7 @@ for(const path of ['index.html','job-management.html']){
  const src=path==='index.html'?index:jobs;
  assert.match(src,/href="suite-header-v61\.css\?v=/);
  assert.match(src,/href="suite-header-minimal\.css\?v=/);
- assert.match(src,/src="suite-header\.js"/);
+ assert.match(src,/src="suite-header\.js(?:\?v=[^"]+)?"/);
 }
 assert.match(index,/office-index-header-parity\.css\?v=/);
 assert.ok(index.indexOf('office-index-header-parity.css')>index.indexOf('office-live-activity.css'),'Index header parity must load after all legacy index-only CSS');

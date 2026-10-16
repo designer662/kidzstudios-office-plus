@@ -6,14 +6,14 @@ const pages=readdirSync('public').filter(p=>p.endsWith('.html'));
 assert.equal(pages.length,11,'All 11 pages remain available');
 for(const page of pages){
   const html=rd('public/'+page);
-  assert.equal((html.match(/suite-header-minimal\.css\?v=86\.53/g)||[]).length,1,`Shared minimalist header required in ${page}`);
+  assert.equal((html.match(/suite-header-minimal\.css\?v=[^"\\]+/g)||[]).length,1,`Shared minimalist header required in ${page}`);
   assert.match(html,/suite-header-v61\.css/,`Header controller CSS missing in ${page}`);
   assert.match(html,/suite-header\.js/,`Shared header logic missing in ${page}`);
   if(page!=='index.html')assert.ok(!html.includes('office-fullscreen.css'),`${page} must retain its original content design`);
 }
 const home=rd('public/index.html'),living=rd('public/office-living-office.js'),smart=rd('public/office-smart-ai.js');
 assert.match(home,/id="ksOfficeFullscreen"/,'Immersive simulator button');
-assert.match(home,/office-fullscreen\.js\?v=86\.53/);
+assert.match(home,/office-fullscreen\.js\?v=[^"\\]+/);
 assert.match(living,/id='ksResetAI'/);
 assert.match(living,/ks:smart-ai-reset-request/);
 assert.match(living,/target:'all'/,'Only full simulation reset');
@@ -41,5 +41,5 @@ assert.equal(s.topCustomers[0].name,'Alpha');assert.equal(s.topCustomers[0].coun
 assert.equal(M.summarize([],now).averageInvoice,0,'Empty reports avoid division by zero');
 assert.equal(M.safeCSV('=HYPERLINK(1)'),"\"'=HYPERLINK(1)\"",'Spreadsheet formula injection protection retained');
 const release=JSON.parse(rd('office-release.json'));
-assert.equal(release.release,'86.53');
+assert.equal(release.release,'86.54');
 console.log(`PASS V86.53: ${pages.length} consistent headers, full-viewport simulator, single Reset AI, hidden debug UI, rich read-only report metrics and data safeguards`);

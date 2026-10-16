@@ -1,7 +1,7 @@
 {
-  "release": "86.53",
+  "release": "86.54",
   "edition": "Office Plus · Jarvis Minimal Header & Fullscreen Simulator",
-  "package": "V86.53: shared minimalist header; edge-to-edge simulator, single Reset AI beside sound, hidden monitor UI, enhanced read-only Job Reports. Classic Job Management UI and Import/Export retained.",
+  "package": "V86.54: integrated Job Data Hub, verified import backups, hardened dashboard/Office Pulse, Smart AI recovery, secure pricing UI, and CSV/XLSX reports. Original simulation and database schema preserved.",
   "modules": [
     "office-geometry-guard.js",
     "office-workstations.js",

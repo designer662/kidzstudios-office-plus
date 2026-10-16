@@ -8,7 +8,7 @@ for(const name of pages){
  const links=(html.match(/office-layout-v86-52\.css/g)||[]).length;
  if(name==='index'){
   assert.equal(links,1,'dashboard alone loads custom alignment stylesheet');
-  assert.match(html,/office-layout-v86-52\.css\?v=86\.52\.1/);
+  assert.match(html,/office-layout-v86-52\.css\?v=86\.54/);
  }else assert.equal(links,0,`${name} must retain its previous UI layout`);
 }
 assert.match(read('public/index.html'),/<body class="ks-dashboard">/,'dashboard scope required');

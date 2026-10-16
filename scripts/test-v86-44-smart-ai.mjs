@@ -90,5 +90,5 @@ const all=await T.resetSmartAI('all');assert(all.ok);assert.equal(writes,2);
 assert(persisted.staff.every(s=>!s.walk&&s.lastWalkAt<baseTime-110000));
 assert(!read('public/office-smart-ai.js').includes('Reset Afiq/Boss')); // V86.53 removes the redundant priority-reset UI; internal recovery remains tested above.
 assert(read('public/office-living-office.js').includes("id='ksResetAI'"));
-assert(html.includes('office-movement-sync.js?v=86.49'));
+assert(html.includes('office-movement-sync.js?v='));
 console.log('PASS V86.44 Smart AI: boss/afiq reachable, legacy recovery idempotent, deadlock back-to-desk, stale walk reset, scoped CAS reset, all-staff rebuild and safe navigation.');

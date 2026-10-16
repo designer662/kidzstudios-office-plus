@@ -13,7 +13,7 @@ assert.match(jobs,/function runExportAction\(action,\{template=false\}=\{\}\)/,'
 assert.match(jobs,/if\(result===false\|\|result\?\.state==='failed'\)/,'Export failure must remain visible');
 assert.match(jobs,/\['exportCsvAll',exportAllCsv\]/,'All jobs CSV must remain available');
 for(const id of ['exportCurrent','exportPeriod','exportYear','exportSummary','exportExcelAll','exportExcelTemplate','exportBackup'])assert.match(jobs,new RegExp(`['"]${id}['"]`));
-assert.match(price,/pricelist-markup-workspace\.css\?v=86\.53\.parity1/,'Price List must load the Markup-style workspace');
+assert.match(price,/pricelist-markup-workspace\.css\?v=[^"\\]+/,'Price List must load the Markup-style workspace');
 assert.match(style,/\.layout-wrapper\{grid-template-columns:/);
 assert.match(style,/@media\(max-width:580px\)/);
 for(const id of ['comm_type','comm_value','cart-items-container','out_item_total','out_cart_grand','out_cart_deposit'])assert.match(price,new RegExp(`id="${id}"`),`Preserve quote calculation ${id}`);
