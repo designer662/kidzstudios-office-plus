@@ -10,7 +10,7 @@ const workflow=read('.github/workflows/deploy-pages.yml');
 assert.match(jobs,/id="exportQuick"/,'Users need a visible Export Data button');
 assert.match(jobs,/id="exportStatus"[^>]*role="status"/,'Export dialog needs status feedback');
 assert.match(jobs,/function runExportAction\(action,\{template=false\}=\{\}\)/,'Export handlers must catch exceptions');
-assert.match(jobs,/if\(ok===false\)/,'Excel export failures must not close the dialog');
+assert.match(jobs,/if\(result===false\|\|result\?\.state==='failed'\)/,'Export failure must remain visible');
 assert.match(jobs,/\['exportCsvAll',exportAllCsv\]/,'All jobs CSV must remain available');
 for(const id of ['exportCurrent','exportPeriod','exportYear','exportSummary','exportExcelAll','exportExcelTemplate','exportBackup'])assert.match(jobs,new RegExp(`['"]${id}['"]`));
 assert.match(price,/pricelist-markup-workspace\.css\?v=86\.53\.parity1/,'Price List must load the Markup-style workspace');

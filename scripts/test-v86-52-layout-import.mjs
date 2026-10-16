@@ -26,9 +26,9 @@ assert.ok(!job.includes('const EXACT_MAP='),'legacy map duplicated shared aliase
 assert.match(job,/KSJobData\.loadGoogleSheet\(sheetUrl\)/,'shared Google Sheet loader');
 assert.match(job,/KSJobData\.recordsFromGrid\(grid\.headers,grid\.rows,FIELDS\)/,'shared date-aware conversion');
 assert.match(job,/KSJobs\.validateUniqueRefs\(list\)/,'reject duplicate refs');
-assert.match(job,/exportBackup\(\)/,'backup before import');
+assert.match(job,/const result=await saveFile\(backup.blob,backup.name,\{strict:true\}\)/,'verified backup before import');
 assert.match(job,/id="exportCsvAll"/,'All Jobs CSV option');
-assert.match(job,/exportAllCsv\(\)\{exportRowsCsv\(jobs/,'All Jobs export is not silently year-filtered');
+assert.match(job,/function exportAllCsv\(\)\{return exportRowsCsv\(jobs/,'All Jobs export is not silently year-filtered');
 assert.match(job,/expectedVersion:version/,'CAS version guard retained');
 const sandbox={window:{},AbortController,URL,URLSearchParams,Date,Number,String,Math,Set,Array,Object,TextEncoder,fetch:async()=>({ok:true,status:200,headers:new Headers(),text:async()=>`JOBSHEET/FILES,CUSTOMER,ORDER DATE,ITEM\nKS-101,Client A,15/10/2026,Poster\nKS-102,Client B,2026-10-16,Book\n`}),setTimeout,clearTimeout,Headers};
 vm.runInNewContext(read('public/job-data.js'),sandbox);

@@ -20,7 +20,8 @@ assert(html.includes('window.KSOfficeWorkbook.readXlsx(file)'),'Excel import mus
 assert(html.includes('window.KSOfficeWorkbook.makeXlsx(headers,rows'),'Excel download must use workbook builder');
 assert(html.includes('const ok=await saveAll(`${mode===\'merge\'?\'merged\':\'restored\'} ${preview.list.length} jobs from ${preview.fileName}`,target.list)'),'Excel import must save verified merged or restored rows to shared state');
 assert(html.includes('baseVersion:version'),'Excel preview must snapshot server revision');
-assert(html.includes('if(!exportBackup())throw Error('),'Backup failure must block import before modifying shared state');
+assert(html.includes('const result=await saveFile(backup.blob,backup.name,{strict:true})'),'Backup must be verified before import');
+assert(html.includes("if(result.state!=='verified')throw Error"),'Unverified backup blocks shared database save');
 assert(workflow.includes('node scripts/test-job-ui-v86-31.mjs'),'Run the new regression in CI');
 const start=html.indexOf('const JOB_ERROR_FIELDS=');
 const end=html.indexOf('async function saveEditor()',start);
