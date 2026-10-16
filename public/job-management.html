@@ -184,6 +184,16 @@
 .data-hub-dialog .export-card.featured b{color:#9b421a}
 .data-hub-import-actions{padding:13px 16px;display:flex;flex-wrap:wrap;gap:9px}
 .data-hub-import-actions>.btn{min-height:42px;height:auto;text-align:center}
+.data-hub-link{margin:0 16px 14px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#fafaf8;min-width:0}
+.data-hub-link label{display:block;font-size:12px;font-weight:780;margin-bottom:7px}
+.data-hub-link label span{font-size:10px;font-weight:500;color:var(--muted);margin-left:4px}
+.data-hub-link-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.data-hub-link-row input{flex:1 1 260px;min-width:0;width:100%;height:42px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 11px;font:inherit;font-size:12px;color:var(--text)}
+.data-hub-link-row input:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+.data-hub-link-row .btn{min-height:42px;height:auto}
+.data-hub-link-status{font-size:11px;color:var(--muted);line-height:1.5;margin:8px 0 0;overflow-wrap:anywhere}
+.data-hub-link-status[data-state=error]{color:#a43f32}.data-hub-link-status[data-state=success]{color:#267244}
+@media(max-width:440px){.data-hub-link{margin:0 10px 10px}.data-hub-link-row .btn{flex:1}}
 .data-hub-safety{margin:2px 16px 16px;padding:13px;background:#f7f8f7;border:1px solid var(--line);border-radius:11px;font-size:11px;line-height:1.55}
 .data-hub-safety p{margin:5px 0 0;color:#646b70}
 .data-hub-import-mode{padding:10px 16px;display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;gap:9px;font-size:11px;font-weight:750}
@@ -373,7 +383,16 @@
       <button class="btn primary" id="importExcelQuick" type="button">↑ Choose Excel / CSV / JSON</button>
       <button class="btn" id="importExcelBtn" type="button">Import Excel XLSX</button>
       <button class="btn" id="importLocalBtn" type="button">Import CSV / TSV / JSON</button>
-      <button class="btn" id="importBtn" type="button">Import Google Sheet</button>
+    </div>
+    <div class="data-hub-link" aria-label="Editable Google Sheet import link">
+      <label for="sheetImportUrl">Google Sheet URL <span>Editable · remembered on this browser</span></label>
+      <div class="data-hub-link-row">
+        <input id="sheetImportUrl" type="url" inputmode="url" maxlength="2048" autocomplete="url" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=0" aria-describedby="sheetImportStatus">
+        <button class="btn" id="saveSheetLinkBtn" type="button">Save Link</button>
+        <button class="btn primary" id="importBtn" type="button">Import from Link</button>
+        <button class="btn" id="resetSheetLinkBtn" type="button" title="Restore the default configured Google Sheet link">Reset</button>
+      </div>
+      <p id="sheetImportStatus" class="data-hub-link-status" role="status" aria-live="polite">Loading configured link…</p>
     </div>
     <input id="importExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Choose Excel job workbook">
     <input id="importLocalFile" type="file" accept=".csv,.tsv,.json,text/csv,application/json" hidden aria-label="Select CSV TSV or JSON job file">
@@ -424,6 +443,7 @@
 (()=>{'use strict';
 const API='/api/state',EVENTS='/api/events',JOBS_SCOPE='dashboard:jobs',STAFF_SCOPE='office:staff',CONFIG_SCOPE='config:global',OPTIONS_SCOPE='dashboard:job-options';
 const DEFAULT_SHEET='https://docs.google.com/spreadsheets/d/1ReoIszVRgyEzbnkq3MKM_Bn79Q1570PLQQvnRNEj3Eo/edit?gid=588550996#gid=588550996';
+const SHEET_LINK_STORAGE_KEY='ks:job-management:sheet-import-url:v1';
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const FIELDS=[
  ['JOBSHEET/FILES','jobsheetFiles'],['INVOICE','invoice'],['CUSTOMER','customer'],['PRIORITY','priority'],['ITEM','item'],['DESIGN CHARGE','designCharge'],['TYPE OF PRINTING','typeOfPrinting'],['ARTWORK STATUS','artworkStatus'],['PAYMENT STATUS','paymentStatus'],['COLLECTION','collection'],['ORDER DATE','orderDate'],['DELIVERY TIME','deliveryTime'],['ACTUAL COMPLETE','actualComplete1'],['DAYS LEFT','daysLeft1'],['SALES','sales'],['DESIGNER','designer'],['SUPPLIER','supplier'],['SUPPLIER STATUS','supplierStatus'],['PRODUCTION PIC','productionPic'],['QC STATUS','qcStatus'],['ACTUAL COMPLETE','actualComplete2'],['INVOICE AMOUNT','invoiceAmount'],['PAID','paid'],['BALANCE','balance'],['CURRENT DEPARTMENT','currentDepartment'],['DAYS LEFT','daysLeft2'],['LAST UPDATE','lastUpdate'],['REMARK','remark']
@@ -462,6 +482,7 @@ const DEFAULT_DROPDOWN_OPTIONS={
 let queueLoadState='loading',queueError='',jobsEverLoaded=false,activeJobView='table';
 const initialJobPeriod=new Date();
 let periodUserSelected=false;
+let configuredSheetUrl=DEFAULT_SHEET,sheetLinkEdited=false;
 let jobs=[],version=0,savedAt=0,staff=[],sheetUrl=DEFAULT_SHEET,editingIndex=-1,saving=false,pollTimer=null,confirmAction=null,selectedYear=initialJobPeriod.getFullYear(),selectedMonth=String(initialJobPeriod.getMonth()),dropdownOptions=structuredClone(DEFAULT_DROPDOWN_OPTIONS),optionsVersion=0,optionsLoaded=false,optionDraft=null,optionActiveField='priority',optionDirty=false,optionCurrentManualValue='',optionsSavedAt=0,editorBaseVersion=0,editorOriginalRef="",optionsConflict=false;
 const clientId=window.KSTempUser?.get?.().browserId||crypto.randomUUID?.()||`jm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function currentActor(){const p=window.KSTempUser?.get?.();return p?{name:String(p.name||p.browserId||'This PC'),browserId:String(p.browserId||clientId)}:{name:'This PC',browserId:clientId}}
@@ -506,7 +527,52 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show'
 function setSync(state,label,detail=''){const b=$('#syncbar');b.dataset.state=state;$('#syncLabel').textContent=label;$('#syncDetail').textContent=detail;$('#syncTime').textContent=savedAt?`Updated ${new Date(savedAt).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:false})}`:'Waiting for server'}
 async function getState(scope){const r=await fetch(`${API}?scope=${encodeURIComponent(scope)}`,{cache:'no-store',headers:{accept:'application/json'}});if(r.status===404)return null;if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}
 async function postEvent(type,title,message,metadata={}){try{const actor=currentActor();const meta={...metadata,actor};await fetch(EVENTS,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({eventType:type,title,message,metadata:meta,dedupeKey:`${type}:${hashString(message)}:${Date.now()}`,sourceClient:clientId})})}catch(_){}}
-async function loadConfig(){try{const row=await getState(CONFIG_SCOPE),cfg=row?.payload||{};sheetUrl=cfg.jobManagementUrl||DEFAULT_SHEET;$('#openSheetBtn').href=sheetUrl}catch(_){$('#openSheetBtn').href=DEFAULT_SHEET}}
+function validateSheetImportUrl(value){
+ const url=String(value||'').trim();
+ if(!url)throw Error('Paste a Google Sheet link before importing.');
+ if(url.length>2048)throw Error('Google Sheet link is too long.');
+ window.KSJobData.parseSheetUrl(url); // Restrict links to valid HTTPS Google Sheets URLs.
+ return url;
+}
+function sheetLinkStatus(message,state='ready'){
+ const node=$('#sheetImportStatus');node.textContent=message;node.dataset.state=state;
+}
+function updateSheetOpenLink(value){
+ const link=$('#openSheetBtn');
+ try{link.href=window.KSJobData.parseSheetUrl(value).url;link.removeAttribute('aria-disabled')}
+ catch(_){link.removeAttribute('href');link.setAttribute('aria-disabled','true')}
+}
+function setSheetImportLink(value,message){
+ sheetUrl=value;$('#sheetImportUrl').value=value;updateSheetOpenLink(value);
+ sheetLinkStatus(message);
+}
+function storedSheetImportLink(){try{return localStorage.getItem(SHEET_LINK_STORAGE_KEY)}catch(_){return null}}
+function rememberSheetImportLink(value){
+ try{localStorage.setItem(SHEET_LINK_STORAGE_KEY,value);return true}catch(_){return false}
+}
+function saveSheetImportLink(){
+ try{
+  const url=validateSheetImportUrl($('#sheetImportUrl').value);
+  sheetUrl=url;sheetLinkEdited=false;updateSheetOpenLink(url);
+  const remembered=rememberSheetImportLink(url);
+  sheetLinkStatus(remembered?'Link saved on this browser. Ready to import.':'Link ready to import. This browser cannot remember it; keep a copy.',remembered?'success':'ready');
+ }catch(error){sheetLinkStatus(error.message,'error')}
+}
+function resetSheetImportLink(){
+ try{localStorage.removeItem(SHEET_LINK_STORAGE_KEY)}catch(_){}
+ sheetLinkEdited=false;
+ setSheetImportLink(configuredSheetUrl,'Configured Google Sheet link restored.');
+}
+async function loadConfig(){
+ let configured=DEFAULT_SHEET;
+ try{const row=await getState(CONFIG_SCOPE),cfg=row?.payload||{};configured=cfg.jobManagementUrl||DEFAULT_SHEET}catch(_){}
+ try{configured=validateSheetImportUrl(configured)}catch(_){configured=DEFAULT_SHEET}
+ configuredSheetUrl=configured;
+ let remembered=storedSheetImportLink();
+ if(remembered){try{remembered=validateSheetImportUrl(remembered)}catch(_){remembered=null}}
+ if(!sheetLinkEdited)setSheetImportLink(remembered||configured,remembered?'Saved link loaded from this browser.':'Configured Google Sheet link loaded. You can change it here.');
+}
+
 async function loadStaff(){try{const row=await getState(STAFF_SCOPE);staff=Array.isArray(row?.payload?.staff)?row.payload.staff:[];const names=[...new Set(staff.map(s=>String(s.name||'').trim()).filter(Boolean))];const byRole=rx=>[...new Set(staff.filter(s=>rx.test(String(s.position||s.role||'').toLowerCase())).map(s=>String(s.name||'').trim()).filter(Boolean))];const sales=byRole(/sales/),designers=byRole(/design/),production=byRole(/admin|production|operator|qc/);const opts=a=>a.map(n=>`<option value="${esc(n)}"></option>`).join('');$('#salesOptions').innerHTML=opts(sales.length?sales:names);$('#designerOptions').innerHTML=opts([...new Set(['AFIQ','MINMIN',...designers,...unique('designer')])]);$('#productionPicOptions').innerHTML=opts(production.length?production:names)}catch(_){staff=[]}}
 async function pull({quiet=false}={}){
  if(saving)return;
@@ -785,17 +851,24 @@ let confirmReturnFocus=null;
 function ask(title,copy,fn,label='Continue'){confirmReturnFocus=document.activeElement;confirmAction=fn;$('#confirmTitle').textContent=title;$('#confirmCopy').textContent=copy;$('#confirmYes').textContent=label;$('#confirmModal').classList.add('open');$('#confirmModal').setAttribute('aria-hidden','false');$('#confirmCancel').focus()}
 function closeConfirm(){const wasOpen=$('#confirmModal').classList.contains('open');confirmAction=null;$('#confirmModal').classList.remove('open');$('#confirmModal').setAttribute('aria-hidden','true');if(wasOpen&&confirmReturnFocus?.isConnected)confirmReturnFocus.focus();confirmReturnFocus=null}
 async function importSheet(){
- if(!sheetUrl){setJobWarning('Google Sheet link has not been configured. Use Import Excel or CSV, or configure the Sheet URL.');toast('Google Sheet link not configured');return}
- $('#importBtn').disabled=true;
+ let url;
+ try{url=validateSheetImportUrl($('#sheetImportUrl').value)}
+ catch(error){sheetLinkStatus(error.message,'error');$('#sheetImportUrl').focus();return}
+ if(!jobsEverLoaded||queueLoadState==='error'){sheetLinkStatus('Wait until shared jobs have loaded before importing.','error');return}
+ $('#importBtn').disabled=true;$('#saveSheetLinkBtn').disabled=true;
+ sheetLinkStatus('Reading Google Sheet…','loading');
  setSync('loading','Reading Google Sheet…');
  try{
-  const grid=await window.KSJobData.loadGoogleSheet(sheetUrl);
+  const grid=await window.KSJobData.loadGoogleSheet(url);
   const list=window.KSJobData.recordsFromGrid(grid.headers,grid.rows,FIELDS);
   if(!list.length)throw Error('No usable job rows. Download the Excel template for the correct columns.');
   const invalid=window.KSJobs.validateUniqueRefs(list);if(invalid)throw Error(invalid);
-  previewImportJobs(list,`Google Sheet · ${grid.sheetName}`,grid.sheetName);
- }catch(e){setJobWarning(`Google Sheet import not applied: ${e.message}`);toast(e.message||'Google Sheet import failed')}
- finally{$('#importBtn').disabled=false;if(jobsEverLoaded&&!saving)setSync('live','Shared · Live',`${jobs.length} jobs · Office Pulse synced`)}
+  sheetUrl=url;sheetLinkEdited=false;updateSheetOpenLink(url);
+  const remembered=rememberSheetImportLink(url);
+  sheetLinkStatus(`Preview ready: ${list.length} row(s). ${remembered?'Link remembered on this browser.':'Link not saved on this browser.'}`,'success');
+  previewImportJobs(list,grid.sheetName,'Linked spreadsheet');
+ }catch(e){sheetLinkStatus(`Import failed: ${e.message}`,'error');setJobWarning(`Google Sheet import not applied: ${e.message}`);toast(e.message||'Google Sheet import failed')}
+ finally{$('#importBtn').disabled=false;$('#saveSheetLinkBtn').disabled=false;if(jobsEverLoaded&&!saving)setSync('live','Shared · Live',`${jobs.length} jobs · Office Pulse synced`)}
 }
 // Unified file import: preview, merge by reference (default), or guarded full restore.
 let excelPreview=null;
@@ -1029,6 +1102,15 @@ $('#addCurrentValueBtn').onclick=()=>{const v=String(optionCurrentManualValue||'
 $('#reloadOptionsBtn').onclick=async()=>{if(optionDirty&&!confirm('Discard unsaved dropdown changes and reload from server?'))return;await loadDropdownOptions({fromManager:true});optionDraft=structuredClone(dropdownOptions);optionDirty=false;renderOptionManagerField();$('#optionsStatus').textContent='Reloaded latest dropdown options from server.'};
 $('#saveOptionsBtn').onclick=async()=>{collectOptionRows();dropdownOptions=sanitizeDropdownOptions(optionDraft);const ok=await saveDropdownOptions(`updated ${OPTION_FIELDS[optionActiveField]?.label||'dropdown'} options`);if(ok){optionDraft=structuredClone(dropdownOptions);renderOptionManagerField();$('#optionsStatus').textContent='Saved to server. Dropdown changes are now shared with everyone.'}};
 $('#editorClose').onclick=$('#cancelBtn').onclick=closeEditor;$('#saveBtn').onclick=saveEditor;$('#deleteBtn').onclick=()=>{if(editingIndex<0)return;const idx=editingIndex,j=jobs[idx];ask('Delete job?',`${j.jobsheetFiles} · ${j.customer}. This removes it from shared Job Management and Office Pulse.`,async()=>{if(version!==editorBaseVersion){setJobWarning('Data changed. Reopen the job before deleting.');return}const next=jobs.filter((_,i)=>i!==idx);if(await saveAll(`deleted ${j.jobsheetFiles}`,next)){closeEditor();toast(`${j.jobsheetFiles} deleted`)}},'Delete')};$('#duplicateBtn').onclick=()=>openEditor(editingIndex,true);$('#importBtn').onclick=importSheet;
+$('#saveSheetLinkBtn').onclick=saveSheetImportLink;
+$('#resetSheetLinkBtn').onclick=resetSheetImportLink;
+$('#sheetImportUrl').addEventListener('input',()=>{
+ sheetLinkEdited=true;
+ const value=$('#sheetImportUrl').value;
+ updateSheetOpenLink(value);
+ try{validateSheetImportUrl(value);sheetLinkStatus('Link edited. Import now or select Save Link to remember it.')}catch(error){sheetLinkStatus(error.message,'error')}
+});
+$('#sheetImportUrl').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();importSheet()}});
 $('#importExcelBtn').onclick=()=>$('#importExcelFile').click();
 $('#importExcelQuick').onclick=()=>$('#importUnifiedFile').click();
 $('#importLocalBtn').onclick=()=>$('#importLocalFile').click();

@@ -23,7 +23,8 @@ for(const bad of ['body[data-ks-page=', 'body:not(.ks-dashboard)', '.stats.v44-s
 const job=read('public/job-management.html');
 assert.ok(!job.includes('function recordsFromGrid(headers,rows){'),'duplicate Google/Excel parser was not removed');
 assert.ok(!job.includes('const EXACT_MAP='),'legacy map duplicated shared aliases');
-assert.match(job,/KSJobData\.loadGoogleSheet\(sheetUrl\)/,'shared Google Sheet loader');
+assert.match(job,/KSJobData\.loadGoogleSheet\(url\)/,'shared Google Sheet loader uses validated editable URL');
+assert.match(job,/validateSheetImportUrl\(\$\('#sheetImportUrl'\)\.value\)/,'editable Google Sheet source validated before import');
 assert.match(job,/KSJobData\.recordsFromGrid\(grid\.headers,grid\.rows,FIELDS\)/,'shared date-aware conversion');
 assert.match(job,/KSJobs\.validateUniqueRefs\(list\)/,'reject duplicate refs');
 assert.match(job,/const result=await saveFile\(backup.blob,backup.name,\{strict:true\}\)/,'verified backup before import');

@@ -103,6 +103,8 @@ jobs:
         run: node scripts/test-v86-53-export-browser.mjs
       - name: Test Job Data Hub imports and exports in Chromium
         run: node scripts/test-v86-53-job-data-hub-browser.mjs
+      - name: Test editable Google Sheet import link in Chromium
+        run: node scripts/test-v86-53-editable-import-link.mjs
       - name: Test rebuilt 3D in WebGL
         run: node scripts/test-v86-22-browser.mjs
       - name: Stamp current build version
