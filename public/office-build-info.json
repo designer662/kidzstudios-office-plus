@@ -31,5 +31,5 @@
     "report.js"
   ],
   "check": "Staff directory data unchanged; physical desk ownership is computed deterministically. CI must build the 3D scene and pass browser/WebGL plus Supabase acceptance before production.",
-  "cpu_hotfix": "V86.54-CPU1 (2026-10-19): scoped Realtime movement updates, reduced fallback polling, coalesced simultaneous GETs; SQLSTATE 40001 repair is separate manual migration."
+  "cpu_hotfix": "V86.54-CPU2 (2026-10-19): fixes Smart AI regression caused by CPU1 hidden-tab background refresh guard; manual reset/move fetches fresh state while automatic polling stays paused. CPU1 mitigations and separate SQL PT409 hotfix remain."
 }

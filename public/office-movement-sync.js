@@ -662,7 +662,7 @@
   async function resetSmartAI(requestedIds){
     if(!authorized||stopped)return {ok:false,message:'Sign in to reset Smart AI'};
     if(writing||reading)return {ok:false,message:'AI is syncing. Please try again'};
-    await refresh();
+    await refresh(true);
     if(!state)return {ok:false,message:'Shared AI timeline unavailable. Try again online'};
     const ids=requestedIds==='all'?new Set(livePeople().map(e=>Number(e.id))):priorityStaffIds();
     if(!ids.size)return {ok:false,message:'Afiq/Boss not found in the staff roster'};
@@ -677,7 +677,7 @@
     const allowed=new Set(['boss','staff','showroom','corridor','pantry','store','prayer']);
     if(!Number.isInteger(personId)||!allowed.has(zone))return {ok:false,message:'Invalid character or zone'};
     if(writing||reading)return {ok:false,message:'Simulation sync is busy. Retry shortly'};
-    await refresh();
+    await refresh(true);
     if(!state)return {ok:false,message:'Shared AI state unavailable while offline'};
     const employee=livePeople().find(e=>Number(e.id)===personId);
     const next=clone(state),subject=next.staff.find(s=>Number(s.id)===personId),now=Date.now();
@@ -724,8 +724,10 @@
       return ok;
     }catch(error){leader=false;return false}finally{writing=false}
   }
-  async function refresh(){
-    if(reading||writing||!authorized||stopped||document.hidden)return;
+  async function refresh(force=false){
+    // Background refreshes pause in hidden tabs to reduce CPU and API traffic.
+    // Explicit commands (reset / move) still require a fresh versioned state.
+    if(reading||writing||!authorized||stopped||(!force&&document.hidden))return;
     reading=true;
     try{
       const {status,data}=await api('GET');
