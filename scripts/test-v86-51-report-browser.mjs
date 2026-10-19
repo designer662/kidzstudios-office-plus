@@ -36,6 +36,10 @@ try{
  assert.equal(await page.locator('#notificationList .notification-item').count(),1);
  await page.locator('#notificationClearBtn').click();
  assert.equal(await page.locator('#notificationList .notification-item').count(),0);
+ // Close the notification overlay before testing unrelated report controls.
+ // Its outside-click handler can consume the initial CSV export click.
+ await page.locator('#notificationBtn').click();
+ assert.equal(await page.locator('#notificationBtn').getAttribute('aria-expanded'),'false');
  await page.locator('#reportYear').selectOption('all');
  const promise=page.waitForEvent('download');await page.locator('#exportReport').click();
  const download=await promise;assert.match(download.suggestedFilename(),/kidzstudios-job-report/);
