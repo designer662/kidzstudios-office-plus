@@ -283,7 +283,7 @@
     setInterval(()=>{
       if(document.hidden||saving||conflicted)return;
       const now=Date.now();
-      const every=window.OfficeSupabase?.realtimeConnected?.()?20000:3500;
+      const every=window.OfficeSupabase?.realtimeConnected?.()?45000:10000;
       if(now-lastPoll>=every){lastPoll=now;if(dirty)save();else backgroundPull();}
       // Global configuration rarely changes. 60s polling avoids one request
       // every 3.5s per staff device; Realtime still applies edits immediately.

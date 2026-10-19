@@ -24,7 +24,7 @@ function exercise(name,source,tickMs,connectedPeriod,offlinePeriod,initialRead=t
  advance(tickMs);assert.equal(requests,base+2,`${name}: offline fallback fetches data promptly`);
  return {ctx,onEvent,get count(){return requests}};
 }
-const events=exercise('startEventStream',between('startEventStream','normalizeKey'),2000,15000,2000);
+const events=exercise('startEventStream',between('startEventStream','normalizeKey'),2000,46000,10000);
 const state=events.onEvent;assert(state,'Realtime change handler installed');
 let previous=events.count;
 state({detail:{table:'ks_shared_state',payload:{data:{record:{scope:'other:page'}}}}});assert.equal(events.count,previous,'Unrelated scope ignored');
@@ -33,7 +33,7 @@ previous=events.count;
 state({detail:{table:'ks_shared_state',payload:{data:{record:{scope:'dashboard:jobs'}}}}});assert.equal(events.count,previous+1,'Job event reloads jobs only');
 previous=events.count;
 state({detail:{table:'ks_shared_state',payload:{data:{}}}});assert.equal(events.count,previous+2,'Legacy unscoped events preserve compatibility');
-exercise('startChat',between('startChat','syncFollowChip'),3500,20000,3500);
-exercise('startJobAutoSync',between('startJobAutoSync','normalizeDepartment'),3500,15000,3500,false);
-exercise('startStaffDirectorySync',between('startStaffDirectorySync','polygonBounds'),2500,15000,2500);
-console.log('PASS V86.43 dashboard polling: 4 realtime-aware loops, immediate offline fallback, filtered staff/job events, legacy events retained.');
+exercise('startChat',between('startChat','syncFollowChip'),3500,45500,14000);
+exercise('startJobAutoSync',between('startJobAutoSync','normalizeDepartment'),3500,45500,14000,false);
+exercise('startStaffDirectorySync',between('startStaffDirectorySync','polygonBounds'),2500,45000,12500);
+console.log('PASS V86.54-CPU1 dashboard polling: reduced bounded fallbacks, scoped realtime events, legacy events retained.');

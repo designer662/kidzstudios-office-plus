@@ -30,5 +30,6 @@
     "report-data.js",
     "report.js"
   ],
-  "check": "Staff directory data unchanged; physical desk ownership is computed deterministically. CI must build the 3D scene and pass browser/WebGL plus Supabase acceptance before production."
+  "check": "Staff directory data unchanged; physical desk ownership is computed deterministically. CI must build the 3D scene and pass browser/WebGL plus Supabase acceptance before production.",
+  "cpu_hotfix": "V86.54-CPU1 (2026-10-19): scoped Realtime movement updates, reduced fallback polling, coalesced simultaneous GETs; SQLSTATE 40001 repair is separate manual migration."
 }

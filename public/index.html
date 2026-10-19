@@ -1659,7 +1659,7 @@ body{overscroll-behavior:none;}
     pullOfficeEvents({initial:true});
     if(eventPollTimer)clearInterval(eventPollTimer);
     let lastEventPoll=Date.now();
-    eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
+    eventPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?45000:10000;if(now-lastEventPoll>=every){lastEventPoll=now;pullOfficeEvents()}},2000);
     // Startup or retry may call this twice: bind network and realtime hooks only once.
     if(startEventStream._listenersBound)return;
     startEventStream._listenersBound=true;
@@ -1967,7 +1967,7 @@ body{overscroll-behavior:none;}
       if(!background)opsRefreshBtn?.classList.remove('loading');
     }
   }
-  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);let lastJobPoll=Date.now();jobAutoTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:3500;if(now-lastJobPoll>=every){lastJobPoll=now;loadJobsFromManagement({background:true})}},3500)}
+  function startJobAutoSync(){if(jobAutoTimer)clearInterval(jobAutoTimer);let lastJobPoll=Date.now();jobAutoTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?45000:12000;if(now-lastJobPoll>=every){lastJobPoll=now;loadJobsFromManagement({background:true})}},3500)}
 
   const DEPARTMENTS=['Creative Department','Sales and Marketing','Management','Production Management','Finance Department'];
   function normalizeDepartment(value,position=''){
@@ -2064,7 +2064,7 @@ body{overscroll-behavior:none;}
     workloadEditorSave.disabled=true;workloadEditorStatus.className='staff-editor-status';workloadEditorStatus.textContent='Saving workload to server…';try{const records=serializeStaffDirectory(),at=records.findIndex(r=>Number(r.id)===emp.id);if(at<0)throw new Error('Staff not found');records[at]={...records[at],workload:next};await saveStaffDirectory(records);const summary=next.length?`${next[0]}${next.length>1?` +${next.length-1} more`:''}`:'Workload cleared';const delivered=await postOfficeEvent({eventType:'workload_updated',title:`${emp.name} · Workload updated`,message:summary,employeeId:emp.id,metadata:{workload:next,count:next.length},dedupeKey:`workload:${emp.id}:${hashString(JSON.stringify(next))}:${Date.now()}`});workloadEditorStatus.className='staff-editor-status ok';workloadEditorStatus.textContent=delivered?'Saved. Live Activity was updated.':EVENT_DELIVERY_WARNING;if(delivered)setTimeout(closeWorkloadEditor,650)}catch(err){workloadEditorStatus.className='staff-editor-status error';workloadEditorStatus.textContent=err.message||'Could not save workload.'}finally{workloadEditorSave.disabled=false}
   }
   function startStaffDirectorySync(){
-    loadStaffDirectory({seedIfMissing:true});if(staffPollTimer)clearInterval(staffPollTimer);let lastStaffPoll=Date.now();staffPollTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?15000:2500;if(now-lastStaffPoll>=every){lastStaffPoll=now;loadStaffDirectory({seedIfMissing:false})}},2500);
+    loadStaffDirectory({seedIfMissing:true});if(staffPollTimer)clearInterval(staffPollTimer);let lastStaffPoll=Date.now();staffPollTimer=setInterval(()=>{if(document.hidden||staffEditorModal?.classList.contains('open')||workloadEditorModal?.classList.contains('open'))return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?45000:12000;if(now-lastStaffPoll>=every){lastStaffPoll=now;loadStaffDirectory({seedIfMissing:false})}},2500);
   }
 
   function polygonBounds(points){const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)}}
@@ -2444,7 +2444,7 @@ body{overscroll-behavior:none;}
       await postOfficeEvent({eventType:'chat_cleared',title:'Office chat cleared',message:'Shared chat history was cleared',dedupeKey:`chat-clear:${Date.now()}`});
     }catch(_){alert('Could not clear chat. Please try again.')}finally{chatClearBtn.disabled=false}
   }
-  function startChat(){renderChatSenders();pullChat({initial:true});if(chatPollTimer)clearInterval(chatPollTimer);let lastChatPoll=Date.now();chatPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?20000:3500;if(now-lastChatPoll>=every){lastChatPoll=now;pullChat()}},3500)}
+  function startChat(){renderChatSenders();pullChat({initial:true});if(chatPollTimer)clearInterval(chatPollTimer);let lastChatPoll=Date.now();chatPollTimer=setInterval(()=>{if(document.hidden)return;const now=Date.now(),every=window.OfficeSupabase?.realtimeConnected?.()?45000:12000;if(now-lastChatPoll>=every){lastChatPoll=now;pullChat()}},3500)}
 
   function syncFollowChip(){const emp=followEmployeeId?employeeById[followEmployeeId]:null;if(!followChip)return;followChip.classList.toggle('show',Boolean(emp));followChip.setAttribute('aria-hidden',String(!emp));if(followChipName)followChipName.textContent=emp?.name||''}
   function collapseOpsPanel(){if(!todayPanel?.classList.contains('expanded'))return;todayPanel.classList.remove('expanded');if(opsExpandBtn){opsExpandBtn.textContent='⤢';opsExpandBtn.setAttribute('aria-expanded','false');opsExpandBtn.setAttribute('title','Expand Office Pulse')}}

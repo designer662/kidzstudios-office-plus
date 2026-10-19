@@ -91,7 +91,9 @@ jobs:
           node scripts/test-v86-38-office-pulse.mjs
           node scripts/test-v86-40-office-pulse-source.mjs
       - name: Test Supabase API compatibility
-        run: node scripts/test-bridge-mock.mjs
+        run: |
+          node scripts/test-bridge-mock.mjs
+          node scripts/test-v86-54-cpu-hotfix.mjs
       - name: Test Office Simulator stability
         run: node scripts/run-stability-suite.mjs
       - name: Install test browser

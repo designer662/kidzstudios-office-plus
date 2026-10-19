@@ -40,6 +40,19 @@ domReady();
 async function check(url,opt){const res=await window.fetch(url,opt);return [res.status,await res.json()];}
 const [getStatus,getResult]=await check('/api/state?scope=office%3Astaff');
 assert.equal(getStatus,200);assert.equal(getResult.payload.staff[0].name,'Boss');
+const countStateReads=()=>reqs.filter(([path,method])=>path.endsWith('/ks_shared_state')&&method==='GET').length;
+const beforeParallel=countStateReads();
+const parallel=await Promise.all([
+  check('/api/state?scope=office%3Astaff'),
+  check('/api/state?scope=office%3Astaff'),
+  check('/api/state?scope=office%3Astaff')
+]);
+assert.equal(countStateReads()-beforeParallel,1,'Identical simultaneous state GETs share one PostgREST request');
+assert.ok(parallel.every(([status,row])=>status===200&&row.version===1));
+const beforeDistinct=countStateReads();
+await check('/api/state?scope=office%3Astaff');
+assert.equal(countStateReads()-beforeDistinct,1,'Completed GETs are never cached indefinitely');
+
 const [saveStatus,saveResult]=await check('/api/state',{method:'PUT',body:JSON.stringify({scope:'office:staff',payload:{staff:[]}})});
 assert.equal(saveStatus,200);assert.equal(saveResult.version,2);
 const [chatStatus,chatResult]=await check('/api/chat',{method:'POST',body:JSON.stringify({senderId:2,senderName:'Afiq',message:'Hello',sourceClient:'PC-01'})});

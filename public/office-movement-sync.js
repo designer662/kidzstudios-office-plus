@@ -6,7 +6,7 @@
   'use strict';
   const SCOPE='office:movement:v1';
   const ENGINE_REVISION=2, STALL_LIMIT_MS=180000, FORCE_WALK_AFTER_MS=115000;
-  const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=2900,TICK_MS=850;
+  const LEASE_MS=18000,HEARTBEAT_MS=5500,POLL_MS=3000,TICK_MS=850;
   // Office floor-plan units: roughly two units per world-space metre.
   const MIN_STAFF_GAP=1.85, MIN_PARKED_DESK_GAP=1.45, CHECK_MS=140, DEPARTURE_STEP_MS=1500, MAX_DEPARTURE_WAIT_MS=30000;
   const MAX_ACTIVE_WALKERS=3, ESCAPE_GRACE_MS=3600;
@@ -19,7 +19,7 @@
   // Do not run an independent simulation while waiting for authentication/network.
   motion.enable();
   let state=null,version=0,leader=false,lastSave=0,writing=false,reading=false,authorized=false,stopped=false;
-  let refreshTimer=null,heartbeatTimer=null,frame=null,signalTimer=null,failedReads=0,uiWaitUntil=0;
+  let refreshTimer=null,heartbeatTimer=null,frame=null,signalTimer=null,failedReads=0,uiWaitUntil=0,lastFallbackRead=0;
   const clone=p=>JSON.parse(JSON.stringify(p));
   const point=p=>p&&Number.isFinite(+p.x)&&Number.isFinite(+p.y)&&+p.x>=0&&+p.x<=23&&+p.y>=0&&+p.y<=70;
   const livePeople=()=>motion.getPeople();
@@ -725,7 +725,7 @@
     }catch(error){leader=false;return false}finally{writing=false}
   }
   async function refresh(){
-    if(reading||writing||!authorized||stopped)return;
+    if(reading||writing||!authorized||stopped||document.hidden)return;
     reading=true;
     try{
       const {status,data}=await api('GET');
@@ -761,7 +761,15 @@
     furniture?.status?.(furniture?.list().length?'loading':'error');
     authorized=true;
     queueRefresh(0);
-    refreshTimer=setInterval(()=>refresh(),POLL_MS);
+    // Realtime supplies immediate movement changes; poll only as a safety net.
+    // Never read the timeline in a hidden tab. Leader lease writes stay unchanged.
+    lastFallbackRead=Date.now();
+    refreshTimer=setInterval(()=>{
+      if(document.hidden)return;
+      const now=Date.now();
+      const every=window.OfficeSupabase?.realtimeConnected?.()?12000:9000;
+      if(now-lastFallbackRead>=every){lastFallbackRead=now;refresh();}
+    },POLL_MS);
     heartbeatTimer=setInterval(()=>leaderTick(),TICK_MS);
     beginAnimation();
   }
@@ -786,7 +794,9 @@
   });
   window.addEventListener('ks:auth-ready',start);
   window.addEventListener('ks:supabase-change',event=>{
-    if(event.detail?.table==='ks_shared_state')queueRefresh(220);
+    if(event.detail?.table!=='ks_shared_state'||document.hidden)return;
+    const changedScope=event.detail?.payload?.data?.record?.scope;
+    if(!changedScope||changedScope===SCOPE)queueRefresh(220);
   });
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){if(frame!==null)cancelAnimationFrame(frame);frame=null;}

@@ -112,5 +112,5 @@
   window.addEventListener('ks:auth-ready',()=>pull({quiet:true}));
   window.addEventListener('pagehide',()=>{alive=false},{once:true});
   fillMonths();pull();
-  setInterval(()=>{if(alive&&!document.hidden&&Date.now()-lastPoll>15000)pull({quiet:true})},15000);
+  setInterval(()=>{if(alive&&!document.hidden&&Date.now()-lastPoll>45000)pull({quiet:true})},15000);
 })();

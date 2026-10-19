@@ -125,7 +125,13 @@
     if ((session.expires_at || 0) < Math.floor(Date.now()/1000) + 75) await refreshSession();
     return session.access_token;
   }
+  // Deduplicate only identical simultaneous GETs. Never cache stale state and
+  // never merge writes: every mutation must get its own server response.
+  const pendingRestReads = new Map();
   async function rest(path,{method='GET',body,headers={}}={}) {
+    const key = method === 'GET' && body === undefined && Object.keys(headers).length === 0 ? path : null;
+    if (key !== null && pendingRestReads.has(key)) return pendingRestReads.get(key);
+    const operation = (async () => {
     let token;
     try { token = await authToken(); } catch(error) { return {status:401,data:{error:error.message}}; }
     const h = {'apikey':publicKey,'authorization':`Bearer ${token}`,...headers};
@@ -138,6 +144,10 @@
       if (response.status === 401) displayGate('Session expired. Please sign in again.');
       return {status:response.status,data};
     } catch(error) { return {status:503,data:{error:error.message || 'Supabase unreachable'}}; }
+    })();
+    if (key !== null) pendingRestReads.set(key, operation);
+    try { return await operation; }
+    finally { if (key !== null && pendingRestReads.get(key) === operation) pendingRestReads.delete(key); }
   }
   const query = value => encodeURIComponent(String(value));
   const normalizeChat = row => ({
