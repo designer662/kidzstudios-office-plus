@@ -1,0 +1,259 @@
+{
+  "removed_count": 61,
+  "removed_bytes": 1352735,
+  "removed_files": [
+    {
+      "name": "README-V86.53-OPERATIONS-UPGRADE.md",
+      "bytes": 2529
+    },
+    {
+      "name": "README-V86.33.md",
+      "bytes": 2370
+    },
+    {
+      "name": "README-V86.37.md",
+      "bytes": 4604
+    },
+    {
+      "name": "README-V86.53-JOB-DATA-HUB.md",
+      "bytes": 1071
+    },
+    {
+      "name": "README-V86.50-CLASSIC-WORKTABLE.md",
+      "bytes": 1384
+    },
+    {
+      "name": "README-V86.31.md",
+      "bytes": 1719
+    },
+    {
+      "name": "README-V86.54-CPU1.md",
+      "bytes": 4824
+    },
+    {
+      "name": "README-V86.30.md",
+      "bytes": 5194
+    },
+    {
+      "name": "README-V86.53-EDITABLE-IMPORT-LINK.md",
+      "bytes": 3045
+    },
+    {
+      "name": "README-V86.39.md",
+      "bytes": 6072
+    },
+    {
+      "name": "README-V86.35.md",
+      "bytes": 4501
+    },
+    {
+      "name": "README-V86.53-PRICELIST-EXCEL-REPAIR.md",
+      "bytes": 3179
+    },
+    {
+      "name": "README-V86.42-PRODUCTION.md",
+      "bytes": 5454
+    },
+    {
+      "name": "README-V86.20.md",
+      "bytes": 3550
+    },
+    {
+      "name": "README-V86.53-EXPORT-CI-FIX-V3.md",
+      "bytes": 1960
+    },
+    {
+      "name": "README-V86.53-MARKUP-REDESIGN.md",
+      "bytes": 2265
+    },
+    {
+      "name": "README-V86.53-TEAM-WORKLOAD-FIX.md",
+      "bytes": 1761
+    },
+    {
+      "name": "README-V86.23.md",
+      "bytes": 2060
+    },
+    {
+      "name": "README-V86.54-ALL-IN-ONE.md",
+      "bytes": 5569
+    },
+    {
+      "name": "README-V86.53-CINEMATIC-CAMERA.md",
+      "bytes": 2224
+    },
+    {
+      "name": "README-V86.49-JARVIS.md",
+      "bytes": 3988
+    },
+    {
+      "name": "README-V86.21.md",
+      "bytes": 1339
+    },
+    {
+      "name": "README-V86.36.md",
+      "bytes": 4790
+    },
+    {
+      "name": "README-V86.54-CPU3-CI1.md",
+      "bytes": 3215
+    },
+    {
+      "name": "README-V86.53-UI-RECENTER.md",
+      "bytes": 778
+    },
+    {
+      "name": "README-V86.22.md",
+      "bytes": 5005
+    },
+    {
+      "name": "README-V86.40.md",
+      "bytes": 3496
+    },
+    {
+      "name": "README-V86.53-MARKUP-INLINE.md",
+      "bytes": 1316
+    },
+    {
+      "name": "README-V86.43-JARVIS.md",
+      "bytes": 3630
+    },
+    {
+      "name": "README-V86.53-LIVE-ACTIVITY-CLEANUP.md",
+      "bytes": 342
+    },
+    {
+      "name": "README-V86.53-UI-CONTROLS.md",
+      "bytes": 2119
+    },
+    {
+      "name": "README-V86.53-PRICELIST-REDESIGN.md",
+      "bytes": 2369
+    },
+    {
+      "name": "README-V86.51-REPORTS-NAV-INTRO.md",
+      "bytes": 3831
+    },
+    {
+      "name": "README-V86.53-JOB-DATA-HUB-V2.md",
+      "bytes": 4718
+    },
+    {
+      "name": "README-V86.34.md",
+      "bytes": 3892
+    },
+    {
+      "name": "README-V86.53-UI-FIXES.md",
+      "bytes": 705
+    },
+    {
+      "name": "README-V86.53-MODAL-DOWNLOAD-FIX.md",
+      "bytes": 2338
+    },
+    {
+      "name": "README-V86.50-WORKSTATIONS.md",
+      "bytes": 3223
+    },
+    {
+      "name": "README-V86.44-SMART-AI.md",
+      "bytes": 3976
+    },
+    {
+      "name": "README-V86.53-INDEX-STABILITY.md",
+      "bytes": 2349
+    },
+    {
+      "name": "README-V86.54-CPU2.md",
+      "bytes": 2689
+    },
+    {
+      "name": "README-V86.19.md",
+      "bytes": 2317
+    },
+    {
+      "name": "README-V86.53-REPORTS-UPGRADE.md",
+      "bytes": 2873
+    },
+    {
+      "name": "README-V86.41-AUDIT.md",
+      "bytes": 4297
+    },
+    {
+      "name": "README-V86.53-MARKUP-FLOATING.md",
+      "bytes": 1629
+    },
+    {
+      "name": "README-V86.38.md",
+      "bytes": 6525
+    },
+    {
+      "name": "AUDIT-REPORT-V86.41.md",
+      "bytes": 7092
+    },
+    {
+      "name": "DEPLOYMENT-RETEST-V86.41.md",
+      "bytes": 5310
+    },
+    {
+      "name": "KidzStudios_V86.50_Staff_Emoji_Dedup_Patch.zip",
+      "bytes": 77229
+    },
+    {
+      "name": "KidzStudios_V86.51_Office_Reports_Essential_Patch.zip",
+      "bytes": 109724
+    },
+    {
+      "name": "KidzStudios_V86.52_Index_Only_UI_Classic_Job_Patch.zip",
+      "bytes": 268330
+    },
+    {
+      "name": "KidzStudios_V86.53_Index_Job_Style_Essential_Patch.zip",
+      "bytes": 79711
+    },
+    {
+      "name": "docs/JOB_MANAGEMENT_V2.md",
+      "bytes": 4372
+    },
+    {
+      "name": "docs/JOB_MANAGEMENT_V86_31.md",
+      "bytes": 6194
+    },
+    {
+      "name": "docs/PRODUCTION-VERIFICATION-V86.42.md",
+      "bytes": 884
+    },
+    {
+      "name": "docs/JARVIS-V86.43-CODE-AUDIT.md",
+      "bytes": 4525
+    },
+    {
+      "name": "docs/PREMERGE-CI-AND-DEPLOYMENT-AUDIT.md",
+      "bytes": 7647
+    },
+    {
+      "name": "reports/QA-V86.49-Results.json",
+      "bytes": 1269
+    },
+    {
+      "name": "reports/QA-V86.43-Results.json",
+      "bytes": 6685
+    },
+    {
+      "name": "reports/QA-V86.44-Results.json",
+      "bytes": 6549
+    },
+    {
+      "name": "legacy/office-v51-preview.png",
+      "bytes": 624130
+    }
+  ],
+  "preserved": [
+    "public/**",
+    "scripts/**",
+    "source/**",
+    "supabase/migrations/**",
+    ".github/**",
+    "legacy/netlify/**",
+    "legacy/netlify.toml"
+  ]
+}

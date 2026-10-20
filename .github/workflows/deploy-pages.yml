@@ -76,6 +76,7 @@ jobs:
           node scripts/test-v86-54-all-in-one.mjs
           node scripts/test-index-job-style.mjs
           node scripts/test-v86-54-header-parity.mjs
+          node scripts/test-v87-mobile-ui.mjs
       - name: Test job data and workbook tools
         run: |
           node scripts/test-job-data.mjs
@@ -86,6 +87,7 @@ jobs:
           node scripts/test-job-ui-v86-31.mjs
           node scripts/test-v86-53-job-data-hub.mjs
           node scripts/test-delete-modal.mjs
+          node scripts/test-v87-job-row-delete.mjs
           node scripts/test-outside-close.mjs
           node scripts/test-v86-37-action-queue.mjs
           node scripts/test-v86-38-office-pulse.mjs
@@ -98,6 +100,8 @@ jobs:
         run: node scripts/run-stability-suite.mjs
       - name: Install test browser
         run: npm exec --prefix source -- playwright install --with-deps chromium
+      - name: Test V87 mobile menu in Chromium
+        run: node scripts/test-v87-mobile-browser.mjs
       - name: Test auth recovery in Chromium
         run: node scripts/test-v86-43-auth-browser.mjs
       - name: Test Excel import and download in Chromium

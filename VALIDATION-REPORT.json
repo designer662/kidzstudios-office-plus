@@ -1,0 +1,36 @@
+{
+  "baseline": {
+    "passed": 53,
+    "total": 78
+  },
+  "updated": {
+    "passed": 54,
+    "total": 79
+  },
+  "regressions": [],
+  "newly_passing": [
+    "test-v87-mobile-ui.mjs"
+  ],
+  "notes": [
+    "Unit/static tests only; browser tests and 3D rebuilding require npm dependencies.",
+    "Old version-pinned tests can fail independently of this responsive update."
+  ],
+  "v87_1_job_row_delete": {
+    "feature": "Delete action beside Duplicate in Job Management rows",
+    "static_checks_passed": [
+      "scripts/check-repo.mjs",
+      "scripts/audit-runtime-wiring.mjs",
+      "scripts/test-v87-mobile-ui.mjs",
+      "scripts/test-job-ui-v86-31.mjs",
+      "scripts/test-v87-job-row-delete.mjs",
+      "scripts/test-delete-modal.mjs",
+      "scripts/test-job-saving.mjs"
+    ],
+    "browser_fixture_checks": "390px and 1280px local sandbox fixture: confirmation/cancel/delete and 40px touch targets passed",
+    "limits": [
+      "Browser fixture is not a full live Supabase end-to-end check",
+      "Live database was not accessed or modified",
+      "Native Node Playwright runner requires npm dependencies in CI"
+    ]
+  }
+}
