@@ -1,0 +1,40 @@
+/* V86.53 — edge-to-edge office viewport; content pages remain unchanged. */
+html:has(body.ks-dashboard),body.ks-dashboard{height:100%;max-width:100%;overflow:hidden}
+body.ks-dashboard .app{width:100%;max-width:100%;height:100dvh;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr)!important;overflow:hidden}
+body.ks-dashboard #mapShell{
+  box-sizing:border-box!important;position:relative!important;
+  width:100%!important;max-width:none!important;min-width:0!important;
+  height:100%!important;min-height:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;
+  background:radial-gradient(ellipse at center,#fafaf8 0%,#f3f3f0 74%,#eeefea 100%)!important;
+}
+/* Keep primary overlays near opposite viewport edges and clear of each other. */
+body.ks-dashboard #livePanel{left:clamp(10px,1.1vw,20px)!important;right:auto!important;bottom:clamp(24px,3.5vh,44px)!important;translate:0 0!important}
+body.ks-dashboard #todayPanel:not(.expanded){right:clamp(10px,1.1vw,20px)!important;left:auto!important;top:clamp(10px,1.1vw,20px)!important}
+body.ks-dashboard #todayPanel.expanded{right:clamp(10px,1.1vw,20px)!important;left:auto!important;top:clamp(10px,1.1vw,20px)!important}
+body.ks-dashboard #liveReopenBtn{left:0!important}
+/* Remove old dev UI only; movement simulation and diagnostics events remain active. */
+body.ks-dashboard #ksSmartAIControls,body.ks-dashboard #ksSmartAIStatus,body.ks-dashboard #ksAIMonitor,body.ks-dashboard #ksAIMonitorToggle{display:none!important}
+body.ks-dashboard .ks-living-controls{z-index:20!important;top:clamp(10px,1.2vw,21px)!important;left:clamp(12px,1.2vw,22px)!important;flex-wrap:wrap!important;max-width:min(75vw,380px)!important}
+body.ks-dashboard .ks-living-reset{pointer-events:auto;min-height:30px;border-radius:999px;border:1px solid #e5e6e2;background:rgba(255,255,255,.95);color:#656d6b;padding:6px 11px;white-space:nowrap;font:750 11px/1.2 Inter,Arial,sans-serif;cursor:pointer;box-shadow:0 3px 14px rgba(35,44,37,.04)}
+body.ks-dashboard .ks-living-reset:hover,body.ks-dashboard .ks-living-reset:focus-visible{border-color:#eebc9b;color:#bc6330;background:#fff8f2;outline-offset:2px}
+body.ks-dashboard .ks-living-reset:disabled{cursor:progress;opacity:.6}
+/* Secondary explicit browser fullscreen: map-shell itself becomes the fullscreen element. */
+body.ks-dashboard .ks-office-fullscreen{display:inline-flex;align-items:center;gap:6px;min-height:34px;border:1px solid #e4e8e5;border-radius:11px;background:#fff;color:#59636b;padding:0 11px;white-space:nowrap;font-size:11px;font-weight:750;cursor:pointer}
+body.ks-dashboard .ks-office-fullscreen:hover{background:#fff2e8;color:#c26632}
+body.ks-dashboard #mapShell:fullscreen{height:100dvh!important;width:100vw!important;max-width:none!important;border-radius:0!important;margin:0!important}
+@media(max-width:920px){
+ body.ks-dashboard .ks-living-controls{top:10px!important;left:10px!important;max-width:calc(100% - 20px)!important}
+ body.ks-dashboard #todayPanel:not(.expanded){top:clamp(51px,8vh,76px)!important;right:9px!important}
+ body.ks-dashboard #livePanel{bottom:55px!important;left:9px!important;right:auto!important;max-width:min(315px,calc(100% - 20px))!important}
+}
+@media(max-width:650px){
+ body.ks-dashboard .ks-living-controls{top:8px!important;max-width:calc(100% - 12px)!important;gap:4px!important}
+ body.ks-dashboard .ks-living-reset,body.ks-dashboard .ks-living-audio{font-size:10px;padding:5px 9px}
+ body.ks-dashboard #todayPanel:not(.expanded){right:7px!important;top:48px!important}
+ body.ks-dashboard #livePanel{left:7px!important;right:auto!important;bottom:49px!important;width:min(280px,calc(100% - 14px))!important;max-height:30vh!important;overflow:auto}
+ body.ks-dashboard #livePanel.expanded{left:7px!important;right:7px!important;width:auto!important;max-width:none!important;max-height:56vh!important}
+ body.ks-dashboard #todayPanel.expanded{right:7px!important;left:7px!important;width:auto!important}
+ body.ks-dashboard .ks-office-fullscreen span{display:none}
+}
+@media print{body.ks-dashboard #mapShell{height:100%!important}}

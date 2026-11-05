@@ -1,0 +1,79 @@
+/* KIDZSTUDIOS V86.53 clean Price List styling. Presentation only, no pricing logic. */
+body[data-ks-page="calculator"]{
+  --price-orange:#d96732;--price-light:#fff8f3;
+  background:#f7f7f6!important;
+}
+body[data-ks-page="calculator"] .main-content{max-width:1480px;padding:20px 22px 50px}
+body[data-ks-page="calculator"] .ks-price-hero{margin-bottom:15px;align-items:center}
+body[data-ks-page="calculator"] .ks-price-eyebrow{font-size:10px;letter-spacing:.07em;color:#9a522f}
+body[data-ks-page="calculator"] .ks-price-eyebrow:before{display:none}
+body[data-ks-page="calculator"] .ks-price-hero h1{font-size:clamp(25px,2.5vw,31px);letter-spacing:-.045em;margin:5px 0 4px}
+body[data-ks-page="calculator"] .ks-price-hero p{font-size:12px;line-height:1.45}
+body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:minmax(0,1fr) minmax(290px,330px);gap:13px}
+body[data-ks-page="calculator"] .left-panel,
+body[data-ks-page="calculator"] .right-box{
+  border-radius:12px!important;box-shadow:none!important;border:1px solid #dededa!important;
+}
+body[data-ks-page="calculator"] .left-panel{padding:18px!important}
+body[data-ks-page="calculator"] .right-box{padding:16px!important}
+body[data-ks-page="calculator"] .right-panel{gap:10px}
+body[data-ks-page="calculator"] .right-box:first-child{border-top:1px solid #dededa!important}
+body[data-ks-page="calculator"] .brand-subtitle:before{display:none}
+body[data-ks-page="calculator"] .header-flex{margin-bottom:10px;padding-bottom:10px}
+body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:13px}
+body[data-ks-page="calculator"] .category-card{
+  min-height:51px;padding:8px 6px;gap:5px;flex-direction:row;justify-content:center;
+  border-radius:8px!important;box-shadow:none!important;transform:none!important;
+}
+body[data-ks-page="calculator"] .category-card .cat-icon{width:20px;height:20px;background:transparent;border-radius:0}
+body[data-ks-page="calculator"] .category-card .cat-icon svg{width:17px;height:17px}
+body[data-ks-page="calculator"] .category-card .cat-name{font-size:11px;text-align:left}
+body[data-ks-page="calculator"] .category-card.active{
+  background:#fff7f1!important;border-color:#dd8e63!important;box-shadow:none!important;
+}
+body[data-ks-page="calculator"] .category-card.active .cat-icon{background:transparent}
+body[data-ks-page="calculator"] .panel-banner{
+  background:#f8f8f7!important;border:1px solid #e6e6e2!important;
+  border-radius:9px!important;padding:10px 12px!important;min-height:45px;
+  margin-bottom:11px!important;
+}
+body[data-ks-page="calculator"] .panel-banner h2{font-size:14px}
+body[data-ks-page="calculator"] .panel-banner svg{width:22px;height:22px}
+body[data-ks-page="calculator"] .grid-layout{gap:10px}
+body[data-ks-page="calculator"] .form-group{padding:14px!important;border-radius:10px!important;background:#fff}
+body[data-ks-page="calculator"] .section-title{font-size:12px!important;margin-bottom:11px}
+body[data-ks-page="calculator"] .size-grid{gap:6px}
+body[data-ks-page="calculator"] .size-item{padding:8px 6px;border-radius:8px}
+body[data-ks-page="calculator"] .input-field,
+body[data-ks-page="calculator"] .select-field{border-radius:7px;min-height:38px;background:#fff}
+body[data-ks-page="calculator"] .stepper-wrapper{border-radius:7px}
+body[data-ks-page="calculator"] :is(.section-title,.brand-subtitle,.panel-banner h2){letter-spacing:-.012em}
+@media(max-width:960px){
+  body[data-ks-page="calculator"] .main-content{padding:15px 14px 40px}
+  body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:minmax(0,1fr)}
+  body[data-ks-page="calculator"] .right-panel{position:static}
+}
+@media(max-width:580px){
+  body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-ks-page="calculator"] .left-panel{padding:12px!important}
+  body[data-ks-page="calculator"] .category-card{min-height:44px}
+  body[data-ks-page="calculator"] .grid-layout{grid-template-columns:minmax(0,1fr)}
+}
+/* Keep internal commission visually neutral, not an error-alert panel. */
+body[data-ks-page="calculator"] #comm_type{border-color:#d9d9d6!important;color:#333!important}
+body[data-ks-page="calculator"] #comm_value{border-color:#d9d9d6!important}
+body[data-ks-page="calculator"] #comm_type:focus,
+body[data-ks-page="calculator"] #comm_value:focus{border-color:#d18d6e!important}
+body[data-ks-page="calculator"] .right-box > div[style*="border: 1px dashed"]{
+  background:#f8f8f7!important;border:1px solid #e5e5e1!important;
+  border-radius:8px!important;padding:11px!important;
+}
+body[data-ks-page="calculator"] .right-box > div[style*="border: 1px dashed"] > div:first-child{
+  color:#515658!important;text-transform:none!important;letter-spacing:0!important;font-size:11px!important;
+}
+body[data-ks-page="calculator"] .right-box > div[style*="border: 1px dashed"] > div:last-child{color:#73787a!important}
+body[data-ks-page="calculator"] .total-price{
+  background:#f8f8f7!important;border:1px solid #e9e8e4!important;border-radius:9px!important;
+}
+body[data-ks-page="calculator"] .action-btn,
+body[data-ks-page="calculator"] .wa-btn{border-radius:8px!important;box-shadow:none!important}

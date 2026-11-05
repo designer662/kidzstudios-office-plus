@@ -1,0 +1,14 @@
+/* Office Plus V52 — clean scene controls and premium miniature character presentation. */
+.studio-toolbar{gap:9px}
+#deptNav{background:rgba(255,255,255,.95);border:1px solid #e7e9e3;box-shadow:0 9px 22px rgba(48,60,48,.06);padding:5px}
+#deptNav .dept-tab{border-radius:9px;font-weight:700}
+#deptNav .dept-tab.active{background:#d18854;box-shadow:0 3px 10px rgba(171,102,54,.18)}
+.studio-view-controls,.scene-emote-toolbar{background:rgba(255,255,255,.97);border-color:#e7e9e3;box-shadow:0 9px 22px rgba(48,60,48,.055)}
+#office3dHost .person-label{border-radius:11px;padding:7px 10px;font-size:11px;letter-spacing:.01em;color:#4d5a52;background:rgba(255,255,255,.96);border:1px solid rgba(219,228,218,.95);box-shadow:0 5px 17px rgba(44,62,53,.12);backdrop-filter:blur(8px)}
+#office3dHost .person-label:before{height:8px;width:8px;border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,var(--person-color) 15%,transparent)}
+#office3dHost .person-label.focused,#office3dHost .person-label:hover{background:#364e47;color:#fff;border-color:#364e47;box-shadow:0 9px 24px rgba(32,62,53,.23)}
+#office3dHost .room-label{border-radius:9px;padding:6px 9px;background:rgba(252,253,249,.94)}
+#office3dHost .scene-bubble{border-radius:14px 14px 14px 4px;background:rgba(255,255,255,.98);color:#43564d;box-shadow:0 13px 31px rgba(40,64,46,.15)}
+.scene-emote-toolbar button{font-weight:750}
+@media(max-width:920px){.studio-toolbar{gap:7px}#deptNav .dept-tab{padding:8px 9px}#office3dHost .person-label{font-size:10px;padding:6px 8px}}
+@media(prefers-reduced-motion:reduce){#office3dHost .person-label{transition:none}}

@@ -1,0 +1,69 @@
+/* V86.52.1 — index-only dashboard layout.  Never apply to Job Management or tool pages. */
+body.ks-dashboard {--ks-home-gutter:clamp(8px,1.1vw,20px);min-width:0;}
+body.ks-dashboard .ks-master-header{
+  width:100%!important;max-width:none!important;
+  padding:10px var(--ks-home-gutter) 7px!important;
+}
+body.ks-dashboard .ks-master-header .topbar{
+  display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;
+  grid-template-rows:auto!important;align-items:center!important;
+  width:100%!important;max-width:1600px!important;min-width:0!important;
+  margin:0 auto!important;gap:12px!important;padding:9px 12px!important;
+  overflow:visible!important;
+}
+body.ks-dashboard .ks-master-header .brand{
+  grid-column:1!important;grid-row:1!important;
+  max-width:100%!important;min-width:0!important;justify-self:start!important;
+}
+body.ks-dashboard .ks-master-header .tool-nav{
+  grid-column:2!important;grid-row:1!important;
+  justify-self:stretch!important;justify-content:safe center!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  display:flex!important;flex-wrap:nowrap!important;gap:6px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+  overscroll-behavior-x:contain!important;scrollbar-width:thin!important;
+  scroll-padding-inline:10px;
+}
+body.ks-dashboard .ks-master-header .tool-nav-btn {flex-shrink:0!important;min-width:max-content!important;}
+body.ks-dashboard .ks-master-header .header-tools{
+  grid-column:3!important;grid-row:1!important;
+  justify-self:end!important;position:relative!important;min-width:max-content!important;
+}
+body.ks-dashboard .ks-master-header .notification-panel{
+  z-index:1000!important;max-width:calc(100vw - 24px)!important;
+}
+body.ks-dashboard #mapShell{
+  box-sizing:border-box;width:calc(100% - 2 * var(--ks-home-gutter))!important;
+  max-width:1600px!important;margin:0 auto 14px!important;min-width:0!important;
+}
+body.ks-dashboard .ks-master-header :is(.tool-nav-btn,.ks-home-pill):focus-visible{
+  outline:2px solid #e47743!important;outline-offset:2px!important;
+}
+/* The tools move to their own row before navigation can collide with account controls. */
+@media(max-width:1250px){
+ body.ks-dashboard .ks-master-header .topbar{
+  grid-template-columns:minmax(0,1fr) max-content!important;grid-template-rows:auto auto!important;
+ }
+ body.ks-dashboard .ks-master-header .brand{grid-column:1!important;grid-row:1!important;}
+ body.ks-dashboard .ks-master-header .header-tools{grid-column:2!important;grid-row:1!important;}
+ body.ks-dashboard .ks-master-header .tool-nav{
+  grid-column:1/-1!important;grid-row:2!important;
+  justify-content:flex-start!important;max-width:100%!important;
+ }
+}
+@media(max-width:700px){
+ body.ks-dashboard .ks-master-header{padding:7px 7px 5px!important;}
+ body.ks-dashboard .ks-master-header .topbar{gap:7px!important;padding:8px!important;border-radius:16px!important;}
+ body.ks-dashboard .ks-master-header .brand{width:auto!important;max-width:calc(100vw - 105px)!important;}
+ body.ks-dashboard .ks-master-header .ks-home-pill{width:35px!important;min-width:35px!important;justify-content:center!important;padding:0!important;}
+ body.ks-dashboard .ks-master-header .ks-home-pill span{display:none!important;}
+ body.ks-dashboard .ks-master-header .tool-nav{padding:4px 0 6px!important;}
+ body.ks-dashboard .ks-master-header .tool-nav-btn{height:34px!important;padding:0 9px!important;}
+ body.ks-dashboard .ks-master-header .header-tools{gap:5px!important;}
+ body.ks-dashboard .ks-master-header .notification-panel{
+   position:fixed!important;left:8px!important;right:8px!important;
+   top:110px!important;width:auto!important;
+ }
+ body.ks-dashboard #mapShell{width:calc(100% - 12px)!important;margin:0 auto 7px!important;}
+}
+@media print{body.ks-dashboard .ks-master-header{display:none!important;}}

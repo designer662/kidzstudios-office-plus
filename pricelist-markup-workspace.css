@@ -1,0 +1,49 @@
+/* V86.53: Price List aligns with the clean, inline Markup Calculator workspace.
+   Style only; preserve all category, quotation, deposit and export logic. */
+body[data-ks-page="calculator"]{
+ --bg-body:#f5f6f4;--bg-container:#fff;--bg-card:#fff;--bg-input:#fbfcfa;
+ --border-main:#e6eae5;--border-input:#dfe5df;
+ --text-primary:#26312a;--text-secondary:#728075;--accent-color:#ce6631;
+ background:#f5f6f4!important;color:#26312a;
+}
+body[data-ks-page="calculator"] .glass-header{height:62px;background:#fff;border-bottom:1px solid #e6eae5;box-shadow:none;backdrop-filter:none}
+body[data-ks-page="calculator"] .main-content{max-width:1320px;margin:auto;padding:20px clamp(12px,3vw,38px) 64px}
+body[data-ks-page="calculator"] .ks-price-hero{margin:0 0 18px;max-width:100%}
+body[data-ks-page="calculator"] .ks-price-hero h1{font-size:clamp(29px,3vw,40px);font-weight:850;letter-spacing:-.05em;line-height:1.1;margin:4px 0 9px}
+body[data-ks-page="calculator"] .ks-price-hero p{font-size:12px;color:#77817a;margin:0}
+body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:minmax(0,1.27fr) minmax(310px,.73fr);gap:16px;align-items:start}
+body[data-ks-page="calculator"] .left-panel,body[data-ks-page="calculator"] .right-box{background:#fff!important;border:1px solid #e5eae4!important;border-radius:17px!important;box-shadow:0 5px 18px rgba(32,46,36,.035)!important}
+body[data-ks-page="calculator"] .left-panel{padding:22px!important;min-width:0}
+body[data-ks-page="calculator"] .right-panel{gap:12px;top:77px;min-width:0}
+body[data-ks-page="calculator"] .right-box{padding:17px!important;min-width:0}
+body[data-ks-page="calculator"] .header-flex{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #e9ece7}
+body[data-ks-page="calculator"] .brand-subtitle{font-size:12px!important;font-weight:850;color:#39483f;letter-spacing:0}
+body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+body[data-ks-page="calculator"] .category-card{min-height:58px;padding:8px 9px;border:1px solid #e0e6df!important;border-radius:11px!important;background:#fdfefd!important;justify-content:flex-start!important;gap:7px;text-align:left}
+body[data-ks-page="calculator"] .category-card:hover{border-color:#dfb595!important;background:#fff9f5!important}
+body[data-ks-page="calculator"] .category-card.active{background:#fff4e9!important;border:1px solid #dc985f!important;box-shadow:inset 0 0 0 1px rgba(205,100,49,.1)!important}
+body[data-ks-page="calculator"] .category-card .cat-name{font-size:11px;color:#445147;font-weight:750}
+body[data-ks-page="calculator"] .category-card .cat-icon{flex:none}
+body[data-ks-page="calculator"] .panel-banner{background:#f9faf7!important;border:1px solid #e5eae4!important;border-radius:12px!important;min-height:56px;padding:12px 14px!important;margin-bottom:13px!important}
+body[data-ks-page="calculator"] .panel-banner h2{font-size:14px;color:#38443b}
+body[data-ks-page="calculator"] .form-group{border:1px solid #e6eae5!important;border-radius:12px!important;padding:15px!important;background:#fff!important;margin-bottom:10px}
+body[data-ks-page="calculator"] .grid-layout{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body[data-ks-page="calculator"] .section-title{font-weight:850;font-size:12px!important;letter-spacing:-.015em;margin-bottom:10px}
+body[data-ks-page="calculator"] label.field-label{font-size:11px;margin-top:11px;margin-bottom:5px;color:#66756b;font-weight:750}
+body[data-ks-page="calculator"] .input-field,body[data-ks-page="calculator"] .select-field{min-height:42px;padding:10px 12px;border-radius:10px!important;border:1px solid #dfe5df!important;background:#fbfcfa!important;color:#27352c}
+body[data-ks-page="calculator"] .input-field:focus,body[data-ks-page="calculator"] .select-field:focus{box-shadow:0 0 0 3px #f9dac6!important;border-color:#d9895b!important;background:#fff!important}
+body[data-ks-page="calculator"] .size-item{background:#fafbf9;border:1px solid #e5e9e5;border-radius:10px;padding:8px 5px}
+body[data-ks-page="calculator"] .stepper-wrapper,body[data-ks-page="calculator"] .general-stepper{border-radius:9px}
+body[data-ks-page="calculator"] .price-breakdown{gap:8px;margin-bottom:12px;text-align:left}
+body[data-ks-page="calculator"] .price-breakdown>div{border:1px solid #e9ede8;border-radius:10px;padding:10px;min-width:0;background:#fafbf9}
+body[data-ks-page="calculator"] .price-breakdown strong{font-size:14px;color:#34453a;overflow-wrap:anywhere}
+body[data-ks-page="calculator"] .total-price{background:#fff7ef!important;border:1px solid #f1d7bf!important;border-radius:13px!important;padding:14px 16px!important;text-align:left;font-weight:800;color:#754c32;margin-top:10px}
+body[data-ks-page="calculator"] .total-price span{font-size:clamp(26px,2.5vw,36px)!important;color:#27362b;letter-spacing:-.055em;margin-top:4px}
+body[data-ks-page="calculator"] .deposit-terms{background:#f4f9f4;border:1px solid #dce9df;border-radius:11px;padding:12px;gap:10px}
+body[data-ks-page="calculator"] .deposit-terms span{color:#2d7346;font-size:16px}
+body[data-ks-page="calculator"] .breakdown-list{background:#f8faf7!important;border-radius:10px!important;max-height:150px}
+body[data-ks-page="calculator"] .action-btn,body[data-ks-page="calculator"] .wa-btn{border-radius:10px!important;box-shadow:none!important;min-height:41px}
+body[data-ks-page="calculator"] :is(.category-card,.action-btn,.wa-btn,.reset-btn):focus-visible{outline:3px solid #f3b58b!important;outline-offset:2px}
+@media(max-width:980px){body[data-ks-page="calculator"] .layout-wrapper{grid-template-columns:1fr;max-width:720px;margin:auto}body[data-ks-page="calculator"] .right-panel{position:static}body[data-ks-page="calculator"] .main-content{padding:18px 15px 52px}}
+@media(max-width:580px){body[data-ks-page="calculator"] .main-content{padding:15px 11px 46px}body[data-ks-page="calculator"] .left-panel{padding:13px!important}body[data-ks-page="calculator"] .right-box{padding:13px!important}body[data-ks-page="calculator"] .category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-ks-page="calculator"] .grid-layout{grid-template-columns:minmax(0,1fr)}body[data-ks-page="calculator"] .total-price span{font-size:28px!important}}
+@media(prefers-reduced-motion:reduce){body[data-ks-page="calculator"] *{animation:none!important;transition:none!important}}

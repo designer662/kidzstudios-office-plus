@@ -1,0 +1,6 @@
+/* V86.25: unobtrusive live viewer count in the existing header. */
+.ks-online-users{display:flex;align-items:center;gap:5px;padding:7px 9px;white-space:nowrap;border:1px solid rgba(30,34,37,.10);border-radius:11px;background:#f7f7f5;color:#73787a;font:700 11px/1.4 Inter,Arial,sans-serif}
+.ks-online-users strong{font-variant-numeric:tabular-nums;color:#333b3b}
+.ks-online-dot{width:7px;height:7px;border-radius:50%;background:#c5c7c7;flex:none}
+.ks-online-users.connected .ks-online-dot{background:#31ad73;box-shadow:0 0 0 3px rgba(49,173,115,.13)}
+@media(max-width:480px){.ks-online-users{padding:6px 7px;gap:4px}.ks-online-label{display:none}}

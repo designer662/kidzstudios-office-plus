@@ -1,0 +1,132 @@
+/* KIDZSTUDIOS V86.53 UI patch: office controls only. No simulation changes. */
+/* Reset AI and Fullscreen share one pill-style upper toolbar. */
+body.ks-dashboard #mapShell .ks-living-controls{
+  z-index:42!important;top:12px!important;left:clamp(10px,1.2vw,22px)!important;
+  max-width:calc(100% - 24px)!important;display:flex!important;flex-wrap:wrap!important;
+  align-items:center!important;gap:6px!important;pointer-events:none;
+}
+body.ks-dashboard #mapShell .ks-living-controls > *{pointer-events:auto}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen,
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini{
+  min-height:32px!important;height:32px!important;display:inline-flex!important;
+  justify-content:center;align-items:center;gap:6px;
+  border-radius:999px!important;border:1px solid #e5e6e2!important;
+  background:rgba(255,255,255,.96)!important;color:#656d6b!important;
+  box-shadow:0 3px 14px rgba(35,44,37,.06)!important;
+  font:750 11px/1.2 Inter,Arial,sans-serif!important;padding:5px 12px!important;
+  white-space:nowrap;flex-shrink:0;cursor:pointer;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen:hover,
+body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen:focus-visible,
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini:hover,
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini:focus-within{
+  background:#fff8f2!important;color:#bc6330!important;border-color:#eebc9b!important;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini{
+  padding:4px 10px!important;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini > span{
+  color:inherit!important;font:800 10px/1 Inter,Arial,sans-serif!important;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini select{
+  max-width:70px!important;background:transparent!important;color:#454b50!important;
+  border:0!important;outline:none!important;cursor:pointer!important;
+  font:750 11px/1.2 Inter,Arial,sans-serif!important;padding-right:2px;
+  pointer-events:auto!important;touch-action:auto!important;-webkit-appearance:none;appearance:none;
+}
+/* Keep the legacy rotation readout available to the 3D bridge, but hide
+   its old toolbar. Cinematic auto-rotate runs independently of UI buttons. */
+body.ks-dashboard #mapShell .map-tools .rotation-control{display:none!important}
+body.ks-dashboard #mapShell .map-tools{
+  right:12px!important;left:auto!important;bottom:12px!important;top:auto!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  width:auto!important;max-width:calc(100% - 24px)!important;transform:none!important;
+}
+/* Chat is centered along the bottom of the scene instead of right-docked. */
+@media(min-width:921px){
+  body.ks-dashboard #mapShell #chatLauncher{
+    position:fixed!important;left:50vw!important;right:auto!important;bottom:14px!important;top:auto!important;
+    transform:translateX(-50%)!important;translate:none!important;
+    z-index:46!important;
+  }
+  body.ks-dashboard #mapShell #officeChat{
+    position:fixed!important;left:50vw!important;right:auto!important;bottom:68px!important;
+    transform:translateX(-50%) translateY(10px)!important;translate:none!important;
+    width:min(370px,calc(100% - 28px))!important;z-index:47!important;
+  }
+  body.ks-dashboard #mapShell #officeChat.open{transform:translateX(-50%) translateY(0)!important}
+}
+/* Keep the Following notification centered near the top of the screen. */
+body.ks-dashboard #mapShell #followChip{
+  position:fixed!important;left:50vw!important;right:auto!important;
+  top:76px!important;bottom:auto!important;
+  transform:translateX(-50%) translateY(-6px)!important;translate:none!important;
+  z-index:48!important;max-width:min(320px,calc(100vw - 20px))!important;
+}
+body.ks-dashboard #mapShell #followChip.show{transform:translateX(-50%) translateY(0)!important}
+@media(max-width:920px){
+  body.ks-dashboard #mapShell .ks-living-controls{
+    top:8px!important;left:8px!important;right:8px!important;
+    max-width:calc(100% - 16px)!important;gap:4px!important;
+  }
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen{
+    min-width:33px!important;width:33px!important;height:32px!important;
+    padding:4px!important;font-size:16px!important;
+  }
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-fullscreen span{display:none!important}
+  body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini{
+    min-width:auto!important;height:32px!important;padding:4px 8px!important;gap:4px!important;
+  }
+  body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini > span{font-size:9px!important}
+  body.ks-dashboard #mapShell .ks-living-controls .ks-quality-mini select{
+    max-width:56px!important;font-size:10px!important;
+  }
+  body.ks-dashboard #mapShell #followChip{top:84px!important}
+  /* Mobile already has its own Chat tab; do not create a competing launcher. */
+  body.ks-dashboard #mapShell #chatLauncher{display:none!important}
+}
+@media(max-width:360px){
+  body.ks-dashboard #mapShell #followChip{top:90px!important}
+  body.ks-dashboard #mapShell .ks-living-controls .ks-living-reset{padding:5px 8px!important}
+}
+
+/* V86.53 Team Workload: this is #opsStaffLoad, not the separate Workload tab.
+   office-plus.css changes its cards to flex, which lets the description push
+   the Busy/Normal pill outside the card. Restore a constrained grid. */
+#todayPanel .ops-staff-load{container-type:inline-size;min-width:0}
+#todayPanel .ops-staff-load > button{
+  display:grid!important;
+  grid-template-columns:38px minmax(0,1fr) max-content!important;
+  align-items:center!important;
+  column-gap:10px!important;
+  width:100%!important;min-width:0!important;
+  padding:9px 10px!important;
+  text-align:left;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy{
+  min-width:0;width:100%;overflow:hidden;display:block;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy b{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#todayPanel .ops-staff-load > button > .ops-load-copy small{
+  display:block;max-width:100%;white-space:normal;
+  overflow-wrap:break-word;line-height:1.35;
+}
+#todayPanel .ops-staff-load > button > em{
+  grid-column:3;justify-self:end;min-width:0;max-width:100%;
+  white-space:nowrap;line-height:1.1;
+}
+/* At genuinely narrow Pulse panel widths, give the status its own row. */
+@container (max-width:240px){
+  #todayPanel .ops-staff-load > button{
+    grid-template-columns:32px minmax(0,1fr)!important;
+    row-gap:5px!important;column-gap:8px!important;
+  }
+  #todayPanel .ops-staff-load > button > .ops-load-avatar{grid-column:1;grid-row:1 / span 2;width:32px;height:32px}
+  #todayPanel .ops-staff-load > button > .ops-load-copy{grid-column:2;grid-row:1}
+  #todayPanel .ops-staff-load > button > em{grid-column:2;grid-row:2;justify-self:start}
+}
+
+@media print{body.ks-dashboard #mapShell .ks-living-controls{display:none!important}}

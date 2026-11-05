@@ -1,0 +1,55 @@
+/* V86.53 — single minimalist header across all 11 pages. Header-only selectors. */
+.ks-master-header{padding:8px clamp(10px,1.4vw,24px)!important;margin:0!important;max-width:none!important;width:100%!important;box-sizing:border-box!important;z-index:110!important}
+.ks-master-header .topbar{
+  display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;grid-template-rows:44px!important;
+  align-items:center!important;gap:clamp(9px,1vw,20px)!important;min-height:54px!important;height:auto!important;
+  width:100%!important;max-width:none!important;margin:0!important;padding:5px 9px!important;
+  background:rgba(255,255,255,.98)!important;border:1px solid #e8e9e7!important;
+  border-radius:15px!important;box-shadow:0 5px 20px rgba(25,30,35,.035)!important;
+}
+.ks-master-header .brand{grid-column:1!important;grid-row:1!important;width:auto!important;max-width:none!important;min-width:0!important;justify-self:start!important;margin:0!important;padding:0!important;overflow:visible!important;background:transparent!important;border:0!important}
+.ks-master-header .brand:before{display:none!important;content:none!important}
+.ks-master-header .ks-home-pill{display:inline-flex!important;gap:8px!important;align-items:center!important;justify-content:center!important;min-height:36px!important;padding:0 12px!important;background:transparent!important;border:1px solid transparent!important;border-radius:10px!important;color:#303b40!important;text-decoration:none!important;font-size:11px!important;font-weight:800!important;box-shadow:none!important;letter-spacing:-.02em!important}
+.ks-master-header .ks-home-pill svg{width:17px;height:17px;flex-shrink:0;color:#e47743!important}
+.ks-master-header .ks-home-pill.active,.ks-master-header .ks-home-pill:hover{background:#fff3eb!important;border-color:#f2daca!important;color:#bb5829!important}
+.ks-master-header .tool-nav{grid-column:2!important;grid-row:1!important;justify-self:stretch!important;display:flex!important;align-items:center!important;justify-content:safe center!important;flex-wrap:nowrap!important;gap:3px!important;max-width:100%!important;width:100%!important;min-width:0!important;padding:3px 0!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important;scrollbar-color:#dde0e1 transparent!important;overscroll-behavior-x:contain!important}
+.ks-master-header .tool-nav-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;flex:0 0 auto!important;height:35px!important;min-width:max-content!important;padding:0 10px!important;margin:0!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;box-shadow:none!important;color:#6c7479!important;font-size:10.5px!important;font-weight:700!important;line-height:1!important;white-space:nowrap!important;transform:none!important;transition:background .15s,border-color .15s,color .15s!important}
+.ks-master-header .tool-nav-btn:hover{background:#f5f6f5!important;color:#252f34!important}
+.ks-master-header .tool-nav-btn.active,.ks-master-header .tool-nav-btn[aria-current="page"]{background:#fff1e8!important;color:#c25e2f!important;border-color:#f6dac7!important}
+.ks-master-header .nav-tool-icon{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;border-radius:6px!important;background:#f2f3f2!important;color:#7c8589!important;font-size:10px!important;box-shadow:none!important}
+.ks-master-header .tool-nav-btn.active .nav-tool-icon{background:#fbe1d0!important;color:#bb6030!important}
+.ks-master-header .header-tools{grid-column:3!important;grid-row:1!important;display:flex!important;justify-self:end!important;align-items:center!important;flex-wrap:nowrap!important;gap:6px!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
+.ks-master-header .temp-user-chip,.ks-master-header .icon-btn,.ks-master-header .notification-button{min-height:35px!important;border:1px solid #e6e9e8!important;border-radius:9px!important;background:#fff!important;box-shadow:none!important}
+.ks-master-header :is(a,button):focus-visible{outline:2px solid #e58c5b!important;outline-offset:2px!important}
+.ks-master-header .notification-wrap{position:relative!important;z-index:30!important}
+.ks-master-header .notification-panel{z-index:2000!important;right:0!important;max-width:min(360px,calc(100vw - 22px))!important}
+@media(max-width:1280px){
+ .ks-master-header .topbar{grid-template-columns:minmax(0,1fr) max-content!important;grid-template-rows:38px 40px!important;row-gap:3px!important}
+ .ks-master-header .brand{grid-column:1!important;grid-row:1!important}
+ .ks-master-header .header-tools{grid-column:2!important;grid-row:1!important}
+ .ks-master-header .tool-nav{grid-column:1/-1!important;grid-row:2!important;justify-content:flex-start!important}
+}
+@media(max-width:700px){
+ .ks-master-header{padding:6px!important}
+ .ks-master-header .topbar{grid-template-rows:36px 37px!important;gap:3px!important;padding:6px!important;border-radius:12px!important}
+ .ks-master-header .ks-home-pill{width:auto!important;max-width:calc(100vw - 140px)!important;min-height:33px!important;padding:0 9px!important}
+ .ks-master-header .ks-home-pill span{display:block!important;overflow:hidden;text-overflow:ellipsis;max-width:160px;font-size:10px!important}
+ .ks-master-header .brand{width:auto!important;max-width:100%!important}
+ .ks-master-header .tool-nav{padding:1px 0!important}
+ .ks-master-header .tool-nav-btn{height:33px!important;padding:0 9px!important;font-size:10px!important}
+ .ks-master-header .tool-nav-btn>span:not(.nav-tool-icon){display:inline!important}
+ .ks-master-header .header-tools{gap:4px!important}
+ .ks-master-header .notification-panel{position:fixed!important;top:93px!important;right:7px!important;left:auto!important;width:min(350px,calc(100vw - 14px))!important}
+}
+@media(max-width:395px){.ks-master-header .ks-home-pill span{max-width:100px}.ks-master-header .tool-nav-btn{padding:0 8px!important}}
+@media print{.ks-master-header{display:none!important}}
+/* Stronger mobile Home label override: old V61 rules hid every brand span. */
+@media(max-width:700px){
+ .ks-master-header .brand .ks-home-pill{width:auto!important;max-width:calc(100vw - 135px)!important;min-width:35px!important}
+ .ks-master-header .brand .ks-home-pill span{display:inline!important;max-width:140px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
+@media(max-width:700px){
+ body.ks-dashboard .ks-master-header .brand{width:auto!important;max-width:calc(100vw - 138px)!important}
+ body.ks-dashboard .ks-master-header .brand .ks-home-pill{width:auto!important;max-width:calc(100vw - 138px)!important}
+ body.ks-dashboard .ks-master-header .brand .ks-home-pill span{display:inline!important;max-width:135px!important}
+}

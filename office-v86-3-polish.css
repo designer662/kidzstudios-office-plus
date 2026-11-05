@@ -1,0 +1,19 @@
+/* V86.4 — compact responsive Office Plus controls without room picker */
+#todayPanel button:focus-visible,#mapShell .map-tools button:focus-visible{outline:3px solid #ef7b45;outline-offset:2px}
+#todayPanel .ops-view.active{scrollbar-gutter:stable;overscroll-behavior:contain}
+#todayPanel .ops-tab{touch-action:manipulation}
+#mapShell .map-tools button{touch-action:manipulation}
+@media (max-width:920px){
+ #todayPanel .ops-tab{min-height:40px;height:40px}
+ #todayPanel .ops-view.active{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:650px){
+ #todayPanel .ops-head{padding-left:12px;padding-right:12px}
+ #todayPanel .ops-tabs{margin-left:10px;margin-right:10px}
+ #todayPanel .ops-view.active{padding-left:12px;padding-right:12px}
+ #mapShell .map-tools{max-height:calc(100dvh - 190px);overflow-y:auto;scrollbar-width:none}
+ #todayPanel .ops-staff-load button,#todayPanel .staff-directory-row,#todayPanel .workload-row{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+ #todayPanel .ops-view.active,#todayPanel .staff-directory-row,#todayPanel .workload-row,#todayPanel .ops-staff-load>*{animation:none!important;transition:none!important}
+}

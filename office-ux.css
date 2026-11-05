@@ -1,0 +1,33 @@
+/* Office Plus V58 UX layer: loaded last on every page. Accessibility + comfort fixes only. */
+:focus-visible{outline:3px solid rgba(239,123,69,.55);outline-offset:2px;border-radius:6px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0}
+button,[role="button"],a.tool-nav-btn,select{touch-action:manipulation}
+@media (pointer:coarse){
+  button,.tool-nav-btn,.temp-user-suggestion,select,input:not([type=checkbox]):not([type=radio]){min-height:44px}
+}
+.ks-shared-status{pointer-events:none;max-width:calc(100vw - 16px)}
+@media (max-width:640px){.ks-shared-status{bottom:calc(8px + env(safe-area-inset-bottom,0px))}}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+@media print{#ks-auth-gate,#ks-office-signout,.ks-shared-status,#ksBootFallback{display:none!important}}
+
+/* Status chip and version badge were both pinned to the bottom-left corner and covered each other. */
+.ks-version-footer{left:156px!important}
+@media (max-width:640px){.ks-version-footer{display:none!important}}
+/* Remove the stray few-pixel horizontal scroll caused by full-bleed shells. */
+html{overflow-x:clip}
+
+/* ───── Page transitions (ks-motion.js) ───── */
+@keyframes ksPageIn{from{opacity:0;transform:translateY(16px) scale(.992);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+html.ks-enter body>*:not(#ks-auth-gate):not(#ksProgress):not(script):not(style){animation:ksPageIn .6s cubic-bezier(.2,.85,.25,1) backwards}
+html.ks-enter body>*:nth-child(2){animation-delay:.05s}
+html.ks-enter body>*:nth-child(3){animation-delay:.1s}
+html.ks-enter body>*:nth-child(n+4){animation-delay:.15s}
+html.ks-leave body>*:not(#ks-auth-gate):not(#ksProgress){opacity:0;transform:translateY(-10px) scale(.992);filter:blur(3px);transition:opacity .3s ease,transform .34s cubic-bezier(.5,0,.8,.4),filter .3s ease;pointer-events:none}
+html.ks-leave[data-ks-dir="back"] body>*:not(#ks-auth-gate):not(#ksProgress){transform:translateY(10px) scale(1.006)}
+html.ks-leave[data-ks-dir="across"] body>*:not(#ks-auth-gate):not(#ksProgress){transform:translateX(-18px)}
+#ksProgress{position:fixed;left:0;top:0;height:3px;width:0;z-index:100001;background:linear-gradient(90deg,#ef7b45,#ffb48a);box-shadow:0 0 12px rgba(239,123,69,.6);border-radius:0 3px 3px 0;pointer-events:none}
+#ksProgress.run{width:88%;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+@media (prefers-reduced-motion:reduce){html.ks-enter body>*,html.ks-leave body>*{animation:none!important;transition:none!important}}
